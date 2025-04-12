@@ -1,0 +1,6 @@
+This app helps people organize walks with friends or their local community.
+
+Projects:
+walk2gether-expo is an expo app with typescript, firebase, tamagui and expo-router
+walk2gether-functions is a firebase functions app with typescript
+walk2gether-shared contains shared types and schemas (using yup)

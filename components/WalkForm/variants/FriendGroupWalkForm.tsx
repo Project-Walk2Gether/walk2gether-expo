@@ -1,0 +1,67 @@
+import React from "react";
+import { StyleSheet } from "react-native";
+import { YStack } from "tamagui";
+import { FriendGroupWalk, friendGroupWalkSchema } from "walk2gether-shared";
+import DateTimeField from "../components/DateTimeField";
+import DurationField from "../components/DurationField";
+import FormProvider from "../components/FormProvider";
+import LocationField from "../components/LocationField";
+
+interface FriendGroupWalkFormProps {
+  initialValues: Partial<FriendGroupWalk>;
+  onSubmit: (values: FriendGroupWalk) => Promise<void>;
+  submitButtonText: string;
+  onCancel: () => void;
+  googleApiKey: string;
+}
+
+export default function FriendGroupWalkForm({
+  initialValues,
+  onSubmit,
+  submitButtonText,
+  onCancel,
+  googleApiKey,
+}: FriendGroupWalkFormProps) {
+  return (
+    <FormProvider
+      initialValues={initialValues}
+      validationSchema={friendGroupWalkSchema}
+      onSubmit={onSubmit}
+      submitButtonText={submitButtonText}
+      onCancel={onCancel}
+    >
+      {({ values, setFieldValue, errors, touched }) => (
+        <YStack gap="$4">
+          <DateTimeField
+            value={values.date}
+            onChange={(date) => setFieldValue("date", date)}
+            error={errors.date}
+            touched={touched.date}
+          />
+          <LocationField
+            value={values.location}
+            onChange={(location) => setFieldValue("location", location)}
+            error={errors.location?.name}
+            touched={touched.location?.name}
+            googleApiKey={googleApiKey}
+          />
+
+          <DurationField
+            value={values.durationMinutes}
+            onChange={(minutes) => setFieldValue("durationMinutes", minutes)}
+            error={errors.durationMinutes}
+            touched={touched.durationMinutes}
+          />
+
+          {/* Friend group specific fields can be added here */}
+        </YStack>
+      )}
+    </FormProvider>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
