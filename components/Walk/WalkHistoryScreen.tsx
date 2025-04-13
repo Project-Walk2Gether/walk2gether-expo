@@ -1,11 +1,10 @@
-import { allWalkPartnerUids } from "@/utils/walkUtils";
+// import { allWalkPartnerUids } from "@/utils/walkUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { Stack } from "expo-router";
 import { StyleSheet } from "react-native";
 import { ScrollView, Text, View } from "tamagui";
 import { Walk } from "walk2gether-shared";
-import { UserAvatar } from "../UserAvatar";
 
 interface Props {
   walk: Walk;
@@ -13,7 +12,7 @@ interface Props {
 
 // Given a walk that the user has been on, show the partners they were matched with
 export default function WalkHistoryScreen({ walk }: Props) {
-  const allPartnerUids = allWalkPartnerUids(walk);
+  // const allPartnerUids = allWalkPartnerUids(walk);
 
   return (
     <>
@@ -71,7 +70,7 @@ export default function WalkHistoryScreen({ walk }: Props) {
         <View style={styles.partnersContainer}>
           <Text style={styles.sectionTitle}>Your Walking Partners</Text>
 
-          {allPartnerUids.length === 0 ? (
+          {/* {allPartnerUids.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyStateText}>
                 You walked solo on this walk.
@@ -81,7 +80,7 @@ export default function WalkHistoryScreen({ walk }: Props) {
             allPartnerUids.map((pair, index) => (
               <UserAvatar key={index} uid={pair} />
             ))
-          )}
+          )} */}
         </View>
       </ScrollView>
     </>

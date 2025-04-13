@@ -20,7 +20,12 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Allow this app to access your location.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow this app to access your location when using the app to create walks in your local area."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow this app to access your location when using the app to create walks in your local area.",
+        "NSLocationAlwaysUsageDescription": "We need your location to track your walks even when the app is in the background.",
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ]
       }
     },
     "android": {
@@ -29,7 +34,14 @@
         "backgroundColor": "#ffffff"
       },
       "googleServicesFile": "./google-services.json",
-      "package": "org.projectwalk2gether.walk2gether"
+      "package": "org.projectwalk2gether.walk2gether",
+      "permissions": [
+        "ACCESS_BACKGROUND_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "WAKE_LOCK"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -48,7 +60,16 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Walk2Gether to use your location to track your position during walks, even when the app is in the background.",
+          "locationAlwaysPermission": "Allow Walk2Gether to use your location to track your position during walks, even when the app is in the background.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ]
     ],
     "updates": {
       "enabled": true,

@@ -1,5 +1,5 @@
 import firebase from "@react-native-firebase/app";
-import { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { doc, setDoc } from "@react-native-firebase/firestore";
 import { nanoid } from "nanoid";
 import React, {
@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import { showMessage } from "react-native-flash-message";
 import { Location } from "walk2gether-shared";
-import { auth, db } from "../config/firebase";
+import { auth_instance, firestore_instance } from "../config/firebase";
 
 interface AuthContextType {
   user: FirebaseAuthTypes.User | null;
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Sign out function
   const signOut = async () => {
     try {
-      await auth.signOut();
+      await auth_instance.signOut();
       setIsAdmin(false);
       showMessage({
         message: "Success",
@@ -120,7 +120,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Listen for auth state changes
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(
+    const unsubscribe = auth_instance.onAuthStateChanged(
       async (firebaseUser: FirebaseAuthTypes.User | null) => {
         if (firebaseUser) {
           setUser(firebaseUser);
@@ -147,7 +147,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     phoneNumber: string
   ): Promise<string> => {
     try {
-      const confirmation = await auth.signInWithPhoneNumber(phoneNumber);
+      const confirmation = await auth_instance.signInWithPhoneNumber(
+        phoneNumber
+      );
       showMessage({
         message: "Success",
         description: "Verification code sent to your phone",
@@ -180,11 +182,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     code: string
   ): Promise<void> => {
     try {
-      const credential = firebase.auth.PhoneAuthProvider.credential(
+      const credential = auth.PhoneAuthProvider.credential(
         verificationId,
         code
       );
-      await auth.signInWithCredential(credential);
+      await auth_instance.signInWithCredential(credential);
     } catch (error: any) {
       console.error("Error verifying code:", error);
       let errorMessage = "Failed to verify code";
@@ -211,18 +213,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     userData?: { name: string; location: Location }
   ): Promise<void> => {
     try {
-      const credential = firebase.auth.PhoneAuthProvider.credential(
+      const credential = firebase.auth_instance.PhoneAuthProvider.credential(
         verificationId,
         code
       );
-      const userCredential = await auth.signInWithCredential(credential);
+      const userCredential = await auth_instance.signInWithCredential(
+        credential
+      );
 
       // If userData is provided, we should create or update the user profile
       if (userData) {
         try {
           // Check if user document already exists
-          const userRef = doc(db, "users", userCredential.user.uid);
-          const userDoc = await db
+          const userRef = doc(
+            firestore_instance,
+            "users",
+            userCredential.user.uid
+          );
+          const userDoc = await firestore_instance
             .collection("users")
             .doc(userCredential.user.uid)
             .get();

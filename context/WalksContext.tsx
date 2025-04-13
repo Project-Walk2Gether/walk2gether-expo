@@ -26,8 +26,8 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { Persisted, Walk } from "walk2gether-shared";
-import { db } from "../config/firebase";
+import { Walk, WithId } from "walk2gether-shared";
+import { firestore_instance } from "../config/firebase";
 import { useQuery } from "../utils/firestore";
 import { useAuth } from "./AuthContext";
 
@@ -74,7 +74,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     if (!user) return undefined;
 
     return query(
-      collection(db, "walks"),
+      collection(firestore_instance, "walks"),
       where("active", "==", false),
       where("date", ">", midnightToday),
       orderBy("date", "asc"),
@@ -86,12 +86,15 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
   const userRSVPsQuery = useMemo(() => {
     if (!user) return undefined;
 
-    return query(collectionGroup(db, "rsvps"), where("userId", "==", user.uid));
+    return query(
+      collectionGroup(firestore_instance, "rsvps"),
+      where("userId", "==", user.uid)
+    );
   }, [user]);
 
   // Use the useQuery hook to fetch walks
   const { docs: upcomingWalks, status: walksStatus } =
-    useQuery<Persisted<Walk>>(upcomingWalksQuery);
+    useQuery<WithId<Walk>>(upcomingWalksQuery);
 
   // Use the useQuery hook to fetch RSVPs
   const { docs: rsvpDocs, status: rsvpsStatus } = useQuery(userRSVPsQuery);
@@ -118,7 +121,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     }
 
     try {
-      const walksRef = collection(db, "walks");
+      const walksRef = collection(firestore_instance, "walks");
 
       // Create the walk document
       const newWalk: Walk = {
@@ -145,7 +148,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     }
 
     try {
-      const walkRef = doc(db, "walks", walkId);
+      const walkRef = doc(firestore_instance, "walks", walkId);
       const walkDoc = await getDoc(walkRef);
 
       if (!walkDoc.exists) {
@@ -177,7 +180,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
 
     setSubmitting(true);
     try {
-      const walkRef = doc(db, "walks", walkId);
+      const walkRef = doc(firestore_instance, "walks", walkId);
 
       // Add user to the rsvpUsers array
       await updateDoc(walkRef, {
@@ -208,7 +211,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
 
     setSubmitting(true);
     try {
-      const walkRef = doc(db, "walks", walkId);
+      const walkRef = doc(firestore_instance, "walks", walkId);
 
       // Remove user from the rsvpUsers array
       await updateDoc(walkRef, {
