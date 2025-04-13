@@ -2,12 +2,22 @@ import { db } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
-import { currentRound, userPair } from "@/utils/walkUtils";
+// import { currentRound, userPair } from "@/utils/walkUtils";
+import WalkChat, { ChatMessage } from "@/components/Chat/WalkChat";
 import * as Location from "expo-location";
 import { useLocalSearchParams } from "expo-router";
-import { collection, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert } from "react-native";
+import { ActivityIndicator, Alert, StyleSheet } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, H3, Text, View, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
@@ -33,6 +43,8 @@ export default function ActiveWalkScreen() {
   const { user } = useAuth();
   const { doc: walk } = useDoc<Walk>(`walks/${id}`);
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(true);
 
   const [region, setRegion] = useState({
     latitude: 37.78825,
@@ -74,8 +86,37 @@ export default function ActiveWalkScreen() {
       setParticipants(participantData);
     });
 
-    // Clean up the subscription
-    return () => unsubscribe();
+    // Subscribe to walk messages
+    const subscribeToMessages = () => {
+      const messagesRef = collection(db, `walks/${id}/messages`);
+      const q = query(messagesRef, orderBy("createdAt", "asc"));
+
+      const messagesUnsubscribe = onSnapshot(q, (snapshot) => {
+        const messagesList = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            senderId: data.senderId,
+            message: data.message,
+            createdAt: data.createdAt,
+            read: data.read || false,
+          };
+        });
+
+        setMessages(messagesList);
+        setLoadingMessages(false);
+      });
+
+      return messagesUnsubscribe;
+    };
+
+    const messagesUnsubscribe = subscribeToMessages();
+
+    // Clean up the subscriptions
+    return () => {
+      unsubscribe();
+      if (messagesUnsubscribe) messagesUnsubscribe();
+    };
   }, [id]);
 
   // Request location permissions and get initial location
@@ -361,6 +402,112 @@ export default function ActiveWalkScreen() {
           </View>
         )}
       </View>
+
+      {/* Walk Chat Section */}
+      <View style={styles.chatContainer}>
+        <WalkChat
+          messages={messages}
+          loading={loadingMessages}
+          currentUserId={user?.uid || ""}
+          onSendMessage={sendWalkMessage}
+          keyboardVerticalOffset={90}
+          containerStyle={styles.walkChatContainer}
+        />
+      </View>
     </View>
   );
 }
+
+// Function to send a message in the walk chat
+const sendWalkMessage = async (message: string) => {
+  const { user } = useAuth();
+  const params = useLocalSearchParams();
+  const id = params.id as string;
+
+  if (!message.trim() || !user || !id) return;
+
+  try {
+    const messagesRef = collection(db, `walks/${id}/messages`);
+    await addDoc(messagesRef, {
+      senderId: user.uid,
+      message,
+      createdAt: serverTimestamp(),
+      read: false,
+    });
+  } catch (error) {
+    console.error("Error sending message:", error);
+  }
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  mapContainer: {
+    height: "50%",
+    position: "relative",
+  },
+  map: {
+    width: "100%",
+    height: "100%",
+  },
+  mapControls: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    flexDirection: "column",
+    gap: 5,
+  },
+  mapButton: {
+    padding: 8,
+    marginBottom: 5,
+  },
+  updateIndicator: {
+    position: "absolute",
+    bottom: 10,
+    left: 10,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    padding: 5,
+    borderRadius: 5,
+  },
+  infoContainer: {
+    padding: 15,
+    backgroundColor: "#f5f5f5",
+  },
+  infoHeader: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  pairInfo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  pairName: {
+    fontWeight: "bold",
+    fontSize: 15,
+  },
+  pairStatus: {
+    color: "#666",
+  },
+  permissionAlert: {
+    backgroundColor: "#ffcccc",
+    padding: 10,
+    margin: 10,
+    borderRadius: 5,
+  },
+  permissionText: {
+    color: "#990000",
+    textAlign: "center",
+  },
+  chatContainer: {
+    height: "35%",
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+  },
+  walkChatContainer: {
+    height: "100%",
+  },
+});

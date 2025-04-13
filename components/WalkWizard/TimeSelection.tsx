@@ -1,12 +1,11 @@
 import { COLORS } from "@/styles/colors";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Text, View, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
 import { useWalkForm } from "../../context/WalkFormContext";
-import { BrandGradient } from "../UI";
+import WizardWrapper from "./WizardWrapper";
 
 interface TimeSelectionProps {
   onContinue: () => void;
@@ -21,7 +20,6 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
   const [date, setDate] = useState(formData.date || new Date());
   const [time, setTime] = useState(formData.time || new Date());
   const [timeOption, setTimeOption] = useState<"now" | "future">("future");
-  const insets = useSafeAreaInsets();
 
   const handleDateChange = (day: any) => {
     const selectedDate = new Date(day.timestamp);
@@ -70,126 +68,93 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
   };
 
   return (
-    <BrandGradient style={styles.container}>
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: insets.bottom },
-        ]}
-      >
-        <YStack gap="$4" paddingHorizontal="$4" paddingVertical="$4">
-          {/* Time option tabs */}
-          <XStack backgroundColor="white" borderRadius={12} overflow="hidden">
-            <TouchableOpacity
-              style={[styles.tab, timeOption === "now" && styles.activeTab]}
-              onPress={() => setTimeOption("now")}
+    <WizardWrapper onContinue={handleContinue} onBack={onBack}>
+      <YStack gap="$4">
+        {/* Time option tabs */}
+        <XStack backgroundColor="white" borderRadius={12} overflow="hidden">
+          <TouchableOpacity
+            style={[styles.tab, timeOption === "now" && styles.activeTab]}
+            onPress={() => setTimeOption("now")}
+          >
+            <Text
+              fontSize={16}
+              fontWeight="600"
+              color={timeOption === "now" ? "white" : COLORS.text}
             >
-              <Text
-                fontSize={16}
-                fontWeight="600"
-                color={timeOption === "now" ? "white" : COLORS.text}
-              >
-                Now
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, timeOption === "future" && styles.activeTab]}
-              onPress={() => setTimeOption("future")}
+              Now
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, timeOption === "future" && styles.activeTab]}
+            onPress={() => setTimeOption("future")}
+          >
+            <Text
+              fontSize={16}
+              fontWeight="600"
+              color={timeOption === "future" ? "white" : COLORS.text}
             >
-              <Text
-                fontSize={16}
-                fontWeight="600"
-                color={timeOption === "future" ? "white" : COLORS.text}
-              >
-                At a future time
-              </Text>
-            </TouchableOpacity>
-          </XStack>
+              At a future time
+            </Text>
+          </TouchableOpacity>
+        </XStack>
 
-          {timeOption === "now" ? (
+        {timeOption === "now" ? (
+          <View style={styles.sectionContainer}>
+            <Text fontSize={16} color="#555" textAlign="center">
+              Your walk will be scheduled for right now.
+            </Text>
+            <Text fontSize={16} color="#555" marginTop="$2" textAlign="center">
+              Current time:{" "}
+              {new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </Text>
+          </View>
+        ) : (
+          <>
             <View style={styles.sectionContainer}>
-              <Text fontSize={16} color="#555" textAlign="center">
-                Your walk will be scheduled for right now.
-              </Text>
-              <Text
-                fontSize={16}
-                color="#555"
-                marginTop="$2"
-                textAlign="center"
-              >
-                Current time:{" "}
-                {new Date().toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
+              <View style={styles.calendarWrapper}>
+                <Calendar
+                  onDayPress={handleDateChange}
+                  current={date.toISOString().split("T")[0]}
+                  minDate={new Date().toISOString().split("T")[0]}
+                  markedDates={{
+                    [date.toISOString().split("T")[0]]: {
+                      selected: true,
+                      selectedColor: COLORS.action,
+                    },
+                  }}
+                  theme={{
+                    todayTextColor: COLORS.action,
+                    arrowColor: COLORS.action,
+                    dotColor: COLORS.action,
+                    selectedDayBackgroundColor: COLORS.action,
+                    textDayFontWeight: "500",
+                    textMonthFontWeight: "bold",
+                    textDayHeaderFontWeight: "500",
+                  }}
+                />
+              </View>
             </View>
-          ) : (
-            <>
-              <View style={styles.sectionContainer}>
-                <View style={styles.calendarWrapper}>
-                  <Calendar
-                    onDayPress={handleDateChange}
-                    current={date.toISOString().split("T")[0]}
-                    minDate={new Date().toISOString().split("T")[0]}
-                    markedDates={{
-                      [date.toISOString().split("T")[0]]: {
-                        selected: true,
-                        selectedColor: COLORS.action,
-                      },
-                    }}
-                    theme={{
-                      todayTextColor: COLORS.action,
-                      arrowColor: COLORS.action,
-                      dotColor: COLORS.action,
-                      selectedDayBackgroundColor: COLORS.action,
-                      textDayFontWeight: "500",
-                      textMonthFontWeight: "bold",
-                      textDayHeaderFontWeight: "500",
-                    }}
-                  />
-                </View>
-              </View>
 
-              <View style={styles.sectionContainer}>
-                <View style={styles.datePickerWrapper}>
-                  <DateTimePicker
-                    value={time}
-                    mode="time"
-                    display="spinner"
-                    onChange={handleTimeChange}
-                    themeVariant="light"
-                    minuteInterval={5}
-                    style={{ flex: 1 }}
-                  />
-                </View>
+            <View style={styles.sectionContainer}>
+              <View style={styles.datePickerWrapper}>
+                <DateTimePicker
+                  value={time}
+                  mode="time"
+                  display="spinner"
+                  onChange={handleTimeChange}
+                  themeVariant="light"
+                  minuteInterval={5}
+                  style={{ flex: 1 }}
+                />
               </View>
-            </>
-          )}
-
-          <XStack gap="$4" justifyContent="space-between" marginTop="auto">
-            <Button
-              size="$5"
-              backgroundColor={COLORS.actionSecondary}
-              color={COLORS.textOnDark}
-              onPress={onBack}
-              flex={1}
-            >
-              Back
-            </Button>
-            <Button
-              size="$5"
-              backgroundColor={COLORS.action}
-              color={COLORS.textOnDark}
-              onPress={handleContinue}
-              flex={1}
-            >
-              Continue
-            </Button>
-          </XStack>
-        </YStack>
-      </ScrollView>
-    </BrandGradient>
+            </View>
+          </>
+        )}
+      </YStack>
+    </WizardWrapper>
   );
 };
 
@@ -204,7 +169,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     padding: 15,
-    marginBottom: 15,
   },
   datePickerWrapper: {
     backgroundColor: "rgba(255, 255, 255, 0.95)",

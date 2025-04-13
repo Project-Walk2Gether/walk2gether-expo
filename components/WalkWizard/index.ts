@@ -5,3 +5,4 @@ export { default as NeighborhoodConfirmationScreen } from "./NeighborhoodConfirm
 export { default as ReviewScreen } from "./ReviewScreen";
 export { default as TimeSelection } from "./TimeSelection";
 export { default as TypeSelection } from "./TypeSelection";
+export { default as WizardWrapper } from "./WizardWrapper";

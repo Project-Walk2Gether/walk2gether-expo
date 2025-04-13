@@ -1,4 +1,4 @@
-import { COLORS } from "@/styles/colors";
+import WalkChat, { ChatMessage } from "@/components/Chat/WalkChat";
 import firestore, {
   addDoc,
   collection,
@@ -8,36 +8,16 @@ import firestore, {
   orderBy,
   query,
   serverTimestamp,
-  Timestamp,
 } from "@react-native-firebase/firestore";
-import { ArrowLeft, Send } from "@tamagui/lucide-icons";
+import { ArrowLeft } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView as RNScrollView,
-} from "react-native";
-import {
-  Avatar,
-  Button,
-  Input,
-  ScrollView,
-  Spinner,
-  Text,
-  XStack,
-  YStack,
-} from "tamagui";
+import React, { useEffect, useState } from "react";
+import { Avatar, Button, Text, XStack } from "tamagui";
 import { useAuth } from "../../../../context/AuthContext";
 
-// Define types for messages and users
-type Message = {
-  id: string;
-  senderId: string;
+// Define types for the friend data
+type Message = ChatMessage & {
   recipientId: string;
-  message: string;
-  createdAt: Timestamp;
-  read?: boolean;
 };
 
 type Friend = {
@@ -51,8 +31,6 @@ export default function ChatDetailScreen() {
   const friendId = params.id;
   const { user } = useAuth();
   const router = useRouter();
-  const scrollViewRef = useRef<RNScrollView | null>(null);
-  const [messageText, setMessageText] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [friend, setFriend] = useState<Friend | null>(null);
   const [loading, setLoading] = useState(true);
@@ -112,10 +90,7 @@ export default function ChatDetailScreen() {
         // Mark received messages as read (would implement in a real app)
         // This would involve updating the message documents in Firestore
 
-        // Scroll to bottom after loading messages
-        setTimeout(() => {
-          scrollViewRef.current?.scrollToEnd({ animated: false });
-        }, 100);
+        // Messages loaded successfully
       });
     };
 
@@ -132,7 +107,7 @@ export default function ChatDetailScreen() {
     router.back();
   };
 
-  const sendMessage = async () => {
+  const sendMessage = async (messageText: string) => {
     if (!messageText.trim() || !user || !friendId) return;
 
     try {
@@ -164,55 +139,9 @@ export default function ChatDetailScreen() {
         createdAt: serverTimestamp(),
         read: false,
       });
-
-      setMessageText("");
-
-      // Scroll to bottom after sending message
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 100);
     } catch (error) {
       console.error("Error sending message:", error);
     }
-  };
-
-  // Format timestamp for display
-  const formatMessageTime = (timestamp: Timestamp | null) => {
-    if (!timestamp) return "";
-
-    const date = timestamp.toDate();
-    return date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const renderMessage = (message: Message) => {
-    const isMe = message.senderId === user?.uid;
-
-    return (
-      <YStack
-        key={message.id}
-        alignSelf={isMe ? "flex-end" : "flex-start"}
-        backgroundColor={isMe ? "#4EB1BA" : "#eee"}
-        paddingHorizontal="$4"
-        paddingVertical="$3"
-        borderRadius="$4"
-        maxWidth="80%"
-        marginBottom="$2"
-      >
-        <Text color={isMe ? "white" : "black"}>{message.message}</Text>
-        <Text
-          fontSize="$2"
-          color={isMe ? "rgba(255,255,255,0.8)" : "#888"}
-          alignSelf="flex-end"
-        >
-          {message.createdAt
-            ? formatMessageTime(message.createdAt)
-            : "Sending..."}
-        </Text>
-      </YStack>
-    );
   };
 
   return (
@@ -254,78 +183,13 @@ export default function ChatDetailScreen() {
         }}
       />
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-      >
-        <YStack flex={1} backgroundColor="#F5F5F5">
-          {loading ? (
-            <YStack flex={1} justifyContent="center" alignItems="center">
-              <Spinner size="large" color="#4EB1BA" />
-              <Text marginTop="$4" color="#666">
-                Loading messages...
-              </Text>
-            </YStack>
-          ) : (
-            <ScrollView
-              ref={scrollViewRef}
-              flex={1}
-              padding="$4"
-              contentContainerStyle={{ paddingTop: 10 }}
-              onContentSizeChange={() =>
-                scrollViewRef.current?.scrollToEnd({ animated: false })
-              }
-            >
-              {messages.length === 0 ? (
-                <YStack
-                  height={200}
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <Text color="#666" textAlign="center">
-                    No messages yet. Say hello!
-                  </Text>
-                </YStack>
-              ) : (
-                messages.map(renderMessage)
-              )}
-            </ScrollView>
-          )}
-
-          <XStack
-            backgroundColor="white"
-            padding="$3"
-            alignItems="center"
-            gap="$2"
-            borderTopWidth={1}
-            borderTopColor="#eee"
-          >
-            <Input
-              flex={1}
-              placeholder="Type a message..."
-              value={messageText}
-              onChangeText={setMessageText}
-              backgroundColor="#f0f0f0"
-              borderRadius="$4"
-              autoCapitalize="none"
-              color={COLORS.text}
-              paddingHorizontal="$3"
-              paddingVertical="$2"
-              onSubmitEditing={sendMessage}
-            />
-            <Button
-              size="$4"
-              circular
-              backgroundColor="#4EB1BA"
-              onPress={sendMessage}
-              disabled={!messageText.trim()}
-              icon={<Send size="$1" color="white" />}
-              opacity={!messageText.trim() ? 0.5 : 1}
-            />
-          </XStack>
-        </YStack>
-      </KeyboardAvoidingView>
+      <WalkChat
+        messages={messages}
+        loading={loading}
+        currentUserId={user?.uid || ""}
+        onSendMessage={sendMessage}
+        keyboardVerticalOffset={90}
+      />
     </>
   );
 }

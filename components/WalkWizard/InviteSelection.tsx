@@ -1,12 +1,12 @@
 import { COLORS } from "@/styles/colors";
-import { MapPin, MessageCircle, Search, UserPlus } from "@tamagui/lucide-icons";
+import { MapPin, MessageCircle, UserPlus } from "@tamagui/lucide-icons";
 import React, { useEffect, useRef, useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { Button, Card, Input, Text, View, XStack, YStack } from "tamagui";
 import FriendsList from "../../components/FriendsList/FriendsList";
 import { useWalkForm } from "../../context/WalkFormContext";
-import { BrandGradient } from "../UI";
+import WizardWrapper from "./WizardWrapper";
 
 interface InviteSelectionProps {
   onContinue: () => void;
@@ -94,8 +94,17 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   }, [isNeighborhoodWalk, formData.location]);
 
   return (
-    <BrandGradient style={styles.container}>
-      <YStack gap="$4" paddingHorizontal="$4" paddingVertical="$4" flex={1}>
+    <WizardWrapper
+      onContinue={handleContinue}
+      onBack={onBack}
+      continueDisabled={
+        !isNeighborhoodWalk &&
+        selectedFriends.length === 0 &&
+        phoneNumbers.length === 0
+      }
+      continueText="Next"
+    >
+      <YStack gap="$4">
         {isNeighborhoodWalk && (
           <YStack gap="$4">
             <View style={styles.mapContainer}>
@@ -142,7 +151,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                     Neighborhood Walk
                   </Text>
                 </XStack>
-                <Text fontSize={16} color={COLORS.TEXT_LABEL} lineHeight={22}>
+                <Text fontSize={16} color={COLORS.text} lineHeight={22}>
                   We'll invite users within a 1-mile radius of your location to
                   join your walk. This is a great way to meet neighbors and make
                   new walking buddies!
@@ -154,34 +163,15 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
 
         {isFriendsWalk && (
           <YStack gap="$4">
-            <XStack
-              backgroundColor="white"
-              borderRadius={10}
-              alignItems="center"
-              paddingHorizontal={15}
-              marginBottom="$2"
-            >
-              <Search color={COLORS.TEXT_LABEL} size="$3" />
-              <Input
-                placeholder="Search friends"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                backgroundColor="white"
-                borderRadius={10}
-                paddingHorizontal={15}
-                fontSize={16}
-                flex={1}
-                borderWidth={0}
-                color={COLORS.text}
-              />
-            </XStack>
-
-            <ScrollView style={styles.friendsListContainer}>
+            <Card style={styles.friendsCard}>
               <FriendsList
                 onSelectFriend={(friend) => handleFriendToggle(friend.id)}
                 title="Select Friends"
+                searchEnabled={true}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
               />
-            </ScrollView>
+            </Card>
 
             <YStack gap="$3" style={styles.inviteContainer}>
               <XStack alignItems="center" gap="$2" marginBottom="$2">
@@ -256,41 +246,8 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
             </Text>
           </YStack>
         )}
-
-        <XStack gap="$4" justifyContent="space-between" marginTop="auto">
-          <Button
-            size="$5"
-            backgroundColor={COLORS.actionSecondary}
-            color={COLORS.textOnDark}
-            onPress={onBack}
-            flex={1}
-          >
-            Back
-          </Button>
-          <Button
-            size="$5"
-            backgroundColor={COLORS.action}
-            color={COLORS.textOnDark}
-            disabled={
-              !isNeighborhoodWalk &&
-              selectedFriends.length === 0 &&
-              phoneNumbers.length === 0
-            }
-            opacity={
-              !isNeighborhoodWalk &&
-              selectedFriends.length === 0 &&
-              phoneNumbers.length === 0
-                ? 0.6
-                : 1
-            }
-            onPress={handleContinue}
-            flex={1}
-          >
-            Next
-          </Button>
-        </XStack>
       </YStack>
-    </BrandGradient>
+    </WizardWrapper>
   );
 };
 
@@ -317,11 +274,12 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
   },
-  friendsListContainer: {
+  friendsCard: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "white",
     borderRadius: 10,
     marginVertical: 8,
+    padding: 8,
   },
   inviteContainer: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",

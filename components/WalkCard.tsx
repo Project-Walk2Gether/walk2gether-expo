@@ -4,31 +4,23 @@ import {
   Calendar,
   Check,
   Clock,
+  ExternalLink,
   Map,
   MapPin,
-  MoreVertical,
-  Navigation,
   User,
 } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Alert, Linking, Platform, StyleSheet, View } from "react-native";
-import {
-  Button,
-  Card,
-  Popover,
-  Separator,
-  Text,
-  XStack,
-  YStack,
-} from "tamagui";
+import React from "react";
+import { Alert, Linking, Platform, StyleSheet } from "react-native";
+import { Button, Card, Separator, Text, View, XStack, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
 import { db } from "../config/firebase";
 import { getWalkTypeData } from "../constants/walkTypes";
 import { useAuth } from "../context/AuthContext";
 import { useWalks } from "../context/WalksContext.bak";
+import WalkMenu from "./WalkMenu";
 
 interface WalkCardProps {
   walk: Walk;
@@ -37,7 +29,6 @@ interface WalkCardProps {
 export default function WalkCard({ walk }: WalkCardProps) {
   const { hasUserRSVPed, rsvpForWalk, cancelRSVP } = useWalks();
   const { user } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
   const isRSVPed = hasUserRSVPed(walk.id || "");
   const walkDate = walk.date?.toDate() || new Date();
@@ -48,7 +39,6 @@ export default function WalkCard({ walk }: WalkCardProps) {
   const isPast = walkDate < now;
   const isUpcoming = !isPast;
   const isMine = user?.uid === walk.createdByUid;
-  const [mapsMenuOpen, setMapsMenuOpen] = useState(false);
 
   const handleRSVP = async () => {
     if (!walk.id) return;
@@ -60,20 +50,20 @@ export default function WalkCard({ walk }: WalkCardProps) {
     }
   };
 
-  // Tap functionality disabled
+  // Make card tappable to view walk details
   const handlePress = () => {
-    // Do nothing when card is tapped
+    if (walk.id) {
+      router.push(`/walk/${walk.id}`);
+    }
   };
 
   const handleEdit = () => {
-    setMenuOpen(false);
     if (walk.id) {
       router.push(`/edit-walk/${walk.id}`);
     }
   };
 
   const handleDelete = () => {
-    setMenuOpen(false);
     if (!walk.id) return;
 
     Alert.alert(
@@ -110,11 +100,10 @@ export default function WalkCard({ walk }: WalkCardProps) {
 
   // Create the icon element with consistent styling
   const IconComponent = walkTypeData.icon;
-  const walkIcon = <IconComponent size="$3" color="white" />;
+  const walkIcon = <IconComponent size={20} color="white" />;
 
   // Functions to open maps
   const openInGoogleMaps = () => {
-    setMapsMenuOpen(false);
     if (!walk.location?.latitude || !walk.location?.longitude) return;
 
     const url = `https://www.google.com/maps/search/?api=1&query=${walk.location.latitude},${walk.location.longitude}`;
@@ -128,7 +117,6 @@ export default function WalkCard({ walk }: WalkCardProps) {
   };
 
   const openInAppleMaps = () => {
-    setMapsMenuOpen(false);
     if (!walk.location?.latitude || !walk.location?.longitude) return;
 
     const url = `http://maps.apple.com/?ll=${walk.location.latitude},${walk.location.longitude}`;
@@ -141,8 +129,6 @@ export default function WalkCard({ walk }: WalkCardProps) {
     });
   };
 
-  console.log({ isMine, isPast, isUpcoming });
-
   return (
     <Card
       size="$4"
@@ -150,174 +136,145 @@ export default function WalkCard({ walk }: WalkCardProps) {
       overflow="hidden"
       backgroundColor="white"
       style={styles.card}
+      onPress={handlePress} // Make entire card tappable even if handlePress is currently empty
+      pressStyle={styles.cardPress}
+      hoverStyle={styles.cardHover}
     >
       {/* Walk type banner */}
-      <View style={styles.bannerContainer}>
+      <Card.Header
+        paddingHorizontal="$4"
+        paddingVertical="$4"
+        style={styles.bannerContainer}
+        p={0}
+      >
         <LinearGradient
           colors={walkTypeData.gradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          style={[styles.banner, styles.bannerBorderRadius]}
+          style={styles.banner}
         >
           <XStack
             justifyContent="space-between"
             alignItems="center"
             width="100%"
+            pl="$4"
+            pr="$2"
+            py="$3"
+            gap="$2"
           >
-            <XStack alignItems="center" gap="$2">
+            <XStack flexShrink={1} alignItems="center" gap="$2">
               {walkIcon}
-              <Text color="white" fontWeight="600">
+              <Text
+                flexShrink={1}
+                flexGrow={1}
+                color="white"
+                fontWeight="700"
+                fontSize="$5"
+              >
                 {walkTypeData.label}
               </Text>
+              {isMine ? (
+                <XStack style={styles.hostBadge}>
+                  <Text fontSize="$2" fontWeight="500" color={COLORS.primary}>
+                    YOU'RE HOSTING
+                  </Text>
+                </XStack>
+              ) : (
+                <XStack gap="$2" alignItems="center">
+                  <View style={styles.iconContainer}>
+                    <User size="$1.5" color={COLORS.primary} />
+                  </View>
+                  <XStack gap="$2">
+                    <Text fontSize="$2" fontWeight="400" color="#777">
+                      Hosted by
+                    </Text>
+                    <Text fontSize="$3" fontWeight="600" color="#333">
+                      {walk.organizerName || "Host"}
+                    </Text>
+                  </XStack>
+                </XStack>
+              )}
             </XStack>
 
             {/* Owner Menu */}
             {isCreator && (
-              <Popover open={menuOpen} onOpenChange={setMenuOpen}>
-                <Popover.Trigger asChild>
-                  <Button
-                    size="$2"
-                    circular
-                    chromeless
-                    onPress={() => setMenuOpen(true)}
-                    icon={<MoreVertical size="$1" color="white" />}
-                  />
-                </Popover.Trigger>
-
-                <Popover.Content
-                  padding="$3"
-                  borderWidth={1}
-                  borderColor="$borderColor"
-                  enterStyle={{ y: -10, opacity: 0 }}
-                  exitStyle={{ y: -10, opacity: 0 }}
-                  animation={[
-                    "quick",
-                    { opacity: { overshootClamping: true } },
-                  ]}
-                  elevate
-                >
-                  <YStack gap="$2">
-                    <Button size="$3" onPress={handleEdit}>
-                      Edit Walk
-                    </Button>
-                    <Button size="$3" theme="red" onPress={handleDelete}>
-                      Cancel Walk
-                    </Button>
-                  </YStack>
-                </Popover.Content>
-              </Popover>
+              <WalkMenu
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                hasLocation={
+                  !!walk.location?.latitude && !!walk.location?.longitude
+                }
+                onOpenMaps={
+                  Platform.OS === "ios" ? openInAppleMaps : openInGoogleMaps
+                }
+              />
             )}
           </XStack>
         </LinearGradient>
-      </View>
+      </Card.Header>
 
-      <Card.Header paddingHorizontal="$4" paddingVertical="$3">
+      {/* ZONE 1: Title, Time, Hosting Info */}
+
+      <YStack p="$4" width="100%" gap="$3">
         <XStack justifyContent="space-between" alignItems="center" width="100%">
           <XStack alignItems="center" gap="$2">
             <Calendar size="$1.5" color={COLORS.primary} />
-            <Text color="#333" fontWeight="bold" fontSize="$5">
+            <Text color="#333" fontWeight="600" fontSize="$5">
               {isToday ? "Today" : formattedDate}
             </Text>
           </XStack>
 
           <XStack alignItems="center" gap="$2">
             <Clock size="$1.5" color={COLORS.primary} />
-            <Text color="#333" fontSize="$5" fontWeight="500">
+            <Text color="#333" fontSize="$4" fontWeight="500">
               {formattedTime}
             </Text>
+            <Separator vertical />
+            <View p="$2" borderRadius={20} bg={COLORS.primary}>
+              <Text fontSize="$3" fontWeight="600" color={COLORS.textOnDark}>
+                {walk.durationMinutes} min
+              </Text>
+            </View>
           </XStack>
         </XStack>
-      </Card.Header>
+      </YStack>
 
-      <Card.Footer paddingHorizontal="$4" paddingVertical="$3">
-        <Separator marginBottom="$2" />
+      <Separator />
 
-        <YStack gap="$3" width="100%">
+      {/* ZONE 2: Location Actions */}
+      <Card.Footer p="$4">
+        <YStack gap="$4" width="100%">
           {/* Location with Maps button */}
-          <XStack gap="$2" alignItems="center" justifyContent="space-between">
+          <XStack gap="$3" alignItems="center" justifyContent="space-between">
             <XStack gap="$2" alignItems="center" flex={1}>
               <View style={styles.iconContainer}>
                 <MapPin size="$1.5" color={COLORS.primary} />
               </View>
-              <Text fontSize="$4" fontWeight="500" flex={1} color="#333">
+              <Text fontSize="$4" fontWeight="600" flex={1} color="#333">
                 {walk.location?.name || "Location TBD"}
               </Text>
             </XStack>
 
             {walk.location?.latitude && walk.location?.longitude && (
-              <Popover open={mapsMenuOpen} onOpenChange={setMapsMenuOpen}>
-                <Popover.Trigger asChild>
-                  <Button
-                    size="$2"
-                    backgroundColor={COLORS.background}
-                    borderColor={COLORS.primary}
-                    borderWidth={1}
-                    color={COLORS.primary}
-                    onPress={() => setMapsMenuOpen(true)}
-                    borderRadius={8}
-                    paddingHorizontal="$2"
-                    icon={<Map size="$1" color={COLORS.primary} />}
-                  >
-                    Maps
-                  </Button>
-                </Popover.Trigger>
-
-                <Popover.Content
-                  padding="$3"
-                  borderWidth={1}
-                  borderColor="$borderColor"
-                  enterStyle={{ y: -10, opacity: 0 }}
-                  exitStyle={{ y: -10, opacity: 0 }}
-                  animation={[
-                    "quick",
-                    { opacity: { overshootClamping: true } },
-                  ]}
-                  elevate
-                >
-                  <YStack gap="$2" width={180}>
-                    <Button
-                      size="$3"
-                      onPress={openInGoogleMaps}
-                      icon={<Navigation size="$1" color={COLORS.action} />}
-                    >
-                      Google Maps
-                    </Button>
-                    <Button
-                      size="$3"
-                      onPress={openInAppleMaps}
-                      icon={<Map size="$1" color={COLORS.action} />}
-                    >
-                      {Platform.OS === "ios" ? "Apple Maps" : "Maps"}
-                    </Button>
-                  </YStack>
-                </Popover.Content>
-              </Popover>
+              <Button
+                size="$3"
+                backgroundColor={COLORS.background}
+                borderColor={COLORS.primary}
+                borderWidth={1}
+                color={COLORS.primary}
+                onPress={
+                  Platform.OS === "ios" ? openInAppleMaps : openInGoogleMaps
+                }
+                borderRadius={12}
+                paddingHorizontal="$3"
+                hoverStyle={styles.buttonHover}
+                pressStyle={styles.buttonPress}
+                icon={<Map size="$1" color={COLORS.primary} />}
+                iconAfter={<ExternalLink />}
+              >
+                Open
+              </Button>
             )}
-          </XStack>
-
-          {/* Host and Duration */}
-          <XStack justifyContent="space-between" alignItems="center">
-            <XStack gap="$2" alignItems="center">
-              <View style={styles.iconContainer}>
-                <User size="$1.5" color={COLORS.primary} />
-              </View>
-              <Text fontSize="$3" fontWeight="500" color="#555">
-                {walk.organizerName || "Host"}
-              </Text>
-            </XStack>
-            <XStack
-              gap="$2"
-              alignItems="center"
-              backgroundColor={`${COLORS.primary}15`}
-              paddingHorizontal="$2"
-              paddingVertical="$1"
-              borderRadius={8}
-            >
-              <Clock size="$1" color={COLORS.primary} />
-              <Text fontSize="$3" fontWeight="600" color={COLORS.primary}>
-                {walk.durationMinutes} min
-              </Text>
-            </XStack>
           </XStack>
 
           {/* RSVP Button */}
@@ -328,25 +285,16 @@ export default function WalkCard({ walk }: WalkCardProps) {
               borderColor={COLORS.action}
               borderWidth={1}
               onPress={handleRSVP}
-              marginTop="$3"
+              marginTop="$2"
               fontWeight="bold"
               size="$3"
-              borderRadius={10}
+              borderRadius={12}
+              hoverStyle={styles.actionButtonHover}
+              pressStyle={styles.actionButtonPress}
               iconAfter={isRSVPed ? <Check size="$1" /> : undefined}
             >
               {isRSVPed ? "RSVP'd" : `Join ${walk.organizerName} Now!`}
             </Button>
-          )}
-
-          {/* Host indicator */}
-          {isMine && (
-            <View
-              style={[styles.hostBadge, { backgroundColor: COLORS.primary }]}
-            >
-              <Text fontSize="$2" fontWeight="600" color={COLORS.textOnDark}>
-                YOU'RE HOSTING
-              </Text>
-            </View>
           )}
         </YStack>
       </Card.Footer>
@@ -364,8 +312,17 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     elevation: 5,
-    marginVertical: 6,
+    marginVertical: 8,
     borderWidth: 0,
+    padding: 0,
+  },
+  cardPress: {
+    scale: 0.98,
+    opacity: 0.9,
+  },
+  cardHover: {
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
   },
   bannerContainer: {
     overflow: "hidden",
@@ -373,27 +330,40 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
   },
   banner: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderBottomWidth: 0,
-  },
-  bannerBorderRadius: {
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
   iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: `${COLORS.primary}15`,
     alignItems: "center",
     justifyContent: "center",
   },
   hostBadge: {
     paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
     alignSelf: "flex-start",
-    marginTop: 8,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "white",
+  },
+  buttonHover: {
+    scale: 1.02,
+    opacity: 0.9,
+  },
+  buttonPress: {
+    scale: 0.98,
+    opacity: 0.8,
+  },
+  actionButtonHover: {
+    scale: 1.03,
+    backgroundColor: `${COLORS.action}F0`,
+  },
+  actionButtonPress: {
+    scale: 0.98,
+    backgroundColor: `${COLORS.action}E0`,
   },
 });

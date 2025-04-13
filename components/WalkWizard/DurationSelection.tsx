@@ -19,7 +19,7 @@ import {
   YStack,
 } from "tamagui";
 import { useWalkForm } from "../../context/WalkFormContext";
-import { BrandGradient } from "../UI";
+import WizardWrapper from "./WizardWrapper";
 
 interface DurationSelectionProps {
   onContinue: () => void;
@@ -86,106 +86,96 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
     }
   };
 
+  // Define the continue handler to use with the WizardWrapper
+  const handleContinue = () => {
+    // Pass the duration data to the next step
+    onContinue();
+  };
+
   return (
-    <BrandGradient style={styles.container}>
-      <YStack gap="$4" paddingHorizontal="$4" paddingVertical="$4" flex={1}>
-        <View style={styles.durationContainer}>
-          <XStack alignItems="center" justifyContent="center" marginBottom="$4">
-            <Clock size="$6" color={COLORS.textOnDark} />
-            <Text
-              fontSize={36}
-              fontWeight="bold"
-              color={COLORS.textOnDark}
-              marginLeft="$2"
-            >
-              {formatDuration(duration)}
-            </Text>
-          </XStack>
-
-          <View style={styles.sliderContainer}>
-            <Slider
-              size="$4"
-              width="100%"
-              defaultValue={[duration]}
-              min={15}
-              max={120}
-              step={1}
-              onValueChange={([value]) => handleDurationChange(value)}
-              marginBottom="$8"
-            >
-              <Slider.Track backgroundColor="rgba(255,255,255,0.3)">
-                <Slider.TrackActive backgroundColor={COLORS.background} />
-              </Slider.Track>
-              <Slider.Thumb
-                index={0}
-                backgroundColor={COLORS.background}
-                circular
-                size="$5"
-              />
-            </Slider>
-
-            <XStack justifyContent="space-between" width="100%">
-              {durationOptions.map((option) => (
-                <View
-                  key={option}
-                  style={[
-                    styles.durationOption,
-                    duration === option && styles.selectedDuration,
-                  ]}
-                  onTouchEnd={() => handleDurationChange(option)}
-                >
-                  <SizableText
-                    size="$2"
-                    color={COLORS.text}
-                    fontWeight={duration === option ? "700" : "500"}
-                  >
-                    {option < 60 ? `${option}m` : `${option / 60}h`}
-                  </SizableText>
-                </View>
-              ))}
+    <>
+      <WizardWrapper
+        onContinue={handleContinue}
+        onBack={onBack}
+      >
+        <YStack gap="$4">
+          <View style={styles.durationContainer}>
+            <XStack alignItems="center" justifyContent="center" marginBottom="$4">
+              <Clock size="$6" color={COLORS.textOnDark} />
+              <Text
+                fontSize={36}
+                fontWeight="bold"
+                color={COLORS.textOnDark}
+                marginLeft="$2"
+              >
+                {formatDuration(duration)}
+              </Text>
             </XStack>
 
-            <TouchableOpacity
-              style={styles.customDurationButton}
-              onPress={openCustomDurationPicker}
-            >
-              <XStack
-                backgroundColor="white"
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius={20}
-                alignItems="center"
+            <View style={styles.sliderContainer}>
+              <Slider
+                size="$4"
+                width="100%"
+                defaultValue={[duration]}
+                min={15}
+                max={120}
+                step={1}
+                onValueChange={([value]) => handleDurationChange(value)}
+                marginBottom="$8"
               >
-                <Plus size={16} color={COLORS.text} />
-                <Text color={COLORS.text} marginLeft="$1" fontWeight="500">
-                  Custom Duration
-                </Text>
-              </XStack>
-            </TouchableOpacity>
-          </View>
-        </View>
+                <Slider.Track backgroundColor="rgba(255,255,255,0.3)">
+                  <Slider.TrackActive backgroundColor={COLORS.background} />
+                </Slider.Track>
+                <Slider.Thumb
+                  index={0}
+                  backgroundColor={COLORS.background}
+                  circular
+                  size="$5"
+                />
+              </Slider>
 
-        <XStack gap="$4" justifyContent="space-between" marginTop="$4">
-          <Button
-            size="$5"
-            backgroundColor={COLORS.actionSecondary}
-            color={COLORS.textOnDark}
-            onPress={onBack}
-            flex={1}
-          >
-            Back
-          </Button>
-          <Button
-            size="$5"
-            backgroundColor={COLORS.action}
-            color={COLORS.textOnDark}
-            onPress={onContinue}
-            flex={1}
-          >
-            Continue
-          </Button>
-        </XStack>
-      </YStack>
+              <XStack justifyContent="space-between" width="100%">
+                {durationOptions.map((option) => (
+                  <View
+                    key={option}
+                    style={[
+                      styles.durationOption,
+                      duration === option && styles.selectedDuration,
+                    ]}
+                    onTouchEnd={() => handleDurationChange(option)}
+                  >
+                    <SizableText
+                      size="$2"
+                      color={COLORS.text}
+                      fontWeight={duration === option ? "700" : "500"}
+                    >
+                      {option < 60 ? `${option}m` : `${option / 60}h`}
+                    </SizableText>
+                  </View>
+                ))}
+              </XStack>
+
+              <TouchableOpacity
+                style={styles.customDurationButton}
+                onPress={openCustomDurationPicker}
+              >
+                <XStack
+                  backgroundColor="white"
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius={20}
+                  alignItems="center"
+                >
+                  <Plus size={16} color={COLORS.text} />
+                  <Text color={COLORS.text} marginLeft="$1" fontWeight="500">
+                    Custom Duration
+                  </Text>
+                </XStack>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </YStack>
+      </WizardWrapper>
 
       {/* Custom Duration Modal */}
       <Modal
@@ -276,7 +266,7 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
           </KeyboardAvoidingView>
         </View>
       </Modal>
-    </BrandGradient>
+    </>
   );
 };
 

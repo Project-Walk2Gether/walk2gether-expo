@@ -1,6 +1,5 @@
 import WalkHistoryItem from "@/components/WalkHistoryItem";
 import { useMyPastWalks } from "@/services/walksService";
-import { COLORS } from "@/styles/colors";
 import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -20,33 +19,28 @@ export default function HistoryTabScreen() {
       contentContainerStyle={styles.scrollViewContent}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.container}>
-
-        <View style={styles.cardContainer}>
-          {pastWalks.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>
-                You haven't been on any walks yet.
-              </Text>
-            </View>
-          ) : (
-            <FlatList
-              data={pastWalks}
-              renderItem={({ item }) => (
-                <WalkHistoryItem
-                  walk={item}
-                  onPress={() => navigateToWalkDetails(item)}
-                />
-              )}
-              keyExtractor={(item) => item.id || String(Date.now())}
-              contentContainerStyle={styles.listContainer}
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled={false}
-              scrollEnabled={false}
+      {pastWalks.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>
+            You haven't been on any walks yet.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={pastWalks}
+          renderItem={({ item }) => (
+            <WalkHistoryItem
+              walk={item}
+              onPress={() => navigateToWalkDetails(item)}
             />
           )}
-        </View>
-      </View>
+          keyExtractor={(item) => item.id || String(Date.now())}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled={false}
+          scrollEnabled={false}
+        />
+      )}
     </ScrollView>
   );
 }

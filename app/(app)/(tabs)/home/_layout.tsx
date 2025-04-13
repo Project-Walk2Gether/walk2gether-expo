@@ -8,7 +8,7 @@ import {
 } from "@react-navigation/material-top-tabs";
 import { ParamListBase, TabNavigationState } from "@react-navigation/native";
 import { User } from "@tamagui/lucide-icons";
-import { Slot, useRouter, withLayoutContext } from "expo-router";
+import { useRouter, withLayoutContext } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -81,24 +81,13 @@ export default function HomeTabsLayout() {
             )
           }
         >
-          Welcome{userData ? ", " + userData.name : null}!
+          Walks
         </ScreenTitle>
       </View>
-
-      <View style={{ width: "100%" }}>
-        <MaterialTopTabs>
-          <MaterialTopTabs.Screen name="active" options={{ title: "Active" }} />
-          <MaterialTopTabs.Screen
-            name="history"
-            options={{ title: "History" }}
-          />
-        </MaterialTopTabs>
-      </View>
-
-      {/* Slot for the actual screen content */}
-      <View style={styles.screenContainer}>
-        <Slot />
-      </View>
+      <MaterialTopTabs>
+        <MaterialTopTabs.Screen name="active" options={{ title: "Active" }} />
+        <MaterialTopTabs.Screen name="history" options={{ title: "History" }} />
+      </MaterialTopTabs>
     </View>
   );
 }
@@ -110,7 +99,6 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    marginBottom: 10,
   },
   tabNavigatorContainer: {
     zIndex: 1,

@@ -18,10 +18,7 @@ export default function WalkDetailsScreen() {
     );
   }
 
-  if (walk.active)
-    return (
-      <>
-        {walk.active ? <ActiveWalkScreen /> : <WalkHistoryScreen walk={walk} />}
-      </>
-    );
+  if (walk.active) return <ActiveWalkScreen />;
+
+  return <WalkHistoryScreen walk={walk} />;
 }

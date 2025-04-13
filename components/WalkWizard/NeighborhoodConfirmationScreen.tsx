@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Dimensions, Platform } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
-import { Button, Text, View, XStack, YStack } from "tamagui";
-import { BrandGradient } from "../UI";
+import { Text, View, XStack, YStack } from "tamagui";
+import WizardWrapper from "./WizardWrapper";
 
 interface NeighborhoodConfirmationProps {
   onSubmit: () => void;
@@ -50,9 +50,13 @@ export const NeighborhoodConfirmationScreen: React.FC<
     })();
   }, []);
   return (
-    <BrandGradient style={styles.container}>
-      <YStack gap="$4" paddingHorizontal="$4" paddingVertical="$4" flex={1}>
-        <YStack flex={1} justifyContent="flex-start" gap="$4">
+    <WizardWrapper
+      onContinue={onSubmit}
+      onBack={onBack}
+      continueText="Start the walk!"
+    >
+      <YStack gap="$4">
+        <YStack justifyContent="flex-start" gap="$4">
           {/* Map View */}
           <View style={styles.mapContainer}>
             {errorMsg ? (
@@ -175,28 +179,8 @@ export const NeighborhoodConfirmationScreen: React.FC<
           </View>
         </YStack>
 
-        <XStack gap="$4" justifyContent="space-between">
-          <Button
-            size="$5"
-            backgroundColor={COLORS.actionSecondary}
-            color={COLORS.textOnDark}
-            onPress={onBack}
-            flex={1}
-          >
-            Back
-          </Button>
-          <Button
-            size="$5"
-            backgroundColor={COLORS.action}
-            color={COLORS.textOnDark}
-            onPress={onSubmit}
-            flex={1}
-          >
-            Start the walk!
-          </Button>
-        </XStack>
       </YStack>
-    </BrandGradient>
+    </WizardWrapper>
   );
 };
 

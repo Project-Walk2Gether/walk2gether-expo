@@ -1,24 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useNotificationPermissions } from "../hooks/useNotificationPermissions";
 
-interface NotificationPermissionCardProps {
-  onPermissionGranted?: () => void;
-}
-
-export default function NotificationPermissionCard({
-  onPermissionGranted,
-}: NotificationPermissionCardProps) {
-  const { permissionStatus, requestPermissions, loading } =
-    useNotificationPermissions();
-
-  // Call onPermissionGranted when permission status changes to granted
-  useEffect(() => {
-    if (permissionStatus?.granted && onPermissionGranted) {
-      onPermissionGranted();
-    }
-  }, [permissionStatus, onPermissionGranted]);
-
+export default function NotificationPermissionCard() {
+  const { requestPermissions } = useNotificationPermissions();
   return (
     <View style={styles.cardContainer}>
       <View style={styles.card}>
@@ -28,7 +13,6 @@ export default function NotificationPermissionCard({
         <TouchableOpacity
           style={styles.enableButton}
           onPress={requestPermissions}
-          disabled={loading}
         >
           <Text style={styles.enableButtonText}>Enable Notifications</Text>
         </TouchableOpacity>
@@ -54,12 +38,6 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
-  },
   description: {
     fontSize: 16,
     lineHeight: 22,
@@ -82,5 +60,32 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  activatedHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  activatedTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#4EB1BA",
+    marginLeft: 10,
+  },
+  manageButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#4EB1BA",
+    alignSelf: "flex-start",
+  },
+  manageButtonText: {
+    color: "#4EB1BA",
+    fontWeight: "600",
+    fontSize: 14,
+    marginLeft: 8,
   },
 });

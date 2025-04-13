@@ -18,7 +18,6 @@ import {
   TypeSelection,
 } from "../../../components/WalkWizard";
 import { useAuth } from "../../../context/AuthContext";
-import { useConfetti } from "../../../context/ConfettiContext";
 import { useUserData } from "../../../context/UserDataContext";
 import {
   WalkFormProvider,
@@ -32,7 +31,6 @@ function WalkWizard() {
   const { createWalk, isSubmitting } = useWalks();
   const { user } = useAuth();
   const { userData } = useUserData();
-  const { showConfetti } = useConfetti();
 
   const handleSubmit = useCallback(async () => {
     if (!formData.date || !formData.location || !formData.duration) {
@@ -69,7 +67,7 @@ function WalkWizard() {
 
       // Show confetti animation after a delay once the screen is closed
       setTimeout(() => {
-        showConfetti(0);
+        // showConfetti(0);
       }, 600);
     } catch (error) {
       console.error("Error creating walk:", error);

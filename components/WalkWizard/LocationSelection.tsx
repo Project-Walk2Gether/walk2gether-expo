@@ -1,15 +1,15 @@
 import { COLORS } from "@/styles/colors";
 import Constants from "expo-constants";
 import React, { useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet } from "react-native";
+import { ActivityIndicator, StyleSheet } from "react-native";
 import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
 } from "react-native-google-places-autocomplete";
 import MapView, { Marker } from "react-native-maps";
-import { Button, Text, View, XStack, YStack } from "tamagui";
+import { Text, View, YStack } from "tamagui";
 import { useWalkForm } from "../../context/WalkFormContext";
-import { BrandGradient } from "../UI";
+import WizardWrapper from "./WizardWrapper";
 
 interface LocationSelectionProps {
   onContinue: () => void;
@@ -29,6 +29,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   const { formData, updateFormData } = useWalkForm();
   const [location, setLocation] = useState(formData.location || null);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
+  const [longPressActive, setLongPressActive] = useState(false);
   const mapRef = useRef<MapView>(null);
   const googlePlacesRef = useRef<GooglePlacesAutocompleteRef>(null);
 
@@ -140,19 +141,31 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
 
   // Handle long press on map
   const handleMapLongPress = async (event: any) => {
+    // Provide visual feedback that long press is detected
+    setLongPressActive(true);
+
     const { coordinate } = event.nativeEvent;
     const newLocation = await reverseGeocode(
       coordinate.latitude,
       coordinate.longitude
     );
 
+    console.log({ newLocation });
+
     // Update the text in Google Places Autocomplete input
     if (googlePlacesRef.current && newLocation) {
-      // Set the text input value
+      // Clear the input first to ensure proper update
+
+      console.log("Setting", { ref: googlePlacesRef.current });
+      // googlePlacesRef.current.clear();
+      // Then set the text input value with the resolved address
       googlePlacesRef.current.setAddressText(
         newLocation.description || newLocation.name
       );
     }
+
+    // Reset the long press indicator
+    setLongPressActive(false);
   };
 
   const handleContinue = () => {
@@ -162,106 +175,86 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   };
 
   return (
-    <BrandGradient style={styles.container}>
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={styles.scrollContent}
-      >
-        <YStack gap="$4" paddingHorizontal="$4" paddingVertical="$4">
-          <View style={styles.autocompleteContainer}>
-            <GooglePlacesAutocomplete
-              ref={googlePlacesRef}
-              placeholder="Search for a location or long-press on map"
-              onPress={handleLocationSelect}
-              fetchDetails={true}
-              styles={{
-                container: {
-                  flex: 0,
-                },
-                textInput: {
-                  height: 50,
-                  borderRadius: 10,
-                  paddingHorizontal: 15,
-                  fontSize: 16,
-                },
-                listView: {
-                  backgroundColor: "white",
-                  borderRadius: 10,
-                  marginTop: 5,
-                },
-              }}
-              query={{
-                key: GOOGLE_MAPS_API_KEY,
-                language: "en",
-              }}
-            />
-          </View>
+    <WizardWrapper
+      onContinue={handleContinue}
+      onBack={onBack}
+      continueDisabled={!location}
+    >
+      <YStack gap="$4">
+        <View style={styles.autocompleteContainer}>
+          <GooglePlacesAutocomplete
+            ref={googlePlacesRef}
+            placeholder="Search for a location or long-press on map"
+            onPress={handleLocationSelect}
+            fetchDetails={true}
+            keyboardShouldPersistTaps="handled"
+            styles={{
+              container: {
+                flex: 0,
+              },
+              textInput: {
+                height: 50,
+                borderRadius: 10,
+                paddingHorizontal: 15,
+                fontSize: 16,
+              },
+              listView: {
+                backgroundColor: "white",
+                borderRadius: 10,
+                marginTop: 5,
+              },
+            }}
+            query={{
+              key: GOOGLE_MAPS_API_KEY,
+              language: "en",
+            }}
+          />
+        </View>
 
-          <View style={styles.mapContainer}>
-            {!isApiKeyMissing && (
-              <MapView
-                ref={mapRef}
-                style={styles.map}
-                initialRegion={region}
-                onLongPress={handleMapLongPress}
+        <View style={styles.mapContainer}>
+          {!isApiKeyMissing && (
+            <MapView
+              ref={mapRef}
+              style={styles.map}
+              initialRegion={region}
+              onLongPress={handleMapLongPress}
+            >
+              {location && (
+                <Marker
+                  coordinate={{
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                  }}
+                  title={location.name}
+                  description={location.description}
+                />
+              )}
+            </MapView>
+          )}
+          {(isReverseGeocoding || longPressActive) && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator size="large" color={COLORS.primary} />
+              <Text style={styles.loadingText}>
+                {longPressActive
+                  ? "Location selected! Getting details..."
+                  : "Getting location details..."}
+              </Text>
+            </View>
+          )}
+          {isApiKeyMissing && (
+            <View style={[styles.map, styles.placeholderMap]}>
+              <Text
+                color={COLORS.textOnDark}
+                textAlign="center"
+                fontWeight="600"
               >
-                {location && (
-                  <Marker
-                    coordinate={{
-                      latitude: location.latitude,
-                      longitude: location.longitude,
-                    }}
-                    title={location.name}
-                    description={location.description}
-                  />
-                )}
-              </MapView>
-            )}
-            {isReverseGeocoding && (
-              <View style={styles.loadingOverlay}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text style={styles.loadingText}>
-                  Getting location details...
-                </Text>
-              </View>
-            )}
-            {isApiKeyMissing && (
-              <View style={[styles.map, styles.placeholderMap]}>
-                <Text
-                  color={COLORS.textOnDark}
-                  textAlign="center"
-                  fontWeight="600"
-                >
-                  Map preview unavailable without API key
-                </Text>
-              </View>
-            )}
-          </View>
-
-          <XStack gap="$4" justifyContent="space-between" marginTop="$4">
-            <Button
-              size="$5"
-              backgroundColor={COLORS.actionSecondary}
-              color={COLORS.textOnDark}
-              onPress={onBack}
-              flex={1}
-            >
-              Back
-            </Button>
-            <Button
-              size="$5"
-              backgroundColor={location ? COLORS.action : COLORS.disabled}
-              color={COLORS.textOnDark}
-              disabled={!location}
-              onPress={handleContinue}
-              flex={1}
-            >
-              Continue
-            </Button>
-          </XStack>
-        </YStack>
-      </ScrollView>
-    </BrandGradient>
+                Map preview unavailable without API key
+              </Text>
+            </View>
+          )}
+        </View>
+      </YStack>
+    </WizardWrapper>
   );
 };
 
