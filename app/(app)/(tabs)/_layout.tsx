@@ -1,8 +1,9 @@
 import { COLORS } from "@/styles/colors";
-import { Footprints, Users } from "@tamagui/lucide-icons";
+import { Bell, Footprints, Users } from "@tamagui/lucide-icons";
 import { Tabs } from "expo-router";
 import React from "react";
 import { ProfileButton } from "../../../components/ProfileButton";
+import NotificationBell from "../../../components/NotificationBell";
 
 export default function TabLayout() {
   return (
@@ -37,7 +38,12 @@ export default function TabLayout() {
           marginHorizontal: 8,
           borderRadius: 12,
         },
-        headerRight: () => <ProfileButton />,
+        headerRight: () => (
+          <React.Fragment>
+            <NotificationBell />
+            <ProfileButton />
+          </React.Fragment>
+        ),
       }}
     >
       <Tabs.Screen
@@ -55,6 +61,15 @@ export default function TabLayout() {
           title: "Friends",
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          title: "Notifications",
+          headerShown: true,
+          headerTitle: "Notifications",
+          tabBarIcon: ({ color, size }) => <Bell size={size} color={color} />,
         }}
       />
     </Tabs>

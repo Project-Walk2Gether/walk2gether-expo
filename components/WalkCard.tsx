@@ -176,7 +176,7 @@ export default function WalkCard({ walk }: WalkCardProps) {
               {isMine ? (
                 <XStack style={styles.hostBadge}>
                   <Text fontSize="$2" fontWeight="500" color={COLORS.primary}>
-                    YOU'RE HOSTING
+                    {isPast ? "YOU HOSTED" : "YOU'RE HOSTING"}
                   </Text>
                 </XStack>
               ) : (

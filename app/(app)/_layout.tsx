@@ -2,6 +2,8 @@ import { Redirect, Stack } from "expo-router";
 import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import HeaderBackButton from "../../components/HeaderBackButton";
+import HeaderCloseButton from "../../components/HeaderCloseButton";
+import NotificationBell from "../../components/NotificationBell";
 import { useAuth } from "../../context/AuthContext";
 import { UserDataProvider } from "../../context/UserDataContext";
 import { WalksProvider } from "../../context/WalksContext.bak";
@@ -40,9 +42,10 @@ export default function AppLayout() {
           <Stack.Screen
             name="(modals)/walk/[id]"
             options={{
-              headerShown: false,
+              title: "Let's walk 2gether!",
+              headerShown: true,
               presentation: "modal",
-              headerLeft: () => <HeaderBackButton />,
+              headerRight: () => <HeaderCloseButton />,
             }}
           />
           <Stack.Screen

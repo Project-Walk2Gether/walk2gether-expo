@@ -1,4 +1,5 @@
-import WalkHistoryItem from "@/components/WalkHistoryItem";
+import { BrandGradient } from "@/components/UI";
+import WalkCard from "@/components/WalkCard";
 import { useMyPastWalks } from "@/services/walksService";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -14,34 +15,31 @@ export default function HistoryTabScreen() {
   };
 
   return (
-    <ScrollView
-      style={styles.scrollView}
-      contentContainerStyle={styles.scrollViewContent}
-      showsVerticalScrollIndicator={false}
-    >
-      {pastWalks.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyStateText}>
-            You haven't been on any walks yet.
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={pastWalks}
-          renderItem={({ item }) => (
-            <WalkHistoryItem
-              walk={item}
-              onPress={() => navigateToWalkDetails(item)}
-            />
-          )}
-          keyExtractor={(item) => item.id || String(Date.now())}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-          nestedScrollEnabled={false}
-          scrollEnabled={false}
-        />
-      )}
-    </ScrollView>
+    <BrandGradient style={{ flex: 1 }}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {pastWalks.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>
+              You haven't been on any walks yet.
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={pastWalks}
+            renderItem={({ item }) => <WalkCard walk={item} />}
+            keyExtractor={(item) => item.id || String(Date.now())}
+            contentContainerStyle={styles.listContainer}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={false}
+            scrollEnabled={false}
+          />
+        )}
+      </ScrollView>
+    </BrandGradient>
   );
 }
 
@@ -77,6 +75,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingVertical: 10,
+    paddingHorizontal: 20,
   },
   emptyState: {
     flex: 1,

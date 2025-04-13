@@ -2,20 +2,24 @@ import { COLORS } from "@/styles/colors";
 import { Send } from "@tamagui/lucide-icons";
 import { Timestamp } from "firebase/firestore";
 import React, { useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView as RNScrollView } from "react-native";
-import { Button, Input, ScrollView, Spinner, Text, XStack, YStack } from "tamagui";
-
-// Message type definition
-export type ChatMessage = {
-  id: string;
-  senderId: string;
-  message: string;
-  createdAt: Timestamp;
-  read?: boolean;
-};
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView as RNScrollView,
+} from "react-native";
+import {
+  Button,
+  Input,
+  ScrollView,
+  Spinner,
+  Text,
+  XStack,
+  YStack,
+} from "tamagui";
+import { Message } from "walk2gether-shared";
 
 type WalkChatProps = {
-  messages: ChatMessage[];
+  messages: Message[];
   loading?: boolean;
   currentUserId: string;
   onSendMessage: (message: string) => void;
@@ -48,7 +52,7 @@ export default function WalkChat({
   };
 
   // Render individual message
-  const renderMessage = (message: ChatMessage) => {
+  const renderMessage = (message: Message) => {
     const isMe = message.senderId === currentUserId;
 
     return (
@@ -80,7 +84,9 @@ export default function WalkChat({
     <KeyboardAvoidingView
       style={[{ flex: 1 }, containerStyle]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? keyboardVerticalOffset : 0}
+      keyboardVerticalOffset={
+        Platform.OS === "ios" ? keyboardVerticalOffset : 0
+      }
     >
       <YStack flex={1} backgroundColor="#F5F5F5">
         {loading ? (

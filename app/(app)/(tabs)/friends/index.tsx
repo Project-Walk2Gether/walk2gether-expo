@@ -1,6 +1,5 @@
 import { COLORS } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
-import TabScreenWrapper from "../../../../components/TabScreenWrapper";
 import {
   collection,
   getDocs,
@@ -167,129 +166,131 @@ export default function FriendsScreen() {
   }
 
   return (
-    <TabScreenWrapper>
+    <>
       <BrandGradient style={styles.gradientContainer}>
-      <StatusBar style="light" />
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[styles.scrollViewContent]}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={[styles.container, { paddingTop: insets.top }]}>
-          <ScreenTitle color="black">My Friends</ScreenTitle>
+        <StatusBar style="light" />
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={[styles.scrollViewContent]}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[styles.container, { paddingTop: insets.top }]}>
+            <ScreenTitle color="black">My Friends</ScreenTitle>
 
-          {friends.length > 0 && (
-            <View style={styles.searchContainer}>
-              <XStack
-                backgroundColor="white"
-                borderRadius={10}
-                padding="$2"
-                alignItems="center"
-              >
-                <Search size="$1" color="#999" marginRight="$2" />
-                <Input
-                  flex={1}
-                  borderWidth={0}
-                  placeholder="Search friends"
-                  value={searchQuery}
-                  color={COLORS.text}
-                  onChangeText={setSearchQuery}
-                />
-              </XStack>
-            </View>
-          )}
-
-          <View style={styles.cardContainer}>
-            {filteredFriends.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Ionicons name="people-outline" size={48} color="#666" />
-                <Text style={styles.emptyStateTitle}>No Friends Yet</Text>
-                <Text style={styles.emptyStateText}>
-                  {searchQuery
-                    ? "No friends match your search."
-                    : "You don't have any friends yet. Add friends to start walking with them!"}
-                </Text>
-                {!searchQuery && (
-                  <Button
-                    backgroundColor={COLORS.action}
-                    color={COLORS.textOnDark}
-                    marginTop="$4"
-                    onPress={() =>
-                      router.push("/(app)/(modals)/invite-friends")
-                    }
-                    icon={
-                      <Ionicons name="person-add" size={18} color="white" />
-                    }
-                    fontWeight="600"
-                    size="$4"
-                    borderRadius={10}
-                  >
-                    Invite Friends
-                  </Button>
-                )}
-              </View>
-            ) : (
-              filteredFriends.map((friend) => (
+            {friends.length > 0 && (
+              <View style={styles.searchContainer}>
                 <XStack
-                  key={friend.id}
                   backgroundColor="white"
-                  padding="$4"
-                  marginBottom="$3"
                   borderRadius={10}
-                  pressStyle={{ opacity: 0.8, scale: 0.98 }}
-                  onPress={() => navigateToChat(friend.id)}
-                  style={styles.friendCard}
+                  padding="$2"
+                  alignItems="center"
                 >
-                  <Avatar circular size="$6" marginRight="$3">
-                    {friend.profilePicUrl ? (
-                      <Avatar.Image src={friend.profilePicUrl} />
-                    ) : (
-                      <Avatar.Fallback backgroundColor={`${COLORS.primary}30`}>
-                        <Text color={COLORS.primary} fontWeight="bold">
-                          {friend.name.charAt(0).toUpperCase()}
-                        </Text>
-                      </Avatar.Fallback>
-                    )}
-                  </Avatar>
-                  <YStack flex={1} justifyContent="center">
-                    <Text fontWeight="bold" color="#333" fontSize="$5">
-                      {friend.name}
-                    </Text>
-                    {friend.lastMessage ? (
-                      <Text color="#666" numberOfLines={1} fontSize="$3">
-                        {friend.lastMessage}
-                      </Text>
-                    ) : null}
-                  </YStack>
-                  <YStack alignItems="flex-end" justifyContent="center">
-                    {friend.lastMessageTime && (
-                      <Text fontSize="$2" color="#999" marginBottom="$1">
-                        {formatMessageTime(friend.lastMessageTime)}
-                      </Text>
-                    )}
-                    {friend.unread ? (
-                      <XStack
-                        width={20}
-                        height={20}
-                        borderRadius={10}
-                        backgroundColor={COLORS.primary}
-                        alignItems="center"
-                        justifyContent="center"
-                      >
-                        <Text color="white" fontSize={12}>
-                          {friend.unread}
-                        </Text>
-                      </XStack>
-                    ) : null}
-                  </YStack>
+                  <Search size="$1" color="#999" marginRight="$2" />
+                  <Input
+                    flex={1}
+                    borderWidth={0}
+                    placeholder="Search friends"
+                    value={searchQuery}
+                    color={COLORS.text}
+                    onChangeText={setSearchQuery}
+                  />
                 </XStack>
-              ))
+              </View>
             )}
+
+            <View style={styles.cardContainer}>
+              {filteredFriends.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Ionicons name="people-outline" size={48} color="#666" />
+                  <Text style={styles.emptyStateTitle}>No Friends Yet</Text>
+                  <Text style={styles.emptyStateText}>
+                    {searchQuery
+                      ? "No friends match your search."
+                      : "You don't have any friends yet. Add friends to start walking with them!"}
+                  </Text>
+                  {!searchQuery && (
+                    <Button
+                      backgroundColor={COLORS.action}
+                      color={COLORS.textOnDark}
+                      marginTop="$4"
+                      onPress={() =>
+                        router.push("/(app)/(modals)/invite-friends")
+                      }
+                      icon={
+                        <Ionicons name="person-add" size={18} color="white" />
+                      }
+                      fontWeight="600"
+                      size="$4"
+                      borderRadius={10}
+                    >
+                      Invite Friends
+                    </Button>
+                  )}
+                </View>
+              ) : (
+                filteredFriends.map((friend) => (
+                  <XStack
+                    key={friend.id}
+                    backgroundColor="white"
+                    padding="$4"
+                    marginBottom="$3"
+                    borderRadius={10}
+                    pressStyle={{ opacity: 0.8, scale: 0.98 }}
+                    onPress={() => navigateToChat(friend.id)}
+                    style={styles.friendCard}
+                  >
+                    <Avatar circular size="$6" marginRight="$3">
+                      {friend.profilePicUrl ? (
+                        <Avatar.Image src={friend.profilePicUrl} />
+                      ) : (
+                        <Avatar.Fallback
+                          backgroundColor={`${COLORS.primary}30`}
+                        >
+                          <Text color={COLORS.primary} fontWeight="bold">
+                            {friend.name.charAt(0).toUpperCase()}
+                          </Text>
+                        </Avatar.Fallback>
+                      )}
+                    </Avatar>
+                    <YStack flex={1} justifyContent="center">
+                      <Text fontWeight="bold" color="#333" fontSize="$5">
+                        {friend.name}
+                      </Text>
+                      {friend.lastMessage ? (
+                        <Text color="#666" numberOfLines={1} fontSize="$3">
+                          {friend.lastMessage}
+                        </Text>
+                      ) : null}
+                    </YStack>
+                    <YStack alignItems="flex-end" justifyContent="center">
+                      {friend.lastMessageTime && (
+                        <Text fontSize="$2" color="#999" marginBottom="$1">
+                          {formatMessageTime(friend.lastMessageTime)}
+                        </Text>
+                      )}
+                      {friend.unread ? (
+                        <XStack
+                          width={20}
+                          height={20}
+                          borderRadius={10}
+                          backgroundColor={COLORS.primary}
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          <Text color="white" fontSize={12}>
+                            {friend.unread}
+                          </Text>
+                        </XStack>
+                      ) : null}
+                    </YStack>
+                  </XStack>
+                ))
+              )}
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
       </BrandGradient>
-    </TabScreenWrapper>
+    </>
   );
 }
 

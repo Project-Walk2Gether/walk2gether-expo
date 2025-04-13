@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@/utils/firestore";
+import { useEffect, useState } from "react";
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import {
   addDoc,
@@ -111,13 +112,50 @@ export const joinWalk = async (walkId: string) => {};
 
 export function useMyPastWalks() {
   const { user } = useAuth();
-  const pastWalksQuery = query(
+  const [allPastWalks, setAllPastWalks] = useState<Walk[]>([]);
+  
+  // Query for walks the user has RSVP'd to
+  const rsvpWalksQuery = query(
     collection(db, "walks"),
     where("date", "<", Timestamp.now()),
     where("rsvpUsers", "array-contains", user!.uid)
   );
-  const { docs: pastWalks } = useQuery<Walk>(pastWalksQuery);
-  return pastWalks;
+  const { docs: rsvpWalks } = useQuery<Walk>(rsvpWalksQuery);
+
+  // Query for walks the user has hosted
+  const hostedWalksQuery = query(
+    collection(db, "walks"),
+    where("date", "<", Timestamp.now()),
+    where("createdByUid", "==", user!.uid)
+  );
+  const { docs: hostedWalks } = useQuery<Walk>(hostedWalksQuery);
+
+  // Merge and deduplicate walks
+  useEffect(() => {
+    // Combine both arrays
+    const combinedWalks = [...rsvpWalks, ...hostedWalks];
+    
+    // Deduplicate by walk ID
+    const uniqueWalks = combinedWalks.reduce<Walk[]>((unique, walk) => {
+      // Check if this walk ID is already in our unique array
+      const exists = unique.some(item => item.id === walk.id);
+      if (!exists) {
+        unique.push(walk);
+      }
+      return unique;
+    }, []);
+    
+    // Sort by date (most recent first)
+    uniqueWalks.sort((a, b) => {
+      const dateA = a.date?.toDate ? a.date.toDate() : new Date();
+      const dateB = b.date?.toDate ? b.date.toDate() : new Date();
+      return dateB.getTime() - dateA.getTime();
+    });
+    
+    setAllPastWalks(uniqueWalks);
+  }, [rsvpWalks, hostedWalks]);
+
+  return allPastWalks;
 }
 
 export function useMyRSVPs() {
