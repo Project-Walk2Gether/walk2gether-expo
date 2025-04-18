@@ -9,9 +9,10 @@ import {
   query,
   serverTimestamp,
 } from "@react-native-firebase/firestore";
+import { useNavigation } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
-import React from "react";
-import { StyleSheet } from "react-native";
+import React, { useState } from "react";
+// Removed StyleSheet import; using Tamagui for styles
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View } from "tamagui";
 import { Message, Walk } from "walk2gether-shared";
@@ -24,7 +25,9 @@ export default function ActiveWalkScreen() {
   const { user } = useAuth();
   const { doc: walk } = useDoc<Walk>(`walks/${id}`);
   const insets = useSafeAreaInsets();
-
+  const navigation = useNavigation();
+  const [pendingRequests, setPendingRequests] = useState<number>(0);
+  const [isHost, setIsHost] = useState<boolean>(false);
   // Get walk messages using the useQuery hook
   const messagesRef = collection(firestore_instance, `walks/${id}/messages`);
   const q = query(messagesRef, orderBy("createdAt", "asc"));
@@ -55,40 +58,24 @@ export default function ActiveWalkScreen() {
   if (!id) return <Text>Invalid walk ID</Text>;
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+    <View flex={1} backgroundColor="#fff" paddingBottom={insets.bottom}>
       {/* Map - Using LiveWalkMap component */}
-      <View style={styles.mapContainer}>
+      <View height={isHost ? "55%" : "60%"}>
         <LiveWalkMap walkId={id} />
       </View>
 
       {/* Walk Chat Section */}
-      <View style={styles.chatContainer}>
+      <View height="40%" borderTopWidth={1} borderTopColor="#e0e0e0">
         <WalkChat
           messages={messages}
           currentUserId={user?.uid || ""}
           onSendMessage={handleSendMessage}
           keyboardVerticalOffset={90}
-          containerStyle={styles.walkChatContainer}
+          containerStyle={{ height: "100%" }}
         />
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  mapContainer: {
-    height: "60%",
-  },
-  chatContainer: {
-    height: "40%",
-    borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
-  },
-  walkChatContainer: {
-    height: "100%",
-  },
-});
+// All styles have been replaced with Tamagui props above.

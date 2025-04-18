@@ -25,7 +25,7 @@ import {
 } from "react-native-google-places-autocomplete";
 import PhoneInput from "react-native-phone-number-input";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, YStack } from "tamagui";
+import { Button, Text, XStack, YStack } from "tamagui";
 import * as Yup from "yup";
 import AnimatedLogo from "../components/AnimatedLogo";
 import { BrandGradient } from "../components/UI";
@@ -263,17 +263,18 @@ export default function Auth() {
                       {/* Sign Up specific fields - only shown during the phone number input step */}
                       {authMode === "signup" &&
                         phoneAuthStep === "phone_number" && (
-                          <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Name</Text>
+                          <View style={[styles.inputContainer]}>
+                            <Text style={[styles.label, { marginBottom: 8 }]}>
+                              Name
+                            </Text>
                             <TextInput
                               style={[
                                 styles.input,
-                                { marginLeft: 10 },
                                 touched.name && errors.name
                                   ? styles.inputError
                                   : null,
                               ]}
-                              placeholder="Enter your name"
+                              placeholder="Enter your full name"
                               value={values.name}
                               onChangeText={handleChange("name")}
                               onBlur={handleBlur("name")}
@@ -291,15 +292,21 @@ export default function Auth() {
                       {authMode === "signup" &&
                         phoneAuthStep === "phone_number" && (
                           <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Location</Text>
+                            <XStack mb="$2" alignItems="center">
+                              <Text style={[styles.label, { flexGrow: 1 }]}>
+                                Home Location
+                              </Text>
+                              <Button size="$3">Share my location</Button>
+                            </XStack>
                             <GooglePlacesAutocomplete
                               ref={placesAutocompleteRef}
                               placeholder="Search for your city"
                               enablePoweredByContainer={false}
                               suppressDefaultStyles={false}
-                              currentLocation
-                              currentLocationLabel="Current location"
                               listViewDisplayed={showLocationResults}
+                              currentLocation
+                              currentLocationLabel="Use my current location"
+                              enableHighAccuracyLocation={true}
                               onPress={(data, details) => {
                                 if (details) {
                                   const locationData = {
@@ -346,7 +353,7 @@ export default function Auth() {
                               query={{
                                 key: "AIzaSyCVRcp8LoR83nVd-ur3kEQ6MdOYMBevHhk",
                                 language: "en",
-                                types: "(cities)", // Only return cities
+                                // types: "(cities)", // Only return cities
                               }}
                               styles={{
                                 textInputContainer: styles.placesInputContainer,
@@ -605,7 +612,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    marginBottom: 8,
     fontWeight: "600",
     color: "#333",
   },

@@ -1,5 +1,5 @@
 {
-  "name": "walkmate",
+  "name": "walk2gether",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -8,29 +8,33 @@
     "ios": "expo run:ios",
     "prebuild": "npx expo prebuild --clean",
     "build:prune-artifacts": "scripts/prune-artifacts.sh",
-    "build:ios:production": "NODE_ENV=production eas build -p ios --local --profile production && npm run build:prune-artifacts",
+    "build:ios:production": "NODE_ENV=production eas build -p ios --local --clear-cache --profile production && npm run build:prune-artifacts",
     "publish:production": "eas update --branch production",
     "update-shared": "npm install walk2gether-shared git@github.com:Project-Walk2Gether/walk2gether-shared.git",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "clear-all-caches": "rm -rf node_modules && npm cache clean --force && npm install && watchman watch-del-all && rm -fr $TMPDIR/haste-map-* && rm -rf $TMPDIR/metro-cache && npx expo start --clear"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.4",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/datetimepicker": "8.2.0",
     "@react-native-community/geolocation": "^3.4.0",
-    "@react-native-firebase/app": "^21.12.0",
-    "@react-native-firebase/auth": "^21.12.0",
-    "@react-native-firebase/crashlytics": "^21.12.0",
-    "@react-native-firebase/firestore": "^21.12.0",
-    "@react-native-firebase/functions": "^21.12.0",
-    "@react-native-firebase/storage": "^21.12.0",
+    "@react-native-firebase/analytics": "^21.14.0",
+    "@react-native-firebase/app": "^21.14.0",
+    "@react-native-firebase/auth": "^21.14.0",
+    "@react-native-firebase/crashlytics": "^21.14.0",
+    "@react-native-firebase/firestore": "^21.14.0",
+    "@react-native-firebase/functions": "^21.14.0",
+    "@react-native-firebase/storage": "^21.14.0",
     "@react-native-picker/picker": "2.9.0",
     "@react-navigation/material-top-tabs": "^7.2.10",
+    "@react-navigation/native": "^7.1.6",
+    "@react-navigation/native-stack": "^7.3.10",
     "@tamagui/config": "^1.125.26",
     "@tamagui/lucide-icons": "^1.125.26",
     "axios": "^1.8.4",
     "date-fns": "^4.1.0",
-    "expo": "~52.0.42",
+    "expo": "52.0.40",
     "expo-background-fetch": "~13.0.6",
     "expo-build-properties": "~0.13.2",
     "expo-clipboard": "~7.0.1",
@@ -80,9 +84,5 @@
     "@types/react": "~18.3.12",
     "typescript": "^5.3.3"
   },
-  "private": true,
-  "overrides": {
-    "metro": "0.80.7",
-    "metro-resolver": "0.80.7"
-  }
+  "private": true
 }

@@ -1,8 +1,9 @@
+// metro.config.js
 const { getDefaultConfig } = require('expo/metro-config');
-
+const path = require('path');
 const config = getDefaultConfig(__dirname);
-
-// Add .lottie files to the asset extensions
-config.resolver.assetExts.push('lottie');
-
+config.resolver.alias = {
+  ...(config.resolver.alias||{}),
+  '@/': path.resolve(__dirname),
+};
 module.exports = config;

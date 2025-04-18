@@ -231,6 +231,11 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
               )}
             </MapView>
           )}
+
+          <Text style={styles.mapHelpText}>
+            Tap and hold on the map to choose a location
+          </Text>
+
           {(isReverseGeocoding || longPressActive) && (
             <View style={styles.loadingOverlay}>
               <ActivityIndicator size="large" color={COLORS.primary} />
@@ -306,6 +311,18 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginBottom: 10,
+  },
+  mapHelpTextContainer: {
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    borderRadius: 8,
+    padding: 8,
+    alignItems: "center",
+  },
+  mapHelpText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "500",
+    textAlign: "center",
   },
 });
 

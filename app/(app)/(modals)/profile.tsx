@@ -261,8 +261,6 @@ export default function ProfileScreen() {
           googleApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || ""}
         />
 
-        <Text style={styles.label}>Email</Text>
-
         <TouchableOpacity
           style={styles.saveButton}
           onPress={handleSaveProfile}

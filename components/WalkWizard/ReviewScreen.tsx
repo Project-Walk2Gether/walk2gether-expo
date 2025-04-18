@@ -47,7 +47,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
         >
           <YStack gap="$4">
             <XStack alignItems="center" gap="$2">
-              <Calendar size="$4.5" color="$blue10" />
+              <Calendar size="$4.5" color={COLORS.primary} />
               <YStack>
                 <Text fontSize={16} color="$gray11" fontWeight="600">
                   Date & Time
@@ -58,9 +58,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
                     : "Not set"}
                 </Text>
                 <Text fontSize={18} color="$gray12">
-                  {formData.time
-                    ? format(formData.time, "h:mm a")
-                    : "Not set"}
+                  {formData.time ? format(formData.time, "h:mm a") : "Not set"}
                 </Text>
               </YStack>
               <Button
@@ -76,27 +74,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
             <Separator />
 
             <XStack alignItems="center" gap="$2">
-              <MapPin size="$4.5" color="$blue10" />
-              <YStack flex={1}>
-                <Text fontSize={16} color="$gray11" fontWeight="600">
-                  Location
-                </Text>
-                <Text fontSize={18} color="$gray12" numberOfLines={1}>
-                  {formData.location?.name || "Not set"}
-                </Text>
-                <Text fontSize={14} color="$gray10" numberOfLines={2}>
-                  {formData.location?.description || ""}
-                </Text>
-              </YStack>
-              <Button size="$2" variant="outlined" onPress={() => onEdit(2)}>
-                Edit
-              </Button>
-            </XStack>
-
-            <Separator />
-
-            <XStack alignItems="center" gap="$2">
-              <Clock size="$4.5" color="$blue10" />
+              <Clock size="$4.5" color={COLORS.primary} />
               <YStack>
                 <Text fontSize={16} color="$gray11" fontWeight="600">
                   Duration
@@ -111,7 +89,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
                 size="$2"
                 variant="outlined"
                 marginLeft="auto"
-                onPress={() => onEdit(3)}
+                onPress={() => onEdit(2)}
               >
                 Edit
               </Button>
@@ -120,7 +98,27 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
             <Separator />
 
             <XStack alignItems="center" gap="$2">
-              <Users size="$4.5" color="$blue10" />
+              <MapPin size="$4.5" color={COLORS.primary} />
+              <YStack flex={1}>
+                <Text fontSize={16} color="$gray11" fontWeight="600">
+                  Location
+                </Text>
+                <Text fontSize={18} color="$gray12" numberOfLines={1}>
+                  {formData.location?.name || "Not set"}
+                </Text>
+                <Text fontSize={14} color="$gray10" numberOfLines={2}>
+                  {formData.location?.description || ""}
+                </Text>
+              </YStack>
+              <Button size="$2" variant="outlined" onPress={() => onEdit(3)}>
+                Edit
+              </Button>
+            </XStack>
+
+            <Separator />
+
+            <XStack alignItems="center" gap="$2">
+              <Users size="$4.5" color={COLORS.primary} />
               <YStack>
                 <Text fontSize={16} color="$gray11" fontWeight="600">
                   Participants
@@ -130,15 +128,46 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
                     Open to entire neighborhood
                   </Text>
                 ) : (
-                  <Text fontSize={18} color="$gray12">
-                    {formData.invitees && formData.invitees.length > 0
-                      ? `${pluralize(
-                          "friend",
-                          formData.invitees.length,
-                          true
-                        )} invited`
-                      : "No one invited yet"}
-                  </Text>
+                  <YStack>
+                    <Text fontSize={18} color="$gray12">
+                      {(() => {
+                        const invitedFriendsCount = (
+                          formData.invitedUserIds || []
+                        ).length;
+                        const invitedPhoneCount = (
+                          formData.invitedPhoneNumbers || []
+                        ).length;
+                        const totalInvited =
+                          invitedFriendsCount + invitedPhoneCount;
+
+                        if (totalInvited === 0) {
+                          return "No one invited yet";
+                        } else {
+                          return `${pluralize(
+                            "person",
+                            totalInvited,
+                            true
+                          )} invited`;
+                        }
+                      })()}
+                    </Text>
+                    {(formData.invitedUserIds?.length || 0) > 0 &&
+                      (formData.invitedPhoneNumbers?.length || 0) > 0 && (
+                        <Text fontSize={14} color="$gray11">
+                          {pluralize(
+                            "friend",
+                            formData.invitedUserIds?.length || 0,
+                            true
+                          )}{" "}
+                          •{" "}
+                          {pluralize(
+                            "phone number",
+                            formData.invitedPhoneNumbers?.length || 0,
+                            true
+                          )}
+                        </Text>
+                      )}
+                  </YStack>
                 )}
               </YStack>
               <Button

@@ -114,10 +114,16 @@ export function useMyPastWalks() {
   const { user } = useAuth();
   const [allPastWalks, setAllPastWalks] = useState<Walk[]>([]);
   
+  // Calculate timestamp for filtering out active walks with 1-hour buffer
+  // Only show truly past walks (more than 1 hour after scheduled time)
+  const oneHourAgo = new Date();
+  oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+  const cutoffTimestamp = Timestamp.fromDate(oneHourAgo);
+  
   // Query for walks the user has RSVP'd to
   const rsvpWalksQuery = query(
     collection(db, "walks"),
-    where("date", "<", Timestamp.now()),
+    where("date", "<", cutoffTimestamp),
     where("rsvpUsers", "array-contains", user!.uid)
   );
   const { docs: rsvpWalks } = useQuery<Walk>(rsvpWalksQuery);
@@ -125,7 +131,7 @@ export function useMyPastWalks() {
   // Query for walks the user has hosted
   const hostedWalksQuery = query(
     collection(db, "walks"),
-    where("date", "<", Timestamp.now()),
+    where("date", "<", cutoffTimestamp),
     where("createdByUid", "==", user!.uid)
   );
   const { docs: hostedWalks } = useQuery<Walk>(hostedWalksQuery);

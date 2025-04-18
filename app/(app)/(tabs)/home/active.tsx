@@ -1,11 +1,10 @@
 import NotificationPermissionCard from "@/components/NotificationPermissionCard";
 import { BrandGradient } from "@/components/UI";
-import { useAuth } from "@/context/AuthContext";
 import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
 import { COLORS } from "@/styles/colors";
 import { Plus } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
-import React, { useMemo } from "react";
+import React from "react";
 import {
   FlatList,
   ScrollView,
@@ -16,24 +15,13 @@ import {
 import { Text } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
 import WalkCard from "../../../../components/WalkCard";
-import { useWalks } from "../../../../context/WalksContext.bak";
+import { useWalks } from "../../../../context/WalksContext";
 
 export default function ActiveTabScreen() {
   const router = useRouter();
   const { upcomingWalks } = useWalks();
-  const { user } = useAuth();
   const { permissionStatus, loading: notificationPermissionStatusLoading } =
     useNotificationPermissions();
-
-  const { myUpcomingWalks, otherUpcomingWalks } = useMemo(() => {
-    const myWalks = upcomingWalks.filter(
-      (walk) => walk.createdByUid === user!.uid
-    );
-    const otherWalks = upcomingWalks.filter(
-      (walk) => walk.createdByUid !== user!.uid
-    );
-    return { myUpcomingWalks: myWalks, otherUpcomingWalks: otherWalks };
-  }, [upcomingWalks, user]);
 
   const renderWalkItem = ({ item }: { item: WithId<Walk> }) => (
     <WalkCard key={item.id} walk={item} />
@@ -50,9 +38,9 @@ export default function ActiveTabScreen() {
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
       >
-        {myUpcomingWalks.length > 0 ? (
+        {upcomingWalks.length > 0 ? (
           <FlatList
-            data={myUpcomingWalks}
+            data={upcomingWalks}
             renderItem={renderWalkItem}
             keyExtractor={(item) => item.id}
             scrollEnabled={false}

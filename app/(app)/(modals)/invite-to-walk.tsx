@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Card, ScrollView, Separator, Text, YStack } from "tamagui";
 import { findUndefined } from "walk2gether-shared";
 import { useAuth } from "../../../context/AuthContext";
-import { useWalks } from "../../../context/WalksContext.bak";
+import { useWalks } from "../../../context/WalksContext";
 
 export default function InviteToWalkScreen() {
   const router = useRouter();

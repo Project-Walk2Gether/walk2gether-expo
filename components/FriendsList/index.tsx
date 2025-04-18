@@ -1,10 +1,14 @@
+import { COLORS } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
-import { collection, getDocs, getFirestore } from "@react-native-firebase/firestore";
+import {
+  collection,
+  getDocs,
+  getFirestore,
+} from "@react-native-firebase/firestore";
+import { Search } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
 import { Card, Input, Spinner, Text, XStack, YStack } from "tamagui";
-import { Search } from "@tamagui/lucide-icons";
 import { useAuth } from "../../context/AuthContext";
-import { COLORS } from "@/styles/colors";
 
 type Friend = {
   id: string;
@@ -12,7 +16,7 @@ type Friend = {
   [key: string]: any;
 };
 
-type FriendsListProps = {
+type Props = {
   onSelectFriend: (friend: Friend) => void;
   title?: string;
   searchEnabled?: boolean;
@@ -20,13 +24,13 @@ type FriendsListProps = {
   onSearchChange?: (text: string) => void;
 };
 
-export default function FriendsList({ 
-  onSelectFriend, 
+export default function FriendsList({
+  onSelectFriend,
   title = "Your Friends",
   searchEnabled = false,
   searchQuery = "",
-  onSearchChange
-}: FriendsListProps) {
+  onSearchChange,
+}: Props) {
   const { user } = useAuth();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,40 +39,46 @@ export default function FriendsList({
   useEffect(() => {
     const fetchFriends = async () => {
       if (!user) return;
-      
+
       setLoading(true);
       try {
         const db = getFirestore();
         const friendsRef = collection(db, `users/${user.uid}/friends`);
         const friendsSnapshot = await getDocs(friendsRef);
-        
-        const friendsData = friendsSnapshot.docs.map(doc => ({
+
+        const friendsData = friendsSnapshot.docs.map((doc) => ({
           id: doc.id,
-          name: doc.data().name || 'Unknown Friend',
-          ...doc.data()
+          name: doc.data().name || "Unknown Friend",
+          ...doc.data(),
         }));
-        
+
         setFriends(friendsData);
       } catch (error) {
-        console.error('Error fetching friends:', error);
+        console.error("Error fetching friends:", error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchFriends();
   }, [user]);
 
   // Filter friends if search is enabled and has query
   const filteredFriends = searchQuery
-    ? friends.filter(f => 
+    ? friends.filter((f) =>
         f.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : friends;
 
   if (loading) {
     return (
-      <YStack gap="$2" mt="$2" alignItems="center" justifyContent="center" p="$4">
+      <YStack
+        gap="$2"
+        mt="$2"
+        alignItems="center"
+        justifyContent="center"
+        p="$4"
+      >
         <Spinner size="large" color="$blue10" />
         <Text>Loading friends...</Text>
       </YStack>
@@ -80,7 +90,7 @@ export default function FriendsList({
       <Text fontSize="$5" fontWeight="bold">
         {title}
       </Text>
-      
+
       {/* Only show search if enabled and there are friends */}
       {searchEnabled && friends.length > 0 && (
         <XStack alignItems="center" gap="$2" marginVertical="$2">
@@ -99,9 +109,11 @@ export default function FriendsList({
           />
         </XStack>
       )}
-      
+
       {friends.length === 0 ? (
-        <Text color="$gray10">No friends found. Add friends to invite them.</Text>
+        <Text color="$gray10">
+          No friends found. Add friends to invite them.
+        </Text>
       ) : (
         filteredFriends.map((friend) => (
           <Card

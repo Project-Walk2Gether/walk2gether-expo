@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import * as Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -169,11 +170,19 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
     
     // Get the token that uniquely identifies this device
     try {
+      // Get projectId from app.json via expo-constants
+      // Fallback to undefined if not found
+      const projectId =
+        Constants?.expoConfig?.extra?.eas?.projectId ||
+        Constants?.manifest?.extra?.eas?.projectId;
+      if (!projectId) {
+        console.warn('Expo projectId not found in app config!');
+      }
       const tokenData = await Notifications.getExpoPushTokenAsync({
-        projectId: '7b384d5a-3e2e-4c79-895f-30255a67819a', // Your Expo project ID
+        projectId,
       });
       token = tokenData.data;
-      console.log('Push token:', token);
+      console.log('Push token:', token, 'projectId:', projectId);
     } catch (error) {
       console.error('Error getting push token:', error);
     }

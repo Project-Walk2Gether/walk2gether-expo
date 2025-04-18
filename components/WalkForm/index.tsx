@@ -6,7 +6,7 @@ import NeighborhoodWalkForm from "./variants/NeighborhoodWalkForm";
 // Basic form values interface to export for use in other components
 type WalkType = Walk["type"];
 
-interface WalkFormProps {
+interface Props {
   initialValues: Walk;
   onSubmit: (values: Walk) => Promise<void>;
   submitButtonText: string;
@@ -20,7 +20,7 @@ export default function WalkForm({
   submitButtonText,
   onCancel,
   googleApiKey,
-}: WalkFormProps) {
+}: Props) {
   // Determine which form to show based on walk type
   const walkType = (initialValues.type as WalkType) || "neighborhood";
 

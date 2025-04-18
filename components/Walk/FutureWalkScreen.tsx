@@ -1,7 +1,7 @@
 import { firestore_instance } from "@/config/firebase";
 import { getWalkTypeData } from "@/constants/walkTypes";
 import { useAuth } from "@/context/AuthContext";
-import { useWalks } from "@/context/WalksContext.bak";
+import { useWalks } from "@/context/WalksContext";
 import { COLORS } from "@/styles/colors";
 import {
   Calendar,
@@ -13,7 +13,7 @@ import {
 } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import { Stack, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Alert, Linking, Platform, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import {
@@ -55,31 +55,6 @@ export default function FutureWalkScreen({ walk }: Props) {
   const formattedTime = format(walkDate, "h:mm a");
   const formattedRelativeDate = format(walkDate, "PPP");
   const formattedRelativeTime = format(walkDate, "p");
-
-  // Subscribe to participants collection
-  useEffect(() => {
-    if (!walk.id) return;
-
-    setLoading(true);
-    const participantsRef = firestore_instance.collection(
-      `walks/${walk.id}/participants`
-    );
-    const unsubscribe = participantsRef.onSnapshot((snapshot) => {
-      const participantData: Participant[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        participantData.push({
-          id: doc.id,
-          displayName: data.displayName,
-          photoURL: data.photoURL,
-        });
-      });
-      setParticipants(participantData);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, [walk.id]);
 
   // Cancel my RSVP
   const handleCancelRSVP = () => {

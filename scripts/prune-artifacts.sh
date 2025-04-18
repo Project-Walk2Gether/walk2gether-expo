@@ -6,4 +6,4 @@ echo "Pruning local artifacts"
 rm -rf "./artifacts"
 
 echo "Pruning XCode artifacts"
-rm -rf ~/Library/Developer/Xcode/DerivedData/WalkMate-*
+rm -rf ~/Library/Developer/Xcode/DerivedData/Walk2Gether-*

@@ -2,6 +2,7 @@ import { db } from "@/config/firebase";
 import {
   doc as firebaseDoc,
   FirebaseFirestoreTypes,
+  onSnapshot,
 } from "@react-native-firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { WithId } from "walk2gether-shared";
@@ -28,14 +29,16 @@ export function useDoc<T extends FirebaseFirestoreTypes.DocumentData>(
   );
 
   useEffect(() => {
+    console.log("re-running effect", { docPath });
     if (!docRef) {
       setDoc(null);
       return;
     }
 
-    const unsubscribe = docRef.onSnapshot(
+    const unsubscribe = onSnapshot(
+      docRef,
       (doc) => {
-        console.log("doc docshot " + logLabel);
+        console.log("doc snapshot " + logLabel);
         const data = doc?.data() as T;
         if (!data) setDoc(null);
         else
@@ -52,7 +55,7 @@ export function useDoc<T extends FirebaseFirestoreTypes.DocumentData>(
     return unsubscribe;
   }, [docPath]);
 
-  return { status, doc, error, updateDoc, docRef };
+  return { status, doc, updateDoc, error, docPath };
 }
 
 export function useQuery<T extends FirebaseFirestoreTypes.DocumentData>(
@@ -63,6 +66,7 @@ export function useQuery<T extends FirebaseFirestoreTypes.DocumentData>(
   const [docs, setDocs] = useState<WithId<T>[]>([]);
 
   useEffect(() => {
+    console.log("use query running");
     if (!query) return;
 
     const logLabel = (query as any)._collectionPath._parts.join("/");
@@ -71,26 +75,30 @@ export function useQuery<T extends FirebaseFirestoreTypes.DocumentData>(
       message: "using firestore query " + logLabel,
       deps,
     });
-    const unsubscribe = query.onSnapshot((snap) => {
-      if (!snap) {
-        console.error("Error fetching collection " + logLabel);
-      }
-      console.log({
-        message: `collection snapshot (${logLabel})`,
-        count: snap.size,
-        docs: snap.docs.length,
-      });
-      if (!snap) return;
-      const docs = snap.docs as FirebaseFirestoreTypes.DocumentSnapshot<T>[];
-      const extantDocs = docs.filter((doc) => doc.exists);
-      const data = extantDocs.map((doc) => ({
-        ...(doc.data() as T),
-        id: doc.id,
-        _ref: doc.ref as DocumentReferenceLike<T>,
-      }));
-      setDocs(data);
-      setStatus("success");
-    });
+
+    const unsubscribe = query.onSnapshot(
+      (snap) => {
+        if (!snap) {
+          console.error("Error fetching collection " + logLabel);
+        }
+        console.log({
+          message: `collection snapshot (${logLabel})`,
+          count: snap.size,
+          docs: snap.docs.length,
+        });
+        if (!snap) return;
+        const docs = snap.docs as FirebaseFirestoreTypes.DocumentSnapshot<T>[];
+        const extantDocs = docs.filter((doc) => doc.exists);
+        const data = extantDocs.map((doc) => ({
+          ...(doc.data() as T),
+          id: doc.id,
+          _ref: doc.ref as DocumentReferenceLike<T>,
+        }));
+        setDocs(data);
+        setStatus("success");
+      },
+      (error) => console.error("Error fetching collection " + logLabel, error)
+    );
 
     return unsubscribe;
   }, [...deps]);

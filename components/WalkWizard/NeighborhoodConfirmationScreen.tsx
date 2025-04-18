@@ -1,10 +1,14 @@
+import { useAuth } from "@/context/AuthContext";
+import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
-import { Bell, MapPin, StopCircle, Users } from "@tamagui/lucide-icons";
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Dimensions, Platform } from "react-native";
-import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { collection, getDocs } from "@react-native-firebase/firestore";
+import { Handshake, Pin, Speech, Users } from "@tamagui/lucide-icons";
 import * as Location from "expo-location";
+import React, { useEffect, useState } from "react";
+import { Dimensions, Platform, StyleSheet } from "react-native";
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Text, View, XStack, YStack } from "tamagui";
+import { db } from "../../config/firebase";
 import WizardWrapper from "./WizardWrapper";
 
 interface NeighborhoodConfirmationProps {
@@ -12,13 +16,43 @@ interface NeighborhoodConfirmationProps {
   onBack: () => void;
 }
 
+// Maximum radius in kilometers for finding nearby walkers
+const NEARBY_USERS_RADIUS_KM = 5;
+
+/**
+ * Calculates the distance between two geo points using the haversine formula
+ */
+const getDistanceInKm = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number => {
+  const R = 6371; // Earth's radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
 export const NeighborhoodConfirmationScreen: React.FC<
   NeighborhoodConfirmationProps
 > = ({ onSubmit, onBack }) => {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const { updateFormData } = useWalkForm();
+  const { user } = useAuth();
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [nearbyWalkers, setNearbyWalkers] = useState(5); // Mock data - would be from backend
-  
+  const [nearbyWalkers, setNearbyWalkers] = useState(0);
+  const [isLoadingNearbyUsers, setIsLoadingNearbyUsers] = useState(false);
+
   // Default location (central location if permissions are not granted)
   const defaultLocation = {
     latitude: 37.7749,
@@ -30,12 +64,68 @@ export const NeighborhoodConfirmationScreen: React.FC<
   // Radius in meters
   const walkRadius = 1500; // 1.5 km radius
 
+  // Function to find nearby users within the radius
+  const findNearbyWalkers = async (userLocation: {
+    latitude: number;
+    longitude: number;
+  }) => {
+    if (!userLocation) return;
+
+    setIsLoadingNearbyUsers(true);
+    try {
+      // Query users from Firestore who have location data
+      const usersRef = collection(db, "users");
+      const usersSnapshot = await getDocs(usersRef);
+
+      if (usersSnapshot.empty) {
+        console.log("No users found");
+        setNearbyWalkers(0);
+        setIsLoadingNearbyUsers(false);
+        return;
+      }
+
+      // Filter users by distance
+      let nearbyUsersCount = 0;
+      usersSnapshot.forEach((doc) => {
+        // Skip the current user
+        if (doc.id === user?.uid) return;
+
+        const userData = doc.data();
+        const userLoc = userData.location;
+
+        // If user has location data
+        if (userLoc && userLoc.latitude && userLoc.longitude) {
+          const distance = getDistanceInKm(
+            userLocation.latitude,
+            userLocation.longitude,
+            userLoc.latitude,
+            userLoc.longitude
+          );
+
+          // Count users within radius
+          if (distance <= NEARBY_USERS_RADIUS_KM) {
+            nearbyUsersCount++;
+          }
+        }
+      });
+
+      setNearbyWalkers(nearbyUsersCount);
+      console.log(
+        `Found ${nearbyUsersCount} users within ${NEARBY_USERS_RADIUS_KM}km`
+      );
+    } catch (error) {
+      console.error("Error finding nearby users:", error);
+    } finally {
+      setIsLoadingNearbyUsers(false);
+    }
+  };
+
   useEffect(() => {
     (async () => {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          setErrorMsg('Permission to access location was denied');
+        if (status !== "granted") {
+          setErrorMsg("Permission to access location was denied");
           return;
         }
 
@@ -43,12 +133,30 @@ export const NeighborhoodConfirmationScreen: React.FC<
           accuracy: Location.Accuracy.Balanced,
         });
         setLocation(currentLocation);
+
+        // Create a location object to match the format expected by the form
+        const locationData = {
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+          name: "Current Location",
+          description: "Your current location",
+        };
+
+        // Update the form data with the user's current location
+        updateFormData({ location: locationData });
+
+        // Find nearby walkers
+        await findNearbyWalkers({
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+        });
       } catch (error) {
-        console.error('Error getting location:', error);
-        setErrorMsg('Could not get your location');
+        console.error("Error getting location:", error);
+        setErrorMsg("Could not get your location");
       }
     })();
   }, []);
+
   return (
     <WizardWrapper
       onContinue={onSubmit}
@@ -61,23 +169,34 @@ export const NeighborhoodConfirmationScreen: React.FC<
           <View style={styles.mapContainer}>
             {errorMsg ? (
               <View style={styles.errorContainer}>
-                <Text color="#ff6b6b" fontSize={16} textAlign="center">
+                <Text color="#ff6b6b" fontSize={17} textAlign="center">
                   {errorMsg}
                 </Text>
-                <Text color="#555" fontSize={14} textAlign="center" marginTop="$2">
+                <Text
+                  color="#555"
+                  fontSize={14}
+                  textAlign="center"
+                  marginTop="$2"
+                >
                   We need your location to find nearby walkers
                 </Text>
               </View>
             ) : (
               <MapView
-                provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+                provider={
+                  Platform.OS === "android" ? PROVIDER_GOOGLE : undefined
+                }
                 style={styles.map}
-                region={location ? {
-                  latitude: location.coords.latitude,
-                  longitude: location.coords.longitude,
-                  latitudeDelta: 0.015,
-                  longitudeDelta: 0.0121,
-                } : defaultLocation}
+                region={
+                  location
+                    ? {
+                        latitude: location.coords.latitude,
+                        longitude: location.coords.longitude,
+                        latitudeDelta: 0.015,
+                        longitudeDelta: 0.0121,
+                      }
+                    : defaultLocation
+                }
                 showsUserLocation
                 showsMyLocationButton
                 showsCompass
@@ -99,30 +218,34 @@ export const NeighborhoodConfirmationScreen: React.FC<
                       }}
                       radius={walkRadius}
                       strokeWidth={2}
-                      strokeColor={COLORS.action + '80'}
-                      fillColor={COLORS.action + '20'}
+                      strokeColor={COLORS.action + "80"}
+                      fillColor={COLORS.action + "20"}
                     />
                   </>
                 )}
               </MapView>
             )}
             <View style={styles.mapOverlay}>
-              <XStack 
-                backgroundColor={COLORS.action} 
-                paddingHorizontal="$3" 
+              <XStack
+                backgroundColor={COLORS.action}
+                paddingHorizontal="$3"
                 paddingVertical="$2"
                 borderRadius={10}
                 alignItems="center"
                 gap="$2"
               >
                 <Users size={18} color="white" />
-                <Text fontSize={16} fontWeight="600" color="white">
-                  {nearbyWalkers} walkers in your neighborhood
+                <Text fontSize={17} fontWeight="600" color="white">
+                  {isLoadingNearbyUsers
+                    ? "Finding walkers..."
+                    : `${nearbyWalkers} walker${
+                        nearbyWalkers !== 1 ? "s" : ""
+                      } in your neighborhood`}
                 </Text>
               </XStack>
             </View>
           </View>
-          
+
           <View style={styles.card}>
             <Text
               fontSize={16}
@@ -136,34 +259,35 @@ export const NeighborhoodConfirmationScreen: React.FC<
             <YStack gap="$4">
               <XStack gap="$3" alignItems="center">
                 <View style={styles.iconContainer}>
-                  <MapPin size="$1.5" color="white" />
+                  <Speech size={19} color="white" />
                 </View>
-                <Text flexShrink={1} fontSize={16} color="#333">
-                  Share your location with nearby neighbors
+                <Text flexShrink={1} fontSize={17} color="#333">
+                  Announce the walk to your neighbors!
                 </Text>
               </XStack>
 
               <XStack gap="$3" alignItems="center">
                 <View style={styles.iconContainer}>
-                  <Bell size="$1.5" color="white" />
+                  <Pin size={19} color="white" />
                 </View>
-                <Text flexShrink={1} fontSize={16} color="#333">
-                  Neighbors in your area get notified about your walk
+                <Text flexShrink={1} fontSize={17} color="#333">
+                  Neighbors can request to join
                 </Text>
               </XStack>
 
               <XStack gap="$3" alignItems="center">
                 <View style={styles.iconContainer}>
-                  <StopCircle size="$1.5" color="white" />
+                  <Handshake size={19} color="white" />
                 </View>
-                <Text flexShrink={1} fontSize={16} color="#333">
-                  You can stop sharing your location at any time
+                <Text flexShrink={1} fontSize={17} color="#333">
+                  If you accept, your live location will be shared so you can
+                  meet up and walk2gether!
                 </Text>
               </XStack>
             </YStack>
           </View>
 
-          <View style={styles.card}>
+          {/* <View style={styles.card}>
             <Text
               fontSize={16}
               fontWeight="600"
@@ -176,9 +300,8 @@ export const NeighborhoodConfirmationScreen: React.FC<
               Your walk will begin right now. Other neighbors can see your
               location and join you on your walk.
             </Text>
-          </View>
+          </View> */}
         </YStack>
-
       </YStack>
     </WizardWrapper>
   );
@@ -191,23 +314,23 @@ const styles = StyleSheet.create({
   mapContainer: {
     height: 220,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 8,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
   },
   map: {
-    width: Dimensions.get('window').width - 32, // Adjust for padding
+    width: Dimensions.get("window").width - 32, // Adjust for padding
     height: 220,
   },
   errorContainer: {
     height: 220,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   mapOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
     zIndex: 10,

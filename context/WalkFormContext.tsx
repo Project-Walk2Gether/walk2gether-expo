@@ -11,7 +11,9 @@ export interface WalkFormData {
     longitude: number;
   } | null;
   duration: number | null;
-  invitees: string[] | null;
+  invitees: string[] | null; // Keeping for backward compatibility
+  invitedUserIds: string[] | null; // Specific friends to invite
+  invitedPhoneNumbers: string[] | null; // Phone numbers to send SMS invites
   isNeighborhoodWalk: boolean;
 }
 
@@ -32,7 +34,9 @@ const initialFormData: WalkFormData = {
   time: null,
   location: null,
   duration: 30, // Default duration in minutes
-  invitees: null,
+  invitees: null, 
+  invitedUserIds: null,
+  invitedPhoneNumbers: null,
   isNeighborhoodWalk: false,
 };
 

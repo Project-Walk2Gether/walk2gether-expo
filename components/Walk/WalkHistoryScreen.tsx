@@ -18,7 +18,7 @@ export default function WalkHistoryScreen({ walk }: Props) {
     <>
       <Stack.Screen
         options={{
-          headerTitle: "Walk Details",
+          headerTitle: "This walk has finished",
           headerShadowVisible: false,
           headerBackVisible: true,
           headerBackTitle: "Back",
@@ -65,22 +65,6 @@ export default function WalkHistoryScreen({ walk }: Props) {
               {walk.numberOfRotations} rotations
             </Text>
           )}
-        </View>
-
-        <View style={styles.partnersContainer}>
-          <Text style={styles.sectionTitle}>Your Walking Partners</Text>
-
-          {/* {allPartnerUids.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>
-                You walked solo on this walk.
-              </Text>
-            </View>
-          ) : (
-            allPartnerUids.map((pair, index) => (
-              <UserAvatar key={index} uid={pair} />
-            ))
-          )} */}
         </View>
       </ScrollView>
     </>

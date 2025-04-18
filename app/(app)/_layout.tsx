@@ -2,14 +2,14 @@ import { Redirect, Stack } from "expo-router";
 import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import HeaderBackButton from "../../components/HeaderBackButton";
-import HeaderCloseButton from "../../components/HeaderCloseButton";
-import NotificationBell from "../../components/NotificationBell";
 import { useAuth } from "../../context/AuthContext";
 import { UserDataProvider } from "../../context/UserDataContext";
-import { WalksProvider } from "../../context/WalksContext.bak";
+import { WalksProvider } from "../../context/WalksContext";
 
 export default function AppLayout() {
   const { user, loading } = useAuth();
+
+  console.log("App layout re-rendering");
 
   if (!loading && !user) {
     console.log("Redirecting to signin");
@@ -43,9 +43,7 @@ export default function AppLayout() {
             name="(modals)/walk/[id]"
             options={{
               title: "Let's walk 2gether!",
-              headerShown: true,
               presentation: "modal",
-              headerRight: () => <HeaderCloseButton />,
             }}
           />
           <Stack.Screen

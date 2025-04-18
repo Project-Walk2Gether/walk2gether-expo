@@ -1,11 +1,17 @@
+import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
+import {
+  collection,
+  getDocs,
+  getFirestore,
+} from "@react-native-firebase/firestore";
 import { MapPin, MessageCircle, UserPlus } from "@tamagui/lucide-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { Button, Card, Input, Text, View, XStack, YStack } from "tamagui";
-import FriendsList from "../../components/FriendsList/FriendsList";
 import { useWalkForm } from "../../context/WalkFormContext";
+import FriendsList from "../FriendsList";
 import WizardWrapper from "./WizardWrapper";
 
 interface InviteSelectionProps {
@@ -18,13 +24,40 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   onBack,
 }) => {
   const { formData, updateFormData } = useWalkForm();
+  const { user } = useAuth();
   const [selectedFriends, setSelectedFriends] = useState<string[]>(
-    formData.invitees || []
+    formData.invitedUserIds || []
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [phoneNumbers, setPhoneNumbers] = useState<string[]>([]);
+  const [phoneNumbers, setPhoneNumbers] = useState<string[]>(
+    formData.invitedPhoneNumbers || []
+  );
+  const [hasFriends, setHasFriends] = useState(false);
+  const [loadingFriends, setLoadingFriends] = useState(true);
   const mapRef = useRef<MapView>(null);
+
+  // Check if user has any friends
+  useEffect(() => {
+    const checkForFriends = async () => {
+      if (!user) return;
+
+      setLoadingFriends(true);
+      try {
+        const db = getFirestore();
+        const friendsRef = collection(db, `users/${user.uid}/friends`);
+        const snapshot = await getDocs(friendsRef);
+        setHasFriends(snapshot.size > 0);
+      } catch (error) {
+        console.error("Error checking for friends:", error);
+        setHasFriends(false);
+      } finally {
+        setLoadingFriends(false);
+      }
+    };
+
+    checkForFriends();
+  }, [user]);
 
   const isNeighborhoodWalk = formData.walkType === "neighborhood";
   const isFriendsWalk = formData.walkType === "friends";
@@ -33,11 +66,11 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
     setSelectedFriends((prev) => {
       if (prev.includes(friendId)) {
         const updated = prev.filter((id) => id !== friendId);
-        updateFormData({ invitees: updated });
+        updateFormData({ invitedUserIds: updated });
         return updated;
       } else {
         const updated = [...prev, friendId];
-        updateFormData({ invitees: updated });
+        updateFormData({ invitedUserIds: updated });
         return updated;
       }
     });
@@ -49,9 +82,8 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
       setPhoneNumbers(updatedNumbers);
       setPhoneNumber("");
 
-      // Store phone numbers in invitees for tracking
-      const updatedInvitees = [...selectedFriends, ...updatedNumbers];
-      updateFormData({ invitees: updatedInvitees });
+      // Store phone numbers separately in the form data
+      updateFormData({ invitedPhoneNumbers: updatedNumbers });
     }
   };
 
@@ -59,11 +91,8 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
     const updatedNumbers = phoneNumbers.filter((num) => num !== numberToRemove);
     setPhoneNumbers(updatedNumbers);
 
-    // Remove from invitees as well
-    const updatedInvitees = selectedFriends.filter(
-      (id) => id !== numberToRemove
-    );
-    updateFormData({ invitees: updatedInvitees });
+    // Update the invitedPhoneNumbers in form data
+    updateFormData({ invitedPhoneNumbers: updatedNumbers });
   };
 
   const handleContinue = () => {
@@ -163,15 +192,17 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
 
         {isFriendsWalk && (
           <YStack gap="$4">
-            <Card style={styles.friendsCard}>
-              <FriendsList
-                onSelectFriend={(friend) => handleFriendToggle(friend.id)}
-                title="Select Friends"
-                searchEnabled={true}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-              />
-            </Card>
+            {hasFriends ? (
+              <Card style={styles.friendsCard}>
+                <FriendsList
+                  onSelectFriend={(friend) => handleFriendToggle(friend.id)}
+                  title="Select Friends"
+                  searchEnabled={true}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                />
+              </Card>
+            ) : null}
 
             <YStack gap="$3" style={styles.inviteContainer}>
               <XStack alignItems="center" gap="$2" marginBottom="$2">

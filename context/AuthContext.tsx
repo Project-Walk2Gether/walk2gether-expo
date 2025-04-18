@@ -213,7 +213,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     userData?: { name: string; location: Location }
   ): Promise<void> => {
     try {
-      const credential = firebase.auth_instance.PhoneAuthProvider.credential(
+      const credential = firebase.auth.PhoneAuthProvider.credential(
         verificationId,
         code
       );

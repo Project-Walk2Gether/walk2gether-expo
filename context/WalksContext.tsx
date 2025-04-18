@@ -65,6 +65,8 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
   const [submitting, setSubmitting] = useState(false);
   const { user, isAdmin } = useAuth();
 
+  console.log("Walks provider re-rendering");
+
   // Get the start of today for filtering upcoming walks
   const now = new Date();
   const midnightToday = startOfDay(now);

@@ -1,18 +1,21 @@
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
-import {
-  collection,
-  doc,
-  onSnapshot,
-  updateDoc,
-} from "@react-native-firebase/firestore";
-import * as Location from "expo-location";
-import * as TaskManager from "expo-task-manager";
+import { doc, setDoc, updateDoc } from "@react-native-firebase/firestore";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as Linking from "expo-linking";
+import * as Location from "expo-location";
+import { Stack } from "expo-router";
+import * as TaskManager from "expo-task-manager";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, AppState, Platform } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  AppState,
+  Platform,
+  StyleSheet,
+} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { Button, Text, View } from "tamagui";
 
@@ -42,62 +45,64 @@ interface LiveWalkMapProps {
 }
 
 // Define the background task for location tracking
-TaskManager.defineTask(LOCATION_TRACKING_TASK, async ({ data, error }: TaskManager.TaskManagerTaskBody<any>) => {
-  if (error) {
-    console.error("Background location error:", error);
-    return;
-  }
-  if (data) {
-    // Extract location data
-    const { locations } = data as { locations: Location.LocationObject[] };
-    const location = locations[0];
-    
-    // Get the current user and walk ID from storage
-    // We use global variables since task manager runs outside React context
-    const currentUser = (global as any).currentUser;
-    const currentWalkId = (global as any).currentWalkId;
-    
-    if (currentUser && currentWalkId) {
-      try {
-        // Update the location in Firestore
-        const participantDocRef = doc(
-          firestore_instance,
-          `walks/${currentWalkId}/participants/${currentUser.uid}`
-        );
-        await updateDoc(participantDocRef, {
-          lastLocation: {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            timestamp: new Date().getTime(),
-          },
-        });
-        return BackgroundFetch.BackgroundFetchResult.NewData;
-      } catch (err) {
-        console.error("Error updating location in background:", err);
-        return BackgroundFetch.BackgroundFetchResult.Failed;
+TaskManager.defineTask(
+  LOCATION_TRACKING_TASK,
+  async ({ data, error }: TaskManager.TaskManagerTaskBody<any>) => {
+    if (error) {
+      console.error("Background location error:", error);
+      return;
+    }
+    if (data) {
+      // Extract location data
+      const { locations } = data as { locations: Location.LocationObject[] };
+      const location = locations[0];
+
+      // Get the current user and walk ID from storage
+      // We use global variables since task manager runs outside React context
+      const currentUser = (global as any).currentUser;
+      const currentWalkId = (global as any).currentWalkId;
+
+      if (currentUser && currentWalkId) {
+        try {
+          // Update the location in Firestore
+          const participantDocRef = doc(
+            firestore_instance,
+            `walks/${currentWalkId}/participants/${currentUser.uid}`
+          );
+          await updateDoc(participantDocRef, {
+            lastLocation: {
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+              timestamp: new Date().getTime(),
+            },
+          });
+          return BackgroundFetch.BackgroundFetchResult.NewData;
+        } catch (err) {
+          console.error("Error updating location in background:", err);
+          return BackgroundFetch.BackgroundFetchResult.Failed;
+        }
       }
     }
+    return BackgroundFetch.BackgroundFetchResult.NoData;
   }
-  return BackgroundFetch.BackgroundFetchResult.NoData;
-});
+);
 
 export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
   const { user } = useAuth();
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(
-    null
-  );
+  const [userLocation, setUserLocation] =
+    useState<Location.LocationObject | null>(null);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(
     null
   );
-  const [backgroundLocationPermission, setBackgroundLocationPermission] = useState<boolean | null>(
-    null
-  );
+  const [backgroundLocationPermission, setBackgroundLocationPermission] =
+    useState<boolean | null>(null);
   const [locationTracking, setLocationTracking] = useState(false);
-  const [locationSubscription, setLocationSubscription] = useState<Location.LocationSubscription | null>(null);
+  const [locationSubscription, setLocationSubscription] =
+    useState<Location.LocationSubscription | null>(null);
   const [appState, setAppState] = useState(AppState.currentState);
   const mapRef = useRef<MapView>(null);
 
+  const participants = useWalkParticipants(walkId);
   // Store user and walkId in global scope for background tasks
   useEffect(() => {
     if (user && walkId) {
@@ -106,10 +111,10 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
       (global as any).currentWalkId = walkId;
     }
   }, [user, walkId]);
-  
+
   // Monitor app state changes
   useEffect(() => {
-    const subscription = AppState.addEventListener("change", nextAppState => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
       setAppState(nextAppState);
     });
 
@@ -122,7 +127,8 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
   useEffect(() => {
     const requestPermissionsAndStartTracking = async () => {
       // Request foreground permission first
-      const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+      const { status: foregroundStatus } =
+        await Location.requestForegroundPermissionsAsync();
       setLocationPermission(foregroundStatus === "granted");
 
       if (foregroundStatus !== "granted") {
@@ -134,27 +140,28 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
       }
 
       // Request background permission
-      const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+      const { status: backgroundStatus } =
+        await Location.requestBackgroundPermissionsAsync();
       setBackgroundLocationPermission(backgroundStatus === "granted");
-      
+
       if (backgroundStatus !== "granted") {
         Alert.alert(
           "Background Location Permission",
           "For best experience, please allow background location tracking. This lets us update your position even when the app is closed.",
           [
             { text: "Continue Anyway", style: "cancel" },
-            { 
-              text: "Settings", 
+            {
+              text: "Settings",
               onPress: () => {
-                if (Platform.OS === 'ios') {
+                if (Platform.OS === "ios") {
                   // On iOS we can open the app settings directly
-                  Linking.openURL('app-settings:');
+                  Linking.openURL("app-settings:");
                 } else {
                   // On Android we can't directly open location settings, so we open app settings
                   Linking.openSettings();
                 }
-              }
-            }
+              },
+            },
           ]
         );
         // Continue with foreground tracking only
@@ -186,12 +193,12 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
       stopLocationTracking();
     };
   }, [walkId, user?.uid]);
-  
+
   // Start location tracking based on permissions
   const startLocationTracking = async () => {
     // Stop any existing tracking first
     await stopLocationTracking();
-    
+
     if (backgroundLocationPermission) {
       // Start background location tracking
       await Location.startLocationUpdatesAsync(LOCATION_TRACKING_TASK, {
@@ -215,8 +222,8 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
       const subscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.Balanced,
-          distanceInterval: 10, 
-          timeInterval: 5000, 
+          distanceInterval: 10,
+          timeInterval: 5000,
         },
         (location) => {
           setUserLocation(location);
@@ -236,13 +243,13 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
     if (await TaskManager.isTaskRegisteredAsync(LOCATION_TRACKING_TASK)) {
       await Location.stopLocationUpdatesAsync(LOCATION_TRACKING_TASK);
     }
-    
+
     // Stop foreground tracking if it's running
     if (locationSubscription) {
       locationSubscription.remove();
       setLocationSubscription(null);
     }
-    
+
     setLocationTracking(false);
   };
 
@@ -256,46 +263,23 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
         firestore_instance,
         `walks/${walkId}/participants/${user.uid}`
       );
-      await updateDoc(participantDocRef, {
-        lastLocation: {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          timestamp: new Date().getTime(),
+      await setDoc(
+        participantDocRef,
+        {
+          lastLocation: {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            timestamp: new Date().getTime(),
+          },
+          displayName: user.displayName || "Anonymous",
+          photoURL: user.photoURL || null,
         },
-        displayName: user.displayName || "Anonymous",
-        photoURL: user.photoURL || null,
-      });
+        { merge: true }
+      );
     } catch (error) {
       console.error("Error updating user location:", error);
     }
   };
-
-  // Set up real-time listener for participants
-  useEffect(() => {
-    if (!walkId) return;
-
-    const participantsRef = collection(
-      firestore_instance,
-      `walks/${walkId}/participants`
-    );
-    const unsubscribe = onSnapshot(participantsRef, (snapshot) => {
-      const participantData: Participant[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        participantData.push({
-          id: doc.id,
-          displayName: data.displayName,
-          photoURL: data.photoURL,
-          lastLocation: data.lastLocation,
-        });
-      });
-      setParticipants(participantData);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [walkId]);
 
   // Show all participants on the map
   const showAllParticipants = () => {
@@ -367,24 +351,29 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
       </View>
     );
   }
-  
+
   // Show tracking status indicator if needed
   const renderTrackingStatus = () => {
-    if (appState !== 'active') return null; // Only show in active state
-    
+    if (appState !== "active") return null; // Only show in active state
+
     return (
       <View style={styles.trackingStatus}>
-        <View 
-          style={[styles.statusIndicator, { backgroundColor: locationTracking ? '#4caf50' : '#ff9800' }]} 
+        <View
+          style={[
+            styles.statusIndicator,
+            { backgroundColor: locationTracking ? "#4caf50" : "#ff9800" },
+          ]}
         />
-        <Text fontSize="$2" color={locationTracking ? '#4caf50' : '#ff9800'}>
-          {locationTracking ? 
-            (backgroundLocationPermission ? 'Background tracking active' : 'Foreground tracking only') : 
-            'Tracking inactive'}
+        <Text fontSize="$2" color={locationTracking ? "#4caf50" : "#ff9800"}>
+          {locationTracking
+            ? backgroundLocationPermission
+              ? "Background tracking active"
+              : "Foreground tracking only"
+            : "Tracking inactive"}
         </Text>
       </View>
     );
-  }
+  };
 
   // Render loading state
   if (locationPermission === null || !userLocation) {
@@ -397,65 +386,68 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
   }
 
   return (
-    <View style={styles.container}>
-      {renderTrackingStatus()}
-      
-      <MapView
-        ref={mapRef}
-        provider={PROVIDER_GOOGLE}
-        style={styles.map}
-        initialRegion={{
-          latitude: userLocation.coords.latitude,
-          longitude: userLocation.coords.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-        showsUserLocation={false}
-        showsMyLocationButton={false}
-      >
-        {/* Render all participants */}
-        {participants.map((p) => {
-          if (!p.lastLocation) return null;
-          
-          // Check if this marker is for the current user
-          const isCurrentUser = p.id === user?.uid;
-          
-          return (
-            <Marker
-              key={p.id}
-              coordinate={{
-                latitude: p.lastLocation.latitude,
-                longitude: p.lastLocation.longitude,
-              }}
-              title={p.displayName || (isCurrentUser ? "You" : "Participant")}
-              pinColor={isCurrentUser ? COLORS.primary : "#2196F3"}
-            />
-          );
-        })}
-      </MapView>
+    <>
+      <Stack.Screen options={{ title: walkId }} />
+      <View style={styles.container}>
+        {renderTrackingStatus()}
 
-      {/* Map controls */}
-      <View style={styles.mapControls}>
-        <Button
-          size="$3"
-          circular
-          backgroundColor="white"
-          onPress={focusUserLocation}
-          style={styles.mapButton}
+        <MapView
+          ref={mapRef}
+          provider={PROVIDER_GOOGLE}
+          style={styles.map}
+          initialRegion={{
+            latitude: userLocation.coords.latitude,
+            longitude: userLocation.coords.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+          showsUserLocation={false}
+          showsMyLocationButton={false}
         >
-          Me
-        </Button>
-        <Button
-          size="$3"
-          circular
-          backgroundColor="white"
-          onPress={showAllParticipants}
-          style={styles.mapButton}
-        >
-          All
-        </Button>
+          {/* Render all participants */}
+          {participants.map((p) => {
+            if (!p.lastLocation) return null;
+
+            // Check if this marker is for the current user
+            const isCurrentUser = p.id === user?.uid;
+
+            return (
+              <Marker
+                key={p.id}
+                coordinate={{
+                  latitude: p.lastLocation.latitude,
+                  longitude: p.lastLocation.longitude,
+                }}
+                title={p.displayName || (isCurrentUser ? "You" : "Participant")}
+                pinColor={isCurrentUser ? COLORS.primary : "#2196F3"}
+              />
+            );
+          })}
+        </MapView>
+
+        {/* Map controls */}
+        <View style={styles.mapControls}>
+          <Button
+            size="$3"
+            circular
+            backgroundColor="white"
+            onPress={focusUserLocation}
+            style={styles.mapButton}
+          >
+            Me
+          </Button>
+          <Button
+            size="$3"
+            circular
+            backgroundColor="white"
+            onPress={showAllParticipants}
+            style={styles.mapButton}
+          >
+            All
+          </Button>
+        </View>
       </View>
-    </View>
+    </>
   );
 }
 

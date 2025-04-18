@@ -15,12 +15,13 @@ import { useRouter } from "expo-router";
 import React from "react";
 import { Alert, Linking, Platform, StyleSheet } from "react-native";
 import { Button, Card, Separator, Text, View, XStack, YStack } from "tamagui";
-import { Walk } from "walk2gether-shared";
+import { Walk, Participant } from "walk2gether-shared";
 import { db } from "../config/firebase";
 import { getWalkTypeData } from "../constants/walkTypes";
 import { useAuth } from "../context/AuthContext";
-import { useWalks } from "../context/WalksContext.bak";
+import { useWalks } from "../context/WalksContext";
 import WalkMenu from "./WalkMenu";
+import { useDoc } from "../utils/firestore";
 
 interface WalkCardProps {
   walk: Walk;
@@ -36,26 +37,49 @@ export default function WalkCard({ walk }: WalkCardProps) {
   const formattedTime = format(walkDate, "h:mm a");
   const now = new Date();
   const isToday = walkDate.toDateString() === now.toDateString();
-  const isPast = walkDate < now;
-  const isUpcoming = !isPast;
+
+  // Calculate end time of the walk based on start time and duration
+  const walkEndTime = new Date(walkDate);
+  walkEndTime.setMinutes(
+    walkEndTime.getMinutes() + (walk.durationMinutes || 0)
+  );
+
+  // A walk is active if it has started but not yet ended
+  const isActive = walkDate <= now && now <= walkEndTime;
+  // A walk is past only if it's end time has passed
+  const isPast = walkEndTime < now;
+  const isUpcoming = walkDate > now;
   const isMine = user?.uid === walk.createdByUid;
 
   const handleRSVP = async () => {
     if (!walk.id) return;
 
-    if (isRSVPed) {
-      await cancelRSVP(walk.id);
-    } else {
-      await rsvpForWalk(walk.id);
-    }
+    router.push(`/walk/${walk.id}/request`);
   };
 
   // Make card tappable to view walk details
+  // Make card tappable to view walk details
+  const { doc: participant } = useDoc<Participant>(
+    walk.id && user?.uid ? `walks/${walk.id}/participants/${user.uid}` : undefined
+  );
   const handlePress = () => {
-    if (walk.id) {
+    if (!walk.id) return;
+    // If user is the walk owner, always go to walk details
+    if (user?.uid === walk.createdByUid) {
       router.push(`/walk/${walk.id}`);
+      return;
+    }
+    if (participant) {
+      if (participant.approvedAt) {
+        router.push(`/walk/${walk.id}`);
+      } else {
+        router.push(`/walk/${walk.id}/request`);
+      }
+    } else {
+      router.push(`/walk/${walk.id}/request`);
     }
   };
+
 
   const handleEdit = () => {
     if (walk.id) {
@@ -176,22 +200,21 @@ export default function WalkCard({ walk }: WalkCardProps) {
               {isMine ? (
                 <XStack style={styles.hostBadge}>
                   <Text fontSize="$2" fontWeight="500" color={COLORS.primary}>
-                    {isPast ? "YOU HOSTED" : "YOU'RE HOSTING"}
+                    {isActive
+                      ? "HAPPENING NOW"
+                      : isPast
+                      ? "YOU HOSTED"
+                      : "YOU'RE HOSTING"}
                   </Text>
                 </XStack>
               ) : (
-                <XStack gap="$2" alignItems="center">
+                <XStack mr="$2" gap="$2" alignItems="center">
                   <View style={styles.iconContainer}>
-                    <User size="$1.5" color={COLORS.primary} />
+                    <User size="$1" color="white" />
                   </View>
-                  <XStack gap="$2">
-                    <Text fontSize="$2" fontWeight="400" color="#777">
-                      Hosted by
-                    </Text>
-                    <Text fontSize="$3" fontWeight="600" color="#333">
-                      {walk.organizerName || "Host"}
-                    </Text>
-                  </XStack>
+                  <Text fontSize="$3" fontWeight="600" color="white">
+                    {walk.organizerName || "Host"}
+                  </Text>
                 </XStack>
               )}
             </XStack>
@@ -231,7 +254,7 @@ export default function WalkCard({ walk }: WalkCardProps) {
             </Text>
             <Separator vertical />
             <View p="$2" borderRadius={20} bg={COLORS.primary}>
-              <Text fontSize="$3" fontWeight="600" color={COLORS.textOnDark}>
+              <Text fontSize="$3" fontWeight="bold" color={COLORS.textOnDark}>
                 {walk.durationMinutes} min
               </Text>
             </View>
@@ -334,8 +357,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
   },
   iconContainer: {
-    width: 36,
-    height: 36,
+    width: 28,
+    height: 28,
     borderRadius: 18,
     backgroundColor: `${COLORS.primary}15`,
     alignItems: "center",

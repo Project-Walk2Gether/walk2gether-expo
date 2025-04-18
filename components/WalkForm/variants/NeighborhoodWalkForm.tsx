@@ -1,5 +1,5 @@
 import React from "react";
-import { YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 import { NeighborhoodWalk, neighborhoodWalkSchema } from "walk2gether-shared";
 import DateTimeField from "../components/DateTimeField";
 import DurationField from "../components/DurationField";
@@ -50,6 +50,7 @@ export default function NeighborhoodWalkForm({
             error={errors.durationMinutes}
             touched={touched.durationMinutes}
           />
+          <Text>{JSON.stringify(errors)}</Text>
         </YStack>
       )}
     </FormProvider>

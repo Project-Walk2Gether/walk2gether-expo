@@ -1,4 +1,4 @@
-import { useWalks } from "@/context/WalksContext.bak";
+import { useWalks } from "@/context/WalksContext";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useRouter } from "expo-router";
 import { nanoid } from "nanoid/non-secure";
@@ -33,6 +33,7 @@ function WalkWizard() {
   const { userData } = useUserData();
 
   const handleSubmit = useCallback(async () => {
+    console.log({ formData });
     if (!formData.date || !formData.location || !formData.duration) {
       console.error("Missing required form data");
       return;
@@ -58,9 +59,24 @@ function WalkWizard() {
         createdByUid: user!.uid,
         type: formData.walkType as any,
         invitationCode: invitationCode, // Add the invitation code to the walk
+        // Include the invited user IDs if available
+        invitedUserIds: formData.invitedUserIds || [],
       } as Walk;
 
+      // Create the walk
       await createWalk(walkPayload);
+
+      // If there are phone numbers to invite, send SMS invitations
+      const phoneNumbers = formData.invitedPhoneNumbers || [];
+      if (phoneNumbers.length > 0) {
+        try {
+          console.log("Sending SMS invitations to:", phoneNumbers);
+          // This would typically call a Cloud Function to send SMS invites
+          // We'll implement this functionality on the backend
+        } catch (error) {
+          console.error("Error sending SMS invitations:", error);
+        }
+      }
 
       // Immediately redirect to home screen after creating a walk
       router.replace("/home");
@@ -102,9 +118,9 @@ function WalkWizard() {
         case 1:
           return "When do you want to walk?";
         case 2:
-          return "Where is the meeting point?";
-        case 3:
           return "How long will this walk be?";
+        case 3:
+          return "Where is the meeting point?";
         case 4:
           return "Who should we invite?";
         case 5:
@@ -161,14 +177,14 @@ function WalkWizard() {
         );
       case 2:
         return (
-          <LocationSelection
+          <DurationSelection
             onContinue={goToNextStep}
             onBack={goToPreviousStep}
           />
         );
       case 3:
         return (
-          <DurationSelection
+          <LocationSelection
             onContinue={goToNextStep}
             onBack={goToPreviousStep}
           />

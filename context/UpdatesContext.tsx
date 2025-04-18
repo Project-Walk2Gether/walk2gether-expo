@@ -3,6 +3,7 @@ import { AppState, AppStateStatus } from 'react-native';
 import * as Updates from 'expo-updates';
 import { useFlashMessage } from './FlashMessageContext';
 import { appVersion } from '../utils/version';
+import { recordError } from '../utils/recordError';
 
 interface UpdatesContextType {
   checkForUpdate: () => Promise<boolean>;
@@ -126,6 +127,11 @@ export const UpdatesProvider: React.FC<UpdatesProviderProps> = ({ children }) =>
       }
     } catch (error) {
       console.error('Error checking for update:', error);
+      recordError(error, {
+        function: 'checkForUpdate',
+        appVersion: appVersion || 'unknown',
+        context: 'UpdatesContext',
+      });
       if (!silent) showMessage('Failed to check for updates', 'error');
       return false;
     } finally {
