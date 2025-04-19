@@ -279,26 +279,28 @@ export default function WalkCard({ walk }: WalkCardProps) {
               </Text>
             </XStack>
 
-            {walk.location?.latitude && walk.location?.longitude && (
-              <Button
-                size="$3"
-                backgroundColor={COLORS.background}
-                borderColor={COLORS.primary}
-                borderWidth={1}
-                color={COLORS.primary}
-                onPress={
-                  Platform.OS === "ios" ? openInAppleMaps : openInGoogleMaps
-                }
-                borderRadius={12}
-                paddingHorizontal="$3"
-                hoverStyle={styles.buttonHover}
-                pressStyle={styles.buttonPress}
-                icon={<Map size="$1" color={COLORS.primary} />}
-                iconAfter={<ExternalLink />}
-              >
-                Open
-              </Button>
-            )}
+            {walk.location?.latitude &&
+              walk.location?.longitude &&
+              walk.type !== "neighborhood" && (
+                <Button
+                  size="$3"
+                  backgroundColor={COLORS.background}
+                  borderColor={COLORS.primary}
+                  borderWidth={1}
+                  color={COLORS.primary}
+                  onPress={
+                    Platform.OS === "ios" ? openInAppleMaps : openInGoogleMaps
+                  }
+                  borderRadius={12}
+                  paddingHorizontal="$3"
+                  hoverStyle={styles.buttonHover}
+                  pressStyle={styles.buttonPress}
+                  icon={<Map size="$1" color={COLORS.primary} />}
+                  iconAfter={<ExternalLink />}
+                >
+                  Open
+                </Button>
+              )}
           </XStack>
 
           {/* RSVP Button */}

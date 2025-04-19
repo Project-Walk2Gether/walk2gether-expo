@@ -1,22 +1,21 @@
 import storage from "@react-native-firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
-  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { showMessage } from "react-native-flash-message";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { PlaceData, PlacesAutocomplete } from "../../../components/UI";
+import { PlaceData } from "../../../components/UI/PlacesAutocomplete";
+import { UserDataForm } from "../../../components/UserDataForm";
 import { useAuth } from "../../../context/AuthContext";
 import { useUserData } from "../../../context/UserDataContext";
 import { COLORS } from "../../../styles/colors";
@@ -24,14 +23,8 @@ import { appVersion } from "../../../utils/version";
 
 export default function ProfileScreen() {
   const { user: authUser, refreshToken, signOut } = useAuth();
-  const {
-    userData,
-    loading: userDataLoading,
-    updateUserData,
-    refreshUserData,
-  } = useUserData();
+  const { userData, loading: userDataLoading, updateUserData } = useUserData();
   const router = useRouter();
-
   const [name, setName] = useState("");
   const [location, setLocation] = useState<PlaceData | null>(null);
   const [aboutMe, setAboutMe] = useState("");
@@ -67,22 +60,6 @@ export default function ProfileScreen() {
       setProfilePicUrl(userData.profilePicUrl || "");
     }
   }, [userData]);
-
-  // Function to handle pull-to-refresh
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      // First refresh the token
-      await refreshToken();
-
-      // Then refresh user data
-      await refreshUserData();
-    } catch (error) {
-      console.error("Error during refresh:", error);
-    } finally {
-      setRefreshing(false);
-    }
-  }, [refreshToken, refreshUserData]);
 
   const pickImage = async () => {
     try {
@@ -219,9 +196,6 @@ export default function ProfileScreen() {
     <ScrollView
       ref={scrollViewRef}
       contentContainerStyle={styles.scrollViewContent}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
     >
       <View style={styles.profileImageContainer}>
         {profilePicUrl ? (
@@ -244,47 +218,31 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.formContainer}>
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          placeholder="Your name"
+      {/* Only render the UserDataForm if userData is loaded */}
+      {userData && (
+        <UserDataForm
+          userData={userData}
+          onSave={({ name, aboutMe, location }) => {
+            setName(name);
+            setAboutMe(aboutMe);
+            setLocation(location);
+            handleSaveProfile();
+          }}
+          isSaving={isSaving}
         />
+      )}
 
-        <PlacesAutocomplete
-          value={location}
-          onSelect={(newLocation) => setLocation(newLocation)}
-          placeholder="Enter your location"
-          label="Location"
-          googleApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || ""}
-        />
-
-        <TouchableOpacity
-          style={styles.saveButton}
-          onPress={handleSaveProfile}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.saveButtonText}>Save Profile</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.signOutButton}
-          onPress={handleSignOut}
-          disabled={isSaving}
-        >
-          <Text style={styles.signOutButtonText}>Sign Out</Text>
-        </TouchableOpacity>
-
-        <View style={styles.versionContainer}>
-          <Text style={styles.versionText}>Version: {appVersion}</Text>
-        </View>
+      <View style={styles.versionContainer}>
+        <Text style={styles.versionText}>Version: {appVersion}</Text>
       </View>
+
+      <TouchableOpacity
+        style={styles.signOutButton}
+        onPress={handleSignOut}
+        disabled={isSaving}
+      >
+        <Text style={styles.signOutButtonText}>Sign Out</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }

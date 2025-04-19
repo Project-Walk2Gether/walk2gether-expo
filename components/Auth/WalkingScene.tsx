@@ -5,25 +5,30 @@ import WalkingCharacters from "./WalkingCharacters";
 
 interface WalkingSceneProps {
   style?: object;
+  showTree?: boolean;
 }
 
 const tree = require("../../assets/animations/tree.lottie");
 
-export default function WalkingScene({ style }: WalkingSceneProps) {
+export default function WalkingScene({
+  style,
+  showTree = true,
+}: WalkingSceneProps) {
   return (
     <View style={[styles.container, style]}>
       <View style={styles.walkingSection}>
         <View style={styles.ground} />
         <WalkingCharacters style={styles.walkingCharacters} />
       </View>
-
-      <LottieView
-        style={styles.treeAnimation}
-        source={tree}
-        autoPlay
-        loop
-        speed={0.7}
-      />
+      {showTree && (
+        <LottieView
+          style={styles.treeAnimation}
+          source={tree}
+          autoPlay
+          loop
+          speed={0.7}
+        />
+      )}
     </View>
   );
 }
@@ -36,8 +41,8 @@ const styles = StyleSheet.create({
   },
   treeAnimation: {
     position: "absolute",
-    bottom: -60,
-    right: -150,
+    bottom: -58,
+    left: -190,
     width: 400,
     height: 400,
     zIndex: -1,

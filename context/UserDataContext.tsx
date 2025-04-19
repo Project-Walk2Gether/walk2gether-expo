@@ -9,6 +9,7 @@ interface UserDataContextType {
   userData: UserData | null;
   loading: boolean;
   updateUserData: (data: Partial<UserData>) => Promise<void>;
+  setUserData: (data: Partial<UserData>) => Promise<void>;
 }
 
 const UserDataContext = createContext<UserDataContextType | undefined>(
@@ -49,12 +50,26 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({
     }
   };
 
+  const setUserData = async (data: Partial<UserData>) => {
+    if (!firebaseUser) {
+      throw new Error("No authenticated user");
+    }
+    try {
+      const userRef = doc(db, "users", firebaseUser.uid);
+      await setDoc(userRef, data, { merge: true });
+    } catch (error) {
+      console.error("Error setting user data:", error);
+      throw error;
+    }
+  };
+
   return (
     <UserDataContext.Provider
       value={{
         userData,
         loading: status === "loading",
         updateUserData,
+        setUserData,
       }}
     >
       {children}

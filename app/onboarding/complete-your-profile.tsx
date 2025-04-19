@@ -1,42 +1,44 @@
 // Screen for completing user profile after phone auth
-import { useRouter } from "expo-router";
+import { Keyboard as KeyboardIcon, MapPin } from "@tamagui/lucide-icons";
+import { Redirect, useRouter } from "expo-router";
 import { Formik } from "formik";
 import React, { useRef, useState } from "react";
-import { Keyboard, StyleSheet } from "react-native";
-import {
-  GooglePlacesAutocomplete,
-  GooglePlacesAutocompleteRef,
-} from "react-native-google-places-autocomplete";
-import { Button, Input, ScrollView, Text, XStack, YStack } from "tamagui";
+import { StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Button, Card, Input, ScrollView, Text, XStack, YStack } from "tamagui";
 import { userDataSchema } from "walk2gether-shared";
-import BottomRow from "../../components/Auth/BottomRow";
-import Clouds from "../../components/Clouds";
-import Sun from "../../components/Sun";
-import { BrandGradient } from "../../components/UI";
+import AuthScenicLayout from "../../components/Auth/AuthScenicLayout";
+import AutoDetectLocation from "../../components/AutoDetectLocation";
+import LocationAutocomplete from "../../components/LocationAutocomplete";
+import { useAuth } from "../../context/AuthContext";
 import { useUserData } from "../../context/UserDataContext";
-import * as Location from 'expo-location';
-import { useEffect } from 'react';
-import AutoDetectLocation from '../../components/AutoDetectLocation';
-import LocationAutocomplete from '../../components/LocationAutocomplete';
+import { COLORS } from "../../styles/colors";
 
 export default function CompleteYourProfile() {
-  const { updateUserData } = useUserData();
+  const { setUserData } = useUserData();
+  const { signOut, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const placesAutocompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
   const scrollViewRef = useRef<ScrollView>(null);
+  const insets = useSafeAreaInsets();
   const [showLocationResults, setShowLocationResults] = useState(false);
   const [locationMode, setLocationMode] = useState<"none" | "auto" | "manual">(
     "none"
   );
+  const initialFriendInvitationCode = user!.uid
+    .substring(0, 8)
+    .split("")
+    .reverse()
+    .join("");
 
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
       // Save user profile data
-      await updateUserData({
+      await setUserData({
         name: values.name,
         location: values.location,
+        friendInvitationCode: values.friendInvitationCode,
       });
       router.replace("/");
     } catch (error) {
@@ -46,126 +48,182 @@ export default function CompleteYourProfile() {
     }
   };
 
-  return (
-    <BrandGradient style={{ flex: 1 }}>
-      <Sun
-        style={{
-          position: "absolute",
-          right: 0,
-          top: 20,
-          zIndex: 1,
-        }}
-      />
-      <Clouds
-        style={{
-          position: "absolute",
-          top: -100,
-          left: 0,
-          zIndex: 1,
-        }}
-      />
-      <BottomRow />
-      <Formik
-        initialValues={{ name: "", location: null }}
-        validationSchema={userDataSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ handleSubmit, values, errors, touched, setFieldValue }) => (
-          <ScrollView
-            ref={scrollViewRef}
-            contentContainerStyle={{
-              flexGrow: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              padding: 16,
-            }}
-            showsVerticalScrollIndicator={false}
-          >
-            <YStack
-              f={1}
-              jc="center"
-              ai="center"
-              p="$6"
-              space="$4"
-              width="100%"
-            >
-              <Text fontSize="$6" fontWeight="bold">
-                Complete your profile
-              </Text>
-              <Input
-                placeholder="Your name"
-                value={values.name}
-                onChangeText={(text) => setFieldValue("name", text)}
-                marginVertical="$3"
-                width="$18"
-                borderColor={touched.name && errors.name ? "$red10" : undefined}
-              />
-              {touched.name && errors.name && (
-                <Text color="$red10" fontSize="$2" alignSelf="flex-start">
-                  {errors.name}
-                </Text>
-              )}
-              <YStack width="100%" space="$2">
-                <Text fontWeight="bold" fontSize="$4" mb="$2">
-                  Home Location
-                </Text>
-                {locationMode === "none" && (
-                  <XStack space="$3" mb="$3" jc="center">
-                    <Button
-                      size="$4"
-                      backgroundColor="$blue9"
-                      color="white"
-                      onPress={() => setLocationMode("auto")}
-                    >
-                      Share My Location
-                    </Button>
-                    <Button
-                      size="$4"
-                      variant="outlined"
-                      onPress={() => setLocationMode("manual")}
-                    >
-                      Type My Location
-                    </Button>
-                  </XStack>
-                )}
-                {locationMode === "auto" && (
-                  <YStack space="$2" ai="center">
-                    <AutoDetectLocation
-                      values={values}
-                      setFieldValue={setFieldValue}
-                      setLocationMode={setLocationMode}
-                    />
-                  </YStack>
-                )}
-                {locationMode === "manual" && (
-                  <LocationAutocomplete
-                    value={values.location}
-                    setFieldValue={setFieldValue}
-                    showLocationResults={showLocationResults}
-                    setShowLocationResults={setShowLocationResults}
-                    touched={touched}
-                    errors={errors}
-                    styles={styles}
-                  />
-                )}
-              </YStack>
+  if (!user) return <Redirect href="/auth" />;
 
-              <Button
-                onPress={() => handleSubmit()}
-                disabled={!values.name || !values.location}
-                backgroundColor="$blue9"
-                color="white"
-                paddingVertical="$3"
-                marginTop="$4"
-                width="$15"
+  return (
+    <>
+      <Button
+        onPress={signOut}
+        backgroundColor={COLORS.disabled}
+        color={COLORS.textOnDark}
+        position="absolute"
+        top={insets.top}
+        right={20}
+        zIndex={10}
+        size="$3"
+        borderRadius={20}
+        px={16}
+        py={8}
+        fontWeight="bold"
+        elevation={2}
+      >
+        Sign Out
+      </Button>
+      <AuthScenicLayout
+        scroll
+        showSun={false}
+        showBottomRow={false}
+        showTree={false}
+        showHouse
+      >
+        <Formik
+          initialValues={{
+            name: user?.displayName || "",
+            location: null,
+            friendInvitationCode: initialFriendInvitationCode,
+          }}
+          validationSchema={userDataSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ handleSubmit, values, errors, touched, setFieldValue }) => (
+            <ScrollView
+              ref={scrollViewRef}
+              contentContainerStyle={{
+                flexGrow: 1,
+
+                alignItems: "center",
+                padding: 16,
+              }}
+              showsVerticalScrollIndicator={false}
+            >
+              <Card
+                elevate
+                bordered
+                size="$4"
+                width="100%"
+                maxWidth={400}
+                padding={24}
+                marginVertical={32}
+                backgroundColor={COLORS.card}
+                shadowColor="#000"
+                shadowOffset={{ width: 0, height: 2 }}
+                shadowOpacity={0.1}
+                shadowRadius={8}
+                alignItems="center"
               >
-                Save Profile
-              </Button>
-            </YStack>
-          </ScrollView>
-        )}
-      </Formik>
-    </BrandGradient>
+                <YStack width="100%" gap="$4" ai="center">
+                  <Text fontSize="$6" fontWeight="bold">
+                    Complete your profile
+                  </Text>
+                  <Input
+                    placeholder="Your full name"
+                    value={values.name}
+                    onChangeText={(text) => setFieldValue("name", text)}
+                    width="100%"
+                    borderColor={
+                      touched.name && errors.name
+                        ? COLORS.error
+                        : COLORS.primary
+                    }
+                    backgroundColor={COLORS.background}
+                    color={COLORS.text}
+                    borderRadius={10}
+                    px={16}
+                    py={12}
+                    fontSize={18}
+                  />
+                  {touched.name && errors.name && (
+                    <Text color="$red10" fontSize="$2" alignSelf="flex-start">
+                      {errors.name}
+                    </Text>
+                  )}
+                  <YStack width="100%" gap="$2">
+                    <Text
+                      fontWeight="bold"
+                      fontSize="$4"
+                      mb="$2"
+                      color={COLORS.primary}
+                    >
+                      Home Location
+                    </Text>
+                    {locationMode === "none" && (
+                      <XStack gap="$3" jc="center" width="100%">
+                        <Button
+                          size="$4"
+                          backgroundColor="$blue9"
+                          color="white"
+                          onPress={() => setLocationMode("auto")}
+                          f={1}
+                          icon={<MapPin size={20} style={{ marginRight: 8 }} />}
+                        >
+                          Share
+                        </Button>
+                        <Button
+                          size="$4"
+                          variant="outlined"
+                          onPress={() => setLocationMode("manual")}
+                          f={1}
+                          icon={
+                            <KeyboardIcon
+                              size={20}
+                              style={{ marginRight: 8 }}
+                            />
+                          }
+                        >
+                          Type
+                        </Button>
+                      </XStack>
+                    )}
+                    {locationMode === "auto" && (
+                      <YStack space="$2" ai="center" width="100%">
+                        <AutoDetectLocation
+                          values={values}
+                          setFieldValue={setFieldValue}
+                          setLocationMode={setLocationMode}
+                          clearLocation={() => {
+                            setFieldValue("location", null);
+                            setLocationMode("none");
+                          }}
+                        />
+                      </YStack>
+                    )}
+                    {locationMode === "manual" && (
+                      <LocationAutocomplete
+                        value={values.location}
+                        setFieldValue={setFieldValue}
+                        showLocationResults={showLocationResults}
+                        setShowLocationResults={setShowLocationResults}
+                        touched={touched}
+                        errors={errors}
+                        styles={styles}
+                      />
+                    )}
+                  </YStack>
+                  <Button
+                    onPress={() => handleSubmit()}
+                    disabled={!values.name || !values.location}
+                    backgroundColor={
+                      !values.name || !values.location
+                        ? COLORS.disabled
+                        : COLORS.primary
+                    }
+                    color={COLORS.textOnDark}
+                    width="100%"
+                    borderRadius={12}
+                    fontWeight="bold"
+                    elevation={2}
+                    fontSize={18}
+                    opacity={!values.name || !values.location ? 0.6 : 1}
+                  >
+                    Let's walk2gether!
+                  </Button>
+                </YStack>
+              </Card>
+            </ScrollView>
+          )}
+        </Formik>
+      </AuthScenicLayout>
+    </>
   );
 }
 

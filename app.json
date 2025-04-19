@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#fcf0da"
+      "backgroundColor": "#FEF7DC"
     },
     "scheme": "walk2gether",
     "assetBundlePatterns": ["**/*", "assets/animations/*.lottie"],

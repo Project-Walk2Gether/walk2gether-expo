@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Text, YStack } from 'tamagui';
+import { Text, YStack, XStack, Button } from 'tamagui';
+import { CheckCircle, X as XIcon } from '@tamagui/lucide-icons';
 import * as Location from 'expo-location';
 
 interface AutoDetectLocationProps {
   values: any;
   setFieldValue: (field: string, value: any) => void;
   setLocationMode: (mode: 'none' | 'auto' | 'manual') => void;
+  clearLocation?: () => void;
 }
 
-const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({ values, setFieldValue }) => {
+const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({ values, setFieldValue, clearLocation }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -57,9 +59,22 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({ values, setFiel
   if (loading) return <Text>Detecting your location...</Text>;
   if (error) return <Text color="$red10">{error}</Text>;
   if (values.location) return (
-    <YStack ai="center">
-      <Text color="$green10">Detected: {values.location.name}</Text>
-    </YStack>
+    <XStack ai="center" jc="center" bg="$green1" px={12} py={8} br={10} my={4} width="100%" space={2}>
+      <CheckCircle size={18} color="#22c55e" style={{ marginRight: 6 }} />
+      <Text color="$green10" fontWeight="bold" fontSize={16} flex={1} numberOfLines={1}>
+        {values.location.name}
+      </Text>
+      <Button
+        size="$2"
+        circular
+        chromeless
+        ml={8}
+        onPress={clearLocation}
+        aria-label="Clear location"
+      >
+        <XIcon size={16} color="#888" />
+      </Button>
+    </XStack>
   );
   return null;
 };

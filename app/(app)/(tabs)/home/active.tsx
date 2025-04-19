@@ -10,18 +10,15 @@ import {
 } from "react-native";
 import { Text } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
-import NotificationPermissionCard from "../../../../components/NotificationPermissionCard";
+
 import { BrandGradient } from "../../../../components/UI";
 import WalkCard from "../../../../components/WalkCard";
 import { useWalks } from "../../../../context/WalksContext";
-import { useNotificationPermissions } from "../../../../hooks/useNotificationPermissions";
 import { COLORS } from "../../../../styles/colors";
 
 export default function ActiveTabScreen() {
   const router = useRouter();
   const { upcomingWalks } = useWalks();
-  const { permissionStatus, loading: notificationPermissionStatusLoading } =
-    useNotificationPermissions();
 
   const renderWalkItem = ({ item }: { item: WithId<Walk> }) => (
     <WalkCard key={item.id} walk={item} />
@@ -49,9 +46,6 @@ export default function ActiveTabScreen() {
         ) : (
           <EmptyMessage message="There aren't any active walks right now!" />
         )}
-        {!notificationPermissionStatusLoading && !permissionStatus?.granted ? (
-          <NotificationPermissionCard />
-        ) : null}
       </ScrollView>
       <TouchableOpacity
         style={styles.fab}
