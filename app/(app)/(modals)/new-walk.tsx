@@ -223,10 +223,63 @@ function WalkWizard() {
 }
 
 // Wrap the entire screen with our WalkFormProvider
+// Only import useEffect, useState from React here, since React and Text are already imported at the top
+import { useEffect, useState } from "react";
+import * as Location from "expo-location";
+import { YStack, Spinner } from "tamagui";
+
 export default function NewWalkWizardScreen() {
+  const [locationReady, setLocationReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { updateFormData } = require("../../../context/WalkFormContext");
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchLocation() {
+      try {
+        setError(null);
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setError("Permission to access location was denied.");
+          setLocationReady(true);
+          return;
+        }
+        const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+        const { latitude, longitude } = position.coords;
+        // Optionally, reverse geocode here or just set lat/lng
+        updateFormData({
+          location: {
+            name: "Current Location",
+            description: "Your current location",
+            latitude,
+            longitude,
+          },
+        });
+      } catch (e: any) {
+        setError("Unable to get your location.");
+      } finally {
+        if (isMounted) setLocationReady(true);
+      }
+    }
+    fetchLocation();
+    return () => { isMounted = false; };
+  }, []);
+
   return (
     <WalkFormProvider>
-      <WalkWizard />
+      {locationReady ? (
+        <WalkWizard />
+      ) : (
+        <YStack f={1} jc="center" ai="center" p="$6">
+          <Spinner size="large" color="$blue10" />
+          <Text mt="$4" fontSize={18} color="$blue10">
+            Getting your location...
+          </Text>
+          {error && (
+            <Text mt="$2" color="$red10">{error}</Text>
+          )}
+        </YStack>
+      )}
     </WalkFormProvider>
   );
 }
