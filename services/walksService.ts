@@ -1,6 +1,3 @@
-import { useAuth } from "@/context/AuthContext";
-import { useQuery } from "@/utils/firestore";
-import { useEffect, useState } from "react";
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import {
   addDoc,
@@ -21,10 +18,12 @@ import {
   where,
 } from "@react-native-firebase/firestore";
 import { startOfDay } from "date-fns";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pair, RSVP, Walk, WithId } from "walk2gether-shared";
 import { DocumentReferenceLike } from "walk2gether-shared/lib/utils/documentReference";
 import { db } from "../config/firebase";
+import { useAuth } from "../context/AuthContext";
+import { useQuery } from "../utils/firestore";
 import { getRandomColor } from "../utils/random";
 
 // Create a new round with rotated pairs
@@ -113,13 +112,13 @@ export const joinWalk = async (walkId: string) => {};
 export function useMyPastWalks() {
   const { user } = useAuth();
   const [allPastWalks, setAllPastWalks] = useState<Walk[]>([]);
-  
+
   // Calculate timestamp for filtering out active walks with 1-hour buffer
   // Only show truly past walks (more than 1 hour after scheduled time)
   const oneHourAgo = new Date();
   oneHourAgo.setHours(oneHourAgo.getHours() - 1);
   const cutoffTimestamp = Timestamp.fromDate(oneHourAgo);
-  
+
   // Query for walks the user has RSVP'd to
   const rsvpWalksQuery = query(
     collection(db, "walks"),
@@ -140,24 +139,24 @@ export function useMyPastWalks() {
   useEffect(() => {
     // Combine both arrays
     const combinedWalks = [...rsvpWalks, ...hostedWalks];
-    
+
     // Deduplicate by walk ID
     const uniqueWalks = combinedWalks.reduce<Walk[]>((unique, walk) => {
       // Check if this walk ID is already in our unique array
-      const exists = unique.some(item => item.id === walk.id);
+      const exists = unique.some((item) => item.id === walk.id);
       if (!exists) {
         unique.push(walk);
       }
       return unique;
     }, []);
-    
+
     // Sort by date (most recent first)
     uniqueWalks.sort((a, b) => {
       const dateA = a.date?.toDate ? a.date.toDate() : new Date();
       const dateB = b.date?.toDate ? b.date.toDate() : new Date();
       return dateB.getTime() - dateA.getTime();
     });
-    
+
     setAllPastWalks(uniqueWalks);
   }, [rsvpWalks, hostedWalks]);
 

@@ -1,6 +1,6 @@
-import { emulatorsEnabled } from "@/config/emulators";
-import { auth } from "@/config/firebase";
 import axios, { AxiosRequestConfig } from "axios";
+import { emulatorsEnabled } from "../config/emulators";
+import { auth_instance } from "../config/firebase";
 
 // Base URLs based on environment
 const isLive = !emulatorsEnabled;
@@ -24,7 +24,7 @@ export async function callApi<T = any>(
   // Get authentication token if user is logged in
   let token;
   try {
-    token = await auth.currentUser?.getIdToken();
+    token = await auth_instance.currentUser?.getIdToken();
   } catch (error) {
     console.error("Failed to get authentication token:", error);
   }

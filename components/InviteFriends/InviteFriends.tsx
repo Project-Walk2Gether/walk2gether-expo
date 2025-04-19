@@ -1,8 +1,8 @@
-import { Invitation, InvitationCard } from "@/components/InvitationCard";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { FlatList } from "react-native";
 import { Button, Card, Input, Text, YStack } from "tamagui";
+import { Invitation, InvitationCard } from "../../components/InvitationCard";
 
 // Re-export the Invitation type from InvitationCard
 export type { Invitation };

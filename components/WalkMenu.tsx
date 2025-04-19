@@ -1,6 +1,6 @@
-import { COLORS } from "@/styles/colors";
 import { Edit3, Map, Trash } from "@tamagui/lucide-icons";
 import React from "react";
+import { COLORS } from "../styles/colors";
 import Menu, { MenuItem } from "./Menu";
 
 interface WalkMenuProps {

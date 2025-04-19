@@ -1,4 +1,3 @@
-import { COLORS } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 import {
   collection,
@@ -9,6 +8,7 @@ import { Search } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
 import { Card, Input, Spinner, Text, XStack, YStack } from "tamagui";
 import { useAuth } from "../../context/AuthContext";
+import { COLORS } from "../../styles/colors";
 
 type Friend = {
   id: string;

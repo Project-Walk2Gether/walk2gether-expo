@@ -1,4 +1,3 @@
-import { useUserData } from "@/context/UserDataContext";
 import { ArrowLeft, Copy, Plus, Send, X } from "@tamagui/lucide-icons";
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
@@ -15,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Input, Spinner, Text, View, XStack, YStack } from "tamagui";
 import { BrandGradient } from "../../../components/UI";
+import { useUserData } from "../../../context/UserDataContext";
 import { callApi } from "../../../utils/api";
 
 export default function InviteFriendsScreen() {

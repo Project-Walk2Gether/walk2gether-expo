@@ -1,12 +1,17 @@
-import { firestore_instance } from "@/config/firebase";
-import { useAuth } from "@/context/AuthContext";
-import { useEffect, useState } from "react";
-import { TouchableOpacity, StyleSheet } from "react-native";
+import {
+  collection,
+  onSnapshot,
+  query,
+  where,
+} from "@react-native-firebase/firestore";
 import { Bell } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
-import { collection, onSnapshot, query, where } from "@react-native-firebase/firestore";
-import { View, Text } from "tamagui";
-import { COLORS } from "@/styles/colors";
+import { useEffect, useState } from "react";
+import { StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View } from "tamagui";
+import { firestore_instance } from "../config/firebase";
+import { useAuth } from "../context/AuthContext";
+import { COLORS } from "../styles/colors";
 
 export default function NotificationBell() {
   const { user } = useAuth();

@@ -1,4 +1,3 @@
-import { useWalks } from "@/context/WalksContext";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useRouter } from "expo-router";
 import { nanoid } from "nanoid/non-secure";
@@ -23,6 +22,7 @@ import {
   WalkFormProvider,
   useWalkForm,
 } from "../../../context/WalkFormContext";
+import { useWalks } from "../../../context/WalksContext";
 
 function WalkWizard() {
   const { formData, currentStep, goToNextStep, goToPreviousStep, goToStep } =

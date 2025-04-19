@@ -1,20 +1,14 @@
-import { doc, getDoc, setDoc } from "@react-native-firebase/firestore";
-import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { doc, setDoc } from "@react-native-firebase/firestore";
+import React, { createContext, ReactNode, useContext } from "react";
+import { useDoc } from "utils/firestore";
+import { UserData } from "walk2gether-shared";
 import { db } from "../config/firebase";
-import { User } from "../types";
 import { useAuth } from "./AuthContext";
 
 interface UserDataContextType {
-  userData: User | null;
+  userData: UserData | null;
   loading: boolean;
-  updateUserData: (data: Partial<User>) => Promise<void>;
-  refreshUserData: () => Promise<void>;
+  updateUserData: (data: Partial<UserData>) => Promise<void>;
 }
 
 const UserDataContext = createContext<UserDataContextType | undefined>(
@@ -37,35 +31,11 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({
   children,
 }) => {
   const { user: firebaseUser } = useAuth();
-  const [userData, setUserData] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { doc: userData, status } = useDoc(
+    firebaseUser ? "users/" + firebaseUser!.uid : undefined
+  );
 
-  const fetchUserData = async (uid: string) => {
-    try {
-      console.log("Fetching user data, uid: " + uid);
-      const userRef = doc(db, "users", uid);
-      const userDoc = await getDoc(userRef);
-
-      if (userDoc.exists) {
-        const userData = {
-          id: userDoc.id,
-          ...userDoc.data(),
-        } as User;
-
-        setUserData(userData);
-      } else {
-        console.log("No user data found in Firestore");
-        setUserData(null);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      setUserData(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateUserData = async (data: Partial<User>) => {
+  const updateUserData = async (data: Partial<UserData>) => {
     if (!firebaseUser) {
       throw new Error("No authenticated user");
     }
@@ -73,43 +43,18 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({
     try {
       const userRef = doc(db, "users", firebaseUser.uid);
       await setDoc(userRef, data, { merge: true });
-      // Refresh user data after update
-      await fetchUserData(firebaseUser.uid);
     } catch (error) {
       console.error("Error updating user data:", error);
       throw error;
     }
   };
 
-  const refreshUserData = async () => {
-    if (!firebaseUser) {
-      setUserData(null);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    await fetchUserData(firebaseUser.uid);
-  };
-
-  // Listen for changes in the Firebase user
-  useEffect(() => {
-    if (firebaseUser) {
-      console.log("Fetching");
-      fetchUserData(firebaseUser.uid);
-    } else {
-      setUserData(null);
-      setLoading(false);
-    }
-  }, [firebaseUser]);
-
   return (
     <UserDataContext.Provider
       value={{
         userData,
-        loading,
+        loading: status === "loading",
         updateUserData,
-        refreshUserData,
       }}
     >
       {children}

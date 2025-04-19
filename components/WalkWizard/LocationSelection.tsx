@@ -1,4 +1,3 @@
-import { COLORS } from "@/styles/colors";
 import Constants from "expo-constants";
 import React, { useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet } from "react-native";
@@ -9,6 +8,7 @@ import {
 import MapView, { Marker } from "react-native-maps";
 import { Text, View, YStack } from "tamagui";
 import { useWalkForm } from "../../context/WalkFormContext";
+import { COLORS } from "../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
 
 interface LocationSelectionProps {

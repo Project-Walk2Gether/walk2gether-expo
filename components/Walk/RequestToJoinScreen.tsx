@@ -1,6 +1,3 @@
-import { firestore_instance } from "@/config/firebase";
-import { useAuth } from "@/context/AuthContext";
-import { useDoc } from "@/utils/firestore";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -8,6 +5,9 @@ import { ActivityIndicator, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, View, YStack } from "tamagui";
 import { Participant, Walk } from "walk2gether-shared";
+import { firestore_instance } from "../../config/firebase";
+import { useAuth } from "../../context/AuthContext";
+import { useDoc } from "../../utils/firestore";
 
 interface CheckInScreenProps {
   walk: Walk;

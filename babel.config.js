@@ -1,23 +1,18 @@
-// babel.config.js
-module.exports = function(api) {
-  api.cache(true);
+module.exports = function (api) {
+  api.cache(true)
   return {
-    presets: ['babel-preset-expo'],
+    presets: [['babel-preset-expo', { jsxRuntime: 'automatic' }]],
     plugins: [
-      // if you’re using expo-router, keep this:
-      'expo-router/babel',
-      // then your alias mapping:
       [
-        'module-resolver',
+        require.resolve('babel-plugin-module-resolver'),
         {
-          root: ['./'],
+          root: ['../..'],
           alias: {
-            // ONLY map imports that start with "@/..."
-            '@/': './',
+            "@/*": "./*",
           },
-          extensions: ['.ios.js', '.android.js', '.js', '.ts', '.tsx', '.json']
+          extensions: ['.js', '.jsx', '.tsx', '.ios.js', '.android.js'],
         },
       ],
     ],
-  };
-};
+  }
+}

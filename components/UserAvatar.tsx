@@ -1,7 +1,7 @@
-import { useDoc } from "@/utils/firestore";
 import { StyleSheet } from "react-native";
 import { Image, Text, View } from "tamagui";
 import { UserData } from "walk2gether-shared";
+import { useDoc } from "../utils/firestore";
 
 export function UserAvatar({ uid }: { uid: string }) {
   const { doc: userData } = useDoc<UserData>(`users/${uid}`);

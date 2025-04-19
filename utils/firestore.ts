@@ -1,4 +1,3 @@
-import { db } from "@/config/firebase";
 import {
   doc as firebaseDoc,
   FirebaseFirestoreTypes,
@@ -7,6 +6,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { WithId } from "walk2gether-shared";
 import { DocumentReferenceLike } from "walk2gether-shared/lib/utils/documentReference";
+import { db } from "../config/firebase";
 
 export function useDoc<T extends FirebaseFirestoreTypes.DocumentData>(
   docPath?: string

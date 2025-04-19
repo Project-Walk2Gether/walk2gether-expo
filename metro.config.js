@@ -1,9 +1,8 @@
 // metro.config.js
 const { getDefaultConfig } = require('expo/metro-config');
-const path = require('path');
 const config = getDefaultConfig(__dirname);
-config.resolver.alias = {
-  ...(config.resolver.alias||{}),
-  '@/': path.resolve(__dirname),
-};
+
+// Tell Metro to treat `.lottie` files as assets:
+config.resolver.assetExts.push('lottie');
+
 module.exports = config;

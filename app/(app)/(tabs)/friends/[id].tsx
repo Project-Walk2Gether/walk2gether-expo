@@ -1,4 +1,3 @@
-import WalkChat, { ChatMessage } from "@/components/Chat/WalkChat";
 import firestore, {
   addDoc,
   collection,
@@ -13,6 +12,7 @@ import { ArrowLeft } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Avatar, Button, Text, XStack } from "tamagui";
+import WalkChat, { ChatMessage } from "../../../../components/Chat/WalkChat";
 import { useAuth } from "../../../../context/AuthContext";
 
 // Define types for the friend data

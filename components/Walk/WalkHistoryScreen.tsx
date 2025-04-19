@@ -1,4 +1,3 @@
-// import { allWalkPartnerUids } from "@/utils/walkUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { Stack } from "expo-router";

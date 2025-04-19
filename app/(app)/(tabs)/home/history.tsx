@@ -1,10 +1,10 @@
-import { BrandGradient } from "@/components/UI";
-import WalkCard from "@/components/WalkCard";
-import { useMyPastWalks } from "@/services/walksService";
 import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Walk, WithId } from "walk2gether-shared";
+import { BrandGradient } from "../../../../components/UI";
+import WalkCard from "../../../../components/WalkCard";
+import { useMyPastWalks } from "../../../../services/walksService";
 
 export default function HistoryTabScreen() {
   const router = useRouter();

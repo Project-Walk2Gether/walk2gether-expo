@@ -1,3 +1,4 @@
+import { UserDataProvider } from "context/UserDataContext";
 import { Stack } from "expo-router";
 import React from "react";
 import { TamaguiProvider } from "tamagui";
@@ -34,7 +35,9 @@ function RootLayout() {
     <TamaguiProvider config={tamaguiConfig}>
       <FlashMessageProvider>
         <UpdatesProvider>
-          <AppContent />
+          <UserDataProvider>
+            <AppContent />
+          </UserDataProvider>
         </UpdatesProvider>
       </FlashMessageProvider>
     </TamaguiProvider>

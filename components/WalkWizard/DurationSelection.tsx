@@ -1,4 +1,3 @@
-import { COLORS } from "@/styles/colors";
 import { Clock, Plus, X } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import {
@@ -19,6 +18,7 @@ import {
   YStack,
 } from "tamagui";
 import { useWalkForm } from "../../context/WalkFormContext";
+import { COLORS } from "../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
 
 interface DurationSelectionProps {
@@ -94,13 +94,14 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
 
   return (
     <>
-      <WizardWrapper
-        onContinue={handleContinue}
-        onBack={onBack}
-      >
+      <WizardWrapper onContinue={handleContinue} onBack={onBack}>
         <YStack gap="$4">
           <View style={styles.durationContainer}>
-            <XStack alignItems="center" justifyContent="center" marginBottom="$4">
+            <XStack
+              alignItems="center"
+              justifyContent="center"
+              marginBottom="$4"
+            >
               <Clock size="$6" color={COLORS.textOnDark} />
               <Text
                 fontSize={36}

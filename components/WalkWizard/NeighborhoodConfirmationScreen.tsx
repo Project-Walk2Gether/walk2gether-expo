@@ -1,6 +1,3 @@
-import { useAuth } from "@/context/AuthContext";
-import { useWalkForm } from "@/context/WalkFormContext";
-import { COLORS } from "@/styles/colors";
 import { collection, getDocs } from "@react-native-firebase/firestore";
 import { Handshake, Pin, Speech, Users } from "@tamagui/lucide-icons";
 import * as Location from "expo-location";
@@ -9,6 +6,9 @@ import { Dimensions, Platform, StyleSheet } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Text, View, XStack, YStack } from "tamagui";
 import { db } from "../../config/firebase";
+import { useAuth } from "../../context/AuthContext";
+import { useWalkForm } from "../../context/WalkFormContext";
+import { COLORS } from "../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
 
 interface NeighborhoodConfirmationProps {

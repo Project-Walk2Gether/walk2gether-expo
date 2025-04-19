@@ -1,6 +1,3 @@
-import { useAuth } from "@/context/AuthContext";
-import { useUserData } from "@/context/UserDataContext";
-import { COLORS } from "@/styles/colors";
 import {
   createMaterialTopTabNavigator,
   MaterialTopTabNavigationEventMap,
@@ -15,6 +12,9 @@ import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar, Button } from "tamagui";
 import { ScreenTitle } from "../../../../components/UI";
+import { useAuth } from "../../../../context/AuthContext";
+import { useUserData } from "../../../../context/UserDataContext";
+import { COLORS } from "../../../../styles/colors";
 
 const { Navigator } = createMaterialTopTabNavigator();
 

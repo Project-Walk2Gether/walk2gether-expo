@@ -1,7 +1,3 @@
-import WalkChat from "@/components/Chat/WalkChat";
-import { firestore_instance } from "@/config/firebase";
-import { useAuth } from "@/context/AuthContext";
-import { useDoc, useQuery } from "@/utils/firestore";
 import {
   addDoc,
   collection,
@@ -12,6 +8,10 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
+import WalkChat from "../../components/Chat/WalkChat";
+import { firestore_instance } from "../../config/firebase";
+import { useAuth } from "../../context/AuthContext";
+import { useDoc, useQuery } from "../../utils/firestore";
 // Removed StyleSheet import; using Tamagui for styles
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View } from "tamagui";

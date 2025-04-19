@@ -7,6 +7,8 @@ interface WalkingSceneProps {
   style?: object;
 }
 
+const tree = require("../../assets/animations/tree.lottie");
+
 export default function WalkingScene({ style }: WalkingSceneProps) {
   return (
     <View style={[styles.container, style]}>
@@ -17,7 +19,7 @@ export default function WalkingScene({ style }: WalkingSceneProps) {
 
       <LottieView
         style={styles.treeAnimation}
-        source={require("../assets/animations/tree.lottie")}
+        source={tree}
         autoPlay
         loop
         speed={0.7}
@@ -38,6 +40,7 @@ const styles = StyleSheet.create({
     right: -150,
     width: 400,
     height: 400,
+    zIndex: -1,
   },
   walkingSection: {
     position: "absolute",

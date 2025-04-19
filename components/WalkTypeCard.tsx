@@ -1,8 +1,8 @@
-import { COLORS } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet } from "react-native";
 import { Card, Text, View, XStack, YStack } from "tamagui";
+import { COLORS } from "../styles/colors";
 
 type WalkType = "friends" | "meetup" | "neighborhood" | null;
 

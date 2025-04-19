@@ -1,7 +1,7 @@
-import { COLORS } from "@/styles/colors";
 import React, { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { H3, Text, YStack } from "tamagui";
+import { COLORS } from "../styles/colors";
 
 interface SectionProps {
   title: string;

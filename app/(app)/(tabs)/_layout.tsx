@@ -1,9 +1,9 @@
-import { COLORS } from "@/styles/colors";
 import { Bell, Footprints, Users } from "@tamagui/lucide-icons";
 import { Tabs } from "expo-router";
 import React from "react";
-import { ProfileButton } from "../../../components/ProfileButton";
 import NotificationBell from "../../../components/NotificationBell";
+import { ProfileButton } from "../../../components/ProfileButton";
+import { COLORS } from "../../../styles/colors";
 
 export default function TabLayout() {
   return (

@@ -64,7 +64,7 @@ export default function WalkingCharacters({ style }: WalkingCharactersProps) {
         <View style={[styles.characterContainer, styles.firstCharacter]}>
           <LottieView
             style={styles.animation}
-            source={require("../assets/animations/walker1.lottie")}
+            source={require("../../assets/animations/walker1.lottie")}
             autoPlay
             loop
             speed={0.85}
@@ -75,7 +75,7 @@ export default function WalkingCharacters({ style }: WalkingCharactersProps) {
         <View style={[styles.characterContainer, styles.secondCharacter]}>
           <LottieView
             style={styles.animation}
-            source={require("../assets/animations/walker2.lottie")}
+            source={require("../../assets/animations/walker2.lottie")}
             autoPlay
             loop
             speed={0.85}

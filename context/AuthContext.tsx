@@ -1,7 +1,5 @@
 import firebase from "@react-native-firebase/app";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { doc, setDoc } from "@react-native-firebase/firestore";
-import { nanoid } from "nanoid";
 import React, {
   ComponentType,
   createContext,
@@ -11,8 +9,7 @@ import React, {
   useState,
 } from "react";
 import { showMessage } from "react-native-flash-message";
-import { Location } from "walk2gether-shared";
-import { auth_instance, firestore_instance } from "../config/firebase";
+import { auth_instance } from "../config/firebase";
 
 interface AuthContextType {
   user: FirebaseAuthTypes.User | null;
@@ -24,10 +21,9 @@ interface AuthContextType {
   // Phone auth methods
   sendPhoneVerificationCode: (phoneNumber: string) => Promise<string>;
   verifyPhoneCode: (verificationId: string, code: string) => Promise<void>;
-  signInWithPhone: (
+  signInWithPhoneCredential: (
     verificationId: string,
-    code: string,
-    userData?: { name: string; location: any }
+    code: string
   ) => Promise<void>;
 }
 
@@ -207,11 +203,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const signInWithPhone = async (
+  const signInWithPhoneCredential = async (
     verificationId: string,
-    code: string,
-    userData?: { name: string; location: Location }
-  ): Promise<void> => {
+    code: string
+  ): Promise<FirebaseAuthTypes.UserCredential> => {
     try {
       const credential = firebase.auth.PhoneAuthProvider.credential(
         verificationId,
@@ -220,65 +215,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const userCredential = await auth_instance.signInWithCredential(
         credential
       );
-
-      // If userData is provided, we should create or update the user profile
-      if (userData) {
-        try {
-          // Check if user document already exists
-          const userRef = doc(
-            firestore_instance,
-            "users",
-            userCredential.user.uid
-          );
-          const userDoc = await firestore_instance
-            .collection("users")
-            .doc(userCredential.user.uid)
-            .get();
-
-          if (!userDoc.exists) {
-            console.log("Creating new user profile in Firestore");
-            // Generate a unique invite code - using nanoid for short, URL-friendly IDs
-            const friendInvitationCode = nanoid(8);
-
-            // Create new user profile
-            await setDoc(userRef, {
-              phoneNumber: userCredential.user.phoneNumber || "",
-              name: userData.name,
-              location: userData.location,
-              createdAt: new Date(),
-              isAdmin: false,
-              friendInvitationCode,
-            });
-          } else {
-            console.log("User profile already exists, updating if needed");
-            // User exists but we might want to update some fields
-            // Only update if name or location is missing
-            const existingData = userDoc.data();
-            if (!existingData?.name || !existingData?.location) {
-              await setDoc(
-                userRef,
-                {
-                  ...existingData,
-                  name: existingData?.name || userData.name,
-                  location: existingData?.location || userData.location,
-                  // Don't update createdAt or other fields that should persist
-                },
-                { merge: true }
-              );
-            }
-          }
-        } catch (error) {
-          console.error("Error creating/updating user profile:", error);
-          // Continue with sign-in even if profile creation fails
-        }
-      }
-
-      showMessage({
-        message: "Success",
-        description: "Signed in successfully!",
-        type: "success",
-        duration: 3000,
-      });
+      return userCredential;
     } catch (error: any) {
       console.error("Error signing in with phone:", error);
       let errorMessage = "Failed to sign in";
@@ -309,7 +246,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Phone auth methods
         sendPhoneVerificationCode,
         verifyPhoneCode,
-        signInWithPhone,
+        signInWithPhoneCredential,
       }}
     >
       {children}

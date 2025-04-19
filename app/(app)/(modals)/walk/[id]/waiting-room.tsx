@@ -1,8 +1,8 @@
-import WaitingRoomScreen from "@/components/Walk/WaitingRoomScreen";
-import { useDoc } from "@/utils/firestore";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Walk } from "walk2gether-shared";
+import WaitingRoomScreen from "../../../../../components/Walk/WaitingRoomScreen";
+import { useDoc } from "../../../../../utils/firestore";
 
 export default function WalkWaitingRoom() {
   const { id } = useLocalSearchParams();

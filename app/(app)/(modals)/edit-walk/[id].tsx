@@ -1,12 +1,12 @@
-import FullScreenLoader from "@/components/FullScreenLoader";
-import { useDoc } from "@/utils/firestore";
 import { doc, updateDoc } from "@react-native-firebase/firestore";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { Alert, ScrollView, StyleSheet } from "react-native";
 import { Walk } from "walk2gether-shared";
+import FullScreenLoader from "../../../../components/FullScreenLoader";
 import WalkForm from "../../../../components/WalkForm";
 import { db } from "../../../../config/firebase";
+import { useDoc } from "../../../../utils/firestore";
 
 export default function EditWalkScreen() {
   const router = useRouter();

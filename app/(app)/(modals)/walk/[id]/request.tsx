@@ -1,8 +1,8 @@
-import RequestToJoinScreen from "@/components/Walk/RequestToJoinScreen";
-import { useDoc } from "@/utils/firestore";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Walk } from "walk2gether-shared";
+import RequestToJoinScreen from "../../../../../components/Walk/RequestToJoinScreen";
+import { useDoc } from "../../../../../utils/firestore";
 
 export default function WalkCheckIn() {
   const { id } = useLocalSearchParams();

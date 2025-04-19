@@ -1,7 +1,3 @@
-import NotificationPermissionCard from "@/components/NotificationPermissionCard";
-import { BrandGradient } from "@/components/UI";
-import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
-import { COLORS } from "@/styles/colors";
 import { Plus } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -14,8 +10,12 @@ import {
 } from "react-native";
 import { Text } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
+import NotificationPermissionCard from "../../../../components/NotificationPermissionCard";
+import { BrandGradient } from "../../../../components/UI";
 import WalkCard from "../../../../components/WalkCard";
 import { useWalks } from "../../../../context/WalksContext";
+import { useNotificationPermissions } from "../../../../hooks/useNotificationPermissions";
+import { COLORS } from "../../../../styles/colors";
 
 export default function ActiveTabScreen() {
   const router = useRouter();

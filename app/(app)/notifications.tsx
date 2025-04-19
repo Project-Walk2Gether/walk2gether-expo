@@ -1,7 +1,3 @@
-import { firestore_instance } from "@/config/firebase";
-import { useAuth } from "@/context/AuthContext";
-import { COLORS } from "@/styles/colors";
-import { useQuery } from "@/utils/firestore";
 import { collection, orderBy, query } from "@react-native-firebase/firestore";
 import { router } from "expo-router";
 import React from "react";
@@ -9,6 +5,10 @@ import { FlatList, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Card, Text, View } from "tamagui";
 import { Notification } from "walk2gether-shared";
+import { firestore_instance } from "../../config/firebase";
+import { useAuth } from "../../context/AuthContext";
+import { COLORS } from "../../styles/colors";
+import { useQuery } from "../../utils/firestore";
 
 const icon = require("../../assets/notification-icon.png");
 

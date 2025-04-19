@@ -1,4 +1,3 @@
-import { COLORS } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 import {
   collection,
@@ -25,6 +24,7 @@ import {
 } from "tamagui";
 import { BrandGradient, ScreenTitle } from "../../../../components/UI";
 import { useAuth } from "../../../../context/AuthContext";
+import { COLORS } from "../../../../styles/colors";
 
 // Define Friends type
 type Friend = {

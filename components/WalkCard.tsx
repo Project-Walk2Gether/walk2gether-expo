@@ -1,4 +1,3 @@
-import { COLORS } from "@/styles/colors";
 import { deleteDoc, doc } from "@react-native-firebase/firestore";
 import {
   Calendar,
@@ -15,13 +14,14 @@ import { useRouter } from "expo-router";
 import React from "react";
 import { Alert, Linking, Platform, StyleSheet } from "react-native";
 import { Button, Card, Separator, Text, View, XStack, YStack } from "tamagui";
-import { Walk, Participant } from "walk2gether-shared";
+import { Participant, Walk } from "walk2gether-shared";
 import { db } from "../config/firebase";
 import { getWalkTypeData } from "../constants/walkTypes";
 import { useAuth } from "../context/AuthContext";
 import { useWalks } from "../context/WalksContext";
-import WalkMenu from "./WalkMenu";
+import { COLORS } from "../styles/colors";
 import { useDoc } from "../utils/firestore";
+import WalkMenu from "./WalkMenu";
 
 interface WalkCardProps {
   walk: Walk;
@@ -60,7 +60,9 @@ export default function WalkCard({ walk }: WalkCardProps) {
   // Make card tappable to view walk details
   // Make card tappable to view walk details
   const { doc: participant } = useDoc<Participant>(
-    walk.id && user?.uid ? `walks/${walk.id}/participants/${user.uid}` : undefined
+    walk.id && user?.uid
+      ? `walks/${walk.id}/participants/${user.uid}`
+      : undefined
   );
   const handlePress = () => {
     if (!walk.id) return;
@@ -79,7 +81,6 @@ export default function WalkCard({ walk }: WalkCardProps) {
       router.push(`/walk/${walk.id}/request`);
     }
   };
-
 
   const handleEdit = () => {
     if (walk.id) {

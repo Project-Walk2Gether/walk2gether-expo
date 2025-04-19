@@ -1,4 +1,3 @@
-import { Invitation } from "@/components/InvitationCard";
 import {
   addDoc,
   collection,
@@ -9,6 +8,7 @@ import {
   Timestamp,
   where,
 } from "@react-native-firebase/firestore";
+import { Invitation } from "../components/InvitationCard";
 import { db } from "../config/firebase";
 
 // Interface for Firestore Invitation document

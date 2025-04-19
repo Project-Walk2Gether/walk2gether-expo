@@ -1,8 +1,3 @@
-import { firestore_instance } from "@/config/firebase";
-import { getWalkTypeData } from "@/constants/walkTypes";
-import { useAuth } from "@/context/AuthContext";
-import { useWalks } from "@/context/WalksContext";
-import { COLORS } from "@/styles/colors";
 import {
   Calendar,
   Clock,
@@ -28,6 +23,11 @@ import {
   YStack,
 } from "tamagui";
 import { Walk } from "walk2gether-shared";
+import { firestore_instance } from "../../config/firebase";
+import { getWalkTypeData } from "../../constants/walkTypes";
+import { useAuth } from "../../context/AuthContext";
+import { useWalks } from "../../context/WalksContext";
+import { COLORS } from "../../styles/colors";
 
 interface Props {
   walk: Walk;

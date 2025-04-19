@@ -1,7 +1,3 @@
-import FriendsList from "@/components/FriendsList";
-import HeaderBackButton from "@/components/HeaderBackButton";
-import InviteFriends, { Invitation } from "@/components/InviteFriends";
-import { saveInvitations } from "@/services/invitationsService";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -10,8 +6,12 @@ import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Card, ScrollView, Separator, Text, YStack } from "tamagui";
 import { findUndefined } from "walk2gether-shared";
+import FriendsList from "../../../components/FriendsList";
+import HeaderBackButton from "../../../components/HeaderBackButton";
+import InviteFriends, { Invitation } from "../../../components/InviteFriends";
 import { useAuth } from "../../../context/AuthContext";
 import { useWalks } from "../../../context/WalksContext";
+import { saveInvitations } from "../../../services/invitationsService";
 
 export default function InviteToWalkScreen() {
   const router = useRouter();

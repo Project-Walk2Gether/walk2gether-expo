@@ -1,5 +1,3 @@
-import { useAuth } from "@/context/AuthContext";
-import { COLORS } from "@/styles/colors";
 import {
   collection,
   getDocs,
@@ -10,7 +8,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { Button, Card, Input, Text, View, XStack, YStack } from "tamagui";
+import { useAuth } from "../../context/AuthContext";
 import { useWalkForm } from "../../context/WalkFormContext";
+import { COLORS } from "../../styles/colors";
 import FriendsList from "../FriendsList";
 import WizardWrapper from "./WizardWrapper";
 

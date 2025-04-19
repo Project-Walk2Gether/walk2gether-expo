@@ -1,17 +1,17 @@
-import HeaderCloseButton from "@/components/HeaderCloseButton";
-import WaitingRoomButton from "@/components/WaitingRoomButton";
-import ActiveWalkScreen from "@/components/Walk/ActiveWalkScreen";
-import FutureWalkScreen from "@/components/Walk/FutureWalkScreen";
-import WalkHistoryScreen from "@/components/Walk/WalkHistoryScreen";
-import { useAuth } from "@/context/AuthContext";
-import { useWaitingParticipants } from "@/hooks/useWaitingParticipants";
-import { useDoc } from "@/utils/firestore";
-import { isActive, isFuture } from "@/utils/walkUtils";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { ActivityIndicator } from "react-native";
 import { View } from "tamagui";
 import { Walk } from "walk2gether-shared";
+import HeaderCloseButton from "../../../../../components/HeaderCloseButton";
+import WaitingRoomButton from "../../../../../components/WaitingRoomButton";
+import ActiveWalkScreen from "../../../../../components/Walk/ActiveWalkScreen";
+import FutureWalkScreen from "../../../../../components/Walk/FutureWalkScreen";
+import WalkHistoryScreen from "../../../../../components/Walk/WalkHistoryScreen";
+import { useAuth } from "../../../../../context/AuthContext";
+import { useWaitingParticipants } from "../../../../../hooks/useWaitingParticipants";
+import { useDoc } from "../../../../../utils/firestore";
+import { isActive, isFuture } from "../../../../../utils/walkUtils";
 
 // Main content component that handles the walk state and displays the appropriate screen.
 export default function WalkScreen() {

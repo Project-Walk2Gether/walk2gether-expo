@@ -1,7 +1,3 @@
-import { firestore_instance } from "@/config/firebase";
-import { useAuth } from "@/context/AuthContext";
-import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
-import { COLORS } from "@/styles/colors";
 import { doc, setDoc, updateDoc } from "@react-native-firebase/firestore";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as Linking from "expo-linking";
@@ -18,6 +14,10 @@ import {
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { Button, Text, View } from "tamagui";
+import { firestore_instance } from "../../config/firebase";
+import { useAuth } from "../../context/AuthContext";
+import { useWalkParticipants } from "../../hooks/useWaitingParticipants";
+import { COLORS } from "../../styles/colors";
 
 // Define a task name for background location tracking
 const LOCATION_TRACKING_TASK = "background-location-tracking";

@@ -1,4 +1,3 @@
-import { COLORS } from "@/styles/colors";
 import storage from "@react-native-firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -20,6 +19,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { PlaceData, PlacesAutocomplete } from "../../../components/UI";
 import { useAuth } from "../../../context/AuthContext";
 import { useUserData } from "../../../context/UserDataContext";
+import { COLORS } from "../../../styles/colors";
 import { appVersion } from "../../../utils/version";
 
 export default function ProfileScreen() {

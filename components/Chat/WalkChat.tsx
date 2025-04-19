@@ -1,4 +1,3 @@
-import { COLORS } from "@/styles/colors";
 import { Send } from "@tamagui/lucide-icons";
 import { Timestamp } from "firebase/firestore";
 import React, { useRef, useState } from "react";
@@ -17,6 +16,7 @@ import {
   YStack,
 } from "tamagui";
 import { Message } from "walk2gether-shared";
+import { COLORS } from "../../styles/colors";
 
 type WalkChatProps = {
   messages: Message[];
