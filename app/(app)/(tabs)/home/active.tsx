@@ -10,9 +10,8 @@ import {
 } from "react-native";
 import { Text } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
-
 import { BrandGradient } from "../../../../components/UI";
-import WalkCard from "../../../../components/WalkCard";
+import WalkCardTest from "../../../../components/WalkCard";
 import { useWalks } from "../../../../context/WalksContext";
 import { COLORS } from "../../../../styles/colors";
 
@@ -21,7 +20,7 @@ export default function ActiveTabScreen() {
   const { upcomingWalks } = useWalks();
 
   const renderWalkItem = ({ item }: { item: WithId<Walk> }) => (
-    <WalkCard key={item.id} walk={item} />
+    <WalkCardTest key={item.id} walk={item} />
   );
 
   const EmptyMessage = ({ message }: { message: string }) => (

@@ -6,7 +6,6 @@ import VerificationCodeForm, {
 import { db } from "config/firebase";
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
-import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Card, ScrollView, Text, YStack } from "tamagui";
 import AnimatedLogo from "../components/AnimatedLogo";
@@ -90,37 +89,3 @@ export default function Auth() {
     </AuthScenicLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  // Only keep styles that are needed for third-party components or RN components that weren't converted to Tamagui
-  placesInputContainer: {
-    borderWidth: 0,
-  },
-  placesInput: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
-  },
-  placesList: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    backgroundColor: "white",
-    marginTop: 5,
-  },
-  placesRow: {
-    padding: 13,
-    height: 50,
-  },
-  placesDescription: {
-    fontSize: 14,
-  },
-  inputError: {
-    borderColor: "red",
-    borderWidth: 1,
-  },
-});

@@ -1,3 +1,4 @@
+import HeaderBackButton from "components/HeaderBackButton";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Walk } from "walk2gether-shared";
@@ -12,7 +13,12 @@ export default function WalkCheckIn() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Request to Join walk" }} />
+      <Stack.Screen
+        options={{
+          title: "Request to join",
+          headerLeft: () => <HeaderBackButton />,
+        }}
+      />
       <RequestToJoinScreen walk={walk} />
     </>
   );

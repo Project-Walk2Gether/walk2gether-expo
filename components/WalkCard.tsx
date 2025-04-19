@@ -1,18 +1,12 @@
 import { deleteDoc, doc } from "@react-native-firebase/firestore";
-import {
-  Calendar,
-  Clock,
-  Pin,
-  Timer,
-  User,
-  Users,
-} from "@tamagui/lucide-icons";
+import { Calendar, Hand, Pin, Timer, User, Users } from "@tamagui/lucide-icons";
 import { getWalkTypeData } from "constants/walkTypes";
 import { useAuth } from "context/AuthContext";
 import { useWalks } from "context/WalksContext";
 import { format } from "date-fns";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import pluralize from "pluralize";
 import React from "react";
 import { Alert, Linking, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
@@ -31,24 +25,15 @@ import { useDoc, useQuery } from "utils/firestore";
 import { Participant, Walk, WithId } from "walk2gether-shared";
 import WalkCardHeader from "./WalkCard/WalkCardHeader";
 
-// Props interface for WalkCardTest
-interface WalkCardTestProps {
+// Props interface for WalkCard
+interface WalkCardProps {
   walk: WithId<Walk>;
 }
 
-const WalkCardTest: React.FC<WalkCardTestProps> = ({ walk }) => {
+const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
   const { docs: participants } = useQuery<Participant>(
     walk._ref.collection("participants")
   );
-  // Prepare chips
-  const chips = [
-    {
-      icon: <Calendar size={14} />,
-      label: format(walk.date.toDate(), "EEE MMM, d h:mm a"),
-    },
-    { icon: <Clock size={14} />, label: `${walk.durationMinutes} m` },
-  ];
-  // Prepare avatars
   const maxAvatars = 4;
   const avatars = participants.slice(0, maxAvatars);
   const overflow = participants.length - maxAvatars;
@@ -279,69 +264,71 @@ const WalkCardTest: React.FC<WalkCardTestProps> = ({ walk }) => {
           </XStack>
         </YStack>
       </XStack>
-      <XStack alignItems="center" gap={-10} paddingHorizontal={12}>
-        {participants.map((p, idx) => (
-          <Avatar
-            key={p.id}
-            circular
-            size={36}
-            borderWidth={2}
-            borderColor="#fff"
-            marginLeft={idx === 0 ? 0 : -10}
+      {/* Actions footer */}
+      <XStack py="$3" alignItems="center" gap="$2" paddingHorizontal={12}>
+        <XStack alignItems="center" gap={-10}>
+          {avatars.map((p, idx) => (
+            <Avatar
+              key={p.id}
+              circular
+              size={36}
+              borderWidth={2}
+              borderColor="#fff"
+              marginLeft={idx === 0 ? 0 : -10}
+            >
+              {p.photoURL ? (
+                <Avatar.Image src={p.photoURL} />
+              ) : (
+                <Avatar.Fallback
+                  justifyContent="center"
+                  alignItems="center"
+                  backgroundColor="#eee"
+                >
+                  <Users size={18} color="#aaa" />
+                </Avatar.Fallback>
+              )}
+            </Avatar>
+          ))}
+          {overflow > 0 && (
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "#eee",
+                alignItems: "center",
+                justifyContent: "center",
+                marginLeft: -10,
+                borderWidth: 2,
+                borderColor: "#fff",
+              }}
+            >
+              <Text
+                fontWeight="600"
+                color="#888"
+                fontSize={14}
+              >{`+${overflow}`}</Text>
+            </View>
+          )}
+        </XStack>
+        <Text flexGrow={1}>
+          {pluralize("person", participants.length, true)} walking
+        </Text>
+        {isMine ? null : (
+          <Button
+            backgroundColor={COLORS.primary}
+            icon={<Hand color="white" />}
+            size="$3"
+            onPress={handlePress}
           >
-            {p.photoURL ? (
-              <Avatar.Image src={p.photoURL} />
-            ) : (
-              <Avatar.Fallback backgroundColor="#eee">
-                <Users size={18} color="#aaa" />
-              </Avatar.Fallback>
-            )}
-          </Avatar>
-        ))}
-        {overflow > 0 && (
-          <View
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              backgroundColor: "#eee",
-              alignItems: "center",
-              justifyContent: "center",
-              marginLeft: -10,
-              borderWidth: 2,
-              borderColor: "#fff",
-            }}
-          >
-            <Text
-              fontWeight="600"
-              color="#888"
-              fontSize={14}
-            >{`+${overflow}`}</Text>
-          </View>
+            <Text fontSize={12} fontWeight="bold" color="white">
+              Ask to join
+            </Text>
+          </Button>
         )}
-      </XStack>
-      {/* Action footer */}
-      <XStack
-        alignItems="center"
-        justifyContent="space-between"
-        paddingHorizontal={12}
-        paddingVertical={10}
-        gap={10}
-      >
-        <Button
-          size="$3"
-          backgroundColor="#f6f6f7"
-          color="#333"
-          borderColor="#ddd"
-          borderWidth={1}
-          borderRadius={8}
-          onPress={handlePress}
-        >
-          {isMine ? "Manage" : "Request to join"}
-        </Button>
       </XStack>
     </Card>
   );
 };
 
-export default WalkCardTest;
+export default WalkCard;
