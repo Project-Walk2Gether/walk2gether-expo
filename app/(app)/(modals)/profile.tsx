@@ -1,19 +1,10 @@
 import storage from "@react-native-firebase/storage";
-import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, ScrollView } from "react-native";
+import { YStack, Button, Text } from "tamagui";
 import { showMessage } from "react-native-flash-message";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context"; // Replace with Tamagui's SafeAreaView if available
 import { PlaceData } from "../../../components/UI/PlacesAutocomplete";
 import { UserDataForm } from "../../../components/UserDataForm";
 import { useAuth } from "../../../context/AuthContext";
@@ -61,40 +52,7 @@ export default function ProfileScreen() {
     }
   }, [userData]);
 
-  const pickImage = async () => {
-    try {
-      // Request permission
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Required",
-          "Sorry, we need camera roll permissions to make this work!"
-        );
-        return;
-      }
-
-      // Launch image picker
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const selectedImage = result.assets[0];
-        await uploadImage(selectedImage.uri);
-      }
-    } catch (error) {
-      console.error("Error picking image:", error);
-      showMessage({
-        message: "Error",
-        description: "Failed to pick image",
-        type: "danger",
-      });
-    }
-  };
+  // Removed pickImage: now handled by ProfilePicturePicker
 
   const uploadImage = async (uri: string) => {
     if (!authUser) return;
@@ -186,39 +144,17 @@ export default function ProfileScreen() {
 
   if (userDataLoading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
+      <YStack f={1} jc="center" ai="center" bg="#fff" width="100%" height="100%">
         <ActivityIndicator size="large" color={COLORS.action} />
-      </SafeAreaView>
+      </YStack>
     );
   }
 
   return (
     <ScrollView
       ref={scrollViewRef}
-      contentContainerStyle={styles.scrollViewContent}
+      contentContainerStyle={{ padding: 20 }}
     >
-      <View style={styles.profileImageContainer}>
-        {profilePicUrl ? (
-          <Image source={{ uri: profilePicUrl }} style={styles.profileImage} />
-        ) : (
-          <View style={styles.profileImagePlaceholder}>
-            <Text style={styles.profileImagePlaceholderText}>
-              {name ? name.charAt(0).toUpperCase() : "?"}
-            </Text>
-          </View>
-        )}
-        <TouchableOpacity
-          style={styles.changePhotoButton}
-          onPress={pickImage}
-          disabled={isSaving}
-        >
-          <Text style={styles.changePhotoButtonText}>
-            {profilePicUrl ? "Change Photo" : "Add Photo"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Only render the UserDataForm if userData is loaded */}
       {userData && (
         <UserDataForm
           userData={userData}
@@ -232,128 +168,29 @@ export default function ProfileScreen() {
         />
       )}
 
-      <View style={styles.versionContainer}>
-        <Text style={styles.versionText}>Version: {appVersion}</Text>
-      </View>
+      <YStack mt={30} ai="center">
+        <Text fontSize={12} color="$gray10" opacity={0.7}>
+          Version: {appVersion}
+        </Text>
+      </YStack>
 
-      <TouchableOpacity
-        style={styles.signOutButton}
+      <Button
+        mt="$4"
+        variant="outlined"
+        borderColor="#ff3b30"
+        color="#ff3b30"
+        borderWidth={1}
+        borderRadius={8}
+        py={15}
         onPress={handleSignOut}
         disabled={isSaving}
+        width="100%"
       >
-        <Text style={styles.signOutButtonText}>Sign Out</Text>
-      </TouchableOpacity>
+        <Text fontSize={16} fontWeight="600" color="#ff3b30">
+          Sign Out
+        </Text>
+      </Button>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  scrollViewContent: {
-    padding: 20,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: COLORS.text,
-  },
-  profileImageContainer: {
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 10,
-  },
-  profileImagePlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: COLORS.background,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  profileImagePlaceholderText: {
-    fontSize: 40,
-    fontWeight: "bold",
-    color: COLORS.action,
-  },
-  changePhotoButton: {
-    marginTop: 5,
-  },
-  changePhotoButtonText: {
-    color: COLORS.action,
-    fontSize: 16,
-  },
-  formContainer: {
-    marginBottom: 30,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 5,
-    color: COLORS.TEXT_LABEL,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 20,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  emailText: {
-    fontSize: 16,
-    marginBottom: 20,
-    color: COLORS.TEXT_ON_LIGHT,
-  },
-  saveButton: {
-    backgroundColor: COLORS.action,
-    borderRadius: 8,
-    padding: 15,
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  saveButtonText: {
-    color: COLORS.textOnDark,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  signOutButton: {
-    borderWidth: 1,
-    borderColor: "#ff3b30",
-    borderRadius: 8,
-    padding: 15,
-    alignItems: "center",
-  },
-  signOutButtonText: {
-    color: "#ff3b30",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  versionContainer: {
-    marginTop: 30,
-    alignItems: "center",
-  },
-  versionText: {
-    fontSize: 12,
-    color: COLORS.TEXT_LABEL,
-    opacity: 0.7,
-  },
-});

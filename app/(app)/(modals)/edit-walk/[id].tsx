@@ -41,7 +41,7 @@ export default function EditWalkScreen() {
         onSubmit={handleSubmit}
         submitButtonText="Update Walk"
         onCancel={() => router.back()}
-        googleApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
+        googleApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY!}
       />
     </ScrollView>
   );

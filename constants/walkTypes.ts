@@ -1,4 +1,4 @@
-import { Clock, Home, User, Users } from "@tamagui/lucide-icons";
+import { Clock, Footprints, User, Users } from "@tamagui/lucide-icons";
 
 type IconProps = { size: string | number; color?: string };
 
@@ -12,16 +12,16 @@ export const WALK_TYPES = {
     icon: User,
     gradient: ["#0B3D0B", "#A2C523"] as const,
     backgroundColor: "#5A67F2",
-    label: "Friend Walk",
+    label: "Friend",
     description: "Walk with a friend",
   },
 
   // Neighborhood Walk
   neighborhood: {
-    icon: Home,
+    icon: Footprints,
     gradient: ["#FDB87D", "#2EB94E"] as const,
     backgroundColor: "#4CD964",
-    label: "Neighborhood Walk",
+    label: "Neighborhood",
     description: "Walk and get to know your neighbors",
   },
 
@@ -30,7 +30,7 @@ export const WALK_TYPES = {
     icon: Users,
     gradient: ["#FF6A55", "#A0D8EF"] as const,
     backgroundColor: "#FF6A55",
-    label: "Friend Group Walk",
+    label: "Friends",
     description: "Walk with a group of friends",
   },
 

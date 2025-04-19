@@ -7,7 +7,9 @@ import { useDoc } from "../../../../../utils/firestore";
 export default function WalkCheckIn() {
   const { id } = useLocalSearchParams();
   const { doc: walk } = useDoc<Walk>(`walks/${id}`);
+
   if (!walk) return null;
+
   return (
     <>
       <Stack.Screen options={{ title: "Request to Join walk" }} />

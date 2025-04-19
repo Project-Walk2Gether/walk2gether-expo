@@ -1,9 +1,9 @@
 import { Edit3, Map, Trash } from "@tamagui/lucide-icons";
 import React from "react";
-import { COLORS } from "../styles/colors";
-import Menu, { MenuItem } from "./Menu";
+import { COLORS } from "../../styles/colors";
+import Menu, { MenuItem } from "../Menu";
 
-interface WalkMenuProps {
+interface Props {
   onEdit: () => void;
   onDelete: () => void;
   onOpenMaps?: () => void;
@@ -15,7 +15,7 @@ export default function WalkMenu({
   onDelete,
   onOpenMaps,
   hasLocation = false,
-}: WalkMenuProps) {
+}: Props) {
   // Prepare menu items
   const menuItems: MenuItem[] = [
     {

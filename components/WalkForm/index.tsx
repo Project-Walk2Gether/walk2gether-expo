@@ -1,6 +1,6 @@
 import React from "react";
-import { Walk } from "walk2gether-shared";
-import FriendGroupWalkForm from "./variants/FriendGroupWalkForm";
+import { NeighborhoodWalk, Walk } from "walk2gether-shared";
+import FriendsWalkForm from "./variants/FriendsWalkForm";
 import NeighborhoodWalkForm from "./variants/NeighborhoodWalkForm";
 
 // Basic form values interface to export for use in other components
@@ -28,7 +28,7 @@ export default function WalkForm({
   switch (walkType) {
     case "friends":
       return (
-        <FriendGroupWalkForm
+        <FriendsWalkForm
           initialValues={initialValues}
           onSubmit={onSubmit}
           submitButtonText={submitButtonText}
@@ -40,7 +40,7 @@ export default function WalkForm({
     default:
       return (
         <NeighborhoodWalkForm
-          initialValues={initialValues}
+          initialValues={initialValues as NeighborhoodWalk}
           onSubmit={onSubmit}
           submitButtonText={submitButtonText}
           onCancel={onCancel}

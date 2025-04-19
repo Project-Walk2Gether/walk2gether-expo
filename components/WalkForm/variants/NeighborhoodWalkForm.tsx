@@ -1,10 +1,10 @@
 import React from "react";
-import { Text, YStack } from "tamagui";
+import { YStack } from "tamagui";
 import { NeighborhoodWalk, neighborhoodWalkSchema } from "walk2gether-shared";
+import LocationAutocomplete from "../../LocationAutocomplete";
 import DateTimeField from "../components/DateTimeField";
 import DurationField from "../components/DurationField";
 import FormProvider from "../components/FormProvider";
-import LocationField from "../components/LocationField";
 
 interface NeighborhoodWalkFormProps {
   initialValues: Partial<NeighborhoodWalk>;
@@ -21,6 +21,7 @@ export default function NeighborhoodWalkForm({
   onCancel,
   googleApiKey,
 }: NeighborhoodWalkFormProps) {
+  const [showLocationResults, setShowLocationResults] = React.useState(false);
   return (
     <FormProvider
       initialValues={initialValues}
@@ -29,30 +30,34 @@ export default function NeighborhoodWalkForm({
       submitButtonText={submitButtonText}
       onCancel={onCancel}
     >
-      {({ values, setFieldValue, errors, touched }) => (
-        <YStack gap="$4">
-          <LocationField
-            value={values.location}
-            onChange={(location) => setFieldValue("location", location)}
-            error={errors.location?.name}
-            touched={touched.location?.name}
-            googleApiKey={googleApiKey}
-          />
-          <DateTimeField
-            value={values.date}
-            onChange={(date) => setFieldValue("date", date)}
-            error={errors.date}
-            touched={touched.date}
-          />
-          <DurationField
-            value={values.durationMinutes}
-            onChange={(minutes) => setFieldValue("durationMinutes", minutes)}
-            error={errors.durationMinutes}
-            touched={touched.durationMinutes}
-          />
-          <Text>{JSON.stringify(errors)}</Text>
-        </YStack>
-      )}
+      {({ values, setFieldValue, errors, touched }) => {
+        return (
+          <YStack gap="$4">
+            <LocationAutocomplete
+              value={values.location}
+              setFieldValue={setFieldValue}
+              showLocationResults={showLocationResults}
+              setShowLocationResults={setShowLocationResults}
+              touched={touched}
+              errors={errors}
+              styles={{}}
+              placeholder="Enter a location for your walk"
+            />
+            <DateTimeField
+              value={values.date}
+              onChange={(date) => setFieldValue("date", date)}
+              error={errors.date}
+              touched={touched.date}
+            />
+            <DurationField
+              value={values.durationMinutes}
+              onChange={(minutes) => setFieldValue("durationMinutes", minutes)}
+              error={errors.durationMinutes}
+              touched={touched.durationMinutes}
+            />
+          </YStack>
+        );
+      }}
     </FormProvider>
   );
 }

@@ -1,3 +1,7 @@
+* When prompted to complete a task, take all necessary actions to complete the task, rather than stopping and asking for direction after each step.
+* Always prefer tamagui styles to StyleSheet styles
+* Where appropriate, extract new components from a screen or other large component
+
 This app helps people organize walks with friends or their local community.
 
 Projects:

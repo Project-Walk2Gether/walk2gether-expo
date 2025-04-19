@@ -1,31 +1,31 @@
 import React from "react";
 import { StyleSheet } from "react-native";
 import { YStack } from "tamagui";
-import { FriendGroupWalk, friendGroupWalkSchema } from "walk2gether-shared";
+import { FriendsWalk, friendsWalkSchema } from "walk2gether-shared";
 import DateTimeField from "../components/DateTimeField";
 import DurationField from "../components/DurationField";
 import FormProvider from "../components/FormProvider";
 import LocationField from "../components/LocationField";
 
-interface FriendGroupWalkFormProps {
-  initialValues: Partial<FriendGroupWalk>;
-  onSubmit: (values: FriendGroupWalk) => Promise<void>;
+interface Props {
+  initialValues: Partial<FriendsWalk>;
+  onSubmit: (values: FriendsWalk) => Promise<void>;
   submitButtonText: string;
   onCancel: () => void;
   googleApiKey: string;
 }
 
-export default function FriendGroupWalkForm({
+export default function FriendsWalkForm({
   initialValues,
   onSubmit,
   submitButtonText,
   onCancel,
   googleApiKey,
-}: FriendGroupWalkFormProps) {
+}: Props) {
   return (
     <FormProvider
       initialValues={initialValues}
-      validationSchema={friendGroupWalkSchema}
+      validationSchema={friendsWalkSchema}
       onSubmit={onSubmit}
       submitButtonText={submitButtonText}
       onCancel={onCancel}

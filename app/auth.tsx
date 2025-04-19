@@ -124,10 +124,3 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
 });
-
-// Helper function to determine top padding based on screen height and auth mode
-const getTopPadding = (screenHeight: number): number => {
-  const isLargeScreen = screenHeight > 700; // Arbitrary threshold for large screen
-
-  return isLargeScreen ? 160 : 80;
-};

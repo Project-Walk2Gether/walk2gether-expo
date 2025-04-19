@@ -17,7 +17,7 @@ import {
   updateDoc,
   where,
 } from "@react-native-firebase/firestore";
-import { startOfDay } from "date-fns";
+import { addHours } from "date-fns";
 import "firebase/compat/firestore";
 import React, {
   createContext,
@@ -69,7 +69,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
 
   // Get the start of today for filtering upcoming walks
   const now = new Date();
-  const midnightToday = startOfDay(now);
+  const oneHourAgo = addHours(now, -1);
 
   // Create query for upcoming walks
   const upcomingWalksQuery = useMemo(() => {
@@ -78,11 +78,11 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     return query(
       collection(firestore_instance, "walks"),
       where("active", "==", false),
-      where("date", ">", midnightToday),
+      where("date", ">", oneHourAgo),
       orderBy("date", "asc"),
       limit(10)
     );
-  }, [user, midnightToday]);
+  }, [user, oneHourAgo]);
 
   // Create query for user RSVPs
   const userRSVPsQuery = useMemo(() => {

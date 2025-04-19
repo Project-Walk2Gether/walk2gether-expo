@@ -3,7 +3,7 @@ import React from "react";
 import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Walk, WithId } from "walk2gether-shared";
 import { BrandGradient } from "../../../../components/UI";
-import WalkCard from "../../../../components/WalkCard";
+import WalkCardTest from "../../../../components/WalkCardTest";
 import { useMyPastWalks } from "../../../../services/walksService";
 
 export default function HistoryTabScreen() {
@@ -30,7 +30,7 @@ export default function HistoryTabScreen() {
         ) : (
           <FlatList
             data={pastWalks}
-            renderItem={({ item }) => <WalkCard walk={item} />}
+            renderItem={({ item }) => <WalkCardTest walk={item} />}
             keyExtractor={(item) => item.id || String(Date.now())}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}

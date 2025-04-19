@@ -10,6 +10,7 @@ import { userDataSchema } from "walk2gether-shared";
 import AuthScenicLayout from "../../components/Auth/AuthScenicLayout";
 import AutoDetectLocation from "../../components/AutoDetectLocation";
 import LocationAutocomplete from "../../components/LocationAutocomplete";
+import ProfilePicturePicker from "../../components/ProfilePicturePicker";
 import { useAuth } from "../../context/AuthContext";
 import { useUserData } from "../../context/UserDataContext";
 import { COLORS } from "../../styles/colors";
@@ -39,6 +40,7 @@ export default function CompleteYourProfile() {
         name: values.name,
         location: values.location,
         friendInvitationCode: values.friendInvitationCode,
+        profilePicUrl: values.profilePicUrl,
       });
       router.replace("/");
     } catch (error) {
@@ -81,16 +83,23 @@ export default function CompleteYourProfile() {
             name: user?.displayName || "",
             location: null,
             friendInvitationCode: initialFriendInvitationCode,
+            profilePicUrl: undefined,
           }}
           validationSchema={userDataSchema}
           onSubmit={handleSubmit}
         >
-          {({ handleSubmit, values, errors, touched, setFieldValue }) => (
+          {({
+            handleSubmit,
+            values,
+            errors,
+            touched,
+            setFieldValue,
+            isSubmitting,
+          }) => (
             <ScrollView
               ref={scrollViewRef}
               contentContainerStyle={{
                 flexGrow: 1,
-
                 alignItems: "center",
                 padding: 16,
               }}
@@ -115,6 +124,35 @@ export default function CompleteYourProfile() {
                   <Text fontSize="$6" fontWeight="bold">
                     Complete your profile
                   </Text>
+                  <ProfilePicturePicker
+                    profilePicUrl={values.profilePicUrl}
+                    onChange={(url: string | undefined) =>
+                      setFieldValue("profilePicUrl", url)
+                    }
+                    disabled={isSubmitting}
+                  />
+                  <Input
+                    placeholder="Your full name"
+                    value={values.name}
+                    onChangeText={(text) => setFieldValue("name", text)}
+                    width="100%"
+                    borderColor={
+                      touched.name && errors.name
+                        ? COLORS.error
+                        : COLORS.primary
+                    }
+                    backgroundColor={COLORS.background}
+                    color={COLORS.text}
+                    borderRadius={10}
+                    px={16}
+                    py={12}
+                    fontSize={18}
+                  />
+                  {touched.name && errors.name && (
+                    <Text color="$red10" fontSize="$2" alignSelf="flex-start">
+                      {errors.name}
+                    </Text>
+                  )}
                   <Input
                     placeholder="Your full name"
                     value={values.name}

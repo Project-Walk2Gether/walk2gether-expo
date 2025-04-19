@@ -1,7 +1,10 @@
-import React, { useRef } from 'react';
-import { Keyboard } from 'react-native';
-import { GooglePlacesAutocomplete, GooglePlacesAutocompleteRef } from 'react-native-google-places-autocomplete';
-import { YStack, Button, Text } from 'tamagui';
+import React, { useRef } from "react";
+import { Keyboard } from "react-native";
+import {
+  GooglePlacesAutocomplete,
+  GooglePlacesAutocompleteRef,
+} from "react-native-google-places-autocomplete";
+import { Button, Text, YStack } from "tamagui";
 
 interface LocationAutocompleteProps {
   value: any;
@@ -11,6 +14,8 @@ interface LocationAutocompleteProps {
   touched: any;
   errors: any;
   styles: any;
+  placeholder?: string;
+  includeChooseAnotherWayButton?: boolean;
 }
 
 const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
@@ -20,7 +25,9 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
   setShowLocationResults,
   touched,
   errors,
-  styles
+  styles,
+  placeholder = "Search for your city",
+  includeChooseAnotherWayButton,
 }) => {
   const placesAutocompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
 
@@ -28,7 +35,7 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
     <YStack space="$2">
       <GooglePlacesAutocomplete
         ref={placesAutocompleteRef}
-        placeholder="Search for your city"
+        placeholder={placeholder}
         enablePoweredByContainer={false}
         suppressDefaultStyles={false}
         listViewDisplayed={showLocationResults}
@@ -40,15 +47,13 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
               latitude: details.geometry?.location?.lat || 0,
               longitude: details.geometry?.location?.lng || 0,
             };
-            setFieldValue('location', locationData);
+            setFieldValue("location", locationData);
           } else {
-            setFieldValue('location', null);
+            setFieldValue("location", null);
           }
           setShowLocationResults(false);
           setTimeout(() => {
-            placesAutocompleteRef.current?.setAddressText(
-              data.description
-            );
+            placesAutocompleteRef.current?.setAddressText(data.description);
             Keyboard.dismiss();
           }, 100);
         }}
@@ -81,13 +86,13 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
           {errors.location}
         </Text>
       )}
-      {value && (
+      {value && includeChooseAnotherWayButton && (
         <Button
           size="$2"
           variant="outlined"
           mt="$2"
           onPress={() => {
-            setFieldValue('location', null);
+            setFieldValue("location", null);
             setShowLocationResults(false);
           }}
         >

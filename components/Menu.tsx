@@ -10,7 +10,7 @@ export interface MenuItem {
   buttonProps?: Partial<GetProps<typeof Button>>;
 }
 
-interface MenuProps {
+interface Props {
   title: string;
   items: MenuItem[];
   triggerIcon?: React.ReactElement<IconProps> | undefined;
@@ -24,7 +24,7 @@ export default function Menu({
   triggerIcon = <MoreVertical size="$1" color="white" />,
   triggerButtonProps = {},
   snapPoints = [40],
-}: MenuProps) {
+}: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -37,7 +37,6 @@ export default function Menu({
         icon={triggerIcon}
         {...triggerButtonProps}
       />
-
       <Sheet
         modal
         open={open}

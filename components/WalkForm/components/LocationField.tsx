@@ -3,20 +3,11 @@ import { StyleSheet } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MapView, { Marker } from "react-native-maps";
 import { Text, View } from "tamagui";
+import { Location } from "walk2gether-shared";
 
 interface LocationFieldProps {
-  value: {
-    name: string;
-    placeId: string;
-    latitude: number;
-    longitude: number;
-  } | null;
-  onChange: (location: {
-    name: string;
-    placeId: string;
-    latitude: number;
-    longitude: number;
-  }) => void;
+  value: Location | null;
+  onChange: (location: Location) => void;
   error?: string;
   touched?: boolean;
   googleApiKey: string;

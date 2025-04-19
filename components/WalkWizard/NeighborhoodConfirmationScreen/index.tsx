@@ -1,15 +1,16 @@
-import { collection, getDocs } from "@react-native-firebase/firestore";
 import { Handshake, Pin, Speech, Users } from "@tamagui/lucide-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import { Dimensions, Platform, StyleSheet } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Text, View, XStack, YStack } from "tamagui";
-import { db } from "../../config/firebase";
-import { useAuth } from "../../context/AuthContext";
-import { useWalkForm } from "../../context/WalkFormContext";
-import { COLORS } from "../../styles/colors";
-import WizardWrapper from "./WizardWrapper";
+import { useAuth } from "../../../context/AuthContext";
+import { useWalkForm } from "../../../context/WalkFormContext";
+import { COLORS } from "../../../styles/colors";
+import WizardWrapper from "../WizardWrapper";
+import { findNearbyWalkers } from "./findNearbyWalkers";
+
+const pluralize = require("pluralize");
 
 interface NeighborhoodConfirmationProps {
   onSubmit: () => void;
@@ -65,59 +66,18 @@ export const NeighborhoodConfirmationScreen: React.FC<
   const walkRadius = 1500; // 1.5 km radius
 
   // Function to find nearby users within the radius
-  const findNearbyWalkers = async (userLocation: {
+  const handleFindNearbyWalkers = async (userLocation: {
     latitude: number;
     longitude: number;
   }) => {
-    if (!userLocation) return;
-
-    setIsLoadingNearbyUsers(true);
-    try {
-      // Query users from Firestore who have location data
-      const usersRef = collection(db, "users");
-      const usersSnapshot = await getDocs(usersRef);
-
-      if (usersSnapshot.empty) {
-        console.log("No users found");
-        setNearbyWalkers(0);
-        setIsLoadingNearbyUsers(false);
-        return;
-      }
-
-      // Filter users by distance
-      let nearbyUsersCount = 0;
-      usersSnapshot.forEach((doc) => {
-        // Skip the current user
-        if (doc.id === user?.uid) return;
-
-        const userData = doc.data();
-        const userLoc = userData.location;
-
-        // If user has location data
-        if (userLoc && userLoc.latitude && userLoc.longitude) {
-          const distance = getDistanceInKm(
-            userLocation.latitude,
-            userLocation.longitude,
-            userLoc.latitude,
-            userLoc.longitude
-          );
-
-          // Count users within radius
-          if (distance <= NEARBY_USERS_RADIUS_KM) {
-            nearbyUsersCount++;
-          }
-        }
-      });
-
-      setNearbyWalkers(nearbyUsersCount);
-      console.log(
-        `Found ${nearbyUsersCount} users within ${NEARBY_USERS_RADIUS_KM}km`
-      );
-    } catch (error) {
-      console.error("Error finding nearby users:", error);
-    } finally {
-      setIsLoadingNearbyUsers(false);
-    }
+    await findNearbyWalkers({
+      user,
+      userLocation,
+      radiusKm: NEARBY_USERS_RADIUS_KM,
+      getDistanceInKm,
+      setNearbyWalkers,
+      setIsLoadingNearbyUsers,
+    });
   };
 
   useEffect(() => {
@@ -146,7 +106,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
         updateFormData({ location: locationData });
 
         // Find nearby walkers
-        await findNearbyWalkers({
+        await handleFindNearbyWalkers({
           latitude: currentLocation.coords.latitude,
           longitude: currentLocation.coords.longitude,
         });
@@ -225,25 +185,28 @@ export const NeighborhoodConfirmationScreen: React.FC<
                 )}
               </MapView>
             )}
-            <View style={styles.mapOverlay}>
-              <XStack
-                backgroundColor={COLORS.action}
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius={10}
-                alignItems="center"
-                gap="$2"
-              >
-                <Users size={18} color="white" />
-                <Text fontSize={17} fontWeight="600" color="white">
-                  {isLoadingNearbyUsers
-                    ? "Finding walkers..."
-                    : `${nearbyWalkers} walker${
-                        nearbyWalkers !== 1 ? "s" : ""
-                      } in your neighborhood`}
-                </Text>
-              </XStack>
-            </View>
+          </View>
+
+          <View>
+            <XStack
+              backgroundColor={COLORS.action}
+              paddingHorizontal="$3"
+              paddingVertical="$2"
+              borderRadius={10}
+              alignItems="center"
+              gap="$2"
+            >
+              <Users size={18} color="white" />
+              <Text fontSize={14} fontWeight="600" color="white">
+                {isLoadingNearbyUsers
+                  ? "Finding walkers..."
+                  : `${pluralize(
+                      "Walk2Gether member",
+                      nearbyWalkers,
+                      true
+                    )} in the area`}
+              </Text>
+            </XStack>
           </View>
 
           <View style={styles.card}>
@@ -315,7 +278,7 @@ const styles = StyleSheet.create({
     height: 220,
     borderRadius: 12,
     overflow: "hidden",
-    marginBottom: 8,
+
     backgroundColor: "#f0f0f0",
   },
   map: {
@@ -328,12 +291,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-  },
-  mapOverlay: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    zIndex: 10,
   },
   card: {
     backgroundColor: "white",

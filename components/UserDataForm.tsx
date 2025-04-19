@@ -1,13 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator } from "react-native";
+import { Button, Input, Text, YStack } from "tamagui";
 import { COLORS } from "../styles/colors";
+import ProfilePicturePicker from "./ProfilePicturePicker";
 import { PlaceData, PlacesAutocomplete } from "./UI/PlacesAutocomplete";
 
 export interface UserDataFormProps {
@@ -21,6 +16,7 @@ export interface UserDataFormProps {
     name: string;
     aboutMe: string;
     location: PlaceData | null;
+    profilePicUrl?: string;
   }) => void;
   isSaving?: boolean;
 }
@@ -33,7 +29,12 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
   const [name, setName] = useState("");
   const [aboutMe, setAboutMe] = useState("");
   const [location, setLocation] = useState<PlaceData | null>(null);
-  const googlePlacesAutocompleteRef = useRef();
+  const [profilePicUrl, setProfilePicUrl] = useState<string | undefined>(
+    undefined
+  );
+  // Fix type error: useRef<GooglePlacesAutocompleteRef | null>(null)
+  // If GooglePlacesAutocompleteRef is not imported, import it from the correct package
+  const googlePlacesAutocompleteRef = useRef<any>(null);
 
   useEffect(() => {
     setName(userData.name || "");
@@ -52,91 +53,89 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
     } else {
       setLocation(null);
     }
+    setProfilePicUrl(userData.profilePicUrl);
   }, [userData]);
 
+  // ProfilePicturePicker will handle image picking
+
   const handleSave = () => {
-    onSave({ name, aboutMe, location });
+    onSave({ name, aboutMe, location, profilePicUrl });
   };
 
   return (
-    <View style={styles.formContainer}>
-      <Text style={styles.label}>Name</Text>
-      <TextInput
-        style={styles.input}
-        value={name}
-        onChangeText={setName}
-        placeholder="Your name"
+    <YStack width="100%" gap="$4" mb="$6">
+      <YStack width="100%" gap="$2">
+        <Text fontWeight="500" fontSize="$4">
+          Name
+        </Text>
+        <Input
+          value={name}
+          onChangeText={setName}
+          placeholder="Your name"
+          width="100%"
+          borderColor={COLORS.primary}
+          backgroundColor={COLORS.background}
+          color={COLORS.text}
+          borderRadius={10}
+          px={16}
+          py={12}
+          fontSize={18}
+        />
+      </YStack>
+      <ProfilePicturePicker
+        profilePicUrl={profilePicUrl}
+        onChange={(url?: string) => setProfilePicUrl(url)}
+        disabled={isSaving}
       />
-      <Text style={styles.label}>Location</Text>
-      <PlacesAutocomplete
-        value={location}
-        ref={googlePlacesAutocompleteRef}
-        onSelect={setLocation}
-        placeholder="Enter your location"
-        googleApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || ""}
-      />
-      <Text style={styles.label}>About Me</Text>
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        value={aboutMe}
-        onChangeText={setAboutMe}
-        placeholder="Tell us about yourself"
-        multiline
-      />
-      <TouchableOpacity
-        style={styles.saveButton}
+      <YStack width="100%" gap="$2">
+        <Text fontWeight="500" fontSize="$4">
+          Location
+        </Text>
+        <PlacesAutocomplete
+          value={location}
+          ref={googlePlacesAutocompleteRef}
+          onSelect={setLocation}
+          placeholder="Enter your location"
+          googleApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || ""}
+        />
+      </YStack>
+      <YStack width="100%" gap="$2">
+        <Text fontWeight="500" fontSize="$4">
+          About Me
+        </Text>
+        <Input
+          value={aboutMe}
+          onChangeText={setAboutMe}
+          placeholder="Tell us about yourself"
+          multiline
+          width="100%"
+          borderColor={COLORS.primary}
+          backgroundColor={COLORS.background}
+          color={COLORS.text}
+          borderRadius={10}
+          px={16}
+          py={12}
+          fontSize={18}
+          height={100}
+        />
+      </YStack>
+      <Button
+        theme="active"
         onPress={handleSave}
         disabled={isSaving}
+        width="100%"
+        borderRadius={10}
+        backgroundColor={COLORS.action}
+        color={COLORS.textOnDark}
+        fontWeight="600"
+        fontSize={16}
       >
         {isSaving ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Text style={styles.saveButtonText}>Save Profile</Text>
+          "Save Profile"
         )}
-      </TouchableOpacity>
-    </View>
+      </Button>
+    </YStack>
   );
 };
-
-const styles = StyleSheet.create({
-  formContainer: {
-    marginBottom: 30,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 5,
-    color: COLORS.TEXT_LABEL,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 20,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  saveButton: {
-    backgroundColor: COLORS.action,
-    borderRadius: 8,
-    padding: 15,
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  saveButtonText: {
-    color: COLORS.textOnDark,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  locationName: {
-    fontSize: 14,
-    color: COLORS.text,
-    marginBottom: 10,
-    fontStyle: "italic",
-  },
-});
