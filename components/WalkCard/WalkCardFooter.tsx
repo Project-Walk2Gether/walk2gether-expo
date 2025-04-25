@@ -27,7 +27,25 @@ const WalkCardFooter: React.FC<Props> = ({
   openInGoogleMaps,
   openInAppleMaps,
 }) => {
-  return (
+  import { isActive, isFuture, isPast } from "../../utils/walkUtils";
+
+const participantCount = walk.participants ? walk.participants.length : 0;
+let peopleText = "";
+if (isActive(walk)) {
+  peopleText = `${participantCount} people walking`;
+} else if (isFuture(walk)) {
+  peopleText = `${participantCount} people going`;
+} else if (isPast(walk)) {
+  peopleText = `${participantCount} people joined`;
+}
+
+const PeopleCountText = ({ color = "#333" }: { color?: string }) => (
+  <Text color={color} fontWeight="600" fontSize={14} mt={2}>
+    {peopleText}
+  </Text>
+);
+
+return (
     <>
       {/* Location Map with Overlay Footer */}
       {walk.location?.latitude && walk.location?.longitude ? (
@@ -72,6 +90,8 @@ const WalkCardFooter: React.FC<Props> = ({
             >
               {walk.location.name || "Location TBD"}
             </Text>
+            <PeopleCountText color="#fff" />
+            </Text>
             {walk.type !== "neighborhood" && (
               <Button
                 size="$3"
@@ -109,6 +129,8 @@ const WalkCardFooter: React.FC<Props> = ({
             </View>
             <Text fontSize="$4" fontWeight="600" flex={1} color="#333">
               {walk.location?.name || "Location TBD"}
+            </Text>
+            <PeopleCountText color="#333" />
             </Text>
           </View>
           {!isMine && !isPast && isUpcoming && (

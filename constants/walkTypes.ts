@@ -12,7 +12,7 @@ export const WALK_TYPES = {
     icon: User,
     gradient: ["#0B3D0B", "#A2C523"] as const,
     backgroundColor: "#5A67F2",
-    label: "Friend",
+    label: "Friend Walk",
     description: "Walk with a friend",
   },
 
@@ -21,7 +21,7 @@ export const WALK_TYPES = {
     icon: Footprints,
     gradient: ["#FDB87D", "#2EB94E"] as const,
     backgroundColor: "#4CD964",
-    label: "Neighborhood",
+    label: "Neighborhood Walk",
     description: "Walk and get to know your neighbors",
   },
 
@@ -30,7 +30,7 @@ export const WALK_TYPES = {
     icon: Users,
     gradient: ["#FF6A55", "#A0D8EF"] as const,
     backgroundColor: "#FF6A55",
-    label: "Friends",
+    label: "Meetup Walk",
     description: "Walk with a group of friends",
   },
 

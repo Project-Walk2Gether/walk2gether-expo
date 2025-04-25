@@ -1,7 +1,7 @@
-import HeaderBackButton from "components/HeaderBackButton";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Walk } from "walk2gether-shared";
+import HeaderBackButton from "../../../../../components/HeaderBackButton";
 import RequestToJoinScreen from "../../../../../components/Walk/RequestToJoinScreen";
 import { useDoc } from "../../../../../utils/firestore";
 

@@ -1,11 +1,12 @@
-import { UserDataProvider } from "context/UserDataContext";
 import { Stack } from "expo-router";
 import React from "react";
 import { TamaguiProvider } from "tamagui";
+import { LocationProvider } from "../context/LocationContext";
 import "../config/emulators";
 import { WithAuthProvider } from "../context/AuthContext";
 import { FlashMessageProvider } from "../context/FlashMessageContext";
 import { UpdatesProvider } from "../context/UpdatesContext";
+import { UserDataProvider } from "../context/UserDataContext";
 import { useAppStateUpdates } from "../hooks/useAppStateUpdates";
 import { tamaguiConfig } from "../tamagui.config";
 
@@ -32,15 +33,17 @@ function AppContent() {
 
 function RootLayout() {
   return (
-    <TamaguiProvider config={tamaguiConfig}>
-      <FlashMessageProvider>
-        <UpdatesProvider>
-          <UserDataProvider>
-            <AppContent />
-          </UserDataProvider>
-        </UpdatesProvider>
-      </FlashMessageProvider>
-    </TamaguiProvider>
+    <LocationProvider>
+      <TamaguiProvider config={tamaguiConfig}>
+        <FlashMessageProvider>
+          <UpdatesProvider>
+            <UserDataProvider>
+              <AppContent />
+            </UserDataProvider>
+          </UpdatesProvider>
+        </FlashMessageProvider>
+      </TamaguiProvider>
+    </LocationProvider>
   );
 }
 

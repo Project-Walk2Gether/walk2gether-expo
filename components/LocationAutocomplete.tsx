@@ -5,6 +5,7 @@ import {
   GooglePlacesAutocompleteRef,
 } from "react-native-google-places-autocomplete";
 import { Button, Text, YStack } from "tamagui";
+import { COLORS } from "../styles/colors";
 
 interface LocationAutocompleteProps {
   value: any;
@@ -13,23 +14,50 @@ interface LocationAutocompleteProps {
   setShowLocationResults: (show: boolean) => void;
   touched: any;
   errors: any;
-  styles: any;
   placeholder?: string;
+  onCancel: () => void;
   includeChooseAnotherWayButton?: boolean;
 }
 
-const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
+const LocationAutocomplete: React.FC<Omit<LocationAutocompleteProps, 'styles'>> = ({
   value,
   setFieldValue,
   showLocationResults,
   setShowLocationResults,
   touched,
+  onCancel,
   errors,
-  styles,
   placeholder = "Search for your city",
   includeChooseAnotherWayButton,
 }) => {
   const placesAutocompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
+
+  // Custom styles for GooglePlacesAutocomplete to match Input in UserDataForm
+  const inputStyles = {
+    textInput: {
+      width: '100%',
+      borderColor: COLORS.primary,
+      backgroundColor: COLORS.background,
+      color: COLORS.text,
+      borderRadius: 10,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      fontSize: 18,
+      height: 100,
+      borderWidth: 1,
+    },
+    textInputContainer: {
+      width: '100%',
+      borderRadius: 10,
+      borderColor: COLORS.primary,
+      borderWidth: 1,
+      backgroundColor: COLORS.background,
+    },
+    listView: {
+      borderRadius: 10,
+      marginTop: 4,
+    },
+  };
 
   return (
     <YStack space="$2">
@@ -79,7 +107,7 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
           key: "AIzaSyCVRcp8LoR83nVd-ur3kEQ6MdOYMBevHhk",
           language: "en",
         }}
-        styles={styles}
+        styles={inputStyles}
       />
       {touched.location && errors.location && (
         <Text color="$red10" fontSize="$2">
@@ -94,6 +122,7 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
           onPress={() => {
             setFieldValue("location", null);
             setShowLocationResults(false);
+            onCancel();
           }}
         >
           Choose another way
@@ -104,7 +133,10 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
           size="$2"
           variant="outlined"
           mt="$2"
-          onPress={() => setShowLocationResults(false)}
+          onPress={() => {
+            onCancel();
+            setShowLocationResults(false);
+          }}
         >
           Choose another way
         </Button>

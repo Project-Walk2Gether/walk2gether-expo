@@ -1,16 +1,67 @@
+import { MaterialIcons } from "@expo/vector-icons";
+import Clipboard from "@react-native-clipboard/clipboard";
 import storage from "@react-native-firebase/storage";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView } from "react-native";
-import { YStack, Button, Text } from "tamagui";
 import { showMessage } from "react-native-flash-message";
-import { SafeAreaView } from "react-native-safe-area-context"; // Replace with Tamagui's SafeAreaView if available
-import { PlaceData } from "../../../components/UI/PlacesAutocomplete";
-import { UserDataForm } from "../../../components/UserDataForm";
-import { useAuth } from "../../../context/AuthContext";
-import { useUserData } from "../../../context/UserDataContext";
-import { COLORS } from "../../../styles/colors";
-import { appVersion } from "../../../utils/version";
+import { Button, Text, YStack } from "tamagui";
+import HeaderCloseButton from "../../../../components/HeaderCloseButton";
+import { PlaceData } from "../../../../components/UI/PlacesAutocomplete";
+import { UserDataForm } from "../../../../components/UserDataForm";
+import { useAuth } from "../../../../context/AuthContext";
+import { useFlashMessage } from "../../../../context/FlashMessageContext";
+import { useUserData } from "../../../../context/UserDataContext";
+import { COLORS } from "../../../../styles/colors";
+import { appVersion } from "../../../../utils/version";
+
+const UIDInfo: React.FC<{ uid: string; version: string }> = ({
+  uid,
+  version,
+}) => {
+  const { showMessage } = useFlashMessage();
+  const handleCopy = () => {
+    Clipboard.setString(uid);
+    showMessage("User ID copied to clipboard!", "success");
+  };
+  return (
+    <YStack mt={10} ai="center" mb={20}>
+      <Text
+        fontSize={12}
+        color="$gray10"
+        opacity={0.7}
+        selectable
+        onPress={handleCopy}
+        pressStyle={{ opacity: 0.5 }}
+        style={{ textAlign: "center" }}
+        mb="$2"
+      >
+        Version: {version}
+      </Text>
+
+      <Text
+        fontSize={12}
+        color="$gray10"
+        opacity={0.7}
+        selectable
+        onPress={handleCopy}
+        pressStyle={{ opacity: 0.5 }}
+        style={{ textAlign: "center" }}
+      >
+        User ID: {uid}
+      </Text>
+
+      <Text
+        fontSize={10}
+        color="$gray10"
+        opacity={0.5}
+        style={{ textAlign: "center" }}
+      >
+        Tap to copy
+      </Text>
+    </YStack>
+  );
+};
 
 export default function ProfileScreen() {
   const { user: authUser, refreshToken, signOut } = useAuth();
@@ -106,7 +157,7 @@ export default function ProfileScreen() {
       // Update user data in Firestore
       await updateUserData({
         name,
-        location: location || "",
+        location,
         aboutMe,
       });
 
@@ -144,53 +195,77 @@ export default function ProfileScreen() {
 
   if (userDataLoading) {
     return (
-      <YStack f={1} jc="center" ai="center" bg="#fff" width="100%" height="100%">
+      <YStack
+        f={1}
+        jc="center"
+        ai="center"
+        bg="#fff"
+        width="100%"
+        height="100%"
+      >
         <ActivityIndicator size="large" color={COLORS.action} />
       </YStack>
     );
   }
 
   return (
-    <ScrollView
-      ref={scrollViewRef}
-      contentContainerStyle={{ padding: 20 }}
-    >
-      {userData && (
-        <UserDataForm
-          userData={userData}
-          onSave={({ name, aboutMe, location }) => {
-            setName(name);
-            setAboutMe(aboutMe);
-            setLocation(location);
-            handleSaveProfile();
-          }}
-          isSaving={isSaving}
-        />
-      )}
-
-      <YStack mt={30} ai="center">
-        <Text fontSize={12} color="$gray10" opacity={0.7}>
-          Version: {appVersion}
-        </Text>
-      </YStack>
-
-      <Button
-        mt="$4"
-        variant="outlined"
-        borderColor="#ff3b30"
-        color="#ff3b30"
-        borderWidth={1}
-        borderRadius={8}
-        py={15}
-        onPress={handleSignOut}
-        disabled={isSaving}
-        width="100%"
+    <>
+      <Stack.Screen
+        options={{
+          title: "My Profile",
+          headerLeft: () => (
+            <Button
+              backgroundColor="#5A4430"
+              size="$3"
+              circular
+              color="#fff"
+              bg="$colorTransparent"
+              borderRadius={10}
+              width="100%"
+              fontWeight="600"
+              fontSize={16}
+              onPress={() => router.push("/qr-code")}
+              icon={
+                <MaterialIcons name="qr-code-2" color={"black"} size={30} />
+              }
+            />
+          ),
+          headerRight: () => <HeaderCloseButton />,
+        }}
+      ></Stack.Screen>
+      <ScrollView
+        ref={scrollViewRef}
+        contentContainerStyle={{ padding: 20, paddingBottom: 50 }}
       >
-        <Text fontSize={16} fontWeight="600" color="#ff3b30">
-          Sign Out
-        </Text>
-      </Button>
-    </ScrollView>
+        {userData && (
+          <UserDataForm
+            userData={userData}
+            onSave={({ name, aboutMe, location }) => {
+              setName(name);
+              setAboutMe(aboutMe);
+              setLocation(location);
+              handleSaveProfile();
+            }}
+            isSaving={isSaving}
+          />
+        )}
+        <Button
+          mt="$4"
+          variant="outlined"
+          borderColor="#ff3b30"
+          color="#ff3b30"
+          borderWidth={1}
+          borderRadius={8}
+          onPress={handleSignOut}
+          disabled={isSaving}
+          width="100%"
+        >
+          <Text fontSize={16} fontWeight="600" color="#ff3b30">
+            Sign Out
+          </Text>
+        </Button>
+        {authUser?.uid && <UIDInfo uid={authUser.uid} version={appVersion} />}
+      </ScrollView>
+    </>
   );
 }
-

@@ -77,5 +77,3 @@ export default function ActiveWalkScreen() {
     </View>
   );
 }
-
-// All styles have been replaced with Tamagui props above.

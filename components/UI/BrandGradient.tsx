@@ -22,6 +22,12 @@ export const BRAND_COLORS = {
   greenPale: "#C4D8CF", // Pale green
   greenMuted: "#8AB0A0", // Muted green
 
+  // Sky blue colors for outdoor scenes
+  skyBlueLight: "#B8E0FF", // Light sky blue
+  skyBlueMedium: "#88C4F2", // Medium sky blue
+  skyBlueDark: "#5A9BD5", // Darker sky blue
+  skyBlueDeep: "#3E78B3", // Deep sky blue
+
   // Current gradient colors (can be used as an alternative)
   tealBlue: "#4EB1BA",
   tealGreen: "#6EDAA8",
@@ -63,6 +69,13 @@ export const GRADIENTS = {
     BRAND_COLORS.beigeMedium,
     BRAND_COLORS.greenMuted,
   ],
+
+  // Outdoor sky gradient (top to bottom)
+  outdoor: [
+    BRAND_COLORS.skyBlueLight, // Light sky at the top
+    BRAND_COLORS.skyBlueMedium,
+    BRAND_COLORS.skyBlueDeep, // Deeper blue toward the bottom
+  ],
 };
 
 export interface BrandGradientProps {
@@ -82,7 +95,7 @@ export const BrandGradient: React.FC<BrandGradientProps> = ({
   children,
   style,
   colors,
-  variant = "modern",
+  variant = "outdoor",
   start = { x: 0, y: 1 },
   end = { x: 0, y: 0 },
   ...rest

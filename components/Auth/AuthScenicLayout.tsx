@@ -1,12 +1,19 @@
+import Birds from "components/Birds";
+import LottieView from "lottie-react-native";
 import React from "react";
-import { KeyboardAvoidingView, Platform } from "react-native";
+import {
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ScrollView, View } from "tamagui";
+import { ScrollView, View, YStack } from "tamagui";
 import Clouds from "../Clouds";
 import Sun from "../Sun";
 import { BrandGradient } from "../UI";
 import BottomRow from "./BottomRow";
-import WalkingScene from "./WalkingScene";
+import WalkingCharacters from "./WalkingCharacters";
 
 const getTopPadding = (screenHeight: number): number => {
   const isLargeScreen = screenHeight > 700;
@@ -19,10 +26,13 @@ export interface AuthScenicLayoutProps {
   scroll?: boolean;
   contentContainerStyle?: any;
   showSun?: boolean;
-  showBottomRow?: boolean;
   showTree?: boolean;
   showHouse?: boolean;
 }
+
+const { width } = Dimensions.get("screen");
+const tree = require("../../assets/animations/tree.lottie");
+const groundAspectRatio = 374 / 1489;
 
 export default function AuthScenicLayout({
   children,
@@ -30,9 +40,7 @@ export default function AuthScenicLayout({
   scroll = true,
   contentContainerStyle = {},
   showSun = true,
-  showBottomRow = true,
   showTree = true,
-  showHouse = false,
 }: AuthScenicLayoutProps) {
   const insets = useSafeAreaInsets();
   const { height: screenHeight } =
@@ -46,11 +54,54 @@ export default function AuthScenicLayout({
         <Sun style={{ position: "absolute", left: 0, top: 20, zIndex: 1 }} />
       )}
       <Clouds style={{ position: "absolute", top: -100, left: 0, zIndex: 1 }} />
-      <WalkingScene
-        style={{ position: "absolute", bottom: 0, left: 0, zIndex: 2 }}
-        showTree={showTree}
-      />
-      {showBottomRow && <BottomRow />}
+      <Birds />
+
+      <BottomRow />
+
+      {/* Walking Scene */}
+      <YStack
+        width="100%"
+        height={120}
+        position="absolute"
+        bottom={0}
+        left={0}
+        zIndex={2}
+      >
+        <Image
+          source={require("../../assets/ground.png")}
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width,
+            height: width * groundAspectRatio,
+            resizeMode: "cover",
+          }}
+        />
+        {showTree && (
+          <LottieView
+            style={{
+              position: "absolute",
+              bottom: -40,
+              left: -190,
+              width: 400,
+              height: 400,
+              zIndex: 0,
+            }}
+            source={tree}
+            autoPlay
+            loop
+            speed={0.7}
+          />
+        )}
+        <WalkingCharacters
+          style={{
+            position: "absolute",
+            bottom: -7,
+            width: "100%",
+          }}
+        />
+      </YStack>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}

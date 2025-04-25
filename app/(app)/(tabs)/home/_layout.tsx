@@ -95,7 +95,6 @@ export default function HomeTabsLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   header: {
     paddingHorizontal: 20,

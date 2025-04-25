@@ -1,10 +1,10 @@
-import { useAuth } from "context/AuthContext";
 import { Formik } from "formik";
 import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet } from "react-native";
 import PhoneInput from "react-native-phone-number-input";
 import { Button, Text, View } from "tamagui";
 import * as yup from "yup";
+import { useAuth } from "../../../context/AuthContext";
 
 const signInSchema = yup.object().shape({
   phoneNumber: yup.string().required("Phone number is required"),
@@ -15,10 +15,10 @@ const signInSchema = yup.object().shape({
 type SignInSchema = yup.InferType<typeof signInSchema>;
 
 interface Props {
-  setVerificationCode: (verificationId: string) => void;
+  onPhoneVerified: (verificationId: string, phoneNumber: string) => void;
 }
 
-export default function PhoneForm({ setVerificationCode }: Props) {
+export default function PhoneForm({ onPhoneVerified }: Props) {
   const [loading, setLoading] = useState(false);
   const phoneInputRef = useRef<PhoneInput>(null);
 
@@ -29,7 +29,7 @@ export default function PhoneForm({ setVerificationCode }: Props) {
       try {
         setLoading(true);
         const id = await sendPhoneVerificationCode(values.formattedPhoneNumber);
-        setVerificationCode(id);
+        onPhoneVerified(id, values.formattedPhoneNumber);
       } catch (error) {
         Alert.alert("Error", "Failed to send verification code");
         console.error(error);

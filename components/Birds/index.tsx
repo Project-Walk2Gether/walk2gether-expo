@@ -8,7 +8,7 @@ export default function Birds() {
       speed={0.2}
       style={{
         width: "100%",
-        height: 200,
+        backgroundColor: "blue",
       }}
       source={birds}
       loop

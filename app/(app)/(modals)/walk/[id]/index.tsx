@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { ActivityIndicator } from "react-native";
 import { View } from "tamagui";
@@ -16,10 +16,9 @@ import { isActive, isFuture } from "../../../../../utils/walkUtils";
 // Main content component that handles the walk state and displays the appropriate screen.
 export default function WalkScreen() {
   const { id } = useLocalSearchParams();
-  const router = useRouter();
   const { doc: walk } = useDoc<Walk>(`walks/${id}`);
   const { user } = useAuth();
-  const waitingParticipants = useWaitingParticipants(id);
+  const waitingParticipants = useWaitingParticipants(id!);
 
   // Show loading while walk is loading
   if (!walk) {

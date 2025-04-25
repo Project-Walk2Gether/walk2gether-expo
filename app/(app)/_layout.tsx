@@ -1,9 +1,9 @@
-import { useUserData } from "context/UserDataContext";
 import { Redirect, Stack } from "expo-router";
 import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import HeaderBackButton from "../../components/HeaderBackButton";
 import { useAuth } from "../../context/AuthContext";
+import { useUserData } from "../../context/UserDataContext";
 import { WalksProvider } from "../../context/WalksContext";
 
 export default function AppLayout() {

@@ -12,7 +12,7 @@ import {
   Platform,
   StyleSheet,
 } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Text, View } from "tamagui";
 import { firestore_instance } from "../../config/firebase";
 import { useAuth } from "../../context/AuthContext";
@@ -281,63 +281,6 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
     }
   };
 
-  // Show all participants on the map
-  const showAllParticipants = () => {
-    if (!mapRef.current || participants.length === 0) return;
-
-    // Filter out participants with no location
-    const validParticipants = participants.filter(
-      (p) => p.lastLocation !== undefined
-    );
-
-    if (validParticipants.length === 0) return;
-
-    // Calculate bounds that include all participants
-    let minLat = validParticipants[0].lastLocation!.latitude;
-    let maxLat = validParticipants[0].lastLocation!.latitude;
-    let minLng = validParticipants[0].lastLocation!.longitude;
-    let maxLng = validParticipants[0].lastLocation!.longitude;
-
-    validParticipants.forEach((p: Participant) => {
-      if (!p.lastLocation) return;
-      minLat = Math.min(minLat, p.lastLocation.latitude);
-      maxLat = Math.max(maxLat, p.lastLocation.latitude);
-      minLng = Math.min(minLng, p.lastLocation.longitude);
-      maxLng = Math.max(maxLng, p.lastLocation.longitude);
-    });
-
-    // Add some padding
-    const PADDING = 0.01;
-    minLat -= PADDING;
-    maxLat += PADDING;
-    minLng -= PADDING;
-    maxLng += PADDING;
-
-    const region: Region = {
-      latitude: (minLat + maxLat) / 2,
-      longitude: (minLng + maxLng) / 2,
-      latitudeDelta: maxLat - minLat,
-      longitudeDelta: maxLng - minLng,
-    };
-
-    mapRef.current.animateToRegion(region, 1000);
-  };
-
-  // Focus on user's location
-  const focusUserLocation = () => {
-    if (!mapRef.current || !userLocation) return;
-
-    mapRef.current.animateToRegion(
-      {
-        latitude: userLocation.coords.latitude,
-        longitude: userLocation.coords.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      },
-      1000
-    );
-  };
-
   // Render location permission denied message
   if (locationPermission === false) {
     return (
@@ -424,28 +367,6 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
             );
           })}
         </MapView>
-
-        {/* Map controls */}
-        <View style={styles.mapControls}>
-          <Button
-            size="$3"
-            circular
-            backgroundColor="white"
-            onPress={focusUserLocation}
-            style={styles.mapButton}
-          >
-            Me
-          </Button>
-          <Button
-            size="$3"
-            circular
-            backgroundColor="white"
-            onPress={showAllParticipants}
-            style={styles.mapButton}
-          >
-            All
-          </Button>
-        </View>
       </View>
     </>
   );

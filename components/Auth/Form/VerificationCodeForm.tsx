@@ -12,9 +12,14 @@ export type VerificationSchema = yup.InferType<typeof verificationSchema>;
 interface Props {
   goBack: () => void;
   handleSubmit: (values: VerificationSchema) => Promise<any>;
+  phoneNumber: string;
 }
 
-export default function VerificationCodeForm({ handleSubmit }: Props) {
+export default function VerificationCodeForm({
+  goBack,
+  handleSubmit,
+  phoneNumber,
+}: Props) {
   const [loading, setLoading] = useState(false);
 
   return (
@@ -29,13 +34,31 @@ export default function VerificationCodeForm({ handleSubmit }: Props) {
         handleChange,
         handleBlur,
         handleSubmit,
-        setFieldValue,
         values,
         errors,
         touched,
         isValid,
       }) => (
         <>
+          <YStack width="100%" marginBottom="$3">
+            <Button
+              backgroundColor="transparent"
+              width="auto"
+              height={40}
+              marginBottom="$1"
+              justifyContent="center"
+              alignItems="center"
+              pressStyle={{ opacity: 0.7 }}
+              onPress={goBack}
+            >
+              <Text color="$blue10" fontSize="$3" fontWeight="500">
+                ← Change number
+              </Text>
+            </Button>
+            <Text color="$gray10" fontSize="$3" textAlign="center">
+              Confirmation code sent to {phoneNumber}
+            </Text>
+          </YStack>
           <YStack width="100%" marginBottom="$3">
             <Input
               placeholder="Enter verification code"

@@ -1,12 +1,13 @@
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
+import { Calendar, Clock, MapPin, Timer } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import { ActivityIndicator } from "react-native";
-import MapView, { Marker } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Card, SizableText, Text, View, YStack } from "tamagui";
+import { Button, Card, SizableText, Text, XStack, YStack } from "tamagui";
 import { Participant, Walk } from "walk2gether-shared";
 import { firestore_instance } from "../../config/firebase";
 import { useAuth } from "../../context/AuthContext";
+import { COLORS } from "../../styles/colors";
 import { useDoc } from "../../utils/firestore";
 
 interface CheckInScreenProps {
@@ -74,32 +75,6 @@ export default function RequestToJoinScreen({ walk }: CheckInScreenProps) {
         shadowOffset={{ width: 0, height: 2 }}
         overflow="hidden"
       >
-        {/* Large Map at Top */}
-        <View width="100%" height={200}>
-          <MapView
-            style={{
-              width: "100%",
-              height: "100%",
-              borderTopLeftRadius: 18,
-              borderTopRightRadius: 18,
-            }}
-            initialRegion={{
-              latitude: walk.location.latitude,
-              longitude: walk.location.longitude,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
-            pointerEvents="none"
-          >
-            <Marker
-              coordinate={{
-                latitude: walk.location.latitude,
-                longitude: walk.location.longitude,
-              }}
-              title={walk.location.name}
-            />
-          </MapView>
-        </View>
         <YStack space="$4" w="100%" ai="center" p="$5">
           {requestSent ? (
             <>
@@ -107,7 +82,7 @@ export default function RequestToJoinScreen({ walk }: CheckInScreenProps) {
                 Request Sent!
               </SizableText>
               <Text size="$4" textAlign="center" color="$gray11">
-                The walk organizer needs to approve your request to join.
+                Your neighbor needs to approve your request to join.
               </Text>
               <Card bordered bg="#f5f5f5" p="$4" my="$3" br={14} w="100%">
                 <YStack gap="$1">
@@ -130,29 +105,60 @@ export default function RequestToJoinScreen({ walk }: CheckInScreenProps) {
           ) : (
             <>
               <Text size="$4" textAlign="center" color="$gray11">
-                Send a request to the walk organizer to join this walk.
+                Send a request to your neighbor organizer to join this walk.
               </Text>
               <Card bordered bg="#f5f5f5" p="$4" my="$3" br={14} w="100%">
-                <YStack gap="$1">
-                  <SizableText size="$6" fontWeight="600">
+                <YStack gap="$3">
+                  <SizableText size="$7" fontWeight="700">
                     Walk with {walk.organizerName}
                   </SizableText>
-                  <Text size="$3" color="$gray11">
-                    Organized by {walk.organizerName}
-                  </Text>
-                  <Text size="$3" color="$gray11">
-                    {new Date(walk.date.toDate()).toLocaleString()} •{" "}
-                    {walk.durationMinutes} minutes
-                  </Text>
-                  <Text size="$3" color="$gray11" mt="$2">
-                    {walk.location.name}
-                  </Text>
+                  <XStack gap="$6" alignItems="center" jc="space-between">
+                    <XStack alignItems="center" gap="$2">
+                      <Calendar size={20} />
+                      <Text fontSize={18} fontWeight="600">
+                        {walk.date
+                          .toDate()
+                          .toLocaleDateString(undefined, {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                      </Text>
+                    </XStack>
+                    <XStack alignItems="center" gap="$2">
+                      <Clock size={20} />
+                      <Text fontSize={18} fontWeight="600">
+                        {walk.date
+                          .toDate()
+                          .toLocaleTimeString(undefined, {
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                      </Text>
+                    </XStack>
+                  </XStack>
+                  <XStack gap="$6" alignItems="center" jc="space-between">
+                    <XStack alignItems="center" gap="$2">
+                      <MapPin size={18} />
+                      <Text fontSize={16} color="$gray11">
+                        {walk.location?.name || "Current Location"}
+                      </Text>
+                    </XStack>
+                    <XStack alignItems="center" gap="$2">
+                      <Timer size={18} />
+                      <Text fontSize={16} color="$gray11">
+                        {walk.durationMinutes} min
+                      </Text>
+                    </XStack>
+                  </XStack>
                 </YStack>
               </Card>
               <Button
                 size="$5"
                 w="100%"
-                theme="blue"
+                bg={COLORS.primary}
+                color="white"
                 onPress={handleRequestToJoin}
                 disabled={loading}
                 mt="$2"

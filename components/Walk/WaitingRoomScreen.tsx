@@ -20,7 +20,6 @@ import {
 } from "tamagui";
 import { Participant, Walk, WithId } from "walk2gether-shared";
 import { firestore_instance } from "../../config/firebase";
-import { useAuth } from "../../context/AuthContext";
 import { useWaitingParticipants } from "../../hooks/useWaitingParticipants";
 
 interface Props {
@@ -29,7 +28,6 @@ interface Props {
 }
 
 export default function WaitingRoomScreen({ walk, onBack }: Props) {
-  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const waitingParticipants = useWaitingParticipants(walk.id!);
 

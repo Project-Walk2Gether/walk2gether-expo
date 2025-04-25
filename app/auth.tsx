@@ -1,22 +1,20 @@
-import AuthScenicLayout from "components/Auth/AuthScenicLayout";
-import PhoneForm from "components/Auth/Form/PhoneForm";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Card, Text, View, YStack } from "tamagui";
+import AnimatedLogo from "../components/AnimatedLogo";
+import AuthScenicLayout from "../components/Auth/AuthScenicLayout";
+import PhoneForm from "../components/Auth/Form/PhoneForm";
 import VerificationCodeForm, {
   VerificationSchema,
-} from "components/Auth/Form/VerificationCodeForm";
-import { db } from "config/firebase";
-import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Card, ScrollView, Text, YStack } from "tamagui";
-import AnimatedLogo from "../components/AnimatedLogo";
+} from "../components/Auth/Form/VerificationCodeForm";
+import { db } from "../config/firebase";
 import { useAuth } from "../context/AuthContext";
 
 export default function Auth() {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { signInWithPhoneCredential } = useAuth();
-  const scrollViewRef = useRef<ScrollView>(null);
   const [verificationId, setVerificationId] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const handleVerificationCodeFormSubmit = async (
     values: VerificationSchema
@@ -67,23 +65,25 @@ export default function Auth() {
           shadowRadius={3.84}
           elevation={5}
         >
-          <Text
-            fontSize="$5"
-            fontWeight="bold"
-            textAlign="center"
-            color="#333"
-            marginBottom="$5"
-          >
-            Get started
+          <Text fontSize={24} textAlign="center" color="#333" marginBottom="$3">
+            {verificationId ? "Enter confirmation code" : "Get started"}
           </Text>
-          {verificationId ? (
-            <VerificationCodeForm
-              goBack={() => setVerificationId("")}
-              handleSubmit={handleVerificationCodeFormSubmit}
-            />
-          ) : (
-            <PhoneForm setVerificationCode={setVerificationId} />
-          )}
+          <View mb="$4">
+            {verificationId ? (
+              <VerificationCodeForm
+                goBack={() => setVerificationId("")}
+                handleSubmit={handleVerificationCodeFormSubmit}
+                phoneNumber={phoneNumber}
+              />
+            ) : (
+              <PhoneForm
+                onPhoneVerified={(id, phone) => {
+                  setVerificationId(id);
+                  setPhoneNumber(phone);
+                }}
+              />
+            )}
+          </View>
         </Card>
       </YStack>
     </AuthScenicLayout>

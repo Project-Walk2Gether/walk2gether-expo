@@ -8,7 +8,7 @@ export default function BottomRow() {
   return (
     <YStack
       position="absolute"
-      bottom={insets.bottom + 20}
+      bottom={insets.bottom + 140}
       left={0}
       width="100%"
       zIndex={-1}
@@ -22,7 +22,7 @@ export default function BottomRow() {
       >
         Walk. Connect. Community.
       </Text>
-      <Text textAlign="center" color="#999" width="100%">
+      <Text fontSize={10} textAlign="center" color="#444" width="100%">
         {"Version: " + appVersion}
       </Text>
     </YStack>

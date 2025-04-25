@@ -24,7 +24,7 @@ interface AuthContextType {
   signInWithPhoneCredential: (
     verificationId: string,
     code: string
-  ) => Promise<void>;
+  ) => Promise<FirebaseAuthTypes.UserCredential>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

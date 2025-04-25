@@ -1,28 +1,32 @@
-import { deleteDoc, doc } from "@react-native-firebase/firestore";
 import { Calendar, Hand, Pin, Timer, User, Users } from "@tamagui/lucide-icons";
-import { getWalkTypeData } from "constants/walkTypes";
-import { useAuth } from "context/AuthContext";
-import { useWalks } from "context/WalksContext";
 import { format } from "date-fns";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import pluralize from "pluralize";
 import React from "react";
-import { Alert, Linking, StyleSheet } from "react-native";
-import MapView, { Marker } from "react-native-maps";
-import { COLORS } from "styles/colors";
+import { Alert, Linking } from "react-native";
 import {
   Avatar,
   Button,
   Card,
   SizableText,
+  Spacer,
   Text,
   View,
   XStack,
   YStack,
 } from "tamagui";
-import { useDoc, useQuery } from "utils/firestore";
-import { Participant, Walk, WithId } from "walk2gether-shared";
+import {
+  Participant,
+  Walk,
+  walkIsNeighborhoodWalk,
+  WithId,
+} from "walk2gether-shared";
+import { useAuth } from "../context/AuthContext";
+import { useLocation } from "../context/LocationContext";
+import { getDistanceMeters, formatDistance } from "../utils/geo";
+import { useWalks } from "../context/WalksContext";
+import { COLORS } from "../styles/colors";
+import { useDoc, useQuery } from "../utils/firestore";
+import { isActive, isFuture, isPast } from "../utils/walkUtils";
 import WalkCardHeader from "./WalkCard/WalkCardHeader";
 
 // Props interface for WalkCard
@@ -31,24 +35,21 @@ interface WalkCardProps {
 }
 
 const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
+  const { coords, loading: locationLoading, error: locationError } = useLocation();
+  const { user } = useAuth();
+  const isMine = user?.uid === walk.createdByUid;
   const { docs: participants } = useQuery<Participant>(
     walk._ref.collection("participants")
   );
+  const unapprovedCount = participants.filter((p) => !p.approvedAt).length;
   const maxAvatars = 4;
   const avatars = participants.slice(0, maxAvatars);
   const overflow = participants.length - maxAvatars;
-
   const organizerName = isMine ? "You're hosting" : walk.organizerName;
-
   const { hasUserRSVPed } = useWalks();
-  const { user } = useAuth();
   const router = useRouter();
-  const isRSVPed = hasUserRSVPed(walk.id || "");
   const walkDate = walk.date?.toDate() || new Date();
-  const formattedDate = format(walkDate, "EEE, MMM d");
-  const formattedTime = format(walkDate, "h:mm a");
   const now = new Date();
-  const isToday = walkDate.toDateString() === now.toDateString();
 
   // Calculate end time of the walk based on start time and duration
   const walkEndTime = new Date(walkDate);
@@ -58,10 +59,8 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
 
   // A walk is active if it has started but not yet ended
   const isActive = walkDate <= now && now <= walkEndTime;
-  // A walk is past only if it's end time has passed
   const isPast = walkEndTime < now;
   const isUpcoming = walkDate > now;
-  const isMine = user?.uid === walk.createdByUid;
 
   const handleRSVP = async () => {
     if (!walk.id) return;
@@ -93,50 +92,27 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
     }
   };
 
-  const handleEdit = () => {
-    if (walk.id) {
-      router.push(`/edit-walk/${walk.id}`);
-    }
-  };
-
-  const handleDelete = () => {
-    if (!walk.id) return;
-
-    Alert.alert(
-      "Cancel Walk",
-      "Are you sure you want to cancel this walk? This action cannot be undone.",
-      [
-        { text: "No", style: "cancel" },
-        {
-          text: "Yes, Cancel Walk",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              // Delete the walk from Firestore
-              const walkRef = doc(db, "walks", walk.id as string);
-              await deleteDoc(walkRef);
-            } catch (error) {
-              console.error("Error deleting walk:", error);
-              Alert.alert(
-                "Error",
-                "Could not delete the walk. Please try again."
-              );
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  // Check if current user is the creator of the walk
-  const isCreator = user?.uid === walk.createdByUid;
-
-  // Get walk type styling from shared constants
-  const walkTypeData = getWalkTypeData(walk.type);
-
-  // Create the icon element with consistent styling
-  const IconComponent = walkTypeData.icon;
-  const walkIcon = <IconComponent size={20} color="white" />;
+  let distanceFromMe = null;
+if (
+  walk.location?.latitude != null &&
+  walk.location?.longitude != null &&
+  coords?.latitude != null &&
+  coords?.longitude != null
+) {
+  const meters = getDistanceMeters(
+    coords.latitude,
+    coords.longitude,
+    walk.location.latitude,
+    walk.location.longitude
+  );
+  distanceFromMe = formatDistance(meters);
+} else if (locationLoading) {
+  distanceFromMe = "Locating...";
+} else if (locationError) {
+  distanceFromMe = "Location unavailable";
+} else {
+  distanceFromMe = "-";
+}
 
   // Functions to open maps
   const openInGoogleMaps = () => {
@@ -179,45 +155,48 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
       borderTopRightRadius={18}
       animation="bouncy"
     >
-      <WalkCardHeader
-        isCreator={isMine}
-        walkIcon={walkIcon}
-        walkTypeData={walkTypeData}
-      />
-      {/* Hero Row */}
-      <XStack height={120}>
-        {/* Left: Static Map */}
-        <View f={1}>
-          <MapView
-            style={{ width: "100%", height: "100%" }}
-            initialRegion={{
-              latitude: walk.location.latitude,
-              longitude: walk.location.longitude,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
-            pointerEvents="none"
-          >
-            <Marker
-              coordinate={{
-                latitude: walk.location.latitude,
-                longitude: walk.location.longitude,
-              }}
-              title={walk.location.name}
-            />
-          </MapView>
-          <LinearGradient
-            colors={["rgba(0,0,0,0.25)", "transparent"]}
-            style={StyleSheet.absoluteFillObject}
-          ></LinearGradient>
-        </View>
-        {/* Right: Walk meta */}
+      <WalkCardHeader isMine={isMine} walk={walk} />
+      <XStack>
         <YStack
           f={1}
           justifyContent="center"
           alignItems="flex-start"
           padding={12}
         >
+          {isMine ? (
+            <>
+              <Spacer flexGrow={1} />
+              <XStack w="100%">
+                <XStack
+                  backgroundColor={COLORS.primary}
+                  borderRadius={99}
+                  px={12}
+                  py={5}
+                  alignItems="center"
+                  justifyContent="center"
+                  minWidth={0}
+                  gap="$2"
+                >
+                  <User color="white" size={14} />
+                  <Text
+                    fontSize={12}
+                    color={COLORS.textOnDark}
+                    fontWeight="bold"
+                    numberOfLines={1}
+                  >
+                    You're hosting
+                  </Text>
+                </XStack>
+              </XStack>
+            </>
+          ) : (
+            <XStack alignItems="center" gap={4}>
+              <User size={22} />
+              <Text fontSize={16} fontWeight="bold">
+                {organizerName}
+              </Text>
+            </XStack>
+          )}
           <XStack alignItems="center" gap={4}>
             <Calendar size={14} />
             <SizableText size="$2">
@@ -228,53 +207,29 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
             <Timer size={14} />
             <SizableText size="$2">{walk.durationMinutes} min</SizableText>
           </XStack>
-          <XStack alignItems="center" gap={4}>
-            <Pin size={14} />
-            <SizableText size="$2">{walk.location.name}</SizableText>
-          </XStack>
-          <XStack alignItems="center" gap={4}>
-            {isMine ? (
-              <XStack
-                backgroundColor={COLORS.primary}
-                borderRadius={99}
-                px={12}
-                py={5}
-                mt="$2"
-                alignItems="center"
-                justifyContent="center"
-                minWidth={0}
-                gap="$2"
-              >
-                <User color="white" size={14} />
-                <Text
-                  fontSize={12}
-                  color={COLORS.textOnDark}
-                  fontWeight="bold"
-                  numberOfLines={1}
-                >
-                  You're hosting
-                </Text>
-              </XStack>
-            ) : (
-              <>
-                <User size={14} />
-                <SizableText size="$2">{organizerName}</SizableText>
-              </>
-            )}
-          </XStack>
+          {
+            <XStack alignItems="center" gap={4}>
+              <Pin size={14} />
+              <SizableText size="$2">
+                {walkIsNeighborhoodWalk(walk)
+                  ? distanceFromMe
+                  : walk.location.name}
+              </SizableText>
+            </XStack>
+          }
         </YStack>
       </XStack>
       {/* Actions footer */}
       <XStack py="$3" alignItems="center" gap="$2" paddingHorizontal={12}>
-        <XStack alignItems="center" gap={-10}>
+        <XStack alignItems="center" gap={-20}>
           {avatars.map((p, idx) => (
             <Avatar
               key={p.id}
               circular
-              size={36}
+              size={48}
               borderWidth={2}
               borderColor="#fff"
-              marginLeft={idx === 0 ? 0 : -10}
+              marginLeft={idx === 0 ? 0 : -32}
             >
               {p.photoURL ? (
                 <Avatar.Image src={p.photoURL} />
@@ -311,9 +266,14 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
             </View>
           )}
         </XStack>
-        <Text flexGrow={1}>
-          {pluralize("person", participants.length, true)} walking
-        </Text>
+        {isMine && unapprovedCount > 0 ? (
+          <UnapprovedRequestsRow
+            walkId={walk.id}
+            unapprovedCount={unapprovedCount}
+          />
+        ) : (
+          <PeopleCountText walk={walk} participants={participants} />
+        )}
         {isMine ? null : (
           <Button
             backgroundColor={COLORS.primary}
@@ -328,6 +288,66 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
         )}
       </XStack>
     </Card>
+  );
+};
+
+interface PeopleCountTextProps {
+  walk: Walk;
+  participants: Participant[];
+}
+
+const PeopleCountText: React.FC<PeopleCountTextProps> = ({
+  walk,
+  participants,
+}) => {
+  let peopleText = "";
+  const count = participants.length;
+  if (isActive(walk)) {
+    peopleText = `${count} ${count === 1 ? "person" : "people"} walking`;
+  } else if (isFuture(walk)) {
+    peopleText = `${count} ${count === 1 ? "person" : "people"} going`;
+  } else if (isPast(walk)) {
+    peopleText = `${count} ${count === 1 ? "person" : "people"} joined`;
+  } else {
+    peopleText = `${count} ${count === 1 ? "person" : "people"}`;
+  }
+  return (
+    <Text flexGrow={1} fontWeight="600" fontSize={14} color="#333">
+      {peopleText}
+    </Text>
+  );
+};
+
+interface UnapprovedRequestsRowProps {
+  walkId: string;
+  unapprovedCount: number;
+}
+
+const UnapprovedRequestsRow: React.FC<UnapprovedRequestsRowProps> = ({
+  walkId,
+  unapprovedCount,
+}) => {
+  const router = useRouter();
+  return (
+    <XStack flexShrink={1} alignItems="center" gap={8} py={4}>
+      <Text flexGrow={1} fontWeight="600" fontSize={13} color="#e67e22">
+        {unapprovedCount}{" "}
+        {unapprovedCount === 1 ? "person wants" : "people want"} to join
+      </Text>
+      <Button
+        size="$2"
+        backgroundColor="#e67e22"
+        color="white"
+        onPress={() => router.push(`/walk/${walkId}/waiting-room`)}
+        borderRadius={8}
+        px={12}
+        py={4}
+      >
+        <Text color="white" fontWeight="bold" fontSize={13}>
+          See requests
+        </Text>
+      </Button>
+    </XStack>
   );
 };
 
