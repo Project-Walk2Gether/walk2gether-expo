@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import { ChevronLeft } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { TouchableOpacity } from "react-native";
+import { Button } from "tamagui";
 
 export default function HeaderBackButton({
   onPress,
@@ -10,11 +12,12 @@ export default function HeaderBackButton({
   const router = useRouter();
 
   return (
-    <TouchableOpacity
+    <Button
+      chromeless
       onPress={onPress || (() => router.back())}
-      style={{ marginLeft: 10 }}
-    >
-      <Ionicons name="arrow-back" size={24} color="#000" />
-    </TouchableOpacity>
+      marginLeft={10}
+      padding={0}
+      icon={<ChevronLeft size={24} color="#000" />}
+    />
   );
 }

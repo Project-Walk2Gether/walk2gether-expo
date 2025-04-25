@@ -1,9 +1,9 @@
 import { Handshake, Pin, Speech, Users } from "@tamagui/lucide-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
-import { Dimensions, Platform, StyleSheet } from "react-native";
+import { Dimensions, Platform } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Text, View, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack, Card } from "tamagui";
 import { useAuth } from "../../../context/AuthContext";
 import { useWalkForm } from "../../../context/WalkFormContext";
 import { COLORS } from "../../../styles/colors";
@@ -126,9 +126,20 @@ export const NeighborhoodConfirmationScreen: React.FC<
       <YStack gap="$4">
         <YStack justifyContent="flex-start" gap="$4">
           {/* Map View */}
-          <View style={styles.mapContainer}>
+          <View 
+            height={220}
+            borderRadius={12}
+            overflow="hidden"
+            backgroundColor="#f0f0f0"
+          >
             {errorMsg ? (
-              <View style={styles.errorContainer}>
+              <View 
+                height={220}
+                width="100%"
+                justifyContent="center"
+                alignItems="center"
+                padding={20}
+              >
                 <Text color="#ff6b6b" fontSize={17} textAlign="center">
                   {errorMsg}
                 </Text>
@@ -143,10 +154,11 @@ export const NeighborhoodConfirmationScreen: React.FC<
               </View>
             ) : (
               <MapView
-                provider={
-                  Platform.OS === "android" ? PROVIDER_GOOGLE : undefined
-                }
-                style={styles.map}
+                provider={PROVIDER_GOOGLE}
+                style={{
+                  width: Dimensions.get("window").width - 32,
+                  height: 220
+                }}
                 region={
                   location
                     ? {
@@ -209,7 +221,12 @@ export const NeighborhoodConfirmationScreen: React.FC<
             </XStack>
           </View>
 
-          <View style={styles.card}>
+          <Card 
+            backgroundColor="white"
+            borderRadius={12}
+            padding="$4"
+            marginBottom="$2"
+          >
             <Text
               fontSize={16}
               fontWeight="600"
@@ -221,7 +238,14 @@ export const NeighborhoodConfirmationScreen: React.FC<
 
             <YStack gap="$4">
               <XStack gap="$3" alignItems="center">
-                <View style={styles.iconContainer}>
+                <View 
+                  backgroundColor={COLORS.action}
+                  width={32}
+                  height={32}
+                  borderRadius={16}
+                  alignItems="center"
+                  justifyContent="center"
+                >
                   <Speech size={19} color="white" />
                 </View>
                 <Text flexShrink={1} fontSize={17} color="#333">
@@ -230,7 +254,14 @@ export const NeighborhoodConfirmationScreen: React.FC<
               </XStack>
 
               <XStack gap="$3" alignItems="center">
-                <View style={styles.iconContainer}>
+                <View 
+                  backgroundColor={COLORS.action}
+                  width={32}
+                  height={32}
+                  borderRadius={16}
+                  alignItems="center"
+                  justifyContent="center"
+                >
                   <Pin size={19} color="white" />
                 </View>
                 <Text flexShrink={1} fontSize={17} color="#333">
@@ -239,7 +270,14 @@ export const NeighborhoodConfirmationScreen: React.FC<
               </XStack>
 
               <XStack gap="$3" alignItems="center">
-                <View style={styles.iconContainer}>
+                <View 
+                  backgroundColor={COLORS.action}
+                  width={32}
+                  height={32}
+                  borderRadius={16}
+                  alignItems="center"
+                  justifyContent="center"
+                >
                   <Handshake size={19} color="white" />
                 </View>
                 <Text flexShrink={1} fontSize={17} color="#333">
@@ -248,7 +286,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
                 </Text>
               </XStack>
             </YStack>
-          </View>
+          </Card>
 
           {/* <View style={styles.card}>
             <Text
@@ -269,43 +307,5 @@ export const NeighborhoodConfirmationScreen: React.FC<
     </WizardWrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  mapContainer: {
-    height: 220,
-    borderRadius: 12,
-    overflow: "hidden",
-
-    backgroundColor: "#f0f0f0",
-  },
-  map: {
-    width: Dimensions.get("window").width - 32, // Adjust for padding
-    height: 220,
-  },
-  errorContainer: {
-    height: 220,
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  card: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-  },
-  iconContainer: {
-    backgroundColor: COLORS.action,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
 
 export default NeighborhoodConfirmationScreen;

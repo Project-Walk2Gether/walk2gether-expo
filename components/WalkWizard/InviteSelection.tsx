@@ -5,7 +5,7 @@ import {
 } from "@react-native-firebase/firestore";
 import { MapPin, MessageCircle, UserPlus } from "@tamagui/lucide-icons";
 import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { Button, Card, Input, Text, View, XStack, YStack } from "tamagui";
 import { useAuth } from "../../context/AuthContext";
@@ -135,12 +135,12 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
     >
       <YStack gap="$4">
         {isNeighborhoodWalk && (
-          <YStack gap="$4">
-            <View style={styles.mapContainer}>
+          <YStack gap="$3">
+            <View height={220} borderRadius={10} overflow="hidden" marginBottom={10}>
               {formData.location ? (
                 <MapView
                   ref={mapRef}
-                  style={styles.map}
+                  style={{ height: "100%", width: "100%" }}
                   initialRegion={{
                     latitude: formData.location.latitude,
                     longitude: formData.location.longitude,
@@ -166,13 +166,18 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                   />
                 </MapView>
               ) : (
-                <View style={[styles.map, styles.placeholderMap]}>
+                <View
+                  style={{ height: "100%", width: "100%" }}
+                  backgroundColor="rgba(200, 200, 200, 0.5)"
+                  justifyContent="center"
+                  alignItems="center"
+                >
                   <Text color={COLORS.text}>No location selected</Text>
                 </View>
               )}
             </View>
 
-            <Card style={styles.messageCard}>
+            <Card backgroundColor="white" borderRadius="$3">
               <YStack gap="$3" padding="$4">
                 <XStack alignItems="center" gap="$2">
                   <MapPin size={24} color={COLORS.action} />
@@ -193,7 +198,13 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
         {isFriendsWalk && (
           <YStack gap="$4">
             {hasFriends ? (
-              <Card style={styles.friendsCard}>
+              <Card
+                flex={1}
+                backgroundColor="white"
+                borderRadius="$3"
+                marginVertical="$2"
+                padding="$2"
+              >
                 <FriendsList
                   onSelectFriend={(friend) => handleFriendToggle(friend.id)}
                   title="Select Friends"
@@ -204,7 +215,12 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
               </Card>
             ) : null}
 
-            <YStack gap="$3" style={styles.inviteContainer}>
+            <YStack 
+              gap="$3" 
+              backgroundColor="rgba(255, 255, 255, 0.15)"
+              borderRadius="$3"
+              padding="$4"
+            >
               <XStack alignItems="center" gap="$2" marginBottom="$2">
                 <MessageCircle size={20} color={COLORS.textOnDark} />
                 <Text fontSize={18} fontWeight="500" color={COLORS.textOnDark}>
@@ -282,41 +298,6 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  mapContainer: {
-    height: 220,
-    borderRadius: 10,
-    overflow: "hidden",
-    marginBottom: 10,
-  },
-  map: {
-    height: "100%",
-    width: "100%",
-  },
-  placeholderMap: {
-    backgroundColor: "rgba(200, 200, 200, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  messageCard: {
-    backgroundColor: "white",
-    borderRadius: 10,
-  },
-  friendsCard: {
-    flex: 1,
-    backgroundColor: "white",
-    borderRadius: 10,
-    marginVertical: 8,
-    padding: 8,
-  },
-  inviteContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 10,
-    padding: 16,
-  },
-});
+
 
 export default InviteSelection;

@@ -2,8 +2,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { Calendar, Clock } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
-import { Platform, StyleSheet } from "react-native";
-import { Button, Text, View, XStack } from "tamagui";
+import { Platform } from "react-native";
+import { Button, Card, H4, Text, View, XStack, YStack } from "tamagui";
 
 interface DateTimeFieldProps {
   value: Timestamp;
@@ -42,8 +42,8 @@ export default function DateTimeField({
   };
 
   return (
-    <View>
-      <Text style={styles.sectionTitle}>Date & Time</Text>
+    <YStack>
+      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">Date & Time</H4>
       <XStack gap="$2">
         <Button
           size="$4"
@@ -65,7 +65,7 @@ export default function DateTimeField({
       </XStack>
 
       {pickerMode === "date" && (
-        <View style={styles.pickerContainer}>
+        <Card backgroundColor="white" padding="$5" borderRadius="$3" marginTop="$2">
           <DateTimePicker
             value={date}
             mode="date"
@@ -88,11 +88,11 @@ export default function DateTimeField({
               Done
             </Button>
           )}
-        </View>
+        </Card>
       )}
 
       {pickerMode === "time" && (
-        <View style={styles.pickerContainer}>
+        <Card backgroundColor="white" padding="$5" borderRadius="$3" marginTop="$2">
           <DateTimePicker
             value={date}
             mode="time"
@@ -116,29 +116,10 @@ export default function DateTimeField({
               Done
             </Button>
           )}
-        </View>
+        </Card>
       )}
 
-      {error && touched && <Text style={styles.errorText}>{error}</Text>}
-    </View>
+      {error && touched && <Text color="red" fontSize="$2" marginTop="$1">{error}</Text>}
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  pickerContainer: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-});

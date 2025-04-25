@@ -11,14 +11,16 @@ import { Search } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Avatar,
   Button,
+  Card,
   Input,
   ScrollView,
   Text,
+  View,
   XStack,
   YStack,
 } from "tamagui";
@@ -136,30 +138,37 @@ export default function FriendsScreen() {
       // Yesterday
       return "Yesterday";
     } else if (dayDiff < 7) {
-      // This week, show day name
-      return date.toLocaleDateString([], { weekday: "short" });
+      // Day of the week
+      const days = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      return days[date.getDay()];
     } else {
-      // Older, show date
-      return date.toLocaleDateString([], { month: "short", day: "numeric" });
+      // MM/DD/YYYY
+      return date.toLocaleDateString();
     }
   };
 
-  // Filter friends based on search query
-  const filteredFriends = searchQuery
-    ? friends.filter((friend) =>
-        friend.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : friends;
-
   const navigateToChat = (friendId: string) => {
-    router.push(`/friends/${friendId}`);
+    router.push(`/(app)/(tabs)/friends/${friendId}`);
   };
+
+  // Filter friends based on search query
+  const filteredFriends = friends.filter((friend) =>
+    friend.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (authLoading || loading) {
     return (
-      <BrandGradient style={styles.gradientContainer}>
-        <View style={[styles.container, styles.loadingContainer]}>
-          <ActivityIndicator size="large" color="white" />
+      <BrandGradient style={{ flex: 1 }}>
+        <View flex={1} justifyContent="center" alignItems="center">
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       </BrandGradient>
     );
@@ -167,52 +176,62 @@ export default function FriendsScreen() {
 
   return (
     <>
-      <BrandGradient style={styles.gradientContainer}>
-        <StatusBar style="light" />
+      <StatusBar style="light" />
+      <BrandGradient style={{ flex: 1 }}>
         <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={[styles.scrollViewContent]}
+          flex={1}
+          width="100%"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 40,
+          }}
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.container, { paddingTop: insets.top }]}>
+          <View flex={1} paddingHorizontal={20} paddingTop={insets.top}>
             <ScreenTitle color="black">My Friends</ScreenTitle>
 
             {friends.length > 0 && (
-              <View style={styles.searchContainer}>
+              <View marginBottom={20}>
                 <XStack
                   backgroundColor="white"
                   borderRadius={10}
-                  padding="$2"
+                  padding={12}
                   alignItems="center"
                 >
-                  <Search size="$1" color="#999" marginRight="$2" />
+                  <Search size={20} color="#888" />
                   <Input
-                    flex={1}
+                    placeholder="Search friends..."
                     borderWidth={0}
-                    placeholder="Search friends"
-                    value={searchQuery}
-                    color={COLORS.text}
+                    flex={1}
+                    backgroundColor="transparent"
                     onChangeText={setSearchQuery}
+                    value={searchQuery}
                   />
                 </XStack>
               </View>
             )}
 
-            <View style={styles.cardContainer}>
+            <View flex={1}>
               {filteredFriends.length === 0 ? (
-                <View style={styles.emptyState}>
-                  <Ionicons name="people-outline" size={48} color="#666" />
-                  <Text style={styles.emptyStateTitle}>No Friends Yet</Text>
-                  <Text style={styles.emptyStateText}>
-                    {searchQuery
-                      ? "No friends match your search."
-                      : "You don't have any friends yet. Add friends to start walking with them!"}
+                <View
+                  flex={1}
+                  justifyContent="center"
+                  alignItems="center"
+                  padding={30}
+                  minHeight={300}
+                >
+                  <Ionicons name="people" size={64} color={COLORS.primary} />
+                  <Text fontSize={20} fontWeight="bold" color="#333" marginTop={16} marginBottom={8}>
+                    No Friends Yet
+                  </Text>
+                  <Text fontSize={16} color="#666" textAlign="center" marginBottom={16}>
+                    Add friends to chat and invite them to walks!
                   </Text>
                   {!searchQuery && (
                     <Button
                       backgroundColor={COLORS.action}
                       color={COLORS.textOnDark}
-                      marginTop="$4"
+                      marginTop={16}
                       onPress={() =>
                         router.push("/(app)/(modals)/invite-friends")
                       }
@@ -229,7 +248,7 @@ export default function FriendsScreen() {
                 </View>
               ) : (
                 filteredFriends.map((friend) => (
-                  <XStack
+                  <Card
                     key={friend.id}
                     backgroundColor="white"
                     padding="$4"
@@ -237,53 +256,59 @@ export default function FriendsScreen() {
                     borderRadius={10}
                     pressStyle={{ opacity: 0.8, scale: 0.98 }}
                     onPress={() => navigateToChat(friend.id)}
-                    style={styles.friendCard}
+                    shadowColor="#000"
+                    shadowOffset={{ width: 0, height: 1 }}
+                    shadowOpacity={0.1}
+                    shadowRadius={2}
+                    elevation={2}
                   >
-                    <Avatar circular size="$6" marginRight="$3">
-                      {friend.profilePicUrl ? (
-                        <Avatar.Image src={friend.profilePicUrl} />
-                      ) : (
-                        <Avatar.Fallback
-                          backgroundColor={`${COLORS.primary}30`}
-                        >
-                          <Text color={COLORS.primary} fontWeight="bold">
-                            {friend.name.charAt(0).toUpperCase()}
-                          </Text>
-                        </Avatar.Fallback>
-                      )}
-                    </Avatar>
-                    <YStack flex={1} justifyContent="center">
-                      <Text fontWeight="bold" color="#333" fontSize="$5">
-                        {friend.name}
-                      </Text>
-                      {friend.lastMessage ? (
-                        <Text color="#666" numberOfLines={1} fontSize="$3">
-                          {friend.lastMessage}
+                    <XStack>
+                      <Avatar circular size="$6" marginRight="$3">
+                        {friend.profilePicUrl ? (
+                          <Avatar.Image src={friend.profilePicUrl} />
+                        ) : (
+                          <Avatar.Fallback
+                            backgroundColor={`${COLORS.primary}30`}
+                          >
+                            <Text color={COLORS.primary} fontWeight="bold">
+                              {friend.name.charAt(0).toUpperCase()}
+                            </Text>
+                          </Avatar.Fallback>
+                        )}
+                      </Avatar>
+                      <YStack flex={1} justifyContent="center">
+                        <Text fontWeight="bold" color="#333" fontSize="$5">
+                          {friend.name}
                         </Text>
-                      ) : null}
-                    </YStack>
-                    <YStack alignItems="flex-end" justifyContent="center">
-                      {friend.lastMessageTime && (
-                        <Text fontSize="$2" color="#999" marginBottom="$1">
-                          {formatMessageTime(friend.lastMessageTime)}
-                        </Text>
-                      )}
-                      {friend.unread ? (
-                        <XStack
-                          width={20}
-                          height={20}
-                          borderRadius={10}
-                          backgroundColor={COLORS.primary}
-                          alignItems="center"
-                          justifyContent="center"
-                        >
-                          <Text color="white" fontSize={12}>
-                            {friend.unread}
+                        {friend.lastMessage ? (
+                          <Text color="#666" numberOfLines={1} fontSize="$3">
+                            {friend.lastMessage}
                           </Text>
-                        </XStack>
-                      ) : null}
-                    </YStack>
-                  </XStack>
+                        ) : null}
+                      </YStack>
+                      <YStack alignItems="flex-end" justifyContent="center">
+                        {friend.lastMessageTime && (
+                          <Text fontSize="$2" color="#999" marginBottom="$1">
+                            {formatMessageTime(friend.lastMessageTime)}
+                          </Text>
+                        )}
+                        {friend.unread ? (
+                          <XStack
+                            width={20}
+                            height={20}
+                            borderRadius={10}
+                            backgroundColor={COLORS.primary}
+                            alignItems="center"
+                            justifyContent="center"
+                          >
+                            <Text color="white" fontSize={12}>
+                              {friend.unread}
+                            </Text>
+                          </XStack>
+                        ) : null}
+                      </YStack>
+                    </XStack>
+                  </Card>
                 ))
               )}
             </View>
@@ -294,74 +319,4 @@ export default function FriendsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  gradientContainer: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  loadingContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  scrollView: {
-    flex: 1,
-    width: "100%",
-  },
-  scrollViewContent: {
-    flexGrow: 1,
-    paddingBottom: 40,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  searchContainer: {
-    marginBottom: 20,
-  },
-  cardContainer: {
-    flex: 1,
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
-    marginBottom: 20,
-  },
-  friendCard: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 30,
-    minHeight: 300,
-  },
-  emptyStateTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateText: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 16,
-  },
-});
+

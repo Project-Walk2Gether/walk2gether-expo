@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet } from "react-native";
 import { Card, Text, View, XStack, YStack } from "tamagui";
 import { COLORS } from "../styles/colors";
 
@@ -43,19 +42,24 @@ export default function WalkTypeCard({
       elevate
       size="$4"
       onPress={() => onSelect(type)}
-      style={[
-        styles.card,
-        {
-          backgroundColor: selected ? color : backgroundColor,
-          borderLeftColor: color,
-          borderLeftWidth: 6,
-        },
-        selected && styles.selectedCard,
-      ]}
+      backgroundColor={selected ? color : backgroundColor}
+      borderRadius={16}
+      borderWidth={0}
+      borderLeftColor={color}
+      borderLeftWidth={6}
+      shadowColor="#000"
+      shadowOffset={{ width: 0, height: 2 }}
+      shadowOpacity={selected ? 0.15 : 0.1}
+      shadowRadius={selected ? 6 : 4}
+      elevation={selected ? 6 : 0}
     >
       <XStack gap="$4" padding="$4" alignItems="center">
         <View
-          style={styles.iconContainer}
+          width={50}
+          height={50}
+          borderRadius={12}
+          justifyContent="center"
+          alignItems="center"
           backgroundColor={selected ? "white" : color + "30"}
         >
           <Ionicons name={icon} size={28} color={selected ? color : color} />
@@ -84,26 +88,4 @@ export default function WalkTypeCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: 16,
-    borderWidth: 0,
 
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  selectedCard: {
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 6,
-  },
-  iconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});

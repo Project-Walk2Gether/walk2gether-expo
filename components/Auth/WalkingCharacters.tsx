@@ -1,11 +1,12 @@
 import LottieView from "lottie-react-native";
 import React, { useEffect, useRef } from "react";
-import { Animated, Dimensions, StyleSheet, View } from "react-native";
+import { Animated, Dimensions, View as RNView } from "react-native";
+import { Stack, XStack, YStack } from "tamagui";
 
 const { width } = Dimensions.get("window");
 
 interface WalkingCharactersProps {
-  style?: object;
+  style?: any;
 }
 
 const TIME_TO_WALK_ACROSS_SCREEN = 12;
@@ -55,66 +56,57 @@ export default function WalkingCharacters({ style }: WalkingCharactersProps) {
     outputRange: [-300, width],
   });
 
+  // We can use tamagui for the container, but need to use React Native's Animated.View for animations
   return (
-    <View style={[styles.container, style]}>
+    <YStack 
+      position="relative"
+      height={180}
+      overflow="hidden"
+      width="100%"
+      zIndex={100}
+      {...style}
+    >
       <Animated.View
-        style={[styles.charactersGroup, { transform: [{ translateX }] }]}
+        style={[{
+          position: "absolute",
+          bottom: 0,
+          flexDirection: "row",
+          alignItems: "flex-end",
+          transform: [{ translateX }]
+        }]}
       >
         {/* First character */}
-        <View style={[styles.characterContainer, styles.firstCharacter]}>
+        <RNView style={{
+          position: "relative",
+          zIndex: 2, // Put first character in front
+          left: 30,
+          top: -5,
+        }}>
           <LottieView
-            style={styles.animation}
+            style={{ width: 180, height: 180 }}
             source={require("../../assets/animations/walker1.lottie")}
             autoPlay
             loop
             speed={0.85}
           />
-        </View>
+        </RNView>
 
         {/* Second character */}
-        <View style={[styles.characterContainer, styles.secondCharacter]}>
+        <RNView style={{
+          position: "relative",
+          zIndex: 1, // Put second character behind
+          left: -95, // More overlap
+        }}>
           <LottieView
-            style={styles.animation}
+            style={{ width: 180, height: 180 }}
             source={require("../../assets/animations/walker2.lottie")}
             autoPlay
             loop
             speed={0.85}
           />
-        </View>
+        </RNView>
       </Animated.View>
-    </View>
+    </YStack>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    position: "relative",
-    height: 180,
-    overflow: "hidden",
-    width: "100%",
-    zIndex: 100,
-  },
-  charactersGroup: {
-    position: "absolute",
-    bottom: 0,
-    flexDirection: "row",
-    alignItems: "flex-end",
-  },
-  characterContainer: {
-    position: "relative",
-  },
-  firstCharacter: {
-    zIndex: 2, // Put first character in front
-    left: 30,
-    position: "relative",
-    top: -5,
-  },
-  secondCharacter: {
-    zIndex: 1, // Put second character behind
-    left: -95, // More overlap
-  },
-  animation: {
-    width: 180,
-    height: 180,
-  },
-});

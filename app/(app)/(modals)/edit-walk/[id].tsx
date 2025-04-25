@@ -1,7 +1,8 @@
 import { doc, updateDoc } from "@react-native-firebase/firestore";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import { Alert, ScrollView, StyleSheet } from "react-native";
+import { Alert } from "react-native";
+import { ScrollView } from "tamagui";
 import { Walk } from "walk2gether-shared";
 import FullScreenLoader from "../../../../components/FullScreenLoader";
 import WalkForm from "../../../../components/WalkForm";
@@ -32,8 +33,9 @@ export default function EditWalkScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ padding: 20 }}
+      flex={1}
+      backgroundColor="#f5f5f5"
+      p="$5"
       keyboardShouldPersistTaps="handled"
     >
       <WalkForm
@@ -46,10 +48,3 @@ export default function EditWalkScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-});

@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator } from "react-native";
+import { YStack } from "tamagui";
 import { useAuth } from "../context/AuthContext";
 
 export default function Index() {
@@ -23,17 +24,13 @@ export default function Index() {
 
   // Show loading indicator while checking auth state
   return (
-    <View style={styles.container}>
+    <YStack
+      flex={1}
+      justifyContent="center"
+      alignItems="center"
+      backgroundColor="#f5f5f5"
+    >
       <ActivityIndicator size="large" color="#4285F4" />
-    </View>
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-  },
-});

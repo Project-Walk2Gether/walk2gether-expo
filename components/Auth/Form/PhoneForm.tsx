@@ -1,8 +1,8 @@
 import { Formik } from "formik";
 import { useCallback, useRef, useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet } from "react-native";
+import { ActivityIndicator, Alert } from "react-native";
 import PhoneInput from "react-native-phone-number-input";
-import { Button, Text, View } from "tamagui";
+import { Button, Text, View, YStack } from "tamagui";
 import * as yup from "yup";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -77,13 +77,21 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
                 backgroundColor: "transparent",
                 flex: 1,
               }}
-              textInputStyle={[styles.input]}
+              textInputStyle={{
+                height: 50,
+                borderWidth: 1,
+                borderColor: "#ddd",
+                borderRadius: 10,
+                paddingHorizontal: 15,
+                fontSize: 16,
+                backgroundColor: "#f9f9f9",
+              }}
               codeTextStyle={{
                 color: "#000",
               }}
             />
             {touched.phoneNumber && errors.phoneNumber && (
-              <Text style={styles.errorText}>{errors.phoneNumber}</Text>
+              <Text color="red" fontSize={12} marginTop={2}>{errors.phoneNumber}</Text>
             )}
           </View>
           <Button
@@ -117,23 +125,4 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  inputError: {
-    borderColor: "red",
-    borderWidth: 1,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginTop: 2,
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
-  },
-});
+

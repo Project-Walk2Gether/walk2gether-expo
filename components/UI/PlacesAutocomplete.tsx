@@ -1,11 +1,11 @@
 import React from "react";
-import { StyleSheet, ViewStyle } from "react-native";
+import { ViewStyle } from "react-native";
 import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
   Place,
 } from "react-native-google-places-autocomplete";
-import { Text, View } from "tamagui";
+import { Text, View, YStack } from "tamagui";
 
 export interface PlaceData {
   name: string;
@@ -55,9 +55,14 @@ export const PlacesAutocomplete = React.forwardRef<
     };
 
     return (
-      <View style={[styles.container, containerStyle]}>
+      <YStack marginBottom="$5" {...containerStyle}>
         {withLabel && (
-          <Text style={styles.label}>
+          <Text 
+            fontSize="$4"
+            fontWeight="500"
+            marginBottom="$1"
+            color="$gray11"
+          >
             {label}
             {required && <Text color="red"> *</Text>}
           </Text>
@@ -131,25 +136,9 @@ export const PlacesAutocomplete = React.forwardRef<
             }}
           />
         </View>
-        {error && touched && <Text style={styles.errorText}>{error}</Text>}
-      </View>
+        {error && touched && <Text color="red" fontSize="$2" marginTop="$1">{error}</Text>}
+      </YStack>
     );
   }
 );
 
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 5,
-    color: "#333",
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginTop: 4,
-  },
-});

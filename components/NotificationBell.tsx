@@ -7,8 +7,8 @@ import {
 import { Bell } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
-import { Text, View } from "tamagui";
+import { TouchableOpacity } from "react-native";
+import { Text, View, XStack } from "tamagui";
 import { firestore_instance } from "../config/firebase";
 import { useAuth } from "../context/AuthContext";
 import { COLORS } from "../styles/colors";
@@ -40,10 +40,28 @@ export default function NotificationBell() {
   };
 
   return (
-    <TouchableOpacity style={styles.container} onPress={handlePress}>
+    <TouchableOpacity 
+      style={{ 
+        padding: 8, 
+        marginRight: 8, 
+        position: "relative" 
+      }} 
+      onPress={handlePress}
+    >
       <Bell size={24} color="#000" />
       {unreadCount > 0 && (
-        <View style={styles.badge}>
+        <View 
+          position="absolute"
+          top={4}
+          right={4}
+          backgroundColor={COLORS.primary}
+          borderRadius={10}
+          minWidth={18}
+          height={18}
+          justifyContent="center"
+          alignItems="center"
+          paddingHorizontal={4}
+        >
           <Text color="white" fontSize={10} fontWeight="bold">
             {unreadCount > 9 ? "9+" : unreadCount}
           </Text>
@@ -53,22 +71,4 @@ export default function NotificationBell() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 8,
-    marginRight: 8,
-    position: "relative",
-  },
-  badge: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    backgroundColor: COLORS.primary,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 4,
-  },
-});
+

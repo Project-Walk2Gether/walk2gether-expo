@@ -10,10 +10,9 @@ import {
   Alert,
   AppState,
   Platform,
-  StyleSheet,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Button, Text, View } from "tamagui";
+import { Button, Text, View, XStack, YStack } from "tamagui";
 import { firestore_instance } from "../../config/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { useWalkParticipants } from "../../hooks/useWaitingParticipants";
@@ -284,8 +283,16 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
   // Render location permission denied message
   if (locationPermission === false) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>
+      <View 
+        flex={1} 
+        justifyContent="center" 
+        alignItems="center"
+      >
+        <Text 
+          color="red" 
+          marginBottom={16} 
+          textAlign="center"
+        >
           Location permission is required to participate in the walk.
         </Text>
         <Button onPress={() => Location.requestForegroundPermissionsAsync()}>
@@ -300,12 +307,23 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
     if (appState !== "active") return null; // Only show in active state
 
     return (
-      <View style={styles.trackingStatus}>
+      <XStack
+        position="absolute"
+        top={10}
+        left={10}
+        backgroundColor="rgba(255,255,255,0.8)"
+        paddingHorizontal={10}
+        paddingVertical={5}
+        borderRadius={15}
+        alignItems="center"
+        zIndex={999}
+      >
         <View
-          style={[
-            styles.statusIndicator,
-            { backgroundColor: locationTracking ? "#4caf50" : "#ff9800" },
-          ]}
+          width={8}
+          height={8}
+          borderRadius={4}
+          marginRight={6}
+          backgroundColor={locationTracking ? "#4caf50" : "#ff9800"}
         />
         <Text fontSize="$2" color={locationTracking ? "#4caf50" : "#ff9800"}>
           {locationTracking
@@ -314,14 +332,18 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
               : "Foreground tracking only"
             : "Tracking inactive"}
         </Text>
-      </View>
+      </XStack>
     );
   };
 
   // Render loading state
   if (locationPermission === null || !userLocation) {
     return (
-      <View style={styles.container}>
+      <View 
+        flex={1}
+        justifyContent="center"
+        alignItems="center"
+      >
         <ActivityIndicator size="large" color={COLORS.primary} />
         <Text>Getting your location...</Text>
       </View>
@@ -331,13 +353,17 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
   return (
     <>
       <Stack.Screen options={{ title: walkId }} />
-      <View style={styles.container}>
+      <View 
+        flex={1}
+        justifyContent="center"
+        alignItems="center"
+      >
         {renderTrackingStatus()}
 
         <MapView
           ref={mapRef}
           provider={PROVIDER_GOOGLE}
-          style={styles.map}
+          style={{ width: "100%", height: "100%", backgroundColor: "#dadada" }}
           initialRegion={{
             latitude: userLocation.coords.latitude,
             longitude: userLocation.coords.longitude,
@@ -372,55 +398,4 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  map: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: "#dadada",
-  },
-  mapControls: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    flexDirection: "column",
-    gap: 10,
-  },
-  mapButton: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  errorText: {
-    color: "red",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  trackingStatus: {
-    position: "absolute",
-    top: 10,
-    left: 10,
-    backgroundColor: "rgba(255,255,255,0.8)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    zIndex: 999,
-  },
-  statusIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-});
+// Map control styles can be used in JSX tags directly where needed

@@ -5,7 +5,7 @@ import {
   updateDoc,
 } from "@react-native-firebase/firestore";
 import React from "react";
-import { Alert, StyleSheet } from "react-native";
+import { Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Button,
@@ -66,7 +66,11 @@ export default function WaitingRoomScreen({ walk, onBack }: Props) {
   };
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+    <View 
+      flex={1} 
+      backgroundColor="#fff" 
+      paddingBottom={insets.bottom}
+    >
       <ScrollView>
         <YStack padding="$4" space="$4">
           <Text fontSize="$7" fontWeight="bold">
@@ -143,10 +147,3 @@ export default function WaitingRoomScreen({ walk, onBack }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-});

@@ -1,12 +1,12 @@
 import Constants from "expo-constants";
 import React, { useRef, useState } from "react";
-import { ActivityIndicator, StyleSheet } from "react-native";
+import { ActivityIndicator } from "react-native";
 import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
 } from "react-native-google-places-autocomplete";
 import MapView, { Marker } from "react-native-maps";
-import { Text, View, YStack } from "tamagui";
+import { Text, View, YStack, XStack } from "tamagui";
 import { useWalkForm } from "../../context/WalkFormContext";
 import { COLORS } from "../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
@@ -181,7 +181,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
       continueDisabled={!location}
     >
       <YStack gap="$4">
-        <View style={styles.autocompleteContainer}>
+        <View zIndex={1}>
           <GooglePlacesAutocomplete
             ref={googlePlacesRef}
             placeholder="Search for a location or long-press on map"
@@ -211,11 +211,17 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
           />
         </View>
 
-        <View style={styles.mapContainer}>
+        <View 
+          flex={1}
+          height={300}
+          borderRadius={15}
+          overflow="hidden"
+          position="relative"
+        >
           {!isApiKeyMissing && (
             <MapView
               ref={mapRef}
-              style={styles.map}
+              style={{ width: "100%", height: "100%" }}
               initialRegion={region}
               onLongPress={handleMapLongPress}
             >
@@ -232,14 +238,33 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
             </MapView>
           )}
 
-          <Text style={styles.mapHelpText}>
+          <Text 
+            color="white"
+            fontSize={14}
+            fontWeight="500"
+            textAlign="center"
+          >
             Tap and hold on the map to choose a location
           </Text>
 
           {(isReverseGeocoding || longPressActive) && (
-            <View style={styles.loadingOverlay}>
+            <View 
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              bottom={0}
+              backgroundColor="rgba(255, 255, 255, 0.7)"
+              justifyContent="center"
+              alignItems="center"
+              zIndex={2}
+            >
               <ActivityIndicator size="large" color={COLORS.primary} />
-              <Text style={styles.loadingText}>
+              <Text 
+                marginTop={10}
+                color={COLORS.text}
+                fontSize={14}
+              >
                 {longPressActive
                   ? "Location selected! Getting details..."
                   : "Getting location details..."}
@@ -247,7 +272,12 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
             </View>
           )}
           {isApiKeyMissing && (
-            <View style={[styles.map, styles.placeholderMap]}>
+            <View 
+              style={{ width: "100%", height: "100%" }}
+              backgroundColor="rgba(0, 0, 0, 0.2)"
+              justifyContent="center"
+              alignItems="center"
+            >
               <Text
                 color={COLORS.textOnDark}
                 textAlign="center"
@@ -263,67 +293,5 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  autocompleteContainer: {
-    zIndex: 1,
-  },
-  mapContainer: {
-    flex: 1,
-    height: 300, // Fixed height for the map container
-    borderRadius: 15,
-    overflow: "hidden",
-
-    position: "relative",
-  },
-  map: {
-    width: "100%",
-    height: "100%",
-  },
-  placeholderMap: {
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 2,
-  },
-  loadingText: {
-    marginTop: 10,
-    color: COLORS.text,
-    fontSize: 14,
-  },
-  errorContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  mapHelpTextContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    borderRadius: 8,
-    padding: 8,
-    alignItems: "center",
-  },
-  mapHelpText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "500",
-    textAlign: "center",
-  },
-});
 
 export default LocationSelection;

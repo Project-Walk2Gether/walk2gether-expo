@@ -1,32 +1,24 @@
 import LottieView from "lottie-react-native";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { View as RNView } from "react-native";
+import { View } from "tamagui";
 
 interface Props {
-  style?: object;
+  style?: any;
 }
 
 export default function Clouds({ style }: Props) {
   return (
-    <View style={[styles.container, style]}>
-      <LottieView
-        style={styles.animation}
-        source={require("../assets/animations/clouds.lottie")}
-        autoPlay
-        loop
-        speed={1.05}
-      />
+    <View position="relative" width="100%" {...style}>
+      <RNView style={{ width: "100%", height: 250 }}>
+        <LottieView
+          style={{ width: "100%", height: 250 }}
+          source={require("../assets/animations/clouds.lottie")}
+          autoPlay
+          loop
+          speed={1.05}
+        />
+      </RNView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: "relative",
-    width: "100%",
-  },
-  animation: {
-    width: "100%",
-    height: 250,
-  },
-});

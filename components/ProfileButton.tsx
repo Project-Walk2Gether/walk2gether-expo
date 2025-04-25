@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Button } from "tamagui";
+import { Image, TouchableOpacity } from "react-native";
+import { Button, Text, View, XStack, YStack } from "tamagui";
 import { useUserData } from "../context/UserDataContext";
 
 // Helper function to get initials from a name (up to two characters)
@@ -24,11 +24,26 @@ export const ProfileButton = () => {
   if (!userData) {
     return (
       <TouchableOpacity
-        style={styles.profileButton}
+        style={{ marginRight: 8 }}
         onPress={() => router.push("/profile")}
       >
-        <View style={styles.profilePlaceholder}>
-          <Text style={styles.profileInitial}>U</Text>
+        <View
+          width={36}
+          height={36}
+          borderRadius={18}
+          backgroundColor="#E0E0E0"
+          justifyContent="center"
+          alignItems="center"
+          borderWidth={2}
+          borderColor="#fff"
+        >
+          <Text
+            fontSize={16}
+            fontWeight="bold"
+            color="#555555"
+          >
+            U
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -36,17 +51,36 @@ export const ProfileButton = () => {
 
   return (
     <TouchableOpacity
-      style={styles.profileButton}
+      style={{ marginRight: 8 }}
       onPress={() => router.push("/profile")}
     >
       {userData.profilePicUrl ? (
         <Image
           source={{ uri: userData.profilePicUrl }}
-          style={styles.profileImage}
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            borderWidth: 2,
+            borderColor: "#fff",
+          }}
         />
       ) : (
-        <View style={styles.profilePlaceholder}>
-          <Text style={styles.profileInitial}>
+        <View
+          width={36}
+          height={36}
+          borderRadius={18}
+          backgroundColor="#E0E0E0"
+          justifyContent="center"
+          alignItems="center"
+          borderWidth={2}
+          borderColor="#fff"
+        >
+          <Text
+            fontSize={16}
+            fontWeight="bold"
+            color="#555555"
+          >
             {userData.name && userData.name.length > 0 
               ? getInitials(userData.name)
               : "U"}
@@ -57,42 +91,4 @@ export const ProfileButton = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  adminButton: {
-    backgroundColor: "#34A853",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-    marginLeft: 8,
-  },
-  adminButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  profileButton: {
-    marginRight: 8,
-  },
-  profileImage: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  profilePlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#E0E0E0",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  profileInitial: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#555555",
-  },
-});
+

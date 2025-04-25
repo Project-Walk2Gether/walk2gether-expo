@@ -4,11 +4,11 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
-  StyleSheet,
   TouchableOpacity,
 } from "react-native";
 import {
   Button,
+  Card,
   Input,
   SizableText,
   Slider,
@@ -96,7 +96,13 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
     <>
       <WizardWrapper onContinue={handleContinue} onBack={onBack}>
         <YStack gap="$4">
-          <View style={styles.durationContainer}>
+          <Card 
+            backgroundColor="rgba(255, 255, 255, 0.15)" 
+            borderRadius="$4" 
+            padding="$5" 
+            alignItems="center" 
+            marginVertical="$5"
+          >
             <XStack
               alignItems="center"
               justifyContent="center"
@@ -113,7 +119,7 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
               </Text>
             </XStack>
 
-            <View style={styles.sliderContainer}>
+            <YStack width="100%" alignItems="center" marginTop="$5">
               <Slider
                 size="$4"
                 width="100%"
@@ -135,15 +141,21 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
                 />
               </Slider>
 
-              <XStack justifyContent="space-between" width="100%">
+              <XStack gap="$2" flexWrap="wrap" justifyContent="center">
                 {durationOptions.map((option) => (
-                  <View
+                  <TouchableOpacity
                     key={option}
-                    style={[
-                      styles.durationOption,
-                      duration === option && styles.selectedDuration,
-                    ]}
-                    onTouchEnd={() => handleDurationChange(option)}
+                    style={{
+                      backgroundColor: duration === option ? "white" : "rgba(255, 255, 255, 0.6)",
+                      padding: 8,
+                      borderRadius: 20,
+                      minWidth: 40,
+                      alignItems: "center"
+                    }}
+                    onPress={() => {
+                      setDuration(option);
+                      updateFormData({ duration: option });
+                    }}
                   >
                     <SizableText
                       size="$2"
@@ -152,12 +164,16 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
                     >
                       {option < 60 ? `${option}m` : `${option / 60}h`}
                     </SizableText>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </XStack>
 
               <TouchableOpacity
-                style={styles.customDurationButton}
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginTop: 20
+                }}
                 onPress={openCustomDurationPicker}
               >
                 <XStack
@@ -171,10 +187,11 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
                   <Text color={COLORS.text} marginLeft="$1" fontWeight="500">
                     Custom Duration
                   </Text>
+                  <Text fontSize={24}>{formatDuration(duration)}</Text>
                 </XStack>
               </TouchableOpacity>
-            </View>
-          </View>
+            </YStack>
+          </Card>
         </YStack>
       </WizardWrapper>
 
@@ -185,14 +202,26 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
         transparent={true}
         onRequestClose={() => setCustomModalOpen(false)}
       >
-        <View style={styles.modalOverlay}>
+        <View style={{
+          flex: 1,
+          justifyContent: "flex-end",
+          backgroundColor: "rgba(0,0,0,0.5)"
+        }}>
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ width: "100%" }}
           >
-            <View style={styles.modalContent}>
+            <View style={{
+              backgroundColor: "white",
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              paddingBottom: 30
+            }}>
               <TouchableOpacity
-                style={styles.closeButton}
+                style={{
+                  alignSelf: "flex-end",
+                  padding: 15
+                }}
                 onPress={() => setCustomModalOpen(false)}
               >
                 <X size={24} color={COLORS.text} />
@@ -271,55 +300,5 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 30,
-  },
-  closeButton: {
-    alignSelf: "flex-end",
-    padding: 15,
-  },
-  container: {
-    flex: 1,
-  },
-  durationContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)", // Slightly more contrast
-    borderRadius: 15,
-    padding: 20,
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  sliderContainer: {
-    width: "100%",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  durationOption: {
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    padding: 8,
-    borderRadius: 20,
-    minWidth: 40,
-    alignItems: "center",
-  },
-  selectedDuration: {
-    backgroundColor: "white",
-  },
-  spacer: {
-    flex: 1,
-  },
-  customDurationButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 20,
-  },
-});
 
 export default DurationSelection;

@@ -1,8 +1,8 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { Text, View, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack, Card, Button } from "tamagui";
 import { useWalkForm } from "../../context/WalkFormContext";
 import { COLORS } from "../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
@@ -73,7 +73,13 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
         {/* Time option tabs */}
         <XStack backgroundColor="white" borderRadius={12} overflow="hidden">
           <TouchableOpacity
-            style={[styles.tab, timeOption === "now" && styles.activeTab]}
+            style={{
+              flex: 1,
+              paddingVertical: 12,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: timeOption === "now" ? COLORS.action : "transparent"
+            }}
             onPress={() => setTimeOption("now")}
           >
             <Text
@@ -85,7 +91,13 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.tab, timeOption === "future" && styles.activeTab]}
+            style={{
+              flex: 1,
+              paddingVertical: 12,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: timeOption === "future" ? COLORS.action : "transparent"
+            }}
             onPress={() => setTimeOption("future")}
           >
             <Text
@@ -99,9 +111,9 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
         </XStack>
 
         {timeOption === "now" ? (
-          <View style={styles.sectionContainer}>
+          <Card backgroundColor="white" borderRadius={10} padding={15}>
             <Text fontSize={16} color="#555" textAlign="center">
-              Your walk will be scheduled for right now.
+              Your walk will begin right now!
             </Text>
             <Text fontSize={16} color="#555" marginTop="$2" textAlign="center">
               Current time:{" "}
@@ -110,11 +122,11 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
                 minute: "2-digit",
               })}
             </Text>
-          </View>
+          </Card>
         ) : (
           <>
-            <View style={styles.sectionContainer}>
-              <View style={styles.calendarWrapper}>
+            <Card backgroundColor="white" borderRadius={10} padding={15}>
+              <View borderRadius={10} overflow="hidden" backgroundColor="white">
                 <Calendar
                   onDayPress={handleDateChange}
                   current={date.toISOString().split("T")[0]}
@@ -136,10 +148,10 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
                   }}
                 />
               </View>
-            </View>
+            </Card>
 
-            <View style={styles.sectionContainer}>
-              <View style={styles.datePickerWrapper}>
+            <Card backgroundColor="white" borderRadius={10} padding={15}>
+              <View backgroundColor="rgba(255, 255, 255, 0.95)" borderRadius={10} overflow="hidden">
                 <DateTimePicker
                   value={time}
                   mode="time"
@@ -150,62 +162,12 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
                   style={{ flex: 1 }}
                 />
               </View>
-            </View>
+            </Card>
           </>
         )}
       </YStack>
     </WizardWrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1, // Ensures proper scrolling behavior
-  },
-  sectionContainer: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 15,
-  },
-  datePickerWrapper: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    borderRadius: 10,
-    overflow: "hidden",
-  },
-  calendarWrapper: {
-    borderRadius: 10,
-    overflow: "hidden",
-    backgroundColor: "white",
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  activeTab: {
-    backgroundColor: COLORS.action,
-  },
-  pickerContentContainer: {
-    height: "100%",
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  inlineLabel: {
-    paddingLeft: 16,
-    marginRight: 10,
-  },
-  pickerContainer: {
-    flex: 1,
-  },
-  spacer: {
-    flex: 1,
-    minHeight: 20, // Minimum height to ensure spacing even when content is short
-  },
-});
 
 export default TimeSelection;

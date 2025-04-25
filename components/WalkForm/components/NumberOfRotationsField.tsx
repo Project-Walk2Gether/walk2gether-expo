@@ -1,6 +1,6 @@
 import React from "react";
-import { StyleSheet } from "react-native";
-import { Input, Text, YStack } from "tamagui";
+import { H4, Input, Text, YStack } from "tamagui";
+import { COLORS } from "../../../styles/colors";
 
 interface NumberOfRotationsFieldProps {
   value: number;
@@ -17,7 +17,7 @@ export default function NumberOfRotationsField({
 }: NumberOfRotationsFieldProps) {
   return (
     <YStack gap="$1">
-      <Text style={styles.sectionTitle}>Number of Rotations</Text>
+      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">Number of Rotations</H4>
       <Input
         size="$4"
         value={value.toString()}
@@ -33,20 +33,7 @@ export default function NumberOfRotationsField({
         keyboardType="number-pad"
         placeholder="Enter number of rotations"
       />
-      {error && touched && <Text style={styles.errorText}>{error}</Text>}
+      {error && touched && <Text color="red" fontSize="$2" marginTop="$1">{error}</Text>}
     </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginTop: 4,
-  },
-});

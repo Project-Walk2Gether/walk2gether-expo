@@ -7,12 +7,11 @@ import { ParamListBase, TabNavigationState } from "@react-navigation/native";
 import { User } from "@tamagui/lucide-icons";
 import { useRouter, withLayoutContext } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React from "react";
+import { View as RNView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Avatar, Button } from "tamagui";
-import { ScreenTitle } from "../../../../components/UI";
-import { useAuth } from "../../../../context/AuthContext";
+import { Avatar, Button, Text, View } from "tamagui";
+import { BrandGradient, ScreenTitle } from "../../../../components/UI";
 import { useUserData } from "../../../../context/UserDataContext";
 import { COLORS } from "../../../../styles/colors";
 
@@ -28,27 +27,12 @@ export const MaterialTopTabs = withLayoutContext<
 export default function HomeTabsLayout() {
   const router = useRouter();
   const { userData } = useUserData();
-  const { user } = useAuth();
   const insets = useSafeAreaInsets();
-  const [selectedTab, setSelectedTab] = useState(0);
-
-  // Handle tab press
-  const handleTabPress = (index: number) => {
-    setSelectedTab(index);
-    // Navigate to the corresponding page
-    if (index === 0) {
-      router.replace("/home/active");
-    } else {
-      router.replace("/home/history");
-    }
-  };
-
-  // Initialize with active tab selected
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <BrandGradient style={{ flex: 1, paddingTop: insets.top }}>
       <StatusBar style="dark" />
-      <View style={styles.header}>
+      <View paddingHorizontal={20}>
         <ScreenTitle
           color="black"
           rightAction={
@@ -61,7 +45,7 @@ export default function HomeTabsLayout() {
               >
                 <Avatar.Image src={userData.profilePicUrl} />
                 <Avatar.Fallback backgroundColor={COLORS.action}>
-                  <Text style={styles.avatarText}>
+                  <Text color="white" fontWeight="bold">
                     {userData.name
                       ? userData.name.charAt(0).toUpperCase()
                       : "U"}
@@ -84,30 +68,38 @@ export default function HomeTabsLayout() {
           Walks
         </ScreenTitle>
       </View>
-      <MaterialTopTabs>
-        <MaterialTopTabs.Screen name="active" options={{ title: "Active" }} />
-        <MaterialTopTabs.Screen name="history" options={{ title: "History" }} />
-      </MaterialTopTabs>
-    </View>
+      {/* MaterialTopTabs needs to be wrapped in RNView since it doesn't accept Tamagui props */}
+      <RNView style={{ flex: 1, zIndex: 1 }}>
+        <MaterialTopTabs
+          screenOptions={{
+            tabBarStyle: {
+              backgroundColor: "transparent", // ⬅️ 100 % see-through
+              elevation: 0, // Android: remove drop-shadow
+              shadowOpacity: 0, // iOS: remove drop-shadow
+              borderBottomWidth: 0, // if you had a hairline
+            },
+            // keep the little blue line visible & on-brand
+            tabBarIndicatorStyle: {
+              backgroundColor: COLORS.action,
+              height: 3,
+              borderRadius: 1.5,
+            },
+            tabBarLabelStyle: {
+              backgroundColor: "transparent",
+              borderBottomColor: "rgba(0,0,0,1)",
+              borderBottomWidth: 1,
+              fontWeight: "600",
+            },
+          }}
+          style={{ backgroundColor: "transparent" }}
+        >
+          <MaterialTopTabs.Screen name="active" options={{ title: "Active" }} />
+          <MaterialTopTabs.Screen
+            name="history"
+            options={{ title: "History" }}
+          />
+        </MaterialTopTabs>
+      </RNView>
+    </BrandGradient>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-  },
-  tabNavigatorContainer: {
-    zIndex: 1,
-  },
-  screenContainer: {
-    flex: 1,
-    zIndex: 0,
-  },
-  avatarText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-});

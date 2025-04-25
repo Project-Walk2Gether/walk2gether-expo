@@ -1,7 +1,7 @@
 import { Formik, FormikProps } from "formik";
 import React from "react";
-import { ActivityIndicator, StyleSheet } from "react-native";
-import { Button, View, YStack } from "tamagui";
+import { ActivityIndicator } from "react-native";
+import { Button, XStack, YStack } from "tamagui";
 
 interface FormProviderProps<T> {
   initialValues: T;
@@ -31,12 +31,13 @@ export default function FormProvider<T>({
         <YStack gap="$4">
           {children(formikProps)}
 
-          <View style={styles.buttonContainer}>
+          <XStack flexDirection="row" justifyContent="space-between" marginTop="$4">
             <Button
               size="$4"
               onPress={() => formikProps.handleSubmit()}
               theme="blue"
-              style={styles.button}
+              flex={1}
+              marginHorizontal="$1"
               disabled={formikProps.isSubmitting}
             >
               {formikProps.isSubmitting ? (
@@ -45,21 +46,9 @@ export default function FormProvider<T>({
                 submitButtonText
               )}
             </Button>
-          </View>
+          </XStack>
         </YStack>
       )}
     </Formik>
   );
 }
-
-const styles = StyleSheet.create({
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 16,
-  },
-  button: {
-    flex: 1,
-    marginHorizontal: 4,
-  },
-});

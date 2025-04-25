@@ -1,5 +1,4 @@
-import { StyleSheet } from "react-native";
-import { Image, Text, View } from "tamagui";
+import { Avatar, Image, Text, View } from "tamagui";
 import { UserData } from "walk2gether-shared";
 import { useDoc } from "../utils/firestore";
 
@@ -8,8 +7,17 @@ export function UserAvatar({ uid }: { uid: string }) {
 
   if (!userData?.profilePicUrl) {
     return (
-      <View style={styles.profilePlaceholder}>
-        <Text style={styles.profileInitial}>
+      <View
+        width={36}
+        height={36}
+        borderRadius={18}
+        backgroundColor="#E0E0E0"
+        justifyContent="center"
+        alignItems="center"
+        borderWidth={2}
+        borderColor="#fff"
+      >
+        <Text>
           {userData?.name ? userData.name.charAt(0).toUpperCase() : "..."}
         </Text>
       </View>
@@ -19,27 +27,12 @@ export function UserAvatar({ uid }: { uid: string }) {
   return (
     <Image
       source={{ uri: userData.profilePicUrl }}
-      style={styles.profileImage}
+      width={36}
+      height={36}
+      borderRadius={18}
+      borderWidth={2}
+      borderColor="#fff"
     />
   );
 }
 
-const styles = StyleSheet.create({
-  profilePlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#E0E0E0",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  profileImage: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-});

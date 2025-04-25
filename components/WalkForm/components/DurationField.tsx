@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
-import { Platform, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { Button, Text, View } from "tamagui";
+import React, { useState } from "react";
+import { Platform } from "react-native";
+import { Button, Card, H4, Text, View, XStack, YStack } from "tamagui";
 
 interface DurationFieldProps {
   value: number; // Duration in minutes
@@ -32,8 +32,8 @@ export default function DurationField({
   const minuteOptions = [0, 15, 30, 45];
 
   return (
-    <View>
-      <Text style={styles.sectionTitle}>Duration</Text>
+    <YStack>
+      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">Duration</H4>
       <Button
         size="$4"
         onPress={() => setShowPicker(!showPicker)}
@@ -44,13 +44,13 @@ export default function DurationField({
       </Button>
 
       {showPicker && (
-        <View style={styles.pickerContainer}>
-          <View style={styles.pickerRow}>
-            <View style={styles.pickerColumn}>
-              <Text style={styles.pickerLabel}>Hours</Text>
+        <Card backgroundColor="white" padding="$5" borderRadius="$3" marginTop="$2">
+          <XStack justifyContent="space-between" marginBottom="$5">
+            <YStack flex={1} alignItems="center">
+              <Text fontSize="$4" marginBottom="$2">Hours</Text>
               <Picker
                 selectedValue={Math.floor(value / 60)}
-                style={styles.picker}
+                style={{ width: 100, height: 120 }}
                 onValueChange={(itemValue) => {
                   const newHours = parseInt(itemValue.toString());
                   const currentMinutes = value % 60;
@@ -65,13 +65,13 @@ export default function DurationField({
                   />
                 ))}
               </Picker>
-            </View>
+            </YStack>
 
-            <View style={styles.pickerColumn}>
-              <Text style={styles.pickerLabel}>Minutes</Text>
+            <YStack flex={1} alignItems="center">
+              <Text fontSize="$4" marginBottom="$2">Minutes</Text>
               <Picker
                 selectedValue={value % 60}
-                style={styles.picker}
+                style={{ width: 100, height: 120 }}
                 onValueChange={(itemValue) => {
                   const currentHours = Math.floor(value / 60);
                   const newMinutes = parseInt(itemValue.toString());
@@ -86,52 +86,17 @@ export default function DurationField({
                   />
                 ))}
               </Picker>
-            </View>
-          </View>
+            </YStack>
+          </XStack>
 
           <Button size="$4" onPress={() => setShowPicker(false)}>
             Done
           </Button>
-        </View>
+        </Card>
       )}
 
-      {error && touched && <Text style={styles.errorText}>{error}</Text>}
-    </View>
+      {error && touched && <Text color="red" fontSize="$2" marginTop="$1">{error}</Text>}
+    </YStack>
   );
 }
 
-const styles = StyleSheet.create({
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  pickerContainer: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  pickerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  pickerColumn: {
-    flex: 1,
-    alignItems: "center",
-  },
-  pickerLabel: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  picker: {
-    width: 100,
-    height: 120,
-  },
-});

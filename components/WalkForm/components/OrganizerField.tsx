@@ -1,6 +1,6 @@
 import React from "react";
-import { StyleSheet } from "react-native";
-import { Input, Text, YStack } from "tamagui";
+import { H4, Input, Text, YStack } from "tamagui";
+import { COLORS } from "../../../styles/colors";
 
 interface OrganizerFieldProps {
   value: string;
@@ -17,7 +17,7 @@ export default function OrganizerField({
 }: OrganizerFieldProps) {
   return (
     <YStack gap="$1">
-      <Text style={styles.sectionTitle}>Organizer</Text>
+      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">Organizer</H4>
       <Input
         size="$4"
         value={value}
@@ -25,20 +25,7 @@ export default function OrganizerField({
         color={COLORS.text}
         placeholder="Enter organizer name"
       />
-      {error && touched && <Text style={styles.errorText}>{error}</Text>}
+      {error && touched && <Text color="red" fontSize="$2" marginTop="$1">{error}</Text>}
     </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginTop: 4,
-  },
-});

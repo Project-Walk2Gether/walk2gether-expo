@@ -22,10 +22,9 @@ import {
 } from "walk2gether-shared";
 import { useAuth } from "../context/AuthContext";
 import { useLocation } from "../context/LocationContext";
-import { getDistanceMeters, formatDistance } from "../utils/geo";
-import { useWalks } from "../context/WalksContext";
 import { COLORS } from "../styles/colors";
 import { useDoc, useQuery } from "../utils/firestore";
+import { formatDistance, getDistanceMeters } from "../utils/geo";
 import { isActive, isFuture, isPast } from "../utils/walkUtils";
 import WalkCardHeader from "./WalkCard/WalkCardHeader";
 
@@ -35,7 +34,11 @@ interface WalkCardProps {
 }
 
 const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
-  const { coords, loading: locationLoading, error: locationError } = useLocation();
+  const {
+    coords,
+    loading: locationLoading,
+    error: locationError,
+  } = useLocation();
   const { user } = useAuth();
   const isMine = user?.uid === walk.createdByUid;
   const { docs: participants } = useQuery<Participant>(
@@ -46,21 +49,7 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
   const avatars = participants.slice(0, maxAvatars);
   const overflow = participants.length - maxAvatars;
   const organizerName = isMine ? "You're hosting" : walk.organizerName;
-  const { hasUserRSVPed } = useWalks();
   const router = useRouter();
-  const walkDate = walk.date?.toDate() || new Date();
-  const now = new Date();
-
-  // Calculate end time of the walk based on start time and duration
-  const walkEndTime = new Date(walkDate);
-  walkEndTime.setMinutes(
-    walkEndTime.getMinutes() + (walk.durationMinutes || 0)
-  );
-
-  // A walk is active if it has started but not yet ended
-  const isActive = walkDate <= now && now <= walkEndTime;
-  const isPast = walkEndTime < now;
-  const isUpcoming = walkDate > now;
 
   const handleRSVP = async () => {
     if (!walk.id) return;
@@ -93,26 +82,26 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
   };
 
   let distanceFromMe = null;
-if (
-  walk.location?.latitude != null &&
-  walk.location?.longitude != null &&
-  coords?.latitude != null &&
-  coords?.longitude != null
-) {
-  const meters = getDistanceMeters(
-    coords.latitude,
-    coords.longitude,
-    walk.location.latitude,
-    walk.location.longitude
-  );
-  distanceFromMe = formatDistance(meters);
-} else if (locationLoading) {
-  distanceFromMe = "Locating...";
-} else if (locationError) {
-  distanceFromMe = "Location unavailable";
-} else {
-  distanceFromMe = "-";
-}
+  if (
+    walk.location?.latitude != null &&
+    walk.location?.longitude != null &&
+    coords?.latitude != null &&
+    coords?.longitude != null
+  ) {
+    const meters = getDistanceMeters(
+      coords.latitude,
+      coords.longitude,
+      walk.location.latitude,
+      walk.location.longitude
+    );
+    distanceFromMe = formatDistance(meters);
+  } else if (locationLoading) {
+    distanceFromMe = "Locating...";
+  } else if (locationError) {
+    distanceFromMe = "Location unavailable";
+  } else {
+    distanceFromMe = "-";
+  }
 
   // Functions to open maps
   const openInGoogleMaps = () => {

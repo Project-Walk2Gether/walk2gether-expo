@@ -1,26 +1,21 @@
 import LottieView from "lottie-react-native";
 import React from "react";
-import { StyleSheet } from "react-native";
+import { YStack } from "tamagui";
 
 interface Props {
-  style?: object;
+  style?: any;
 }
 
 export default function Sun({ style }: Props) {
   return (
-    <LottieView
-      style={[styles.animation, style]}
-      source={require("../assets/animations/sun.lottie")}
-      autoPlay
-      loop
-      speed={1.05}
-    />
+    <YStack>
+      <LottieView
+        style={[{ width: 100, height: 100 }, style]}
+        source={require("../assets/animations/sun.lottie")}
+        autoPlay
+        loop
+        speed={1.05}
+      />
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  animation: {
-    width: 100,
-    height: 100,
-  },
-});

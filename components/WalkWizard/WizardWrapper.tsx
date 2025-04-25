@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView as RNScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, XStack } from "tamagui";
+import { Button, View, XStack, YStack } from "tamagui";
 import { COLORS } from "../../styles/colors";
 import { BrandGradient } from "../UI";
 
@@ -25,24 +25,32 @@ export const WizardWrapper: React.FC<WizardWrapperProps> = ({
   const insets = useSafeAreaInsets();
 
   return (
-    <BrandGradient style={styles.container}>
+    <BrandGradient variant="modern" style={{ flex: 1 }}>
       {/* Content ScrollView */}
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
+      <RNScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: 16,
+          paddingVertical: 16,
           // Add bottom padding to ensure content isn't hidden behind the footer
-          { paddingBottom: 80 + insets.bottom },
-        ]}
+          paddingBottom: 80 + insets.bottom,
+        }}
       >
         {children}
-      </ScrollView>
+      </RNScrollView>
 
       {/* Fixed Footer with Buttons */}
       <View
-        style={[
-          styles.footer,
-          { paddingBottom: Math.max(insets.bottom, 16), paddingTop: 16 },
-        ]}
+        position="absolute"
+        bottom={0}
+        left={0}
+        right={0}
+        backgroundColor="rgba(0, 0, 0, 0.05)"
+        paddingHorizontal={16}
+        paddingBottom={Math.max(insets.bottom, 16)}
+        paddingTop={16}
+        borderTopLeftRadius={16}
+        borderTopRightRadius={16}
       >
         <XStack gap="$4" justifyContent="space-between">
           {onBack ? (
@@ -72,25 +80,6 @@ export const WizardWrapper: React.FC<WizardWrapperProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
-    paddingHorizontal: 16,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-  },
-});
+
 
 export default WizardWrapper;

@@ -1,19 +1,16 @@
 import React from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator } from "react-native";
+import { YStack } from "tamagui";
 
 export default function FullScreenLoader() {
   return (
-    <View style={styles.container}>
+    <YStack
+      flex={1}
+      justifyContent="center"
+      alignItems="center"
+      backgroundColor="#fff"
+    >
       <ActivityIndicator size="large" color="#0000ff" />
-    </View>
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-});

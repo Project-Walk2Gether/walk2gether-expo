@@ -1,7 +1,6 @@
 import { Calendar, Clock, MapPin, Users } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React from "react";
-import { StyleSheet } from "react-native";
 import { Button, Card, Separator, Text, XStack, YStack } from "tamagui";
 import { useWalkForm } from "../../context/WalkFormContext";
 import { COLORS } from "../../styles/colors";
@@ -185,14 +184,5 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
     </WizardWrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-});
 
 export default ReviewScreen;

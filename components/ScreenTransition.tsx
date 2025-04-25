@@ -1,6 +1,7 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
-import { Animated, BackHandler, Platform, StyleSheet, View } from "react-native";
+import { Animated, BackHandler, Platform, View as RNView } from "react-native";
+import { View } from "tamagui";
 
 interface ScreenTransitionProps {
   children: ReactNode;
@@ -84,21 +85,12 @@ const ScreenTransition: React.FC<ScreenTransitionProps> = ({ children }) => {
   }, [navigation, isTransitioning, isFocused]);
 
   return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.content, { opacity }]}>
+    <View flex={1}>
+      <Animated.View style={{ flex: 1, opacity }}>
         {children}
       </Animated.View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-  },
-});
 
 export default ScreenTransition;

@@ -2,8 +2,8 @@ import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useRouter } from "expo-router";
 import { nanoid } from "nanoid/non-secure";
 import React, { useCallback } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { Text } from "tamagui";
+import { View as RNView } from "react-native";
+import { Spinner, Text, View, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
 import HeaderBackButton from "../../../components/HeaderBackButton";
 import { BrandGradient } from "../../../components/UI";
@@ -79,7 +79,7 @@ function WalkWizard() {
       }
 
       // Immediately redirect to home screen after creating a walk
-      router.replace("/home");
+      router.back();
 
       // Show confetti animation after a delay once the screen is closed
       setTimeout(() => {
@@ -135,10 +135,20 @@ function WalkWizard() {
   const renderStep = () => {
     if (isSubmitting) {
       return (
-        <BrandGradient style={styles.container}>
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="white" />
-            <Text color="white" fontSize={18} marginTop={20}>
+        <BrandGradient style={{ flex: 1 }}>
+          <View
+            flex={1}
+            justifyContent="center"
+            alignItems="center"
+            padding={20}
+          >
+            <Spinner size="large" color="white" />
+            <Text
+              color="white"
+              fontSize={18}
+              fontWeight="500"
+              marginTop={16}
+            >
               Creating your walk...
             </Text>
           </View>
@@ -226,7 +236,6 @@ function WalkWizard() {
 // Only import useEffect, useState from React here, since React and Text are already imported at the top
 import { useEffect, useState } from "react";
 import * as Location from "expo-location";
-import { YStack, Spinner } from "tamagui";
 
 export default function NewWalkWizardScreen() {
   const [locationReady, setLocationReady] = useState(false);
@@ -270,13 +279,13 @@ export default function NewWalkWizardScreen() {
       {locationReady ? (
         <WalkWizard />
       ) : (
-        <YStack f={1} jc="center" ai="center" p="$6">
+        <YStack flex={1} justifyContent="center" alignItems="center" padding="$6">
           <Spinner size="large" color="$blue10" />
-          <Text mt="$4" fontSize={18} color="$blue10">
+          <Text marginTop="$4" fontSize={18} color="$blue10">
             Getting your location...
           </Text>
           {error && (
-            <Text mt="$2" color="$red10">{error}</Text>
+            <Text marginTop="$2" color="$red10">{error}</Text>
           )}
         </YStack>
       )}
@@ -284,14 +293,4 @@ export default function NewWalkWizardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-});
+

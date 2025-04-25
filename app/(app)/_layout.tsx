@@ -1,6 +1,7 @@
 import { Redirect, Stack } from "expo-router";
 import React from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator } from "react-native";
+import { View, YStack } from "tamagui";
 import HeaderBackButton from "../../components/HeaderBackButton";
 import { useAuth } from "../../context/AuthContext";
 import { useUserData } from "../../context/UserDataContext";
@@ -24,9 +25,14 @@ export default function AppLayout() {
   // Show loading indicator while checking auth state
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <YStack 
+        flex={1}
+        justifyContent="center"
+        alignItems="center"
+        backgroundColor="#f5f5f5"
+      >
         <ActivityIndicator size="large" color={"#8AB0A0"} />
-      </View>
+      </YStack>
     );
   }
 
@@ -82,11 +88,4 @@ export default function AppLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-  },
-});
+

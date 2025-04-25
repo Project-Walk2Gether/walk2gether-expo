@@ -8,11 +8,10 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
   TouchableWithoutFeedback,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Input, Spinner, Text, View, XStack, YStack } from "tamagui";
+import { Button, Card, Input, Spinner, Text, View, XStack, YStack } from "tamagui";
 import { BrandGradient } from "../../../components/UI";
 import { useUserData } from "../../../context/UserDataContext";
 import { callApi } from "../../../utils/api";
@@ -116,77 +115,114 @@ export default function InviteFriendsScreen() {
       style={{ flex: 1 }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <BrandGradient style={styles.container}>
+        <BrandGradient style={{ flex: 1 }}>
           <StatusBar style="light" />
           <View
-            style={[
-              styles.content,
-              {
-                paddingTop: insets.top + 10,
-                paddingBottom: insets.bottom + 20,
-              },
-            ]}
+            flex={1}
+            paddingHorizontal={20}
+            paddingTop={insets.top + 10}
+            paddingBottom={insets.bottom + 20}
           >
             <XStack
               justifyContent="space-between"
               alignItems="center"
               marginBottom="$4"
             >
-              <View f={1}>
+              <View flex={1}>
                 <Button
                   size="$3"
                   circular
-                  icon={<ArrowLeft size="$1.5" color="white" />}
+                  icon={<ArrowLeft size="$1" color="white" />}
                   onPress={() => router.back()}
                   backgroundColor="transparent"
-                  bg="b"
                 />
               </View>
               <Text
                 textAlign="center"
                 flexGrow={1}
-                color="white"
-                fontSize="$7"
                 fontWeight="bold"
+                fontSize="$6"
+                color="white"
               >
                 Invite Friends
               </Text>
               <View flex={1} />
             </XStack>
 
-            <View style={styles.formContainer}>
-              <YStack gap="$4" padding="$4">
+            <Card
+              backgroundColor="white"
+              borderRadius="$3"
+              shadowColor="#000"
+              shadowOpacity={0.1}
+              shadowRadius={4}
+              elevation={3}
+              marginVertical="$5"
+              flex={1}
+            >
+              <YStack padding="$4" gap="$4">
                 <Text fontSize="$5" fontWeight="bold" color="#333">
                   Invite friends to join you on Walk2gether
                 </Text>
 
-                {/* Message display with copy button */}
-                <YStack gap="$2" marginBottom="$2">
+                {/* Invitation Link section */}
+                <YStack gap="$2">
                   <Text fontSize="$4" fontWeight="500" color="#333">
-                    Invitation Message
+                    Share Invitation Link
                   </Text>
                   <XStack
-                    backgroundColor="#f8f8f8"
+                    backgroundColor="#f5f5f5"
                     borderRadius="$2"
-                    padding="$4"
+                    padding="$3"
+                    justifyContent="space-between"
                     alignItems="center"
                   >
-                    <Text color="#333" fontSize="$3.5" lineHeight={20} flex={1}>
-                      {message}
+                    <Text
+                      fontSize="$3"
+                      color="#666"
+                      flex={1}
+                      numberOfLines={1}
+                      ellipsizeMode="middle"
+                    >
+                      {invitationUrl}
                     </Text>
                     <Button
                       size="$3"
                       backgroundColor="#7C5F45"
                       color="white"
                       onPress={handleCopyMessage}
-                      icon={Copy}
-                      marginLeft="$3"
+                      marginLeft="$2"
+                      icon={<Copy size="$1" color="white" />}
                     >
                       Copy
                     </Button>
                   </XStack>
                 </YStack>
 
+                {/* Or divider */}
+                <XStack
+                  alignItems="center"
+                  marginVertical="$3"
+                >
+                  <View
+                    height={1}
+                    backgroundColor="#ddd"
+                    flex={1}
+                  />
+                  <Text
+                    fontSize="$3"
+                    color="#888"
+                    marginHorizontal="$2"
+                  >
+                    OR
+                  </Text>
+                  <View
+                    height={1}
+                    backgroundColor="#ddd"
+                    flex={1}
+                  />
+                </XStack>
+
+                {/* SMS Invitations section */}
                 <YStack gap="$2">
                   <Text fontSize="$4" fontWeight="500" color="#333">
                     Send SMS Invitations
@@ -284,34 +320,10 @@ export default function InviteFriendsScreen() {
                   )}
                 </YStack>
               </YStack>
-            </View>
+            </Card>
           </View>
         </BrandGradient>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  formContainer: {
-    flex: 1,
-    backgroundColor: "white",
-    borderRadius: 15,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    marginVertical: 10,
-  },
-});

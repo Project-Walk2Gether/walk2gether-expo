@@ -1,5 +1,4 @@
 import React from "react";
-import { StyleSheet } from "react-native";
 import { YStack } from "tamagui";
 import WalkTypeCard from "../../components/WalkTypeCard";
 import { useWalkForm } from "../../context/WalkFormContext";
@@ -70,11 +69,5 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue }) => {
     </WizardWrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default TypeSelection;

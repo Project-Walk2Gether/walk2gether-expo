@@ -1,6 +1,5 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
-import { Text } from "tamagui";
+import { H1, Text, View, XStack } from "tamagui";
 
 /**
  * Standardized screen title component for consistent headers across the app
@@ -19,39 +18,26 @@ export const ScreenTitle: React.FC<ScreenTitleProps> = ({
   rightAction,
 }) => {
   return (
-    <View style={styles.container}>
+    <XStack 
+      justifyContent="space-between"
+      alignItems="center"
+      marginBottom="$5"
+    >
       {leftAction && (
-        <View style={styles.leftActionContainer}>{leftAction}</View>
+        <View marginRight="$2">{leftAction}</View>
       )}
-      <Text style={styles.title} color={color}>
+      <H1 
+        fontSize="$8" 
+        fontWeight="bold"
+        flex={1}
+        color={color}
+      >
         {children}
-      </Text>
+      </H1>
       {rightAction && (
-        <View style={styles.rightActionContainer}>{rightAction}</View>
+        <View marginLeft="$2">{rightAction}</View>
       )}
-    </View>
+    </XStack>
   );
 };
 
-/**
- * Shared styles for screen titles
- */
-export const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    flex: 1,
-  },
-  rightActionContainer: {
-    marginLeft: 10,
-  },
-  leftActionContainer: {
-    marginRight: 10,
-  },
-});

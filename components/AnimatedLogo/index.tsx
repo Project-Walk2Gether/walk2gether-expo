@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, StyleSheet, View } from "react-native";
+import { Animated, View as RNView } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { View } from "tamagui";
 import { path } from "./path";
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
@@ -74,7 +75,13 @@ export default function AnimatedLogo({ width, height }: Props) {
   }
 
   return (
-    <View style={styles.container}>
+    <View 
+      position="relative"
+      alignItems="center"
+      justifyContent="center"
+      width="100%"
+      height={60}
+    >
       <Svg viewBox="0 0 549.46 66.382" style={{ width, height }}>
         <AnimatedPath
           ref={pathRef}
@@ -93,13 +100,3 @@ export default function AnimatedLogo({ width, height }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: "relative",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-    height: 60,
-  },
-});

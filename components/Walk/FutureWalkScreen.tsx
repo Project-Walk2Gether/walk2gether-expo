@@ -9,7 +9,7 @@ import {
 import { format } from "date-fns";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Linking, Platform, StyleSheet } from "react-native";
+import { Alert, Linking, Platform } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import {
   Avatar,
@@ -164,14 +164,24 @@ export default function FutureWalkScreen({ walk }: Props) {
     <>
       <Stack.Screen
         options={{
-          headerTitle: "Upcoming Walk",
-          headerShadowVisible: false,
-          headerBackVisible: true,
-          headerBackTitle: "Back",
+          title: `Walk with ${walk.organizerName}`,
         }}
       />
-      <View style={styles.container}>
-        <Card style={styles.card}>
+      <View 
+        flex={1}
+        backgroundColor={COLORS.background}
+        padding="$4"
+      >
+        <Card 
+          backgroundColor="white"
+          borderRadius={16}
+          shadowColor="#000"
+          shadowOffset={{ width: 0, height: 2 }}
+          shadowOpacity={0.1}
+          shadowRadius={4}
+          elevation={3}
+          marginTop={20}
+        >
           <YStack padding="$4" gap="$4">
             {/* Walk Type Header */}
             <XStack alignItems="center" gap="$2">
@@ -219,14 +229,21 @@ export default function FutureWalkScreen({ walk }: Props) {
                   </XStack>
 
                   {/* Map preview */}
-                  <Card bordered style={styles.mapContainer}>
+                  <Card bordered 
+                    style={{
+                      width: "100%",
+                      height: 200,
+                      borderRadius: 16,
+                      overflow: "hidden",
+                    }}
+                  >
                     <MapView
-                      style={styles.map}
+                      style={{ width: "100%", height: "100%" }}
                       initialRegion={{
                         latitude: walk.location.latitude,
                         longitude: walk.location.longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
+                        latitudeDelta: 0.02,
+                        longitudeDelta: 0.02,
                       }}
                       scrollEnabled={false}
                       zoomEnabled={false}
@@ -351,7 +368,18 @@ export default function FutureWalkScreen({ walk }: Props) {
         </YStack>
 
         {/* Countdown Section */}
-        <Card style={styles.countdownCard}>
+        <Card 
+          marginTop="auto"
+          backgroundColor="white"
+          borderRadius={16}
+          padding="$4"
+          shadowColor="#000"
+          shadowOffset={{ width: 0, height: 2 }}
+          shadowOpacity={0.1}
+          shadowRadius={4}
+          elevation={3}
+          marginBottom="$4"
+        >
           <Text
             fontSize="$4"
             fontWeight="600"
@@ -402,41 +430,3 @@ function getTimeUntilWalk(walkDate: Date): string {
   return `${diffDays} ${diffDays === 1 ? "day" : "days"}`;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    padding: 16,
-  },
-  card: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  mapContainer: {
-    width: "100%",
-    height: 200,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  map: {
-    width: "100%",
-    height: "100%",
-  },
-  countdownCard: {
-    marginTop: "auto",
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    marginBottom: 16,
-  },
-});
