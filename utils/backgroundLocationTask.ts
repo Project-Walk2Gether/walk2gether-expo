@@ -2,15 +2,16 @@ import { doc, updateDoc } from '@react-native-firebase/firestore';
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import { firestore_instance } from '../config/firebase';
+import { auth_instance, firestore_instance } from '../config/firebase';
 
 // Define a task name for background location tracking
 export const LOCATION_TRACKING_TASK = 'background-location-tracking';
 
-// Global variables for background tracking
-declare global {
-  var currentUser: any;
-  var currentWalkId: string;
+// Task options interface
+interface LocationTaskOptions extends Location.LocationTaskOptions {
+  walkId?: string;
+  userId?: string;
+  extraFields?: Record<string, any>;
 }
 
 // Define the background task for location tracking
@@ -26,17 +27,26 @@ TaskManager.defineTask(
       const { locations } = data as { locations: Location.LocationObject[] };
       const location = locations[0];
 
-      // Get the current user and walk ID from storage
-      // We use global variables since task manager runs outside React context
-      const currentUser = (global as any).currentUser;
-      const currentWalkId = (global as any).currentWalkId;
+      // Get the task options containing walkId and userId
+      let taskOptions: LocationTaskOptions = {};
+      try {
+        // Get options that were passed when the task was started
+        taskOptions = await TaskManager.getTaskOptionsAsync(LOCATION_TRACKING_TASK) as LocationTaskOptions;
+      } catch (e) {
+        console.error('Error getting task options:', e);
+      }
 
-      if (currentUser && currentWalkId) {
+      const { walkId, userId, extraFields = {} } = taskOptions;
+      
+      // Use auth instance if userId isn't available in options
+      const uid = userId || auth_instance.currentUser?.uid;
+
+      if (uid && walkId) {
         try {
           // Update the location in Firestore
           const participantDocRef = doc(
             firestore_instance,
-            `walks/${currentWalkId}/participants/${currentUser.uid}`
+            `walks/${walkId}/participants/${uid}`
           );
           await updateDoc(participantDocRef, {
             lastLocation: {
@@ -44,6 +54,7 @@ TaskManager.defineTask(
               longitude: location.coords.longitude,
               timestamp: new Date().getTime(),
             },
+            ...extraFields,
           });
           return BackgroundFetch.BackgroundFetchResult.NewData;
         } catch (err) {
@@ -57,10 +68,25 @@ TaskManager.defineTask(
 );
 
 // Helper functions for background location tracking
-export const startBackgroundLocationTracking = async (
-  options: Location.LocationTaskOptions = {}
-) => {
-  const defaultOptions: Location.LocationTaskOptions = {
+export const startBackgroundLocationTracking = async ({
+  walkId,
+  userId,
+  extraFields = {},
+  ...locationOptions
+}: LocationTaskOptions = {}) => {
+  if (!walkId) {
+    console.error('Cannot start background tracking without walkId');
+    return false;
+  }
+
+  // Get userId from auth if not provided
+  const uid = userId || auth_instance.currentUser?.uid;
+  if (!uid) {
+    console.error('Cannot start background tracking without user ID');
+    return false;
+  }
+
+  const defaultOptions: LocationTaskOptions = {
     accuracy: Location.Accuracy.Balanced,
     timeInterval: 15000, // Update every 15 seconds to save battery
     distanceInterval: 10, // Update if moved by 10 meters
@@ -74,11 +100,15 @@ export const startBackgroundLocationTracking = async (
     pausesUpdatesAutomatically: false,
     activityType: Location.ActivityType.Fitness,
     showsBackgroundLocationIndicator: true,
+    // Store these values to access in the background task
+    walkId,
+    userId: uid,
+    extraFields,
   };
 
   await Location.startLocationUpdatesAsync(
     LOCATION_TRACKING_TASK, 
-    { ...defaultOptions, ...options }
+    { ...defaultOptions, ...locationOptions }
   );
   
   return true;

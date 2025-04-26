@@ -1,14 +1,11 @@
-import { doc, setDoc } from "@react-native-firebase/firestore";
-import { Car, Check, Footprints, MapPin } from "@tamagui/lucide-icons";
 import * as Linking from "expo-linking";
 import * as Location from "expo-location";
 import { Stack } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, AppState } from "react-native";
+import { ActivityIndicator, Alert } from "react-native";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
-import { Button, Spinner, Switch, Text, View, XStack, YStack } from "tamagui";
+import { Button, Text, View, XStack } from "tamagui";
 import { ParticipantWithRoute, Walk } from "walk2gether-shared";
-import { firestore_instance } from "../../../config/firebase";
 import { useAuth } from "../../../context/AuthContext";
 import { useLocationTracking } from "../../../hooks/useLocationTracking";
 import { useWalkParticipants } from "../../../hooks/useWaitingParticipants";
@@ -17,22 +14,19 @@ import { useDoc } from "../../../utils/firestore";
 import { getDirectionsUrl } from "../../../utils/routeUtils";
 import WalkStatusControls from "./WalkStatusControls";
 
-// Global types are now defined in backgroundLocationTask.ts
-
 interface Props {
   walkId: string;
 }
 
-// Background task is now defined in backgroundLocationTask.ts
-
 export default function LiveWalkMap({ walkId }: Props) {
   const { user } = useAuth();
-  const [appState, setAppState] = useState(AppState.currentState);
   const mapRef = useRef<MapView>(null);
 
   // Get current user participant and participant status
   const [userParticipant, setUserParticipant] = useState<any>(null);
-  const [navigationMethod, setNavigationMethod] = useState<'walking' | 'driving'>('walking');
+  const [navigationMethod, setNavigationMethod] = useState<
+    "walking" | "driving"
+  >("walking");
 
   // Get extra fields to include in location updates
   const getExtraLocationFields = () => ({
@@ -45,9 +39,9 @@ export default function LiveWalkMap({ walkId }: Props) {
   const participants = useWalkParticipants(walkId);
 
   // Use the location tracking hook
-  const { 
-    userLocation, 
-    locationPermission, 
+  const {
+    userLocation,
+    locationPermission,
     backgroundLocationPermission,
     locationTracking,
   } = useLocationTracking(walkId, user?.uid, getExtraLocationFields);
@@ -55,15 +49,17 @@ export default function LiveWalkMap({ walkId }: Props) {
   // Get and store current user participant data
   useEffect(() => {
     if (participants && user) {
-      const currentUserParticipant = participants.find(p => p.id === user.uid);
+      const currentUserParticipant = participants.find(
+        (p) => p.id === user.uid
+      );
       if (currentUserParticipant) {
         setUserParticipant(currentUserParticipant);
-        
+
         // Set navigation method
         if (currentUserParticipant.navigationMethod === "driving") {
-          setNavigationMethod('driving');
+          setNavigationMethod("driving");
         } else {
-          setNavigationMethod('walking');
+          setNavigationMethod("walking");
         }
       }
     }
@@ -72,25 +68,8 @@ export default function LiveWalkMap({ walkId }: Props) {
   // Get walk data to access start location
   const { doc: walk } = useDoc<Walk>(`walks/${walkId}`);
 
-  // Store user and walkId in global scope for background tasks
-  useEffect(() => {
-    if (user && walkId) {
-      // Using global as a storage for background tasks
-      (global as any).currentUser = user;
-      (global as any).currentWalkId = walkId;
-    }
-  }, [user, walkId]);
-
-  // Monitor app state changes
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      setAppState(nextAppState);
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
+  // The user and walkId are now passed directly to the background task
+  // through the useLocationTracking hook's startBackgroundLocationTracking function
 
   // Render location permission denied message
   if (locationPermission === false) {
@@ -108,8 +87,6 @@ export default function LiveWalkMap({ walkId }: Props) {
 
   // Show tracking status indicator and map controls
   const renderMapControls = () => {
-    if (appState !== "active") return null; // Only show in active state
-
     return (
       <XStack
         position="absolute"
@@ -199,10 +176,12 @@ export default function LiveWalkMap({ walkId }: Props) {
     }
 
     // Convert route points to map coordinates
-    const polylineCoordinates = participantWithRoute.route.points.map(point => ({
-      latitude: point.latitude,
-      longitude: point.longitude
-    }));
+    const polylineCoordinates = participantWithRoute.route.points.map(
+      (point) => ({
+        latitude: point.latitude,
+        longitude: point.longitude,
+      })
+    );
 
     return (
       <>
@@ -307,9 +286,11 @@ export default function LiveWalkMap({ walkId }: Props) {
         <WalkStatusControls
           walkId={walkId}
           userId={user?.uid}
-          initialStatus={userParticipant?.status || 'pending'}
+          initialStatus={userParticipant?.status || "pending"}
           initialNavigationMethod={navigationMethod}
-          onNavigationMethodChange={(isDriving) => setNavigationMethod(isDriving ? 'driving' : 'walking')}
+          onNavigationMethodChange={(isDriving) =>
+            setNavigationMethod(isDriving ? "driving" : "walking")
+          }
         />
       </View>
     </>

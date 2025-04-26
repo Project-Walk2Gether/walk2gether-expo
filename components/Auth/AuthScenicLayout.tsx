@@ -17,7 +17,7 @@ import WalkingCharacters from "./WalkingCharacters";
 
 const getTopPadding = (screenHeight: number): number => {
   const isLargeScreen = screenHeight > 700;
-  return isLargeScreen ? 120 : 80;
+  return isLargeScreen ? 50 : 20;
 };
 
 export interface AuthScenicLayoutProps {
@@ -82,29 +82,28 @@ export default function AuthScenicLayout({
           <LottieView
             style={{
               position: "absolute",
-              bottom: -40,
-              left: -190,
-              width: 400,
-              height: 400,
-              zIndex: 0,
+              bottom: -120,
+              left: -370,
+              width: 750,
+              height: 750,
             }}
             source={tree}
             autoPlay
             loop
-            speed={0.7}
+            speed={0.15}
           />
         )}
         <WalkingCharacters
           style={{
             position: "absolute",
-            bottom: -7,
+            bottom: -18,
             width: "100%",
           }}
         />
       </YStack>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        style={{ flex: 1, zIndex: 100 }}
       >
         <ScrollOrView
           contentContainerStyle={{

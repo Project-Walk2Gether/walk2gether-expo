@@ -119,8 +119,11 @@ export function useLocationTracking(
     if (!userId || !walkId) return;
 
     if (backgroundLocationPermission) {
-      // Start background location tracking using the imported function
+      // Start background location tracking using the imported function with walkId and userId
       await startBackgroundLocationTracking({
+        walkId,
+        userId,
+        extraFields: updateExtraFields ? updateExtraFields() : {},
         foregroundService: {
           notificationTitle: "Walk2gether is tracking your location",
           notificationBody: "This allows others to see your location during the walk",

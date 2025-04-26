@@ -1,7 +1,9 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Card, Text, View, YStack } from "tamagui";
-import AnimatedLogo from "../components/AnimatedLogo";
+import { Dimensions } from "react-native";
+import { Card, Spacer, Text, View, YStack } from "tamagui";
+import { Slogan } from "../components/AnimatedLogo/Slogan";
+import AnimatedLogo from "../components/AnimatedLogo/index";
 import AuthScenicLayout from "../components/Auth/AuthScenicLayout";
 import PhoneForm from "../components/Auth/Form/PhoneForm";
 import VerificationCodeForm, {
@@ -9,6 +11,9 @@ import VerificationCodeForm, {
 } from "../components/Auth/Form/VerificationCodeForm";
 import { db } from "../config/firebase";
 import { useAuth } from "../context/AuthContext";
+
+const { width } = Dimensions.get("window");
+const logoWidth = width * 0.7;
 
 export default function Auth() {
   const router = useRouter();
@@ -37,17 +42,17 @@ export default function Auth() {
   return (
     <AuthScenicLayout
       showLogo={
-        <YStack width="100%" gap="$2" alignItems="center">
+        <YStack width="100%" alignItems="center">
           <Text
-            color="rgb(42, 107, 84)"
+            color="rgb(81, 92, 27)"
             fontWeight="bold"
-            position="relative"
-            top={12}
             textTransform="uppercase"
           >
             PROJECT
           </Text>
-          <AnimatedLogo width={240} height={80} />
+          <AnimatedLogo width={logoWidth} height={44} />
+          <Spacer h="$2" />
+          <Slogan delay={4500} />
         </YStack>
       }
       scroll

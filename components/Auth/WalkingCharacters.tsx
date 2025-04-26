@@ -1,7 +1,7 @@
 import LottieView from "lottie-react-native";
 import React, { useEffect, useRef } from "react";
 import { Animated, Dimensions, View as RNView } from "react-native";
-import { Stack, XStack, YStack } from "tamagui";
+import { YStack } from "tamagui";
 
 const { width } = Dimensions.get("window");
 
@@ -9,8 +9,10 @@ interface WalkingCharactersProps {
   style?: any;
 }
 
-const TIME_TO_WALK_ACROSS_SCREEN = 12;
+const TIME_TO_WALK_ACROSS_SCREEN = 10;
 const PAUSE_TIME = 6;
+const CHARACTER_1_SIZE = 320; // Behind, the pencil
+const CHARACTER_2_SIZE = 270; // In front, the onion
 
 export default function WalkingCharacters({ style }: WalkingCharactersProps) {
   // Horizontal position animations
@@ -53,60 +55,65 @@ export default function WalkingCharacters({ style }: WalkingCharactersProps) {
   // Calculate the actual X position based on the animated value
   const translateX = position.interpolate({
     inputRange: [0, 1],
-    outputRange: [-300, width],
+    outputRange: [-400, width],
   });
 
   // We can use tamagui for the container, but need to use React Native's Animated.View for animations
   return (
-    <YStack 
+    <YStack
       position="relative"
-      height={180}
+      height={300}
       overflow="hidden"
       width="100%"
       zIndex={100}
       {...style}
     >
       <Animated.View
-        style={[{
-          position: "absolute",
-          bottom: 0,
-          flexDirection: "row",
-          alignItems: "flex-end",
-          transform: [{ translateX }]
-        }]}
+        style={[
+          {
+            position: "absolute",
+            bottom: 0,
+            flexDirection: "row",
+            alignItems: "flex-end",
+            transform: [{ translateX }],
+          },
+        ]}
       >
         {/* First character */}
-        <RNView style={{
-          position: "relative",
-          zIndex: 2, // Put first character in front
-          left: 30,
-          top: -5,
-        }}>
+        <RNView
+          style={{
+            position: "relative",
+            zIndex: 1, // Put first character in front
+            left: 30,
+            top: -5,
+          }}
+        >
           <LottieView
-            style={{ width: 180, height: 180 }}
+            style={{ width: CHARACTER_1_SIZE, height: CHARACTER_1_SIZE }}
             source={require("../../assets/animations/walker1.lottie")}
             autoPlay
             loop
-            speed={0.85}
+            speed={0.75}
           />
         </RNView>
 
         {/* Second character */}
-        <RNView style={{
-          position: "relative",
-          zIndex: 1, // Put second character behind
-          left: -95, // More overlap
-        }}>
+        <RNView
+          style={{
+            position: "relative",
+            zIndex: 2, // Put second character in front
+            left: -180, // More overlap
+          }}
+        >
           <LottieView
-            style={{ width: 180, height: 180 }}
+            style={{ width: CHARACTER_2_SIZE, height: CHARACTER_2_SIZE }}
             source={require("../../assets/animations/walker2.lottie")}
             autoPlay
             loop
-            speed={0.85}
+            speed={0.75}
           />
         </RNView>
       </Animated.View>
     </YStack>
   );
 }
-

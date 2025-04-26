@@ -188,7 +188,7 @@ export default function FriendsScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View flex={1} paddingHorizontal={20} paddingTop={insets.top}>
-            <ScreenTitle color="black">My Friends</ScreenTitle>
+            <ScreenTitle>My Friends</ScreenTitle>
 
             {friends.length > 0 && (
               <View marginBottom={20}>
@@ -221,10 +221,21 @@ export default function FriendsScreen() {
                   minHeight={300}
                 >
                   <Ionicons name="people" size={64} color={COLORS.primary} />
-                  <Text fontSize={20} fontWeight="bold" color="#333" marginTop={16} marginBottom={8}>
+                  <Text
+                    fontSize={20}
+                    fontWeight="bold"
+                    color="#333"
+                    marginTop={16}
+                    marginBottom={8}
+                  >
                     No Friends Yet
                   </Text>
-                  <Text fontSize={16} color="#666" textAlign="center" marginBottom={16}>
+                  <Text
+                    fontSize={16}
+                    color="#666"
+                    textAlign="center"
+                    marginBottom={16}
+                  >
                     Add friends to chat and invite them to walks!
                   </Text>
                   {!searchQuery && (
@@ -318,5 +329,3 @@ export default function FriendsScreen() {
     </>
   );
 }
-
-

@@ -2,7 +2,7 @@ import { Formik } from "formik";
 import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Alert } from "react-native";
 import PhoneInput from "react-native-phone-number-input";
-import { Button, Text, View, YStack } from "tamagui";
+import { Button, Text, View } from "tamagui";
 import * as yup from "yup";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -49,15 +49,7 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
       validationSchema={signInSchema}
       onSubmit={onSubmit}
     >
-      {({
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        values,
-        errors,
-        touched,
-        isValid,
-      }) => (
+      {({ handleChange, handleSubmit, values, errors, touched, isValid }) => (
         <>
           <View width="100%">
             <PhoneInput
@@ -79,6 +71,7 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
               }}
               textInputStyle={{
                 height: 50,
+                marginLeft: 10,
                 borderWidth: 1,
                 borderColor: "#ddd",
                 borderRadius: 10,
@@ -91,7 +84,9 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
               }}
             />
             {touched.phoneNumber && errors.phoneNumber && (
-              <Text color="red" fontSize={12} marginTop={2}>{errors.phoneNumber}</Text>
+              <Text color="red" fontSize={12} marginTop={2}>
+                {errors.phoneNumber}
+              </Text>
             )}
           </View>
           <Button
@@ -124,5 +119,3 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
     </Formik>
   );
 }
-
-

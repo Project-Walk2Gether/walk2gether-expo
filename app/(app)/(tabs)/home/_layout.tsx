@@ -34,7 +34,6 @@ export default function HomeTabsLayout() {
       <StatusBar style="dark" />
       <View paddingHorizontal={20}>
         <ScreenTitle
-          color="black"
           rightAction={
             userData && userData.profilePicUrl ? (
               <Avatar

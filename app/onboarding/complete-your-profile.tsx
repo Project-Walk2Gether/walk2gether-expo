@@ -241,7 +241,7 @@ export default function CompleteYourProfile() {
                     color={COLORS.textOnDark}
                     width="100%"
                     borderRadius={12}
-                    fontWeight="bold"
+                    fontWeight={600}
                     elevation={2}
                     fontSize={18}
                     opacity={!values.name || !values.location ? 0.6 : 1}

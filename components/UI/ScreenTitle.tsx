@@ -1,5 +1,5 @@
 import React from "react";
-import { H1, Text, View, XStack } from "tamagui";
+import { H1, View, XStack } from "tamagui";
 
 /**
  * Standardized screen title component for consistent headers across the app
@@ -13,31 +13,21 @@ interface ScreenTitleProps {
 
 export const ScreenTitle: React.FC<ScreenTitleProps> = ({
   children,
-  color = "#333333", // Default to dark text
+  color = "white", // Default to dark text
   leftAction,
   rightAction,
 }) => {
   return (
-    <XStack 
+    <XStack
       justifyContent="space-between"
       alignItems="center"
       marginBottom="$5"
     >
-      {leftAction && (
-        <View marginRight="$2">{leftAction}</View>
-      )}
-      <H1 
-        fontSize="$8" 
-        fontWeight="bold"
-        flex={1}
-        color={color}
-      >
+      {leftAction && <View marginRight="$2">{leftAction}</View>}
+      <H1 fontSize={32} fontWeight="bold" flex={1} color={color}>
         {children}
       </H1>
-      {rightAction && (
-        <View marginLeft="$2">{rightAction}</View>
-      )}
+      {rightAction && <View marginLeft="$2">{rightAction}</View>}
     </XStack>
   );
 };
-

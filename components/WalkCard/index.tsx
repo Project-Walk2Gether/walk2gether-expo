@@ -83,55 +83,75 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
       onPress={handlePress}
     >
       {/* Walk Card Header */}
-      <YStack space="$1" px="$3" py="$2" flex={1}>
+      <YStack space="$1" px="$3" pt="$2" pb="$3" flex={1}>
         <XStack
           p="$2"
           alignItems="center"
           justifyContent="space-between"
           flexShrink={0}
         >
-          <Text
-            fontSize={18}
-            fontWeight="600"
-            color="$gray12"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            flex={1}
-          >
-            {getWalkTypeLabel(walk.type)}
-          </Text>
-
-          <XStack
-            backgroundColor={
-              status === "active"
-                ? "#4caf50"
-                : status === "past"
-                ? "#9e9e9e"
-                : "#2196f3"
-            }
-            paddingHorizontal={8}
-            paddingVertical={4}
-            borderRadius={4}
-            alignItems="center"
-            justifyContent="center"
-            ml={4}
-          >
-            <Text fontSize={12} color="white" fontWeight="500">
-              {status === "active"
-                ? "Active"
-                : status === "past"
-                ? "Past"
-                : "Upcoming"}
-            </Text>
-          </XStack>
+          <XStack alignItems="center" gap={8}>
+  <Text
+    fontSize={18}
+    fontWeight="600"
+    color="$gray12"
+    numberOfLines={1}
+    ellipsizeMode="tail"
+    flex={1}
+  >
+    {isMine
+      ? "Friend walk"
+      : `${walk.organizerName}'s Friend walk`}
+  </Text>
+  {isMine && (
+  <XStack
+    backgroundColor={COLORS.primary}
+    px={8}
+    py={4}
+    borderRadius={4}
+    alignItems="center"
+    justifyContent="center"
+    ml={4}
+  >
+    <Text fontSize={12} color="white" fontWeight="500">
+      {status === "past" ? "You hosted" : "You're hosting"}
+    </Text>
+  </XStack>
+)}
+{status === "active" && (
+  <XStack
+    backgroundColor="#4caf50"
+    paddingHorizontal={8}
+    paddingVertical={4}
+    borderRadius={4}
+    alignItems="center"
+    justifyContent="center"
+    ml={4}
+  >
+    <Text fontSize={12} color="white" fontWeight="500">
+      Active
+    </Text>
+  </XStack>
+)}
+{status !== "active" && status !== "past" && (
+  <XStack
+    backgroundColor="#2196f3"
+    paddingHorizontal={8}
+    paddingVertical={4}
+    borderRadius={4}
+    alignItems="center"
+    justifyContent="center"
+    ml={4}
+  >
+    <Text fontSize={12} color="white" fontWeight="500">
+      Upcoming
+    </Text>
+  </XStack>
+)}
+</XStack>
         </XStack>
 
-        <XStack alignItems="center" gap={6}>
-          <User size={16} color={COLORS.primary} />
-          <Text fontSize={14} color="#666" fontWeight="500">
-            {organizerNameText}
-          </Text>
-        </XStack>
+        
         <XStack alignItems="center" gap={6}>
           <Calendar size={16} color="#666" />
           <Text fontSize={14} color="#666">

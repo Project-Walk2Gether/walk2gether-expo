@@ -1,102 +1,143 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, View as RNView } from "react-native";
-import Svg, { Path } from "react-native-svg";
-import { View } from "tamagui";
-import { path } from "./path";
+import { Animated, Easing } from "react-native";
+import { XStack } from "tamagui";
+import Gether from "./Gether";
+import Two from "./Two";
+import Walk from "./Walk";
+import { logoColor } from "./color";
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
+const PULSE_DURATION = 300;
+const PULSE_SCALE = 1.13;
+const PULSE_DELAY = 180;
+const STARTING_DELAY = 1500;
 
-interface Props {
-  width: number;
-  height: number;
-}
+// Use actual viewBox widths for each SVG
+const walkViewBoxWidth = 218.4;
+const twoViewBoxWidth = 41.467;
+const getherViewBoxWidth = 309.527;
+const totalViewBoxWidth =
+  walkViewBoxWidth + twoViewBoxWidth + getherViewBoxWidth;
 
-// Qwitcher Grypen font
-// https://danmarshall.github.io/google-font-to-svg-path/
-// https://react-svgr.com/playground/?dimensions=false&native=true&typescript=true
-export default function AnimatedLogo({ width, height }: Props) {
+const walkFraction = walkViewBoxWidth / totalViewBoxWidth;
+const twoFraction = twoViewBoxWidth / totalViewBoxWidth;
+const getherFraction = getherViewBoxWidth / totalViewBoxWidth;
+
+// Use the new max viewBox height for consistent alignment
+const height = 44;
+
+// Underline thickness and offset
+const underlineHeight = 2;
+const underlineOffset = 20;
+
+export default function AnimatedLogo({ width = 168 }: { width?: number }) {
   const [isAnimating, setIsAnimating] = useState(false);
-  /* animated value 0-1 that drives the write-on */
-  const progress = useRef(new Animated.Value(0)).current;
-  const [readyToMeasure, setReadyToMeasure] = useState(false);
+  // Animated value for underline progress (0 to 1)
+  const underlineProgress = useRef(new Animated.Value(0)).current;
+  // Animated values for each SVG
+  const walkScale = useRef(new Animated.Value(1)).current;
+  const twoScale = useRef(new Animated.Value(1)).current;
+  const getherScale = useRef(new Animated.Value(1)).current;
 
-  /* length of the outline once we’ve queried it */
-  const [length, setLength] = useState<number | null>(null);
-
-  /* ref so we can call getTotalLength() */
-  const pathRef = useRef<Path>(null);
-
-  useEffect(() => {
-    if (pathRef.current) {
-      const l = pathRef.current.getTotalLength?.() ?? 0;
-      setLength(l); // e.g. ≈1650 for this logo
-      setTimeout(() => setIsAnimating(true), 0);
-    }
-  }, [readyToMeasure]);
-
-  useEffect(() => {
-    if (length && isAnimating) {
-      console.log("STARTING");
-      Animated.timing(progress, {
-        toValue: 1,
-        duration: 2000,
+  // Helper to animate scale up and down
+  const pulse = (animatedValue: Animated.Value, delay: number) =>
+    Animated.sequence([
+      Animated.delay(delay),
+      Animated.timing(animatedValue, {
+        toValue: PULSE_SCALE,
+        duration: PULSE_DURATION,
+        easing: Easing.out(Easing.ease),
         useNativeDriver: true,
-      }).start();
+      }),
+      Animated.timing(animatedValue, {
+        toValue: 1,
+        duration: PULSE_DURATION,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }),
+    ]);
 
-      setTimeout(() => {
-        setIsAnimating(false);
-      }, 2000);
+  // Play the pulse animation sequence once
+  // Animation runner, called from useEffect
+  const runAnimation = () => {
+    underlineProgress.setValue(0); // Reset before starting
+    Animated.sequence([
+      Animated.delay(STARTING_DELAY),
+      pulse(walkScale, 0),
+      Animated.delay(PULSE_DELAY),
+      pulse(twoScale, 0),
+      Animated.delay(PULSE_DELAY),
+      Animated.parallel([
+        pulse(getherScale, 0),
+        Animated.timing(underlineProgress, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: false,
+          easing: Easing.out(Easing.cubic),
+        }),
+      ]),
+    ]).start(() => {
+      setIsAnimating(false);
+    });
+  };
+
+  useEffect(() => {
+    if (isAnimating) {
+      runAnimation();
     }
-  }, [isAnimating, length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAnimating]);
 
-  const dashOffset = length
-    ? progress.interpolate({
-        inputRange: [0, 1],
-        outputRange: [length / 2, length],
-      })
-    : 0;
+  // On mount, trigger the animation once
+  useEffect(() => {
+    setIsAnimating(true);
+    return () => {
+      walkScale.stopAnimation();
+      twoScale.stopAnimation();
+      getherScale.stopAnimation();
+    };
+  }, [walkScale, twoScale, getherScale]);
 
-  const strokeWidth = progress.interpolate({
-    inputRange: [0, 0.8, 1],
-    outputRange: [2, 2, 4],
+  const underlineWidth = underlineProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, width],
   });
 
-  const strokeDasharray = length
-    ? [
-        progress.interpolate({ inputRange: [0, 1], outputRange: [0, length] }), // dash grows
-        progress.interpolate({ inputRange: [0, 1], outputRange: [length, 0] }), // gap shrinks
-      ]
-    : undefined;
-
-  function handlePathLayout() {
-    if (pathRef.current) {
-      setReadyToMeasure(true);
-    }
-  }
+  const walkWidth = width * walkFraction;
+  const twoWidth = width * twoFraction;
+  const getherWidth = width * getherFraction;
 
   return (
-    <View 
-      position="relative"
+    <XStack
       alignItems="center"
-      justifyContent="center"
-      width="100%"
-      height={60}
+      space={0}
+      width={width}
+      height={height + underlineHeight + underlineOffset}
+      onPress={() => {
+        if (!isAnimating) setIsAnimating(true);
+      }}
+      position="relative"
     >
-      <Svg viewBox="0 0 549.46 66.382" style={{ width, height }}>
-        <AnimatedPath
-          ref={pathRef}
-          fill="rgb(60 42 24)"
-          fillRule="evenodd"
-          onLayout={handlePathLayout}
-          strokeLinejoin="round"
-          strokeDashoffset={dashOffset}
-          strokeDasharray={strokeDasharray}
-          strokeWidth={strokeWidth}
-          stroke="rgb(60 42 24)"
-          strokeOpacity={1}
-          d={path}
-        />
-      </Svg>
-    </View>
+      <Animated.View style={{ transform: [{ scale: walkScale }] }}>
+        <Walk width={walkWidth} height={height} />
+      </Animated.View>
+      <Animated.View style={{ transform: [{ scale: twoScale }] }}>
+        <Two width={twoWidth} height={height} />
+      </Animated.View>
+      <Animated.View style={{ transform: [{ scale: getherScale }] }}>
+        <Gether width={getherWidth} height={height} />
+      </Animated.View>
+      {/* Animated Underline */}
+      <Animated.View
+        style={{
+          position: "absolute",
+          left: 0,
+          top: height + underlineOffset,
+          height: underlineHeight,
+          width: underlineWidth,
+          backgroundColor: logoColor,
+          borderRadius: underlineHeight / 2,
+        }}
+      />
+    </XStack>
   );
 }
