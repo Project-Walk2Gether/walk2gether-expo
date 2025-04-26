@@ -2,6 +2,7 @@ import { Formik } from "formik";
 import { useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { Button, Input, Text, YStack } from "tamagui";
+import { ActionButton } from "../../ActionButton";
 import * as yup from "yup";
 
 const verificationSchema = yup.object().shape({
@@ -87,31 +88,12 @@ export default function VerificationCodeForm({
             )}
           </YStack>
 
-          <Button
-            backgroundColor="#4EB1BA"
-            width="100%"
-            height={55}
-            borderRadius={10}
-            justifyContent="center"
-            alignItems="center"
-            marginTop={10}
-            shadowColor="#000"
-            shadowOffset={{ width: 0, height: 1 }}
-            shadowOpacity={0.22}
-            shadowRadius={2.22}
-            elevation={3}
-            opacity={!isValid || loading ? 0.5 : 1}
-            onPress={() => handleSubmit()}
-            disabled={!isValid || loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text color="white" fontSize="$5" fontWeight="bold">
-                Let's go!
-              </Text>
-            )}
-          </Button>
+          <ActionButton
+  onPress={handleSubmit}
+  disabled={!isValid || loading}
+>
+  Let's go!
+</ActionButton>
         </>
       )}
     </Formik>

@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Alert } from "react-native";
 import PhoneInput from "react-native-phone-number-input";
 import { Button, Text, View } from "tamagui";
+import { ActionButton } from "../../ActionButton";
 import * as yup from "yup";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -72,9 +73,11 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
               textInputStyle={{
                 height: 50,
                 marginLeft: 10,
-                borderWidth: 1,
-                borderColor: "#ddd",
-                borderRadius: 10,
+                // borderWidth: 1,
+                // borderColor: "#ddd",
+                borderBottomColor: "#ddd",
+                borderBottomWidth: 1,
+                // borderRadius: 10,
                 paddingHorizontal: 15,
                 fontSize: 16,
                 backgroundColor: "#f9f9f9",
@@ -89,31 +92,12 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
               </Text>
             )}
           </View>
-          <Button
-            backgroundColor="#4EB1BA"
-            width="100%"
-            height={55}
-            borderRadius={10}
-            justifyContent="center"
-            alignItems="center"
-            marginTop={10}
-            shadowColor="#000"
-            shadowOffset={{ width: 0, height: 1 }}
-            shadowOpacity={0.22}
-            shadowRadius={2.22}
-            elevation={3}
-            opacity={!isValid || loading ? 0.5 : 1}
-            onPress={() => handleSubmit()}
-            disabled={!isValid || loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text color="white" fontSize="$5" fontWeight="bold">
-                Send Code
-              </Text>
-            )}
-          </Button>
+          <ActionButton
+  onPress={handleSubmit}
+  disabled={!isValid || loading}
+>
+  Send Code
+</ActionButton>
         </>
       )}
     </Formik>

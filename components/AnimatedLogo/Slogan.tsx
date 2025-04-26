@@ -17,7 +17,7 @@ export function Slogan({ delay = 2500 }: { delay?: number }) {
   return (
     <Animated.View style={{ opacity }}>
       <Text
-        fontSize="$4"
+        fontSize={20}
         fontWeight="bold"
         textAlign="center"
         color="rgb(60 42 24)"

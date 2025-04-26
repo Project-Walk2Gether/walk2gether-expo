@@ -11,6 +11,7 @@ import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Card, Input, ScrollView, Text, XStack, YStack } from "tamagui";
 import { userDataSchema } from "walk2gether-shared";
+import { ActionButton } from "../../components/ActionButton";
 import AuthScenicLayout from "../../components/Auth/AuthScenicLayout";
 import AutoDetectLocation from "../../components/AutoDetectLocation";
 import LocationAutocomplete from "../../components/LocationAutocomplete";
@@ -230,25 +231,13 @@ export default function CompleteYourProfile() {
                       />
                     )}
                   </YStack>
-                  <Button
+                  <ActionButton
                     onPress={() => handleSubmit()}
                     disabled={!values.name || !values.location}
-                    backgroundColor={
-                      !values.name || !values.location
-                        ? COLORS.disabled
-                        : COLORS.primary
-                    }
-                    color={COLORS.textOnDark}
-                    width="100%"
-                    borderRadius={12}
-                    fontWeight={600}
-                    elevation={2}
-                    fontSize={18}
-                    opacity={!values.name || !values.location ? 0.6 : 1}
                     iconAfter={<ArrowRight />}
                   >
                     Get started
-                  </Button>
+                  </ActionButton>
                 </YStack>
               </Card>
             </ScrollView>

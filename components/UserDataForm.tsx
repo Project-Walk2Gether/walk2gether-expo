@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { Button, Input, Text, YStack } from "tamagui";
+import { ActionButton } from "./ActionButton";
 import { COLORS } from "../styles/colors";
 import ProfilePicturePicker from "./ProfilePicturePicker";
 import { PlaceData, PlacesAutocomplete } from "./UI/PlacesAutocomplete";
@@ -119,23 +120,13 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
           height={100}
         />
       </YStack>
-      <Button
-        theme="active"
-        onPress={handleSave}
-        disabled={isSaving}
-        width="100%"
-        borderRadius={10}
-        backgroundColor={COLORS.action}
-        color={COLORS.textOnDark}
-        fontWeight="600"
-        fontSize={16}
-      >
-        {isSaving ? (
-          <ActivityIndicator size="small" color="#fff" />
-        ) : (
-          "Save Profile"
-        )}
-      </Button>
+      <ActionButton
+  onPress={handleSave}
+  disabled={isSaving}
+  loading={isSaving}
+>
+  Save Profile
+</ActionButton>
     </YStack>
   );
 };

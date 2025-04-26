@@ -5,6 +5,7 @@ import {
   GooglePlacesAutocompleteRef,
 } from "react-native-google-places-autocomplete";
 import { Button, Text, YStack } from "tamagui";
+import { ArrowLeft } from '@tamagui/lucide-icons';
 import { COLORS } from "../styles/colors";
 
 interface LocationAutocompleteProps {
@@ -43,15 +44,13 @@ const LocationAutocomplete: React.FC<Omit<LocationAutocompleteProps, 'styles'>> 
       paddingHorizontal: 16,
       paddingVertical: 12,
       fontSize: 18,
-      height: 100,
+      height: 48,
       borderWidth: 1,
     },
     textInputContainer: {
       width: '100%',
       borderRadius: 10,
-      borderColor: COLORS.primary,
-      borderWidth: 1,
-      backgroundColor: COLORS.background,
+      backgroundColor: 'transparent', // no border or bg on container
     },
     listView: {
       borderRadius: 10,
@@ -116,9 +115,16 @@ const LocationAutocomplete: React.FC<Omit<LocationAutocompleteProps, 'styles'>> 
       )}
       {value && includeChooseAnotherWayButton && (
         <Button
-          size="$2"
-          variant="outlined"
+          size="$3"
+          variant="chromeless"
           mt="$2"
+          backgroundColor="$gray2"
+          borderRadius={8}
+          fontWeight="600"
+          fontSize="$4"
+          py="$2"
+          color="$gray12"
+          icon={ArrowLeft}
           onPress={() => {
             setFieldValue("location", null);
             setShowLocationResults(false);
@@ -130,9 +136,16 @@ const LocationAutocomplete: React.FC<Omit<LocationAutocompleteProps, 'styles'>> 
       )}
       {!value && (
         <Button
-          size="$2"
-          variant="outlined"
+          size="$3"
+          variant="chromeless"
           mt="$2"
+          backgroundColor="$gray2"
+          borderRadius={8}
+          fontWeight="600"
+          fontSize="$4"
+          py="$2"
+          color="$gray12"
+          icon={ArrowLeft}
           onPress={() => {
             onCancel();
             setShowLocationResults(false);

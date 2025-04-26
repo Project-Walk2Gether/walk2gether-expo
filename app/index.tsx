@@ -10,12 +10,8 @@ export default function Index() {
 
   useEffect(() => {
     if (!loading) {
-      console.log(
-        "Auth state loaded, user:",
-        user ? "authenticated" : "unauthenticated"
-      );
       if (user) {
-        router.replace("/home");
+        router.replace("/home/active");
       } else {
         router.replace("/auth");
       }

@@ -59,9 +59,7 @@ export default function AnimatedLogo({ width = 168 }: { width?: number }) {
   // Play the pulse animation sequence once
   // Animation runner, called from useEffect
   const runAnimation = () => {
-    underlineProgress.setValue(0); // Reset before starting
     Animated.sequence([
-      Animated.delay(STARTING_DELAY),
       pulse(walkScale, 0),
       Animated.delay(PULSE_DELAY),
       pulse(twoScale, 0),
@@ -89,13 +87,16 @@ export default function AnimatedLogo({ width = 168 }: { width?: number }) {
 
   // On mount, trigger the animation once
   useEffect(() => {
-    setIsAnimating(true);
+    setTimeout(() => {
+      setIsAnimating(true);
+    }, STARTING_DELAY);
+
     return () => {
       walkScale.stopAnimation();
       twoScale.stopAnimation();
       getherScale.stopAnimation();
     };
-  }, [walkScale, twoScale, getherScale]);
+  }, []);
 
   const underlineWidth = underlineProgress.interpolate({
     inputRange: [0, 1],

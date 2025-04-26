@@ -64,7 +64,7 @@ const UIDInfo: React.FC<{ uid: string; version: string }> = ({
 };
 
 export default function ProfileScreen() {
-  const { user: authUser, refreshToken, signOut } = useAuth();
+  const { user: authUser, signOut } = useAuth();
   const { userData, loading: userDataLoading, updateUserData } = useUserData();
   const router = useRouter();
   const [name, setName] = useState("");

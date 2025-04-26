@@ -16,7 +16,7 @@ export default function Clouds({ style }: Props) {
           source={require("../assets/animations/clouds.lottie")}
           autoPlay
           loop
-          speed={1.05}
+          speed={0.2}
         />
       </RNView>
     </View>

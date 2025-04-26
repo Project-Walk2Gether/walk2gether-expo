@@ -9,10 +9,16 @@ interface WalkingCharactersProps {
   style?: any;
 }
 
-const TIME_TO_WALK_ACROSS_SCREEN = 10;
+const TIME_TO_WALK_ACROSS_SCREEN = 12.5;
 const PAUSE_TIME = 6;
-const CHARACTER_1_SIZE = 320; // Behind, the pencil
-const CHARACTER_2_SIZE = 270; // In front, the onion
+
+// The pencil - walking behind
+const CHARACTER_1_SIZE = 320;
+const CHARACTER_1_SPEED = 0.6;
+
+// The onion - walking in front
+const CHARACTER_2_SIZE = 270;
+const CHARACTER_2_SPEED = 0.75;
 
 export default function WalkingCharacters({ style }: WalkingCharactersProps) {
   // Horizontal position animations
@@ -93,7 +99,7 @@ export default function WalkingCharacters({ style }: WalkingCharactersProps) {
             source={require("../../assets/animations/walker1.lottie")}
             autoPlay
             loop
-            speed={0.75}
+            speed={CHARACTER_1_SPEED}
           />
         </RNView>
 
@@ -110,7 +116,7 @@ export default function WalkingCharacters({ style }: WalkingCharactersProps) {
             source={require("../../assets/animations/walker2.lottie")}
             autoPlay
             loop
-            speed={0.75}
+            speed={CHARACTER_2_SPEED}
           />
         </RNView>
       </Animated.View>

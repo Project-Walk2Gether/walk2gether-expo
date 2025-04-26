@@ -53,7 +53,7 @@ export default function AuthScenicLayout({
       {showSun && (
         <Sun style={{ position: "absolute", left: 0, top: 20, zIndex: 1 }} />
       )}
-      <Clouds style={{ position: "absolute", top: -100, left: 0, zIndex: 1 }} />
+      <Clouds style={{ position: "absolute", top: -80, left: 0, zIndex: 1 }} />
       <Birds />
 
       <BottomRow />

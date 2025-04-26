@@ -44,14 +44,14 @@ export default function Auth() {
       showLogo={
         <YStack width="100%" alignItems="center">
           <Text
-            color="rgb(81, 92, 27)"
+            color="rgb(182, 219, 99)"
             fontWeight="bold"
             textTransform="uppercase"
           >
             PROJECT
           </Text>
           <AnimatedLogo width={logoWidth} height={44} />
-          <Spacer h="$2" />
+          <Spacer h="$1" />
           <Slogan delay={4500} />
         </YStack>
       }
@@ -61,8 +61,7 @@ export default function Auth() {
         <Card
           backgroundColor="white"
           borderRadius="$4"
-          padding="$5"
-          paddingTop="$4"
+          padding="$4"
           width="100%"
           shadowColor="#000"
           shadowOffset={{ width: 0, height: 2 }}
@@ -70,10 +69,10 @@ export default function Auth() {
           shadowRadius={3.84}
           elevation={5}
         >
-          <Text fontSize={24} textAlign="center" color="#333" marginBottom="$3">
-            {verificationId ? "Enter confirmation code" : "Get started"}
+          <Text fontSize={26} textAlign="center" color="#333" marginBottom="$2">
+            {verificationId ? "Enter confirmation code" : "Get Started"}
           </Text>
-          <View mb="$4">
+          <View mb="$1">
             {verificationId ? (
               <VerificationCodeForm
                 goBack={() => setVerificationId("")}
