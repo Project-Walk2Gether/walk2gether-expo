@@ -2,9 +2,9 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { Text, View, XStack, YStack, Card, Button } from "tamagui";
-import { useWalkForm } from "../../context/WalkFormContext";
-import { COLORS } from "../../styles/colors";
+import { Card, Text, View, XStack, YStack } from "tamagui";
+import { useWalkForm } from "../../../context/WalkFormContext";
+import { COLORS } from "../../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
 
 interface TimeSelectionProps {
@@ -78,7 +78,8 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
               paddingVertical: 12,
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: timeOption === "now" ? COLORS.action : "transparent"
+              backgroundColor:
+                timeOption === "now" ? COLORS.action : "transparent",
             }}
             onPress={() => setTimeOption("now")}
           >
@@ -96,7 +97,8 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
               paddingVertical: 12,
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: timeOption === "future" ? COLORS.action : "transparent"
+              backgroundColor:
+                timeOption === "future" ? COLORS.action : "transparent",
             }}
             onPress={() => setTimeOption("future")}
           >
@@ -151,7 +153,11 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
             </Card>
 
             <Card backgroundColor="white" borderRadius={10} padding={15}>
-              <View backgroundColor="rgba(255, 255, 255, 0.95)" borderRadius={10} overflow="hidden">
+              <View
+                backgroundColor="rgba(255, 255, 255, 0.95)"
+                borderRadius={10}
+                overflow="hidden"
+              >
                 <DateTimePicker
                   value={time}
                   mode="time"

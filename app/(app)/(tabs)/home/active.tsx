@@ -2,28 +2,13 @@ import { Plus } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList } from "react-native";
-import { Button, ScrollView, Text, View } from "tamagui";
+import { Button, ScrollView, View } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
+import { EmptyMessage } from "../../../../components/EmptyMessage";
 import { BrandGradient } from "../../../../components/UI";
 import WalkCard from "../../../../components/WalkCard";
 import { useWalks } from "../../../../context/WalksContext";
 import { COLORS } from "../../../../styles/colors";
-
-const EmptyMessage = ({ message }: { message: string }) => (
-  <Text
-    fontSize={16}
-    color={COLORS.textOnLight}
-    textAlign="center"
-    marginTop={10}
-    marginBottom={10}
-    paddingHorizontal={20}
-    backgroundColor="rgba(255, 255, 255, 0.2)"
-    padding={15}
-    borderRadius={10}
-  >
-    {message}
-  </Text>
-);
 
 export default function ActiveTabScreen() {
   const router = useRouter();
@@ -54,7 +39,10 @@ export default function ActiveTabScreen() {
             ItemSeparatorComponent={() => <View height={16} />}
           />
         ) : (
-          <EmptyMessage message="There aren't any active walks right now!" />
+          <EmptyMessage
+            message="Looks like it's a quiet moment 🌱"
+            subtitle="Invite a friend or start a walk to get moving!"
+          />
         )}
       </ScrollView>
       <Button

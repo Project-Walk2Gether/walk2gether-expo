@@ -1,17 +1,26 @@
 import { doc, updateDoc } from "@react-native-firebase/firestore";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  useGlobalSearchParams,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
 import React from "react";
 import { Alert } from "react-native";
 import { ScrollView } from "tamagui";
 import { Walk } from "walk2gether-shared";
-import FullScreenLoader from "../../../../components/FullScreenLoader";
-import WalkForm from "../../../../components/WalkForm";
-import { db } from "../../../../config/firebase";
-import { useDoc } from "../../../../utils/firestore";
+import FullScreenLoader from "../../../../../components/FullScreenLoader";
+import WalkForm from "../../../../../components/WalkForm";
+import { db } from "../../../../../config/firebase";
+import { useDoc } from "../../../../../utils/firestore";
 
 export default function EditWalkScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+
+  console.log({
+    local: useLocalSearchParams(),
+    global: useGlobalSearchParams(),
+  });
   const { doc: walk } = useDoc<Walk>(`walks/${id}`);
 
   const handleSubmit = async (values: Walk) => {

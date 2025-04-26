@@ -2,7 +2,7 @@ import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Walk } from "walk2gether-shared";
 import HeaderBackButton from "../../../../../components/HeaderBackButton";
-import RequestToJoinScreen from "../../../../../components/Walk/RequestToJoinScreen";
+import RequestToJoinWalkScreen from "../../../../../components/RequestToJoinWalkScreen";
 import { useDoc } from "../../../../../utils/firestore";
 
 export default function WalkCheckIn() {
@@ -19,7 +19,7 @@ export default function WalkCheckIn() {
           headerLeft: () => <HeaderBackButton />,
         }}
       />
-      <RequestToJoinScreen walk={walk} />
+      <RequestToJoinWalkScreen walk={walk} />
     </>
   );
 }

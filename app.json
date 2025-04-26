@@ -51,6 +51,13 @@
       "@react-native-firebase/crashlytics",
       "expo-updates",
       [
+        "react-native-maps",
+        {
+          "iosGoogleMapsApiKey": "AIzaSyAjnbays5Hi7wYTj9PLljDDFJzZq3Dh3z8",
+          "androidGoogleMapsApiKey": "AIzaSyAjnbays5Hi7wYTj9PLljDDFJzZq3Dh3z8"
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "ios": {

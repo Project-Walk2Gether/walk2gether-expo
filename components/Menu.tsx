@@ -12,6 +12,7 @@ export interface MenuItem {
 
 interface Props {
   title: string;
+  color?: string;
   items: MenuItem[];
   triggerIcon?: React.ReactElement<IconProps> | undefined;
   triggerButtonProps?: Partial<GetProps<typeof Button>>;
@@ -21,7 +22,8 @@ interface Props {
 export default function Menu({
   title,
   items,
-  triggerIcon = <MoreVertical size="$1" color="white" />,
+  color = "white",
+  triggerIcon = <MoreVertical size="$1" color={color} />,
   triggerButtonProps = {},
   snapPoints = [40],
 }: Props) {

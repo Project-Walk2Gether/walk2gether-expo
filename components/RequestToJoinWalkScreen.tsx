@@ -5,10 +5,10 @@ import { ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Card, SizableText, Text, XStack, YStack } from "tamagui";
 import { Participant, Walk } from "walk2gether-shared";
-import { firestore_instance } from "../../config/firebase";
-import { useAuth } from "../../context/AuthContext";
-import { COLORS } from "../../styles/colors";
-import { useDoc } from "../../utils/firestore";
+import { firestore_instance } from "../config/firebase";
+import { useAuth } from "../context/AuthContext";
+import { COLORS } from "../styles/colors";
+import { useDoc } from "../utils/firestore";
 
 interface CheckInScreenProps {
   walk: Walk;
@@ -116,25 +116,21 @@ export default function RequestToJoinScreen({ walk }: CheckInScreenProps) {
                     <XStack alignItems="center" gap="$2">
                       <Calendar size={20} />
                       <Text fontSize={18} fontWeight="600">
-                        {walk.date
-                          .toDate()
-                          .toLocaleDateString(undefined, {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                        {walk.date.toDate().toLocaleDateString(undefined, {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
                       </Text>
                     </XStack>
                     <XStack alignItems="center" gap="$2">
                       <Clock size={20} />
                       <Text fontSize={18} fontWeight="600">
-                        {walk.date
-                          .toDate()
-                          .toLocaleTimeString(undefined, {
-                            hour: "numeric",
-                            minute: "2-digit",
-                          })}
+                        {walk.date.toDate().toLocaleTimeString(undefined, {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}
                       </Text>
                     </XStack>
                   </XStack>

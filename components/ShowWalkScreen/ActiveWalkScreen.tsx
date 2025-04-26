@@ -5,19 +5,20 @@ import {
   query,
   serverTimestamp,
 } from "@react-native-firebase/firestore";
-import { useNavigation } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
-import WalkChat from "../../components/Chat/WalkChat";
+import React from "react";
 import { firestore_instance } from "../../config/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { useDoc, useQuery } from "../../utils/firestore";
+import WalkChat from "../Chat/WalkChat";
 // Removed StyleSheet import; using Tamagui for styles
+import { Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View } from "tamagui";
+import { isOwner } from "utils/walkUtils";
 import { Message, Walk } from "walk2gether-shared";
 import FullScreenLoader from "../FullScreenLoader";
-import LiveWalkMap from "./LiveWalkMap";
+import LiveWalkMap from "./components/LiveWalkMap";
 
 export default function ActiveWalkScreen() {
   const params = useLocalSearchParams();
@@ -25,9 +26,6 @@ export default function ActiveWalkScreen() {
   const { user } = useAuth();
   const { doc: walk } = useDoc<Walk>(`walks/${id}`);
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
-  const [pendingRequests, setPendingRequests] = useState<number>(0);
-  const [isHost, setIsHost] = useState<boolean>(false);
   // Get walk messages using the useQuery hook
   const messagesRef = collection(firestore_instance, `walks/${id}/messages`);
   const q = query(messagesRef, orderBy("createdAt", "asc"));
@@ -58,22 +56,25 @@ export default function ActiveWalkScreen() {
   if (!id) return <Text>Invalid walk ID</Text>;
 
   return (
-    <View flex={1} backgroundColor="#fff" paddingBottom={insets.bottom}>
-      {/* Map - Using LiveWalkMap component */}
-      <View height={isHost ? "55%" : "60%"}>
-        <LiveWalkMap walkId={id} />
-      </View>
+    <>
+      <Stack.Screen options={{ title: "Let's walk2gether!" }} />
+      <View flex={1} backgroundColor="#fff" paddingBottom={insets.bottom}>
+        {/* Map - Using LiveWalkMap component */}
+        <View height={isOwner(walk) ? "55%" : "60%"}>
+          <LiveWalkMap walkId={id} />
+        </View>
 
-      {/* Walk Chat Section */}
-      <View height="40%" borderTopWidth={1} borderTopColor="#e0e0e0">
-        <WalkChat
-          messages={messages}
-          currentUserId={user?.uid || ""}
-          onSendMessage={handleSendMessage}
-          keyboardVerticalOffset={90}
-          containerStyle={{ height: "100%" }}
-        />
+        {/* Walk Chat Section */}
+        <View height="40%" borderTopWidth={1} borderTopColor="#e0e0e0">
+          <WalkChat
+            messages={messages}
+            currentUserId={user?.uid || ""}
+            onSendMessage={handleSendMessage}
+            keyboardVerticalOffset={90}
+            containerStyle={{ height: "100%" }}
+          />
+        </View>
       </View>
-    </View>
+    </>
   );
 }

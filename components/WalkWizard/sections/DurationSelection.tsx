@@ -17,8 +17,8 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import { useWalkForm } from "../../context/WalkFormContext";
-import { COLORS } from "../../styles/colors";
+import { useWalkForm } from "../../../context/WalkFormContext";
+import { COLORS } from "../../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
 
 interface DurationSelectionProps {
@@ -96,11 +96,11 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
     <>
       <WizardWrapper onContinue={handleContinue} onBack={onBack}>
         <YStack gap="$4">
-          <Card 
-            backgroundColor="rgba(255, 255, 255, 0.15)" 
-            borderRadius="$4" 
-            padding="$5" 
-            alignItems="center" 
+          <Card
+            backgroundColor="rgba(255, 255, 255, 0.15)"
+            borderRadius="$4"
+            padding="$5"
+            alignItems="center"
             marginVertical="$5"
           >
             <XStack
@@ -146,11 +146,14 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
                   <TouchableOpacity
                     key={option}
                     style={{
-                      backgroundColor: duration === option ? "white" : "rgba(255, 255, 255, 0.6)",
+                      backgroundColor:
+                        duration === option
+                          ? "white"
+                          : "rgba(255, 255, 255, 0.6)",
                       padding: 8,
                       borderRadius: 20,
                       minWidth: 40,
-                      alignItems: "center"
+                      alignItems: "center",
                     }}
                     onPress={() => {
                       setDuration(option);
@@ -172,7 +175,7 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
                 style={{
                   alignItems: "center",
                   justifyContent: "center",
-                  marginTop: 20
+                  marginTop: 20,
                 }}
                 onPress={openCustomDurationPicker}
               >
@@ -187,7 +190,6 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
                   <Text color={COLORS.text} marginLeft="$1" fontWeight="500">
                     Custom Duration
                   </Text>
-                  <Text fontSize={24}>{formatDuration(duration)}</Text>
                 </XStack>
               </TouchableOpacity>
             </YStack>
@@ -202,25 +204,29 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
         transparent={true}
         onRequestClose={() => setCustomModalOpen(false)}
       >
-        <View style={{
-          flex: 1,
-          justifyContent: "flex-end",
-          backgroundColor: "rgba(0,0,0,0.5)"
-        }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "flex-end",
+            backgroundColor: "rgba(0,0,0,0.5)",
+          }}
+        >
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ width: "100%" }}
           >
-            <View style={{
-              backgroundColor: "white",
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              paddingBottom: 30
-            }}>
+            <View
+              style={{
+                backgroundColor: "white",
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+                paddingBottom: 30,
+              }}
+            >
               <TouchableOpacity
                 style={{
                   alignSelf: "flex-end",
-                  padding: 15
+                  padding: 15,
                 }}
                 onPress={() => setCustomModalOpen(false)}
               >
@@ -299,6 +305,5 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
     </>
   );
 };
-
 
 export default DurationSelection;

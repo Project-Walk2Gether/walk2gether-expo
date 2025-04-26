@@ -1,9 +1,9 @@
 import React, { ReactNode } from "react";
 import { ScrollView as RNScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, View, XStack, YStack } from "tamagui";
-import { COLORS } from "../../styles/colors";
-import { BrandGradient } from "../UI";
+import { Button, View, XStack } from "tamagui";
+import { COLORS } from "../../../styles/colors";
+import { BrandGradient } from "../../UI";
 
 interface WizardWrapperProps {
   children: ReactNode;
@@ -79,7 +79,5 @@ export const WizardWrapper: React.FC<WizardWrapperProps> = ({
     </BrandGradient>
   );
 };
-
-
 
 export default WizardWrapper;

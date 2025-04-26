@@ -1,12 +1,12 @@
 import { Handshake, Pin, Speech, Users } from "@tamagui/lucide-icons";
+import { useAuth } from "context/AuthContext";
+import { useWalkForm } from "context/WalkFormContext";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
-import { Dimensions, Platform } from "react-native";
+import { Dimensions } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Text, View, XStack, YStack, Card } from "tamagui";
-import { useAuth } from "../../../context/AuthContext";
-import { useWalkForm } from "../../../context/WalkFormContext";
-import { COLORS } from "../../../styles/colors";
+import { COLORS } from "styles/colors";
+import { Card, Text, View, XStack, YStack } from "tamagui";
 import WizardWrapper from "../WizardWrapper";
 import { findNearbyWalkers } from "./findNearbyWalkers";
 
@@ -126,14 +126,14 @@ export const NeighborhoodConfirmationScreen: React.FC<
       <YStack gap="$4">
         <YStack justifyContent="flex-start" gap="$4">
           {/* Map View */}
-          <View 
+          <View
             height={220}
             borderRadius={12}
             overflow="hidden"
             backgroundColor="#f0f0f0"
           >
             {errorMsg ? (
-              <View 
+              <View
                 height={220}
                 width="100%"
                 justifyContent="center"
@@ -157,7 +157,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
                 provider={PROVIDER_GOOGLE}
                 style={{
                   width: Dimensions.get("window").width - 32,
-                  height: 220
+                  height: 220,
                 }}
                 region={
                   location
@@ -221,7 +221,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
             </XStack>
           </View>
 
-          <Card 
+          <Card
             backgroundColor="white"
             borderRadius={12}
             padding="$4"
@@ -238,7 +238,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
 
             <YStack gap="$4">
               <XStack gap="$3" alignItems="center">
-                <View 
+                <View
                   backgroundColor={COLORS.action}
                   width={32}
                   height={32}
@@ -254,7 +254,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
               </XStack>
 
               <XStack gap="$3" alignItems="center">
-                <View 
+                <View
                   backgroundColor={COLORS.action}
                   width={32}
                   height={32}
@@ -270,7 +270,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
               </XStack>
 
               <XStack gap="$3" alignItems="center">
-                <View 
+                <View
                   backgroundColor={COLORS.action}
                   width={32}
                   height={32}

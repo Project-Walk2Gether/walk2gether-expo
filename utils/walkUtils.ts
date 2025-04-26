@@ -1,6 +1,10 @@
 import { Walk } from "walk2gether-shared";
 import { auth_instance } from "../config/firebase";
 
+export const isOwner = (walk: Walk) => {
+  return walk.createdByUid === auth_instance.currentUser?.uid;
+};
+
 /**
  * Check if a walk is in the future
  * A walk is in the future if it hasn't started yet and is not active
@@ -71,22 +75,12 @@ export function isPast(walk: Walk): boolean {
 }
 
 /**
- * Placeholder for round and pair functionality - update based on actual Walk structure
- *
- * These functions are meant to be used with a different walk structure that includes rounds.
- * For now, we're keeping them as safe stubs to prevent errors.
+ * Get the status of a walk as a string: "active", "past", or "future"
+ * @param walk The walk to check
+ * @returns A string representing the walk's status
  */
-export function currentRound(walk: Walk) {
-  // Safely check if rounds exists on the Walk type
-  return (walk as any).rounds?.[(walk as any).rounds?.length - 1];
-}
-
-/**
- * Get the current user's pair in a round - safe version
- */
-export function userPair(round: any) {
-  if (!round || !auth_instance.currentUser) return null;
-  return round.pairs?.find((pair: any) =>
-    pair.userUids?.includes(auth_instance.currentUser?.uid)
-  );
+export function getWalkStatus(walk: Walk): "active" | "past" | "future" {
+  if (isActive(walk)) return "active";
+  if (isPast(walk)) return "past";
+  return "future";
 }

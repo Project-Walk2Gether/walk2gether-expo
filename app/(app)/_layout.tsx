@@ -1,7 +1,7 @@
 import { Redirect, Stack } from "expo-router";
 import React from "react";
 import { ActivityIndicator } from "react-native";
-import { View, YStack } from "tamagui";
+import { YStack } from "tamagui";
 import HeaderBackButton from "../../components/HeaderBackButton";
 import { useAuth } from "../../context/AuthContext";
 import { useUserData } from "../../context/UserDataContext";
@@ -15,8 +15,6 @@ export default function AppLayout() {
     return <Redirect href="/auth" />;
   }
 
-  console.log({ userDataLoading, userData });
-
   if (!userDataLoading && !userData) {
     console.log("Redirecting");
     return <Redirect href="/onboarding/complete-your-profile" />;
@@ -25,7 +23,7 @@ export default function AppLayout() {
   // Show loading indicator while checking auth state
   if (loading) {
     return (
-      <YStack 
+      <YStack
         flex={1}
         justifyContent="center"
         alignItems="center"
@@ -47,13 +45,6 @@ export default function AppLayout() {
             headerShown: true,
             presentation: "modal",
             headerLeft: () => <HeaderBackButton />,
-          }}
-        />
-        <Stack.Screen
-          name="(modals)/walk/[id]"
-          options={{
-            title: "Let's walk 2gether!",
-            presentation: "modal",
           }}
         />
         <Stack.Screen
@@ -87,5 +78,3 @@ export default function AppLayout() {
     </WalksProvider>
   );
 }
-
-

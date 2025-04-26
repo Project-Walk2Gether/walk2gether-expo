@@ -2,7 +2,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { Walk } from "walk2gether-shared";
 import HeaderCloseButton from "../../../../../components/HeaderCloseButton";
-import WaitingRoomScreen from "../../../../../components/Walk/WaitingRoomScreen";
+import WaitingRoomScreen from "../../../../../components/WaitingRoomScreen";
 import { useDoc } from "../../../../../utils/firestore";
 
 export default function WalkWaitingRoom() {

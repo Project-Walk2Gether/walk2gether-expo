@@ -7,7 +7,7 @@ import {
   X,
 } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Linking, Platform } from "react-native";
 import MapView, { Marker } from "react-native-maps";
@@ -162,17 +162,8 @@ export default function FutureWalkScreen({ walk }: Props) {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: `Walk with ${walk.organizerName}`,
-        }}
-      />
-      <View 
-        flex={1}
-        backgroundColor={COLORS.background}
-        padding="$4"
-      >
-        <Card 
+      <View flex={1} backgroundColor={COLORS.background} padding="$4">
+        <Card
           backgroundColor="white"
           borderRadius={16}
           shadowColor="#000"
@@ -229,7 +220,8 @@ export default function FutureWalkScreen({ walk }: Props) {
                   </XStack>
 
                   {/* Map preview */}
-                  <Card bordered 
+                  <Card
+                    bordered
                     style={{
                       width: "100%",
                       height: 200,
@@ -368,7 +360,7 @@ export default function FutureWalkScreen({ walk }: Props) {
         </YStack>
 
         {/* Countdown Section */}
-        <Card 
+        <Card
           marginTop="auto"
           backgroundColor="white"
           borderRadius={16}
@@ -429,4 +421,3 @@ function getTimeUntilWalk(walkDate: Date): string {
   const diffDays = Math.floor(diffHours / 24);
   return `${diffDays} ${diffDays === 1 ? "day" : "days"}`;
 }
-

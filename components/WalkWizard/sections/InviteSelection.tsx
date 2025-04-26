@@ -8,10 +8,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { Button, Card, Input, Text, View, XStack, YStack } from "tamagui";
-import { useAuth } from "../../context/AuthContext";
-import { useWalkForm } from "../../context/WalkFormContext";
-import { COLORS } from "../../styles/colors";
-import FriendsList from "../FriendsList";
+import { useAuth } from "../../../context/AuthContext";
+import { useWalkForm } from "../../../context/WalkFormContext";
+import { COLORS } from "../../../styles/colors";
+import FriendsList from "../../FriendsList";
 import WizardWrapper from "./WizardWrapper";
 
 interface InviteSelectionProps {
@@ -136,7 +136,12 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
       <YStack gap="$4">
         {isNeighborhoodWalk && (
           <YStack gap="$3">
-            <View height={220} borderRadius={10} overflow="hidden" marginBottom={10}>
+            <View
+              height={220}
+              borderRadius={10}
+              overflow="hidden"
+              marginBottom={10}
+            >
               {formData.location ? (
                 <MapView
                   ref={mapRef}
@@ -215,8 +220,8 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
               </Card>
             ) : null}
 
-            <YStack 
-              gap="$3" 
+            <YStack
+              gap="$3"
               backgroundColor="rgba(255, 255, 255, 0.15)"
               borderRadius="$3"
               padding="$4"
@@ -297,7 +302,5 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
     </WizardWrapper>
   );
 };
-
-
 
 export default InviteSelection;

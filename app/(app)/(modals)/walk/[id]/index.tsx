@@ -1,57 +1,60 @@
-import { Stack, useLocalSearchParams } from "expo-router";
-import React from "react";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { View } from "tamagui";
-import { Walk } from "walk2gether-shared";
-import HeaderCloseButton from "../../../../../components/HeaderCloseButton";
-import WaitingRoomButton from "../../../../../components/WaitingRoomButton";
-import ActiveWalkScreen from "../../../../../components/Walk/ActiveWalkScreen";
-import FutureWalkScreen from "../../../../../components/Walk/FutureWalkScreen";
-import WalkHistoryScreen from "../../../../../components/Walk/WalkHistoryScreen";
+import { Participant, Walk } from "walk2gether-shared";
 import { useAuth } from "../../../../../context/AuthContext";
-import { useWaitingParticipants } from "../../../../../hooks/useWaitingParticipants";
 import { useDoc } from "../../../../../utils/firestore";
-import { isActive, isFuture } from "../../../../../utils/walkUtils";
 
-// Main content component that handles the walk state and displays the appropriate screen.
-export default function WalkScreen() {
-  const { id } = useLocalSearchParams();
-  const { doc: walk } = useDoc<Walk>(`walks/${id}`);
+// This component serves as a router for walk screens
+// It determines where the user should go based on their permissions
+export default function WalkRouter() {
+  const params = useLocalSearchParams<{ id: string }>();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { user } = useAuth();
-  const waitingParticipants = useWaitingParticipants(id!);
+  const { doc: walk } = useDoc<Walk>(`walks/${id}`);
+  const router = useRouter();
 
-  // Show loading while walk is loading
-  if (!walk) {
-    return (
+  // Get the participant doc to check if user is approved
+  const { doc: participant } = useDoc<Participant>(
+    id && user?.uid ? `walks/${id}/participants/${user.uid}` : undefined
+  );
+
+  // Handle routing based on user permissions using imperative navigation
+  useEffect(() => {
+    // Don't navigate while still loading data
+    if (!walk || (user && participant === undefined)) {
+      return;
+    }
+
+    // Determine the appropriate destination based on permissions
+    if (
+      user?.uid === walk.createdByUid ||
+      (participant && participant.approvedAt)
+    ) {
+      // Walk owner or approved participant - show the walk details
+      // Use router.replace with proper typings
+      router.replace({
+        pathname: "/walk/[id]/show",
+        params: { id: id as string },
+      });
+    } else {
+      // Participant with pending request or non-participant - show request page
+      // Use router.replace with proper typings
+      router.replace({
+        pathname: "/walk/[id]/request",
+        params: { id: id as string },
+      });
+    }
+  }, [walk, participant, user, id, router]);
+
+  // Show loading indicator while data is loading or during navigation
+  return (
+    <>
+      <Stack.Screen options={{ title: "Loading..." }} />
       <View flex={1} jc="center" ai="center" p={20}>
         <ActivityIndicator size="large" />
       </View>
-    );
-  }
-
-  // Show the correct screen based on the walk state
-  const ScreenComponent = isActive(walk)
-    ? ActiveWalkScreen
-    : isFuture(walk)
-    ? FutureWalkScreen
-    : WalkHistoryScreen;
-
-  return (
-    <>
-      <Stack.Screen
-        options={{
-          title: "Let's walk!",
-          headerLeft: () =>
-            walk.createdByUid === user!.uid && (
-              <WaitingRoomButton
-                id={id}
-                pendingRequests={waitingParticipants}
-              />
-            ),
-          headerRight: () => <HeaderCloseButton />,
-        }}
-      />
-      <ScreenComponent walk={walk} />
     </>
   );
 }

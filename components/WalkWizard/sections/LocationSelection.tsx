@@ -6,9 +6,9 @@ import {
   GooglePlacesAutocompleteRef,
 } from "react-native-google-places-autocomplete";
 import MapView, { Marker } from "react-native-maps";
-import { Text, View, YStack, XStack } from "tamagui";
-import { useWalkForm } from "../../context/WalkFormContext";
-import { COLORS } from "../../styles/colors";
+import { Text, View, YStack } from "tamagui";
+import { useWalkForm } from "../../../context/WalkFormContext";
+import { COLORS } from "../../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
 
 interface LocationSelectionProps {
@@ -211,7 +211,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
           />
         </View>
 
-        <View 
+        <View
           flex={1}
           height={300}
           borderRadius={15}
@@ -238,17 +238,12 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
             </MapView>
           )}
 
-          <Text 
-            color="white"
-            fontSize={14}
-            fontWeight="500"
-            textAlign="center"
-          >
+          <Text color="white" fontSize={14} fontWeight="500" textAlign="center">
             Tap and hold on the map to choose a location
           </Text>
 
           {(isReverseGeocoding || longPressActive) && (
-            <View 
+            <View
               position="absolute"
               top={0}
               left={0}
@@ -260,11 +255,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
               zIndex={2}
             >
               <ActivityIndicator size="large" color={COLORS.primary} />
-              <Text 
-                marginTop={10}
-                color={COLORS.text}
-                fontSize={14}
-              >
+              <Text marginTop={10} color={COLORS.text} fontSize={14}>
                 {longPressActive
                   ? "Location selected! Getting details..."
                   : "Getting location details..."}
@@ -272,7 +263,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
             </View>
           )}
           {isApiKeyMissing && (
-            <View 
+            <View
               style={{ width: "100%", height: "100%" }}
               backgroundColor="rgba(0, 0, 0, 0.2)"
               justifyContent="center"
@@ -292,6 +283,5 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
     </WizardWrapper>
   );
 };
-
 
 export default LocationSelection;

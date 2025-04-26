@@ -3,20 +3,17 @@ import * as BackgroundFetch from "expo-background-fetch";
 import * as Linking from "expo-linking";
 import * as Location from "expo-location";
 import { Stack } from "expo-router";
+import { Participant, ParticipantWithRoute, Route } from "walk2gether-shared";
 import * as TaskManager from "expo-task-manager";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  AppState,
-  Platform,
-} from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { ActivityIndicator, Alert, AppState, Platform, Pressable } from "react-native";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import { Button, Text, View, XStack, YStack } from "tamagui";
-import { firestore_instance } from "../../config/firebase";
-import { useAuth } from "../../context/AuthContext";
-import { useWalkParticipants } from "../../hooks/useWaitingParticipants";
-import { COLORS } from "../../styles/colors";
+import { firestore_instance } from "../../../config/firebase";
+import { useAuth } from "../../../context/AuthContext";
+import { useWalkParticipants } from "../../../hooks/useWaitingParticipants";
+import { COLORS } from "../../../styles/colors";
+import { getDirectionsUrl } from "../../../utils/routeUtils";
 
 // Define a task name for background location tracking
 const LOCATION_TRACKING_TASK = "background-location-tracking";
@@ -27,19 +24,7 @@ declare global {
   var currentWalkId: string;
 }
 
-// Participant type for the map
-export interface Participant {
-  id: string;
-  displayName?: string;
-  photoURL?: string;
-  lastLocation?: {
-    latitude: number;
-    longitude: number;
-    timestamp: number;
-  };
-}
-
-interface LiveWalkMapProps {
+interface Props {
   walkId: string;
 }
 
@@ -86,7 +71,7 @@ TaskManager.defineTask(
   }
 );
 
-export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
+export default function LiveWalkMap({ walkId }: Props) {
   const { user } = useAuth();
   const [userLocation, setUserLocation] =
     useState<Location.LocationObject | null>(null);
@@ -252,7 +237,7 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
     setLocationTracking(false);
   };
 
-  // Update user's location in Firestore
+  // Update user's location in Firestore and calculate route
   const updateUserLocation = async (location: Location.LocationObject) => {
     if (!user || !walkId) return;
 
@@ -275,6 +260,9 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
         },
         { merge: true }
       );
+      
+      // Route calculation is now handled by Firebase Functions
+      // The backend will calculate the route when location changes
     } catch (error) {
       console.error("Error updating user location:", error);
     }
@@ -283,16 +271,8 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
   // Render location permission denied message
   if (locationPermission === false) {
     return (
-      <View 
-        flex={1} 
-        justifyContent="center" 
-        alignItems="center"
-      >
-        <Text 
-          color="red" 
-          marginBottom={16} 
-          textAlign="center"
-        >
+      <View flex={1} justifyContent="center" alignItems="center">
+        <Text color="red" marginBottom={16} textAlign="center">
           Location permission is required to participate in the walk.
         </Text>
         <Button onPress={() => Location.requestForegroundPermissionsAsync()}>
@@ -339,30 +319,91 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
   // Render loading state
   if (locationPermission === null || !userLocation) {
     return (
-      <View 
-        flex={1}
-        justifyContent="center"
-        alignItems="center"
-      >
+      <View flex={1} justifyContent="center" alignItems="center">
         <ActivityIndicator size="large" color={COLORS.primary} />
         <Text>Getting your location...</Text>
       </View>
     );
   }
 
+  // Function to open Google Maps directions
+  const openDirections = async () => {
+    if (!user || !walkId) return;
+    
+    const directionsUrl = await getDirectionsUrl(walkId, user.uid);
+    if (directionsUrl) {
+      Linking.openURL(directionsUrl);
+    } else {
+      Alert.alert("Error", "Could not generate directions. Please try again.");
+    }
+  };
+
+  // Render route for current user's participant
+  const renderCurrentUserRoute = () => {
+    const currentUserParticipant = participants.find(p => p.id === user?.uid);
+    
+    if (!currentUserParticipant) return null;
+    
+    // Use the ParticipantWithRoute type from shared package
+    const participantWithRoute = currentUserParticipant as ParticipantWithRoute;
+    
+    if (!participantWithRoute.route || !participantWithRoute.route.points?.length) {
+      return null;
+    }
+    
+    return (
+      <>
+        <Polyline
+          coordinates={participantWithRoute.route.points}
+          strokeWidth={4}
+          strokeColor={COLORS.primary}
+        />
+        
+        {/* Route stats overlay */}
+        <XStack
+          position="absolute"
+          bottom={70}
+          alignSelf="center"
+          backgroundColor="rgba(255,255,255,0.9)"
+          padding={10}
+          borderRadius={8}
+          zIndex={999}
+          alignItems="center"
+          justifyContent="center"
+          gap={10}
+        >
+          <YStack alignItems="center">
+            <Text fontSize={14} fontWeight="bold" color="$gray11">
+              Distance
+            </Text>
+            <Text fontSize={18} fontWeight="bold" color={COLORS.primary}>
+              {participantWithRoute.route.distance.text}
+            </Text>
+          </YStack>
+          
+          <View width={1} height={30} backgroundColor="$gray6" />
+          
+          <YStack alignItems="center">
+            <Text fontSize={14} fontWeight="bold" color="$gray11">
+              Time
+            </Text>
+            <Text fontSize={18} fontWeight="bold" color={COLORS.primary}>
+              {participantWithRoute.route.duration.text}
+            </Text>
+          </YStack>
+        </XStack>
+      </>
+    );
+  };
+
   return (
     <>
       <Stack.Screen options={{ title: walkId }} />
-      <View 
-        flex={1}
-        justifyContent="center"
-        alignItems="center"
-      >
+      <View flex={1} justifyContent="center" alignItems="center">
         {renderTrackingStatus()}
 
         <MapView
           ref={mapRef}
-          provider={PROVIDER_GOOGLE}
           style={{ width: "100%", height: "100%", backgroundColor: "#dadada" }}
           initialRegion={{
             latitude: userLocation.coords.latitude,
@@ -392,7 +433,24 @@ export default function LiveWalkMap({ walkId }: LiveWalkMapProps) {
               />
             );
           })}
+          
+          {/* Render route for current user */}
+          {renderCurrentUserRoute()}
         </MapView>
+        
+        {/* Directions button */}
+        <Button
+          position="absolute"
+          bottom={15}
+          backgroundColor={COLORS.primary}
+          color="white"
+          borderRadius={30}
+          paddingHorizontal={20}
+          paddingVertical={10}
+          onPress={openDirections}
+        >
+          Open in Google Maps
+        </Button>
       </View>
     </>
   );

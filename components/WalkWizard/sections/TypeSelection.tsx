@@ -1,7 +1,7 @@
 import React from "react";
 import { YStack } from "tamagui";
-import WalkTypeCard from "../../components/WalkTypeCard";
-import { useWalkForm } from "../../context/WalkFormContext";
+import { useWalkForm } from "../../../context/WalkFormContext";
+import WalkTypeCard from "../../WalkTypeCard";
 import WizardWrapper from "./WizardWrapper";
 
 interface TypeSelectionProps {

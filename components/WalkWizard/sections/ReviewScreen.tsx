@@ -2,8 +2,8 @@ import { Calendar, Clock, MapPin, Users } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React from "react";
 import { Button, Card, Separator, Text, XStack, YStack } from "tamagui";
-import { useWalkForm } from "../../context/WalkFormContext";
-import { COLORS } from "../../styles/colors";
+import { useWalkForm } from "../../../context/WalkFormContext";
+import { COLORS } from "../../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
 
 const pluralize = require("pluralize");
@@ -20,17 +20,6 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
   onEdit,
 }) => {
   const { formData } = useWalkForm();
-
-  const getWalkTypeLabel = () => {
-    switch (formData.walkType) {
-      case "friends":
-        return "Friend Walk";
-      case "neighborhood":
-        return "Neighborhood Walk";
-      default:
-        return "Walk";
-    }
-  };
 
   return (
     <WizardWrapper

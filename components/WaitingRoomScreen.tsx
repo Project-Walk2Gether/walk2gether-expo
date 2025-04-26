@@ -19,8 +19,8 @@ import {
   YStack,
 } from "tamagui";
 import { Participant, Walk, WithId } from "walk2gether-shared";
-import { firestore_instance } from "../../config/firebase";
-import { useWaitingParticipants } from "../../hooks/useWaitingParticipants";
+import { firestore_instance } from "../config/firebase";
+import { useWaitingParticipants } from "../hooks/useWaitingParticipants";
 
 interface Props {
   walk: WithId<Walk>;
@@ -66,11 +66,7 @@ export default function WaitingRoomScreen({ walk, onBack }: Props) {
   };
 
   return (
-    <View 
-      flex={1} 
-      backgroundColor="#fff" 
-      paddingBottom={insets.bottom}
-    >
+    <View flex={1} backgroundColor="#fff" paddingBottom={insets.bottom}>
       <ScrollView>
         <YStack padding="$4" space="$4">
           <Text fontSize="$7" fontWeight="bold">
