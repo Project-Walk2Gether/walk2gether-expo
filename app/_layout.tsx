@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { TamaguiProvider } from "tamagui";
 import { LocationProvider } from "../context/LocationContext";
 import "../config/emulators";
@@ -10,12 +10,20 @@ import { UserDataProvider } from "../context/UserDataContext";
 import { useAppStateUpdates } from "../hooks/useAppStateUpdates";
 import { tamaguiConfig } from "../tamagui.config";
 
+// Import background location task registration
+import { registerBackgroundTask } from "../utils/backgroundLocationTask";
+
 // https://github.com/FaridSafi/react-native-google-places-autocomplete#more-examples
 (navigator as any).geolocation = require("@react-native-community/geolocation");
 
 function AppContent() {
   // Use our custom hook to handle app state updates
   useAppStateUpdates();
+  
+  // Register background location task when the app starts
+  useEffect(() => {
+    registerBackgroundTask();
+  }, []);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

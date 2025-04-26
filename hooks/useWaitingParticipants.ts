@@ -16,12 +16,10 @@ export function useWaitingParticipants(walkId: string) {
 }
 
 export function useWalkParticipants(walkId: string) {
-  const waitingParticipantsQuery = query(
+  const participantsQuery = query(
     collection(firestore_instance, `walks/${walkId}/participants`)
   );
-  const { docs: waitingParticipants } = useQuery<Participant>(
-    waitingParticipantsQuery
-  );
+  const { docs: participants } = useQuery<Participant>(participantsQuery);
 
-  return waitingParticipants;
+  return participants;
 }

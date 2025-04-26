@@ -45,6 +45,8 @@ export default function WalkShowScreen() {
     <>
       <Stack.Screen
         options={{
+          title: "",
+          headerTitle: () => null,
           headerRight: () => (
             <XStack gap="$2">
               {isOwner(walk) ? <WalkMenu walk={walk} /> : null}

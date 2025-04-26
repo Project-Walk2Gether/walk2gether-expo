@@ -64,7 +64,6 @@ export default function WalkChat({
         paddingVertical="$3"
         borderRadius="$4"
         maxWidth="80%"
-        marginBottom="$2"
       >
         <Text color={isMe ? "white" : "black"}>{message.message}</Text>
         <Text

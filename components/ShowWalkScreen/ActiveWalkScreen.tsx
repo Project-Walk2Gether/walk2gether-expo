@@ -15,10 +15,11 @@ import WalkChat from "../Chat/WalkChat";
 import { Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View } from "tamagui";
-import { isOwner } from "utils/walkUtils";
 import { Message, Walk } from "walk2gether-shared";
 import FullScreenLoader from "../FullScreenLoader";
 import LiveWalkMap from "./components/LiveWalkMap";
+import ParticipantsList from "./components/ParticipantsList";
+import { useWalkParticipants } from "../../hooks/useWaitingParticipants";
 
 export default function ActiveWalkScreen() {
   const params = useLocalSearchParams();
@@ -30,6 +31,9 @@ export default function ActiveWalkScreen() {
   const messagesRef = collection(firestore_instance, `walks/${id}/messages`);
   const q = query(messagesRef, orderBy("createdAt", "asc"));
   const { docs: messages } = useQuery<Message>(q);
+  
+  // Get all participants for the walk
+  const participants = useWalkParticipants(id);
 
   // Handle sending a message
   const handleSendMessage = (message: string) => {
@@ -57,21 +61,29 @@ export default function ActiveWalkScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Let's walk2gether!" }} />
+      <Stack.Screen
+        options={{ headerTitle: () => null, title: "Let's walk2gether!" }}
+      />
       <View flex={1} backgroundColor="#fff" paddingBottom={insets.bottom}>
         {/* Map - Using LiveWalkMap component */}
-        <View height={isOwner(walk) ? "55%" : "60%"}>
+        <View height="50%">
           <LiveWalkMap walkId={id} />
         </View>
 
+        {/* Participants List - Horizontal FlatList showing participants and their ETAs */}
+        <ParticipantsList
+          participants={participants}
+          currentUserId={user?.uid}
+        />
+
         {/* Walk Chat Section */}
-        <View height="40%" borderTopWidth={1} borderTopColor="#e0e0e0">
+        <View flex={1} borderTopWidth={1} borderTopColor="#e0e0e0">
           <WalkChat
             messages={messages}
             currentUserId={user?.uid || ""}
             onSendMessage={handleSendMessage}
             keyboardVerticalOffset={90}
-            containerStyle={{ height: "100%" }}
+            containerStyle={{ flex: 1 }}
           />
         </View>
       </View>
