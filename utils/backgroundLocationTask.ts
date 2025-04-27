@@ -1,11 +1,14 @@
-import { doc, updateDoc } from '@react-native-firebase/firestore';
-import * as BackgroundFetch from 'expo-background-fetch';
-import * as Location from 'expo-location';
-import * as TaskManager from 'expo-task-manager';
-import { auth_instance, firestore_instance } from '../config/firebase';
+import { doc, updateDoc } from "@react-native-firebase/firestore";
+import * as BackgroundFetch from "expo-background-fetch";
+import * as Location from "expo-location";
+import * as TaskManager from "expo-task-manager";
+import {
+  // auth_instance,
+  firestore_instance,
+} from "../config/firebase";
 
 // Define a task name for background location tracking
-export const LOCATION_TRACKING_TASK = 'background-location-tracking';
+export const LOCATION_TRACKING_TASK = "background-location-tracking";
 
 // Task options interface
 interface LocationTaskOptions extends Location.LocationTaskOptions {
@@ -19,7 +22,7 @@ TaskManager.defineTask(
   LOCATION_TRACKING_TASK,
   async ({ data, error }: TaskManager.TaskManagerTaskBody<any>) => {
     if (error) {
-      console.error('Background location error:', error);
+      console.error("Background location error:", error);
       return;
     }
     if (data) {
@@ -31,15 +34,17 @@ TaskManager.defineTask(
       let taskOptions: LocationTaskOptions = {};
       try {
         // Get options that were passed when the task was started
-        taskOptions = await TaskManager.getTaskOptionsAsync(LOCATION_TRACKING_TASK) as LocationTaskOptions;
+        taskOptions = (await TaskManager.getTaskOptionsAsync(
+          LOCATION_TRACKING_TASK
+        )) as LocationTaskOptions;
       } catch (e) {
-        console.error('Error getting task options:', e);
+        console.error("Error getting task options:", e);
       }
 
       const { walkId, userId, extraFields = {} } = taskOptions;
-      
+
       // Use auth instance if userId isn't available in options
-      const uid = userId || auth_instance.currentUser?.uid;
+      const uid = userId; //|| auth_instance.currentUser?.uid;
 
       if (uid && walkId) {
         try {
@@ -58,7 +63,7 @@ TaskManager.defineTask(
           });
           return BackgroundFetch.BackgroundFetchResult.NewData;
         } catch (err) {
-          console.error('Error updating location in background:', err);
+          console.error("Error updating location in background:", err);
           return BackgroundFetch.BackgroundFetchResult.Failed;
         }
       }
@@ -75,14 +80,14 @@ export const startBackgroundLocationTracking = async ({
   ...locationOptions
 }: LocationTaskOptions = {}) => {
   if (!walkId) {
-    console.error('Cannot start background tracking without walkId');
+    console.error("Cannot start background tracking without walkId");
     return false;
   }
 
   // Get userId from auth if not provided
   const uid = userId || auth_instance.currentUser?.uid;
   if (!uid) {
-    console.error('Cannot start background tracking without user ID');
+    console.error("Cannot start background tracking without user ID");
     return false;
   }
 
@@ -93,9 +98,10 @@ export const startBackgroundLocationTracking = async ({
     deferredUpdatesInterval: 30000, // 30 seconds
     deferredUpdatesDistance: 50, // 50 meters
     foregroundService: {
-      notificationTitle: 'Walk2gether is tracking your location',
-      notificationBody: 'This allows others to see your location during the walk',
-      notificationColor: '#FF5E0E', // Use primary color
+      notificationTitle: "Walk2gether is tracking your location",
+      notificationBody:
+        "This allows others to see your location during the walk",
+      notificationColor: "#FF5E0E", // Use primary color
     },
     pausesUpdatesAutomatically: false,
     activityType: Location.ActivityType.Fitness,
@@ -106,11 +112,11 @@ export const startBackgroundLocationTracking = async ({
     extraFields,
   };
 
-  await Location.startLocationUpdatesAsync(
-    LOCATION_TRACKING_TASK, 
-    { ...defaultOptions, ...locationOptions }
-  );
-  
+  await Location.startLocationUpdatesAsync(LOCATION_TRACKING_TASK, {
+    ...defaultOptions,
+    ...locationOptions,
+  });
+
   return true;
 };
 
@@ -126,7 +132,7 @@ export const stopBackgroundLocationTracking = async () => {
 export const registerBackgroundTask = () => {
   // This function doesn't need to do anything, as the task is registered
   // when this file is imported due to the side effect of TaskManager.defineTask
-  console.log('Background location task registered:', LOCATION_TRACKING_TASK);
+  console.log("Background location task registered:", LOCATION_TRACKING_TASK);
 };
 
 export default {

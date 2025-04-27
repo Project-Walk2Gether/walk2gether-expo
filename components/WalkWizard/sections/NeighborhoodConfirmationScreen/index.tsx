@@ -1,12 +1,12 @@
 import { Handshake, Pin, Speech, Users } from "@tamagui/lucide-icons";
-import { useAuth } from "context/AuthContext";
-import { useWalkForm } from "context/WalkFormContext";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { COLORS } from "styles/colors";
 import { Card, Text, View, XStack, YStack } from "tamagui";
+import { useAuth } from "../../../../context/AuthContext";
+import { useWalkForm } from "../../../../context/WalkFormContext";
+import { COLORS } from "../../../../styles/colors";
 import WizardWrapper from "../WizardWrapper";
 import { findNearbyWalkers } from "./findNearbyWalkers";
 
@@ -265,7 +265,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
                   <Pin size={19} color="white" />
                 </View>
                 <Text flexShrink={1} fontSize={17} color="#333">
-                  Neighbors can request to join
+                  Neighbors can request to join within the next 20 minutes.
                 </Text>
               </XStack>
 

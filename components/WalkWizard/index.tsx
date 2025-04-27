@@ -1,13 +1,13 @@
 import { Timestamp } from "@react-native-firebase/firestore";
-import HeaderBackButton from "components/HeaderBackButton";
-import { useAuth } from "context/AuthContext";
-import { useUserData } from "context/UserDataContext";
-import { useWalkForm } from "context/WalkFormContext";
-import { useWalks } from "context/WalksContext";
 import { Stack, useRouter } from "expo-router";
-import uuid from "react-native-uuid";
 import { useCallback } from "react";
+import uuid from "react-native-uuid";
 import { Walk } from "walk2gether-shared";
+import { useAuth } from "../../context/AuthContext";
+import { useUserData } from "../../context/UserDataContext";
+import { useWalkForm } from "../../context/WalkFormContext";
+import { useWalks } from "../../context/WalksContext";
+import HeaderBackButton from "../HeaderBackButton";
 import {
   DurationSelection,
   InviteSelection,
@@ -113,7 +113,7 @@ export function WalkWizard() {
         case 2:
           return "How long will this walk be?";
         case 3:
-          return "Where is the meeting point?";
+          return "Where is the meetup point?";
         case 4:
           return "Who should we invite?";
         case 5:

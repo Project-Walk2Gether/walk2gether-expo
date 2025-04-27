@@ -32,7 +32,7 @@ export default function WalkChat({
   loading = false,
   currentUserId,
   onSendMessage,
-  keyboardVerticalOffset = 90,
+  keyboardVerticalOffset = 140,
   containerStyle = {},
 }: WalkChatProps) {
   const scrollViewRef = useRef<RNScrollView | null>(null);

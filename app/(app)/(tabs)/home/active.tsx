@@ -19,7 +19,7 @@ export default function ActiveTabScreen() {
   );
 
   return (
-    <BrandGradient style={{ flex: 1 }}>
+    <BrandGradient variant="modern" style={{ flex: 1 }}>
       <ScrollView
         flex={1}
         width="100%"

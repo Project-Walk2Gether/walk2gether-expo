@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList } from "react-native";
 import { ScrollView, Text, View } from "tamagui";
@@ -8,15 +7,10 @@ import WalkCardTest from "../../../../components/WalkCard";
 import { useMyPastWalks } from "../../../../services/walksService";
 
 export default function HistoryTabScreen() {
-  const router = useRouter();
   const pastWalks = useMyPastWalks();
 
-  const navigateToWalkDetails = (walk: WithId<Walk>) => {
-    router.push(`/(app)/(modals)/walk/${walk.id}`);
-  };
-
   return (
-    <BrandGradient style={{ flex: 1 }}>
+    <BrandGradient variant="modern" style={{ flex: 1 }}>
       <ScrollView
         flex={1}
         width="100%"

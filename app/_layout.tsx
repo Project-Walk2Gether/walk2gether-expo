@@ -1,16 +1,17 @@
 import { Stack } from "expo-router";
 import React, { useEffect } from "react";
 import { TamaguiProvider } from "tamagui";
-import { LocationProvider } from "../context/LocationContext";
 import "../config/emulators";
 import { WithAuthProvider } from "../context/AuthContext";
 import { FlashMessageProvider } from "../context/FlashMessageContext";
+import { LocationProvider } from "../context/LocationContext";
 import { UpdatesProvider } from "../context/UpdatesContext";
 import { UserDataProvider } from "../context/UserDataContext";
 import { useAppStateUpdates } from "../hooks/useAppStateUpdates";
 import { tamaguiConfig } from "../tamagui.config";
 
 // Import background location task registration
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { registerBackgroundTask } from "../utils/backgroundLocationTask";
 
 // https://github.com/FaridSafi/react-native-google-places-autocomplete#more-examples
@@ -19,23 +20,25 @@ import { registerBackgroundTask } from "../utils/backgroundLocationTask";
 function AppContent() {
   // Use our custom hook to handle app state updates
   useAppStateUpdates();
-  
+
   // Register background location task when the app starts
   useEffect(() => {
     registerBackgroundTask();
   }, []);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen
-        name="(app)"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen name="auth" options={{ headerShown: false }} />
-    </Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen
+          name="(app)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
+      </Stack>
+    </GestureHandlerRootView>
   );
 }
 

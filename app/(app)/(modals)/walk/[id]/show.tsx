@@ -1,15 +1,13 @@
-import WalkMenu from "components/WalkMenu";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { ActivityIndicator } from "react-native";
-import { View, XStack } from "tamagui";
+import { View } from "tamagui";
 import { Walk } from "walk2gether-shared";
-import HeaderCloseButton from "../../../../../components/HeaderCloseButton";
 import ActiveWalkScreen from "../../../../../components/ShowWalkScreen/ActiveWalkScreen";
 import FutureWalkScreen from "../../../../../components/ShowWalkScreen/FutureWalkScreen";
 import WalkHistoryScreen from "../../../../../components/ShowWalkScreen/WalkHistoryScreen";
 import { useDoc } from "../../../../../utils/firestore";
-import { isActive, isFuture, isOwner } from "../../../../../utils/walkUtils";
+import { isActive, isFuture } from "../../../../../utils/walkUtils";
 
 // The walk details display screen
 export default function WalkShowScreen() {
@@ -20,17 +18,9 @@ export default function WalkShowScreen() {
   // Show loading while walk is loading
   if (!walk) {
     return (
-      <>
-        <Stack.Screen
-          options={{
-            title: "",
-            headerRight: () => <HeaderCloseButton />,
-          }}
-        />
-        <View flex={1} jc="center" ai="center" p={20}>
-          <ActivityIndicator size="large" />
-        </View>
-      </>
+      <View flex={1} jc="center" ai="center" p={20}>
+        <ActivityIndicator size="large" />
+      </View>
     );
   }
 
@@ -43,18 +33,7 @@ export default function WalkShowScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: "",
-          headerTitle: () => null,
-          headerRight: () => (
-            <XStack gap="$2">
-              {isOwner(walk) ? <WalkMenu walk={walk} /> : null}
-              <HeaderCloseButton />
-            </XStack>
-          ),
-        }}
-      />
+      <Stack.Screen options={{ title: "Test!" }} />
       <ScreenComponent walk={walk} />
     </>
   );

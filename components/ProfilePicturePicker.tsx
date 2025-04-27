@@ -1,8 +1,8 @@
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import { Alert, Image } from "react-native";
+import { COLORS } from "styles/colors";
 import { Button, Text, YStack } from "tamagui";
-import { COLORS } from "../styles/colors";
 
 interface ProfilePicturePickerProps {
   profilePicUrl?: string;
@@ -46,7 +46,7 @@ export const ProfilePicturePicker: React.FC<ProfilePicturePickerProps> = ({
   return (
     <YStack ai="center" width="100%">
       <YStack mb="$4" w="100%">
-        <Text fontWeight="bold" fontSize="$4" mb="$2" color={COLORS.primary}>
+        <Text fontSize="$4" mb="$2">
           Profile Picture
         </Text>
         <Text fontSize={12}>
@@ -58,13 +58,13 @@ export const ProfilePicturePicker: React.FC<ProfilePicturePickerProps> = ({
       <Button
         onPress={pickImage}
         disabled={pickingImage || disabled}
-        backgroundColor="$background"
+        backgroundColor={COLORS.primary}
         borderColor="$primary"
         borderWidth={2}
         borderRadius={100}
         padding={0}
-        width={100}
-        height={100}
+        width={60}
+        height={60}
         alignItems="center"
         justifyContent="center"
         mb={8}
@@ -75,7 +75,7 @@ export const ProfilePicturePicker: React.FC<ProfilePicturePickerProps> = ({
             style={{ width: 90, height: 90, borderRadius: 45, marginBottom: 0 }}
           />
         ) : (
-          <Text color="#aaa" fontSize={30}>
+          <Text color="#fff" fontSize={30}>
             +
           </Text>
         )}

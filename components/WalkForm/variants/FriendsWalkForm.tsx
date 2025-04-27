@@ -1,6 +1,6 @@
+import { Timestamp } from "@react-native-firebase/firestore";
 import React from "react";
 import { YStack } from "tamagui";
-import { Timestamp } from "@react-native-firebase/firestore";
 import { FriendsWalk, friendsWalkSchema } from "walk2gether-shared";
 import DateTimeField from "../components/DateTimeField";
 import DurationField from "../components/DurationField";
@@ -24,18 +24,20 @@ export default function FriendsWalkForm({
 }: Props) {
   return (
     <FormProvider
-      initialValues={{
-        ...initialValues,
-        // Ensure required fields are present and have the right type
-        date: initialValues.date || Timestamp.now(),
-        location: initialValues.location || { 
-          name: "", 
-          latitude: 0, 
-          longitude: 0, 
-          description: "",
-        },
-        durationMinutes: initialValues.durationMinutes || 60
-      } as FriendsWalk}
+      initialValues={
+        {
+          ...initialValues,
+          // Ensure required fields are present and have the right type
+          date: initialValues.date || Timestamp.now(),
+          location: initialValues.location || {
+            name: "",
+            latitude: 0,
+            longitude: 0,
+            description: "",
+          },
+          durationMinutes: initialValues.durationMinutes || 60,
+        } as FriendsWalk
+      }
       validationSchema={friendsWalkSchema}
       onSubmit={onSubmit}
       submitButtonText={submitButtonText}
@@ -57,7 +59,6 @@ export default function FriendsWalkForm({
             touched={!!touched.location?.name}
             googleApiKey={googleApiKey}
           />
-
           <DurationField
             value={values.durationMinutes || 60}
             onChange={(minutes) => setFieldValue("durationMinutes", minutes)}

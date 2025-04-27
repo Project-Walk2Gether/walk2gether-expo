@@ -66,11 +66,9 @@ export default function AppLayout() {
           }}
         />
         <Stack.Screen
-          name="(modals)/invite-to-walk"
+          name="(modals)/walk/[id]"
           options={{
-            title: "Schedule a new walk",
-            headerShown: true,
-            presentation: "modal",
+            title: "Let's walk",
             headerLeft: () => <HeaderBackButton />,
           }}
         />

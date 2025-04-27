@@ -30,7 +30,7 @@ export default function HomeTabsLayout() {
   const insets = useSafeAreaInsets();
 
   return (
-    <BrandGradient style={{ flex: 1, paddingTop: insets.top }}>
+    <BrandGradient variant="modern" style={{ flex: 1, paddingTop: insets.top }}>
       <StatusBar style="dark" />
       <View paddingHorizontal={20}>
         <ScreenTitle
@@ -88,6 +88,7 @@ export default function HomeTabsLayout() {
               borderBottomColor: "rgba(0,0,0,1)",
               borderBottomWidth: 1,
               fontWeight: "600",
+              fontSize: 19,
             },
           }}
           style={{ backgroundColor: "transparent" }}

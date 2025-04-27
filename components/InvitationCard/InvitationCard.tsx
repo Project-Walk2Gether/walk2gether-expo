@@ -17,23 +17,51 @@ interface InvitationCardProps {
 }
 
 export function InvitationCard({ invitation, onRemove }: InvitationCardProps) {
+  const isPhone = invitation.type === "phone";
   return (
-    <Card bordered my="$2" p="$3">
+    <Card
+      bordered
+      my="$2"
+      p={isPhone ? "$3.5" : "$3"}
+      bg={isPhone ? "$gray2" : undefined}
+      borderRadius={isPhone ? "$8" : "$6"}
+      elevate={isPhone ? 2 : 1}
+      borderColor={isPhone ? "$gray5" : undefined}
+      shadowColor={isPhone ? "$gray8" : undefined}
+    >
       <XStack justifyContent="space-between" alignItems="center">
-        <XStack alignItems="center" gap="$2">
+        <XStack alignItems="center" gap="$3">
           <Ionicons
-            name={invitation.type === "friend" ? "person" : "call"}
-            size={20}
-            color={invitation.type === "friend" ? "#4285F4" : "#34A853"}
+            name={isPhone ? "call" : "person"}
+            size={22}
+            color={isPhone ? "#34A853" : "#4285F4"}
+            style={{ marginRight: 2 }}
           />
-          <Text>{invitation.name}</Text>
-          {invitation.type === "phone" && (
-            <Text color="$gray10">{invitation.recipientPhoneNumber}</Text>
+          {isPhone ? (
+            <Text fontWeight="700" fontSize="$6">
+              {invitation.recipientPhoneNumber}
+            </Text>
+          ) : (
+            <Text>{invitation.name}</Text>
           )}
         </XStack>
-        <TouchableOpacity onPress={() => onRemove(invitation.id)}>
-          <Ionicons name="close-circle" size={20} color="#777" />
-        </TouchableOpacity>
+        <XStack>
+          <Card
+            pressable
+            bg={isPhone ? "$red3" : "$gray3"}
+            hoverStyle={{ bg: isPhone ? "$red5" : "$gray5" }}
+            borderRadius={100}
+            p={2}
+            onPress={() => onRemove(invitation.id)}
+            ai="center"
+            jc="center"
+            w={32}
+            h={32}
+            elevation={isPhone ? 4 : 2}
+          >
+            <Ionicons name="close" size={20} color={isPhone ? "#fff" : "#777"} />
+          </Card>
+        </XStack>
       </XStack>
     </Card>
   );

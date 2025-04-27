@@ -1,3 +1,4 @@
+import { Expand } from "@tamagui/lucide-icons";
 import * as Linking from "expo-linking";
 import * as Location from "expo-location";
 import { Stack } from "expo-router";
@@ -12,6 +13,7 @@ import { useWalkParticipants } from "../../../hooks/useWaitingParticipants";
 import { COLORS } from "../../../styles/colors";
 import { useDoc } from "../../../utils/firestore";
 import { getDirectionsUrl } from "../../../utils/routeUtils";
+import MeetupSpot from "./MeetupSpot";
 import WalkStatusControls from "./WalkStatusControls";
 
 interface Props {
@@ -128,6 +130,7 @@ export default function LiveWalkMap({ walkId }: Props) {
           borderRadius={15}
           onPress={openDirections}
           paddingHorizontal={10}
+          icon={Expand}
         >
           Open in Maps
         </Button>
@@ -208,8 +211,8 @@ export default function LiveWalkMap({ walkId }: Props) {
           initialRegion={{
             latitude: userLocation?.coords.latitude || 0,
             longitude: userLocation?.coords.longitude || 0,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
           }}
           showsUserLocation={false}
           showsMyLocationButton={false}
@@ -222,12 +225,18 @@ export default function LiveWalkMap({ walkId }: Props) {
                 longitude: walk.location.longitude,
               }}
               title={`Start: ${walk.location.name}`}
-              description="Walk meeting point"
+              description="Walk meetup point"
               // Use a distinct color for the start point
               pinColor="#4CAF50" // Green color for start point
             />
           )}
-
+          <MeetupSpot
+            coordinate={{
+              latitude: 37.795834,
+              longitude: -122.406417,
+            }}
+            title="Meetup Spot"
+          />
           {/* 2 & 3. Render all participants (current user and others) */}
           {participants.map((p) => {
             if (!p.lastLocation) return null;
@@ -283,15 +292,17 @@ export default function LiveWalkMap({ walkId }: Props) {
         </MapView>
 
         {/* Combined control for status and navigation method */}
-        <WalkStatusControls
-          walkId={walkId}
-          userId={user?.uid}
-          initialStatus={userParticipant?.status || "pending"}
-          initialNavigationMethod={navigationMethod}
-          onNavigationMethodChange={(isDriving) =>
-            setNavigationMethod(isDriving ? "driving" : "walking")
-          }
-        />
+        {walk?.type === "friends" ? (
+          <WalkStatusControls
+            walkId={walkId}
+            userId={user?.uid}
+            initialStatus={userParticipant?.status || "pending"}
+            initialNavigationMethod={navigationMethod}
+            onNavigationMethodChange={(isDriving) =>
+              setNavigationMethod(isDriving ? "driving" : "walking")
+            }
+          />
+        ) : null}
       </View>
     </>
   );

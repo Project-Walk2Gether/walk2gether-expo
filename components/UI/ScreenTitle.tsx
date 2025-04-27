@@ -13,7 +13,7 @@ interface ScreenTitleProps {
 
 export const ScreenTitle: React.FC<ScreenTitleProps> = ({
   children,
-  color = "white", // Default to dark text
+  color = "black", // Default to dark text
   leftAction,
   rightAction,
 }) => {

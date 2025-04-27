@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import {
   collection,
   getDocs,
-  getFirestore,
   limit,
   orderBy,
   query,
@@ -25,6 +24,7 @@ import {
   YStack,
 } from "tamagui";
 import { BrandGradient, ScreenTitle } from "../../../../components/UI";
+import { firestore_instance } from "../../../../config/firebase";
 import { useAuth } from "../../../../context/AuthContext";
 import { COLORS } from "../../../../styles/colors";
 
@@ -52,8 +52,10 @@ export default function FriendsScreen() {
 
       try {
         setLoading(true);
-        const db = getFirestore();
-        const friendsRef = collection(db, `users/${user.uid}/friends`);
+        const friendsRef = collection(
+          firestore_instance,
+          `users/${user.uid}/friends`
+        );
         const friendsSnapshot = await getDocs(friendsRef);
 
         const friendsData = await Promise.all(

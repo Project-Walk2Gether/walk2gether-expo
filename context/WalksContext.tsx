@@ -1,18 +1,14 @@
 import {
   addDoc,
-  arrayRemove,
   arrayUnion,
   collection,
   collectionGroup,
-  deleteDoc,
   doc,
   FirebaseFirestoreTypes,
   getDoc,
-  getDocs,
   limit,
   orderBy,
   query,
-  serverTimestamp,
   Timestamp,
   updateDoc,
   where,
@@ -42,7 +38,6 @@ interface WalksContextType {
   ) => Promise<FirebaseFirestoreTypes.DocumentReference<Walk>>;
   checkIn: (walkId: string) => Promise<void>;
   getWalkById: (walkId: string) => Walk | undefined;
-  rsvpForWalk: (walkId: string) => Promise<void>;
   cancelRSVP: (walkId: string) => Promise<void>;
   hasUserRSVPed: (walkId: string) => boolean;
 }
@@ -175,75 +170,6 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     }
   };
 
-  const rsvpForWalk = async (walkId: string) => {
-    if (!user) {
-      throw new Error("User must be logged in to RSVP");
-    }
-
-    setSubmitting(true);
-    try {
-      const walkRef = doc(firestore_instance, "walks", walkId);
-
-      // Add user to the rsvpUsers array
-      await updateDoc(walkRef, {
-        rsvpUsers: arrayUnion(user.uid),
-      });
-
-      // Create an RSVP document
-      const rsvpsRef = collection(walkRef, "rsvps");
-      await addDoc(rsvpsRef, {
-        userId: user.uid,
-        walkId: walkId,
-        timestamp: serverTimestamp(),
-      });
-
-      console.log("User RSVPed successfully:", user.uid);
-    } catch (error) {
-      console.error("Error RSVPing for walk:", error);
-      throw error;
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const cancelRSVP = async (walkId: string) => {
-    if (!user) {
-      throw new Error("User must be logged in to cancel RSVP");
-    }
-
-    setSubmitting(true);
-    try {
-      const walkRef = doc(firestore_instance, "walks", walkId);
-
-      // Remove user from the rsvpUsers array
-      await updateDoc(walkRef, {
-        rsvpUsers: arrayRemove(user.uid),
-      });
-
-      // Find and delete the RSVP document
-      const rsvpsRef = collection(walkRef, "rsvps");
-      const rsvpsQuery = query(rsvpsRef, where("userId", "==", user.uid));
-      const rsvpsSnapshot = await getDocs(rsvpsQuery);
-
-      // Delete each matching RSVP document
-      const deletePromises = rsvpsSnapshot.docs.map((doc) =>
-        deleteDoc(doc.ref)
-      );
-      await Promise.all(deletePromises);
-
-      console.log("User canceled RSVP successfully:", user.uid);
-    } catch (error) {
-      console.error("Error canceling RSVP:", error);
-      throw error;
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const hasUserRSVPed = (walkId: string) => {
-    return userRSVPs.includes(walkId);
-  };
-
   // Add getWalkById function to find a walk by its ID
   const getWalkById = (walkId: string): Walk | undefined => {
     return upcomingWalks.find((walk) => walk.id === walkId);
@@ -258,10 +184,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
         userRSVPs,
         createWalk,
         checkIn,
-        rsvpForWalk,
-        cancelRSVP,
         currentWalk,
-        hasUserRSVPed,
         getWalkById,
       }}
     >

@@ -1,7 +1,7 @@
-import { WalkWizard } from "components/WalkWizard";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import { Spinner, Text, YStack } from "tamagui";
+import { WalkWizard } from "../../../components/WalkWizard";
 import { WalkFormProvider } from "../../../context/WalkFormContext";
 
 export default function NewWalkWizardScreen() {

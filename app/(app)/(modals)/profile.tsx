@@ -233,10 +233,7 @@ export default function ProfileScreen() {
           headerRight: () => <HeaderCloseButton />,
         }}
       ></Stack.Screen>
-      <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={{ padding: 20, paddingBottom: 50 }}
-      >
+      <ScrollView ref={scrollViewRef} contentContainerStyle={{ padding: 20 }}>
         {userData && (
           <UserDataForm
             userData={userData}
@@ -250,7 +247,6 @@ export default function ProfileScreen() {
           />
         )}
         <Button
-          mt="$4"
           variant="outlined"
           borderColor="#ff3b30"
           color="#ff3b30"

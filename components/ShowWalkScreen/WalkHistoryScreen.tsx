@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import HeaderCloseButton from "components/HeaderCloseButton";
 import { format } from "date-fns";
 import { Stack } from "expo-router";
-import { Card, ScrollView, Text, View, XStack, YStack } from "tamagui";
+import { Card, ScrollView, Text } from "tamagui";
 import { Walk } from "walk2gether-shared";
 
 interface Props {
@@ -20,6 +21,7 @@ export default function WalkHistoryScreen({ walk }: Props) {
           headerShadowVisible: false,
           headerBackVisible: true,
           headerBackTitle: "Back",
+          headerRight: () => <HeaderCloseButton />,
         }}
       />
       <ScrollView
@@ -41,28 +43,17 @@ export default function WalkHistoryScreen({ walk }: Props) {
           shadowRadius={2}
           elevation={2}
         >
-          <Text
-            fontSize={22}
-            fontWeight="bold"
-            marginBottom={8}
-          >
+          <Text fontSize={22} fontWeight="bold" marginBottom={8}>
             {walk.organizerName}
           </Text>
-          
-          <Text
-            fontSize={16}
-            marginBottom={12}
-          >
+
+          <Text fontSize={16} marginBottom={12}>
             {format(walk.date.toDate(), "EEEE, MMMM d, yyyy")} at{" "}
             {format(walk.date.toDate(), "h:mm a")}
           </Text>
 
           {walk.location && (
-            <Text
-              fontSize={16}
-              color={COLORS.textSecondary}
-              marginBottom={8}
-            >
+            <Text fontSize={16} color={COLORS.textSecondary} marginBottom={8}>
               <Ionicons
                 name="location-outline"
                 size={16}
@@ -72,11 +63,7 @@ export default function WalkHistoryScreen({ walk }: Props) {
             </Text>
           )}
 
-          <Text
-            fontSize={16}
-            color={COLORS.textSecondary}
-            marginBottom={8}
-          >
+          <Text fontSize={16} color={COLORS.textSecondary} marginBottom={8}>
             <Ionicons
               name="time-outline"
               size={16}

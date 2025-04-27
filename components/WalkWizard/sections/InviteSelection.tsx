@@ -3,11 +3,11 @@ import {
   getDocs,
   getFirestore,
 } from "@react-native-firebase/firestore";
-import { MapPin, MessageCircle, UserPlus } from "@tamagui/lucide-icons";
+import { LinearGradient } from "@tamagui/linear-gradient";
+import { MapPin, MessageCircle, UserPlus, X } from "@tamagui/lucide-icons";
 import React, { useEffect, useRef, useState } from "react";
-import { TouchableOpacity } from "react-native";
-import MapView, { Circle, Marker } from "react-native-maps";
-import { Button, Card, Input, Text, View, XStack, YStack } from "tamagui";
+import MapView from "react-native-maps";
+import { Button, Card, Input, Text, XStack, YStack } from "tamagui";
 import { useAuth } from "../../../context/AuthContext";
 import { useWalkForm } from "../../../context/WalkFormContext";
 import { COLORS } from "../../../styles/colors";
@@ -18,6 +18,42 @@ interface InviteSelectionProps {
   onContinue: () => void;
   onBack: () => void;
 }
+
+// PhoneNumberChip: pill-shaped chip for phone numbers
+const PhoneNumberChip: React.FC<{ number: string; onRemove: () => void }> = ({
+  number,
+  onRemove,
+}) => (
+  <XStack
+    alignItems="center"
+    backgroundColor="#f3f4f6"
+    borderRadius={9999}
+    paddingVertical={6}
+    paddingHorizontal={14}
+    marginVertical={2}
+    shadowColor="#000"
+    shadowOpacity={0.07}
+    shadowRadius={4}
+    shadowOffset={{ width: 0, height: 2 }}
+    gap={8}
+  >
+    <Text color="#222" fontSize={15}>
+      {number}
+    </Text>
+    <Button
+      size="$2"
+      circular
+      chromeless
+      onPress={onRemove}
+      aria-label="Remove phone number"
+      backgroundColor="transparent"
+      hoverStyle={{ backgroundColor: "#fee2e2" }}
+      pressStyle={{ backgroundColor: "#fecaca" }}
+    >
+      <X size={16} color="#ef4444" />
+    </Button>
+  </XStack>
+);
 
 export const InviteSelection: React.FC<InviteSelectionProps> = ({
   onContinue,
@@ -123,70 +159,38 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   }, [isNeighborhoodWalk, formData.location]);
 
   return (
-    <WizardWrapper
-      onContinue={handleContinue}
-      onBack={onBack}
-      continueDisabled={
-        !isNeighborhoodWalk &&
-        selectedFriends.length === 0 &&
-        phoneNumbers.length === 0
-      }
-      continueText="Next"
+    <LinearGradient
+      flex={1}
+      colors={["#f7fafc", "#e0e7ef"]}
+      start={[0, 0]}
+      end={[0, 1]}
     >
-      <YStack gap="$4">
-        {isNeighborhoodWalk && (
-          <YStack gap="$3">
-            <View
-              height={220}
-              borderRadius={10}
-              overflow="hidden"
-              marginBottom={10}
-            >
-              {formData.location ? (
-                <MapView
-                  ref={mapRef}
-                  style={{ height: "100%", width: "100%" }}
-                  initialRegion={{
-                    latitude: formData.location.latitude,
-                    longitude: formData.location.longitude,
-                    latitudeDelta: 0.05,
-                    longitudeDelta: 0.05,
-                  }}
-                >
-                  <Marker
-                    coordinate={{
-                      latitude: formData.location.latitude,
-                      longitude: formData.location.longitude,
-                    }}
-                  />
-                  <Circle
-                    center={{
-                      latitude: formData.location.latitude,
-                      longitude: formData.location.longitude,
-                    }}
-                    radius={1600} // 1 mile ≈ 1600 meters
-                    strokeWidth={2}
-                    strokeColor={COLORS.action}
-                    fillColor={`${COLORS.action}30`} // 30 for opacity
-                  />
-                </MapView>
-              ) : (
-                <View
-                  style={{ height: "100%", width: "100%" }}
-                  backgroundColor="rgba(200, 200, 200, 0.5)"
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <Text color={COLORS.text}>No location selected</Text>
-                </View>
-              )}
-            </View>
-
-            <Card backgroundColor="white" borderRadius="$3">
-              <YStack gap="$3" padding="$4">
-                <XStack alignItems="center" gap="$2">
-                  <MapPin size={24} color={COLORS.action} />
-                  <Text fontSize={18} fontWeight="bold" color={COLORS.text}>
+      <WizardWrapper
+        onContinue={handleContinue}
+        onBack={onBack}
+        continueDisabled={
+          !isNeighborhoodWalk &&
+          selectedFriends.length === 0 &&
+          phoneNumbers.length === 0
+        }
+        continueText="Next"
+      >
+        <YStack flex={1} gap="$4" paddingHorizontal="$2" paddingVertical="$4">
+          {isNeighborhoodWalk && (
+            <YStack gap="$4">
+              <Card
+                elevate
+                backgroundColor="#fff"
+                borderRadius={20}
+                padding="$5"
+                shadowColor="#000"
+                shadowOpacity={0.07}
+                shadowRadius={7}
+                shadowOffset={{ width: 0, height: 3 }}
+              >
+                <XStack alignItems="center" gap="$2" marginBottom="$2">
+                  <MapPin size={22} color={COLORS.text} />
+                  <Text fontSize={19} fontWeight="bold" color={COLORS.text}>
                     Neighborhood Walk
                   </Text>
                 </XStack>
@@ -195,111 +199,127 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                   join your walk. This is a great way to meet neighbors and make
                   new walking buddies!
                 </Text>
-              </YStack>
-            </Card>
-          </YStack>
-        )}
-
-        {isFriendsWalk && (
-          <YStack gap="$4">
-            {hasFriends ? (
-              <Card
-                flex={1}
-                backgroundColor="white"
-                borderRadius="$3"
-                marginVertical="$2"
-                padding="$2"
-              >
-                <FriendsList
-                  onSelectFriend={(friend) => handleFriendToggle(friend.id)}
-                  title="Select Friends"
-                  searchEnabled={true}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
               </Card>
-            ) : null}
-
-            <YStack
-              gap="$3"
-              backgroundColor="rgba(255, 255, 255, 0.15)"
-              borderRadius="$3"
-              padding="$4"
-            >
-              <XStack alignItems="center" gap="$2" marginBottom="$2">
-                <MessageCircle size={20} color={COLORS.textOnDark} />
-                <Text fontSize={18} fontWeight="500" color={COLORS.textOnDark}>
-                  Invite by phone number
-                </Text>
-              </XStack>
-
-              <XStack gap="$2">
-                <Input
-                  placeholder="Enter phone number"
-                  value={phoneNumber}
-                  onChangeText={setPhoneNumber}
-                  keyboardType="phone-pad"
-                  backgroundColor="white"
-                  borderRadius={10}
-                  fontSize={16}
-                  flex={1}
-                  color={COLORS.text}
-                />
-                <Button
-                  backgroundColor={COLORS.action}
-                  color={COLORS.textOnDark}
-                  onPress={addPhoneNumber}
-                  disabled={!phoneNumber.trim()}
-                  icon={<UserPlus size={18} />}
-                >
-                  Add
-                </Button>
-              </XStack>
-
-              {phoneNumbers.length > 0 && (
-                <YStack gap="$2" marginTop="$2">
-                  <Text fontSize={14} color={COLORS.textOnDark}>
-                    Phone numbers to invite:
-                  </Text>
-                  {phoneNumbers.map((number, index) => (
-                    <XStack
-                      key={index}
-                      alignItems="center"
-                      justifyContent="space-between"
-                      backgroundColor="rgba(255,255,255,0.8)"
-                      borderRadius={8}
-                      paddingHorizontal={12}
-                      paddingVertical={8}
-                    >
-                      <Text color={COLORS.text}>{number}</Text>
-                      <TouchableOpacity
-                        onPress={() => removePhoneNumber(number)}
-                      >
-                        <Text color="red">Remove</Text>
-                      </TouchableOpacity>
-                    </XStack>
-                  ))}
-                </YStack>
-              )}
             </YStack>
+          )}
 
-            <Text
-              fontSize={16}
-              color={COLORS.textOnDark}
-              marginTop="$2"
-              textAlign="center"
-            >
-              {selectedFriends.length}{" "}
-              {selectedFriends.length === 1 ? "friend" : "friends"} selected
-              {phoneNumbers.length > 0 &&
-                ` • ${phoneNumbers.length} phone ${
-                  phoneNumbers.length === 1 ? "number" : "numbers"
-                }`}
-            </Text>
-          </YStack>
-        )}
-      </YStack>
-    </WizardWrapper>
+          {isFriendsWalk && (
+            <YStack gap="$5">
+              {hasFriends ? (
+                <Card
+                  elevate
+                  backgroundColor="#fff"
+                  borderRadius={20}
+                  marginVertical="$2"
+                  padding="$3"
+                  shadowColor="#000"
+                  shadowOpacity={0.06}
+                  shadowRadius={5}
+                  shadowOffset={{ width: 0, height: 2 }}
+                >
+                  <FriendsList
+                    onSelectFriend={(friend) => handleFriendToggle(friend.id)}
+                    title="Select Friends"
+                    searchEnabled={true}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                  />
+                </Card>
+              ) : null}
+
+              <YStack
+                gap="$3"
+                backgroundColor="rgba(255, 255, 255, 0.7)"
+                borderRadius={18}
+                padding="$5"
+                shadowColor="#000"
+                shadowOpacity={0.05}
+                shadowRadius={7}
+                shadowOffset={{ width: 0, height: 2 }}
+              >
+                <XStack alignItems="center" gap="$2" marginBottom="$2">
+                  <MessageCircle size={20} color={COLORS.textOnLight} />
+                  <Text
+                    fontSize={19}
+                    fontWeight="700"
+                    color={COLORS.textOnLight}
+                  >
+                    Invite by phone number
+                  </Text>
+                </XStack>
+                <Text fontSize={15} color="#6b7280" marginBottom={2}>
+                  Add friends not yet on Walk2Gether by inviting them via text.
+                </Text>
+                <XStack gap="$2" alignItems="center">
+                  <Input
+                    placeholder="Enter phone number"
+                    value={phoneNumber}
+                    onChangeText={setPhoneNumber}
+                    keyboardType="phone-pad"
+                    backgroundColor="#fff"
+                    borderRadius={9999}
+                    fontSize={16}
+                    flex={1}
+                    color={COLORS.text}
+                    paddingLeft={16}
+                    borderWidth={1}
+                    borderColor="#e5e7eb"
+                  />
+                  <Button
+                    backgroundColor={COLORS.action}
+                    color={COLORS.textOnDark}
+                    onPress={addPhoneNumber}
+                    disabled={!phoneNumber.trim()}
+                    circular
+                    size="$4"
+                    icon={<UserPlus size={20} color="#fff" />}
+                    aria-label="Add phone number"
+                    hoverStyle={{ backgroundColor: "#6d4c2b" }}
+                    pressStyle={{ backgroundColor: "#4b2e13" }}
+                  />
+                </XStack>
+
+                {phoneNumbers.length > 0 && (
+                  <YStack gap="$2" marginTop="$2">
+                    <Text
+                      fontSize={14}
+                      color={COLORS.textOnLight}
+                      marginBottom={2}
+                    >
+                      Phone numbers to invite:
+                    </Text>
+                    <XStack flexWrap="wrap" gap={8}>
+                      {phoneNumbers.map((number, index) => (
+                        <PhoneNumberChip
+                          key={index}
+                          number={number}
+                          onRemove={() => removePhoneNumber(number)}
+                        />
+                      ))}
+                    </XStack>
+                  </YStack>
+                )}
+              </YStack>
+
+              <Text
+                fontSize={16}
+                color={COLORS.textOnDark}
+                marginTop="$2"
+                textAlign="center"
+                fontWeight="600"
+              >
+                {selectedFriends.length}{" "}
+                {selectedFriends.length === 1 ? "friend" : "friends"} selected
+                {phoneNumbers.length > 0 &&
+                  ` • ${phoneNumbers.length} phone ${
+                    phoneNumbers.length === 1 ? "number" : "numbers"
+                  }`}
+              </Text>
+            </YStack>
+          )}
+        </YStack>
+      </WizardWrapper>
+    </LinearGradient>
   );
 };
 

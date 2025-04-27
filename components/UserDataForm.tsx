@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator } from "react-native";
-import { Button, Input, Text, YStack } from "tamagui";
-import { ActionButton } from "./ActionButton";
+import { Input, Text, YStack } from "tamagui";
 import { COLORS } from "../styles/colors";
+import { ActionButton } from "./ActionButton";
 import ProfilePicturePicker from "./ProfilePicturePicker";
 import { PlaceData, PlacesAutocomplete } from "./UI/PlacesAutocomplete";
 
@@ -64,7 +63,7 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
   };
 
   return (
-    <YStack width="100%" gap="$4" mb="$6">
+    <YStack width="100%" gap="$4" mb="$4">
       <YStack width="100%" gap="$2">
         <Text fontWeight="500" fontSize="$4">
           Name
@@ -120,13 +119,9 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
           height={100}
         />
       </YStack>
-      <ActionButton
-  onPress={handleSave}
-  disabled={isSaving}
-  loading={isSaving}
->
-  Save Profile
-</ActionButton>
+      <ActionButton onPress={handleSave} disabled={isSaving} loading={isSaving}>
+        Save Profile
+      </ActionButton>
     </YStack>
   );
 };

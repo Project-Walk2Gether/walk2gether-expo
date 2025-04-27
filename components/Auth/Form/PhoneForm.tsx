@@ -96,7 +96,11 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
   onPress={handleSubmit}
   disabled={!isValid || loading}
 >
-  Send Code
+  {loading ? (
+    <ActivityIndicator color="white" size="small" />
+  ) : (
+    "Send Code"
+  )}
 </ActionButton>
         </>
       )}

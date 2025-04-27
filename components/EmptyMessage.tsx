@@ -1,5 +1,5 @@
-import { COLORS } from "styles/colors";
 import { Text, YStack } from "tamagui";
+import { COLORS } from "../styles/colors";
 
 export const EmptyMessage = ({
   message,

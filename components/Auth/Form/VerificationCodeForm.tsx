@@ -23,13 +23,22 @@ export default function VerificationCodeForm({
 }: Props) {
   const [loading, setLoading] = useState(false);
 
+  const handleFormSubmit = async (values: VerificationSchema) => {
+    try {
+      setLoading(true);
+      await handleSubmit(values);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Formik
       initialValues={{
         verificationCode: "",
       }}
       validationSchema={verificationSchema}
-      onSubmit={handleSubmit}
+      onSubmit={handleFormSubmit}
     >
       {({
         handleChange,
@@ -92,7 +101,11 @@ export default function VerificationCodeForm({
   onPress={handleSubmit}
   disabled={!isValid || loading}
 >
-  Let's go!
+  {loading ? (
+    <ActivityIndicator color="white" size="small" />
+  ) : (
+    "Let's go!"
+  )}
 </ActionButton>
         </>
       )}

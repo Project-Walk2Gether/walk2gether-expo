@@ -1,25 +1,20 @@
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import {
   addDoc,
-  arrayRemove,
   arrayUnion,
   collection,
-  collectionGroup,
-  deleteDoc,
   doc,
   getDoc,
-  getDocs,
   limit,
   orderBy,
   query,
-  serverTimestamp,
   Timestamp,
   updateDoc,
   where,
 } from "@react-native-firebase/firestore";
 import { startOfDay } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
-import { Pair, RSVP, Walk, WithId } from "walk2gether-shared";
+import { Pair, Walk, WithId } from "walk2gether-shared";
 import { DocumentReferenceLike } from "walk2gether-shared/lib/utils/documentReference";
 import { db } from "../config/firebase";
 import { useAuth } from "../context/AuthContext";
@@ -163,18 +158,6 @@ export function useMyPastWalks() {
   return allPastWalks;
 }
 
-export function useMyRSVPs() {
-  const { user } = useAuth();
-  const userRSVPsQuery = useMemo(() => {
-    if (!user) return undefined;
-
-    return query(collectionGroup(db, "rsvps"), where("userId", "==", user.uid));
-  }, [user]);
-
-  const { docs: rsvpDocs } = useQuery<RSVP>(userRSVPsQuery);
-  return rsvpDocs;
-}
-
 export function useUpcomingWalks() {
   const { user } = useAuth();
   const midnightToday = startOfDay(new Date());
@@ -195,68 +178,6 @@ export function useUpcomingWalks() {
 
   return upcomingWalks;
 }
-
-export const rsvpForWalk = async (
-  user: FirebaseAuthTypes.User,
-  walkId: string
-) => {
-  if (!user) {
-    throw new Error("User must be logged in to RSVP");
-  }
-
-  try {
-    const walkRef = doc(db, "walks", walkId);
-
-    // Add user to the rsvpUsers array
-    await updateDoc(walkRef, {
-      rsvpUsers: arrayUnion(user.uid),
-    });
-
-    // Create an RSVP document
-    const rsvpsRef = collection(walkRef, "rsvps");
-    await addDoc(rsvpsRef, {
-      userId: user.uid,
-      walkId: walkId,
-      timestamp: serverTimestamp(),
-    });
-
-    console.log("User RSVPed successfully:", user.uid);
-  } catch (error) {
-    console.error("Error RSVPing for walk:", error);
-    throw error;
-  }
-};
-
-export const cancelRSVP = async (
-  user: FirebaseAuthTypes.User,
-  walkId: string
-) => {
-  if (!user) {
-    throw new Error("User must be logged in to cancel RSVP");
-  }
-  try {
-    const walkRef = doc(db, "walks", walkId);
-
-    // Remove user from the rsvpUsers array
-    await updateDoc(walkRef, {
-      rsvpUsers: arrayRemove(user.uid),
-    });
-
-    // Find and delete the RSVP document
-    const rsvpsRef = collection(walkRef, "rsvps");
-    const rsvpsQuery = query(rsvpsRef, where("userId", "==", user.uid));
-    const rsvpsSnapshot = await getDocs(rsvpsQuery);
-
-    // Delete each matching RSVP document
-    const deletePromises = rsvpsSnapshot.docs.map((doc) => deleteDoc(doc.ref));
-    await Promise.all(deletePromises);
-
-    console.log("User canceled RSVP successfully:", user.uid);
-  } catch (error) {
-    console.error("Error canceling RSVP:", error);
-    throw error;
-  }
-};
 
 export const createWalk = async (
   user: FirebaseAuthTypes.User,

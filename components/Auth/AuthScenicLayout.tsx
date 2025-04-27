@@ -1,4 +1,3 @@
-import Birds from "components/Birds";
 import LottieView from "lottie-react-native";
 import React from "react";
 import {
@@ -9,6 +8,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, View, YStack } from "tamagui";
+import Birds from "../Birds";
 import Clouds from "../Clouds";
 import Sun from "../Sun";
 import { BrandGradient } from "../UI";

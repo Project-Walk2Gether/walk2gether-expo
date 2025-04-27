@@ -1,4 +1,4 @@
-import { Calendar, Hand, Pin, Timer, User } from "@tamagui/lucide-icons";
+import { Calendar, Hand, Pin, Timer } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -49,12 +49,6 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
   const avatarsToDisplay = approvedParticipants.slice(0, maxAvatars);
   const overflow = approvedCount > maxAvatars ? approvedCount - maxAvatars : 0;
   const status = getWalkStatus(walk);
-
-  const organizerNameText = isMine
-    ? status === "past"
-      ? "You hosted"
-      : "You're hosting"
-    : walk.organizerName + "'s walk";
   const router = useRouter();
   const handlePress = () => {
     // If user is the walk owner, always go to walk details
@@ -83,7 +77,7 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
       onPress={handlePress}
     >
       {/* Walk Card Header */}
-      <YStack space="$1" px="$3" pt="$2" pb="$3" flex={1}>
+      <YStack gap="$2" px="$3" pt="$2" pb="$3" flex={1}>
         <XStack
           p="$2"
           alignItems="center"
@@ -91,67 +85,51 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
           flexShrink={0}
         >
           <XStack alignItems="center" gap={8}>
-  <Text
-    fontSize={18}
-    fontWeight="600"
-    color="$gray12"
-    numberOfLines={1}
-    ellipsizeMode="tail"
-    flex={1}
-  >
-    {isMine
-      ? "Friend walk"
-      : `${walk.organizerName}'s Friend walk`}
-  </Text>
-  {isMine && (
-  <XStack
-    backgroundColor={COLORS.primary}
-    px={8}
-    py={4}
-    borderRadius={4}
-    alignItems="center"
-    justifyContent="center"
-    ml={4}
-  >
-    <Text fontSize={12} color="white" fontWeight="500">
-      {status === "past" ? "You hosted" : "You're hosting"}
-    </Text>
-  </XStack>
-)}
-{status === "active" && (
-  <XStack
-    backgroundColor="#4caf50"
-    paddingHorizontal={8}
-    paddingVertical={4}
-    borderRadius={4}
-    alignItems="center"
-    justifyContent="center"
-    ml={4}
-  >
-    <Text fontSize={12} color="white" fontWeight="500">
-      Active
-    </Text>
-  </XStack>
-)}
-{status !== "active" && status !== "past" && (
-  <XStack
-    backgroundColor="#2196f3"
-    paddingHorizontal={8}
-    paddingVertical={4}
-    borderRadius={4}
-    alignItems="center"
-    justifyContent="center"
-    ml={4}
-  >
-    <Text fontSize={12} color="white" fontWeight="500">
-      Upcoming
-    </Text>
-  </XStack>
-)}
-</XStack>
+            <Text
+              fontSize={18}
+              fontWeight="600"
+              color="$gray12"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              flex={1}
+            >
+              {isMine
+                ? getWalkTypeLabel(walk.type)
+                : `${walk.organizerName}'s Friend walk`}
+            </Text>
+            {isMine && (
+              <XStack
+                backgroundColor={COLORS.primary}
+                px={8}
+                py={4}
+                borderRadius={4}
+                alignItems="center"
+                justifyContent="center"
+                ml={4}
+              >
+                <Text fontSize={12} color="white" fontWeight="500">
+                  {status === "past" ? "You hosted" : "You're hosting"}
+                </Text>
+              </XStack>
+            )}
+            {status !== "active" && status !== "past" && (
+              <XStack
+                backgroundColor="#2196f3"
+                paddingHorizontal={8}
+                paddingVertical={4}
+                borderRadius={4}
+                alignItems="center"
+                justifyContent="center"
+                ml={4}
+              >
+                <Text fontSize={12} color="white" fontWeight="500">
+                  Upcoming
+                </Text>
+              </XStack>
+            )}
+          </XStack>
         </XStack>
 
-        
         <XStack alignItems="center" gap={6}>
           <Calendar size={16} color="#666" />
           <Text fontSize={14} color="#666">
@@ -164,12 +142,30 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
             {walk.durationMinutes} minutes
           </Text>
         </XStack>
-        <XStack alignItems="center" gap={6}>
-          <Pin size={16} color="#666" />
-          <Text fontSize={14} color="#666" numberOfLines={1}>
-            {walkIsNeighborhoodWalk(walk) ? distanceFromMe : walk.location.name}
-          </Text>
-        </XStack>
+        {walkIsNeighborhoodWalk(walk) ? null : (
+          <XStack alignItems="center" gap={6}>
+            <Pin size={16} color="#666" />
+            <Text fontSize={14} color="#666" numberOfLines={1}>
+              {walk.location.name}
+            </Text>
+          </XStack>
+        )}
+        {status === "active" && (
+          <XStack>
+            <XStack
+              backgroundColor="#4caf50"
+              paddingHorizontal={8}
+              paddingVertical={4}
+              borderRadius={4}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text fontSize={12} color="white" fontWeight="500">
+                Happening now!
+              </Text>
+            </XStack>
+          </XStack>
+        )}
       </YStack>
 
       {/* Actions footer */}
