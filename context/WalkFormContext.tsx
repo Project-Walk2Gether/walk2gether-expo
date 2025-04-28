@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import * as Location from "expo-location";
 
 export interface WalkFormData {
   walkType: "friends" | "meetup" | "neighborhood" | null;
@@ -26,6 +27,12 @@ interface WalkFormContextType {
   goToPreviousStep: () => void;
   goToStep: (step: number) => void;
   totalSteps: number;
+  userLocation: {
+    latitude: number;
+    longitude: number;
+  } | null;
+  isLocationLoading: boolean;
+  locationError: string | null;
 }
 
 const initialFormData: WalkFormData = {
@@ -50,6 +57,9 @@ export const WalkFormProvider: React.FC<{ children: React.ReactNode }> = ({
   const [formData, setFormData] = useState<WalkFormData>(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
   const totalSteps = 6; // Type selection + 4 wizard steps
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [isLocationLoading, setIsLocationLoading] = useState<boolean>(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   const updateFormData = (newData: Partial<WalkFormData>) => {
     setFormData((prevData) => ({
@@ -81,6 +91,41 @@ export const WalkFormProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // Function to request and get the user's current location
+  const fetchUserLocation = async () => {
+    setIsLocationLoading(true);
+    setLocationError(null);
+    
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      
+      if (status !== 'granted') {
+        setLocationError('Permission to access location was denied');
+        setIsLocationLoading(false);
+        return;
+      }
+      
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    } catch (error) {
+      setLocationError('Could not get your location');
+      console.error('Error getting location:', error);
+    } finally {
+      setIsLocationLoading(false);
+    }
+  };
+  
+  // Fetch location when component mounts
+  useEffect(() => {
+    fetchUserLocation();
+  }, []);
+
   return (
     <WalkFormContext.Provider
       value={{
@@ -92,6 +137,9 @@ export const WalkFormProvider: React.FC<{ children: React.ReactNode }> = ({
         goToPreviousStep,
         goToStep,
         totalSteps,
+        userLocation,
+        isLocationLoading,
+        locationError,
       }}
     >
       {children}

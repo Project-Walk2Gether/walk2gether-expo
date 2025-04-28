@@ -1,0 +1,107 @@
+commit 2a3443dd5245a5cd0359f8aaaa97407404d43379
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sun Apr 27 17:29:21 2025 -0500
+
+    Work on multiple modal screens, walk wizard, and more
+
+commit 40683273b6e53d2a745d7722d48fe0360eaf25f1
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sat Apr 26 16:00:52 2025 -0500
+
+    Work on signup flow, walking characters, and more
+
+commit 848188696d07f82df96dd7337516d5ee6cb6a407
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sat Apr 26 13:57:45 2025 -0500
+
+    Update animated logo and more
+
+commit a99b8dc9b3da5606cd95457a613187261d3d67da
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sat Apr 26 09:44:56 2025 -0500
+
+    Get route tracking working in the UI
+
+commit 21027ebb79be644c00e21bee8e693d2b6047ff7c
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sat Apr 26 08:53:19 2025 -0500
+
+    Update walk card and many screens
+
+commit 2cd762fc05dc0cc111e7c4e50593913396ea9f7a
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Fri Apr 25 12:36:13 2025 -0500
+
+    Move away from Stylesheet pattern to tamagui primitives
+
+commit b7fedce0eb3e828097e840490412cbef2d3fdef2
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Fri Apr 25 12:09:30 2025 -0500
+
+    Update auth screen scene
+
+commit 790400979d424f49085f234fbf505e0e4d0106a0
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sat Apr 19 15:52:27 2025 -0500
+
+    Use user's current location when creating a new walk
+
+commit 76788e5591bec3c44427e43f47bfb2632316ac4a
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sat Apr 19 15:48:02 2025 -0500
+
+    Update walk screens
+
+commit f648818d1d9b5e2cb9cd1465217a51e8819e2225
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sat Apr 19 14:54:39 2025 -0500
+
+    Work on walk card, walk forms and more
+
+commit dcfd857408bfbefb995582faf5d38d87f43b3d86
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sat Apr 19 10:27:20 2025 -0500
+
+    Update onboarding flow and profile screen
+
+commit 5f5884f26d22a72d7cc2e0d29857c36833b93bc7
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sat Apr 19 09:09:18 2025 -0500
+
+    Introduce new onboarding screen
+
+commit 4c9c1dfb036f6b458e56d6386bb1b9069d6c70c7
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Fri Apr 18 13:18:54 2025 -0500
+
+    Lots of work across app, working on build issues
+
+commit 0cfede519da209c9d2aa24b016b1b4be5c954923
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sun Apr 13 15:31:44 2025 -0500
+
+    Setup walk history screen and more
+
+commit 80053f79c7e7d1d6d87929b564aad3db17f6543d
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sun Apr 13 10:03:44 2025 -0500
+
+    Setup background location tracking
+
+commit 7bdd7f5c820fe9fd72eaadd5f89ad3c132518d79
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sun Apr 13 08:22:14 2025 -0500
+
+    Work on walk wizard, overall layout etc
+
+commit 8469c9749a57e2b6eebfc616d27574e8036196c0
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sat Apr 12 13:58:33 2025 -0500
+
+    Update dependencies based on expo doctor report
+
+commit 3b54130b2e75230c438c02dfd385f8cdf9436518
+Author: Michael Dawson <m.dawson@y7mail.com>
+Date:   Sat Apr 12 12:21:51 2025 -0500
+
+    Extract project from monorepo

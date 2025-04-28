@@ -14,16 +14,18 @@ import { useAuth } from "../../context/AuthContext";
 import { useDoc, useQuery } from "../../utils/firestore";
 import WalkChat from "../Chat/WalkChat";
 // Removed StyleSheet import; using Tamagui for styles
-import HeaderCloseButton from "components/HeaderCloseButton";
-import WalkMenu from "components/WalkMenu";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { H4, Text, View, XStack } from "tamagui";
 import { Message, ParticipantWithRoute, Walk } from "walk2gether-shared";
+import HeaderCloseButton from "../../components/HeaderCloseButton";
+import WalkMenu from "../../components/WalkMenu";
 import { useWalkParticipants } from "../../hooks/useWaitingParticipants";
 import FullScreenLoader from "../FullScreenLoader";
 import LiveWalkMap from "./components/LiveWalkMap";
+import ParticipantApprovalDrawer, {
+  ParticipantApprovalDrawerRef,
+} from "./components/ParticipantApprovalDrawer";
 import ParticipantsList from "./components/ParticipantsList";
-import ParticipantApprovalDrawer, { ParticipantApprovalDrawerRef } from "./components/ParticipantApprovalDrawer";
 
 export default function ActiveWalkScreen() {
   const params = useLocalSearchParams();
@@ -73,24 +75,30 @@ export default function ActiveWalkScreen() {
   // Handle approving a participant
   const handleApproveParticipant = async (participantId: string) => {
     try {
-      const participantRef = doc(firestore_instance, `walks/${id}/participants/${participantId}`);
+      const participantRef = doc(
+        firestore_instance,
+        `walks/${id}/participants/${participantId}`
+      );
       await updateDoc(participantRef, {
-        approvedAt: serverTimestamp()
+        approvedAt: serverTimestamp(),
       });
     } catch (error) {
-      console.error('Error approving participant:', error);
+      console.error("Error approving participant:", error);
     }
   };
 
   // Handle rejecting a participant
   const handleRejectParticipant = async (participantId: string) => {
     try {
-      const participantRef = doc(firestore_instance, `walks/${id}/participants/${participantId}`);
+      const participantRef = doc(
+        firestore_instance,
+        `walks/${id}/participants/${participantId}`
+      );
       await updateDoc(participantRef, {
-        rejectedAt: serverTimestamp()
+        rejectedAt: serverTimestamp(),
       });
     } catch (error) {
-      console.error('Error rejecting participant:', error);
+      console.error("Error rejecting participant:", error);
     }
   };
 

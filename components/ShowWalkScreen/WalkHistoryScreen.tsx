@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import HeaderCloseButton from "components/HeaderCloseButton";
 import { format } from "date-fns";
 import { Stack } from "expo-router";
 import { Card, ScrollView, Text } from "tamagui";
 import { Walk } from "walk2gether-shared";
+import HeaderCloseButton from "../../components/HeaderCloseButton";
 
 interface Props {
   walk: Walk;

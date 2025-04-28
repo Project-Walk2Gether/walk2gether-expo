@@ -3,7 +3,6 @@ import { format } from "date-fns";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Avatar, Button, Card, Text, View, XStack, YStack } from "tamagui";
-import { getWalkTypeLabel } from "utils/walkType";
 import {
   Participant,
   Walk,
@@ -14,6 +13,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useLocation } from "../../context/LocationContext";
 import { COLORS } from "../../styles/colors";
 import { useQuery } from "../../utils/firestore";
+import { getWalkTypeLabel } from "../../utils/walkType";
 import { getWalkStatus } from "../../utils/walkUtils";
 import { getDistanceFromLocation } from "./utils/locationUtils";
 

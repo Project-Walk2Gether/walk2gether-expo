@@ -1,5 +1,5 @@
 import Constants from "expo-constants";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import {
   GooglePlacesAutocomplete,
@@ -26,20 +26,32 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   onContinue,
   onBack,
 }) => {
-  const { formData, updateFormData } = useWalkForm();
+  const { formData, updateFormData, userLocation, isLocationLoading, locationError } = useWalkForm();
   const [location, setLocation] = useState(formData.location || null);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [longPressActive, setLongPressActive] = useState(false);
   const mapRef = useRef<MapView>(null);
   const googlePlacesRef = useRef<GooglePlacesAutocompleteRef>(null);
 
-  // Set initial region based on saved location or default
+  // Set initial region based on saved location, user location, or default
   const [region, setRegion] = useState({
-    latitude: formData.location?.latitude || 37.78825,
-    longitude: formData.location?.longitude || -122.4324,
+    latitude: formData.location?.latitude || userLocation?.latitude || 37.78825,
+    longitude: formData.location?.longitude || userLocation?.longitude || -122.4324,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
+  
+  // Update region when user location changes
+  useEffect(() => {
+    if (userLocation && !formData.location) {
+      setRegion({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+    }
+  }, [userLocation, formData.location]);
 
   const handleLocationSelect = (data: any, details: any) => {
     if (details && details.geometry) {
@@ -242,7 +254,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
             Tap and hold on the map to choose a location
           </Text>
 
-          {(isReverseGeocoding || longPressActive) && (
+          {(isReverseGeocoding || longPressActive || isLocationLoading) && (
             <View
               position="absolute"
               top={0}
@@ -258,6 +270,8 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
               <Text marginTop={10} color={COLORS.text} fontSize={14}>
                 {longPressActive
                   ? "Location selected! Getting details..."
+                  : isLocationLoading
+                  ? "Getting your location..."
                   : "Getting location details..."}
               </Text>
             </View>
@@ -275,6 +289,22 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
                 fontWeight="600"
               >
                 Map preview unavailable without API key
+              </Text>
+            </View>
+          )}
+          {locationError && !isApiKeyMissing && (
+            <View
+              style={{ width: "100%", height: "100%" }}
+              backgroundColor="rgba(0, 0, 0, 0.2)"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Text
+                color={COLORS.textOnDark}
+                textAlign="center"
+                fontWeight="600"
+              >
+                {locationError}
               </Text>
             </View>
           )}

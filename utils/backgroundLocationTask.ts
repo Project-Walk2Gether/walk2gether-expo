@@ -2,10 +2,7 @@ import { doc, updateDoc } from "@react-native-firebase/firestore";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
-import {
-  // auth_instance,
-  firestore_instance,
-} from "../config/firebase";
+import { auth_instance, firestore_instance } from "../config/firebase";
 
 // Define a task name for background location tracking
 export const LOCATION_TRACKING_TASK = "background-location-tracking";
