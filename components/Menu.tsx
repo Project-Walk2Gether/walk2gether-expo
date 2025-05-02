@@ -14,8 +14,7 @@ interface Props {
   title: string;
   color?: string;
   items: MenuItem[];
-  triggerIcon?: React.ReactElement<IconProps> | undefined;
-  triggerButtonProps?: Partial<GetProps<typeof Button>>;
+  trigger?: React.ReactNode;
   snapPoints?: number[];
 }
 
@@ -23,22 +22,26 @@ export default function Menu({
   title,
   items,
   color = "white",
-  triggerIcon = <MoreVertical size="$1" color={color} />,
-  triggerButtonProps = {},
+  trigger,
   snapPoints = [40],
 }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <Button
-        size="$2"
-        circular
-        chromeless
-        onPress={() => setOpen(true)}
-        icon={triggerIcon}
-        {...triggerButtonProps}
-      />
+      {trigger ? (
+        React.cloneElement(trigger as React.ReactElement<any>, {
+          onPress: () => setOpen(true),
+        })
+      ) : (
+        <Button
+          size="$2"
+          circular
+          chromeless
+          onPress={() => setOpen(true)}
+          icon={<MoreVertical size="$1" color={color} />}
+        />
+      )}
       <Sheet
         modal
         open={open}

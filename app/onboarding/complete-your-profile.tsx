@@ -238,9 +238,8 @@ export default function CompleteYourProfile() {
                     onPress={() => handleSubmit()}
                     disabled={!values.name || !values.location}
                     iconAfter={<ArrowRight />}
-                  >
-                    Get started
-                  </ActionButton>
+                    label="Get started"
+                  />
                 </YStack>
               </Card>
             </ScrollView>

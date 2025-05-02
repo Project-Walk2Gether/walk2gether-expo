@@ -2,7 +2,6 @@ import { Redirect, Stack } from "expo-router";
 import React from "react";
 import { ActivityIndicator } from "react-native";
 import { YStack } from "tamagui";
-import HeaderBackButton from "../../components/HeaderBackButton";
 import { useAuth } from "../../context/AuthContext";
 import { useUserData } from "../../context/UserDataContext";
 import { WalksProvider } from "../../context/WalksContext";
@@ -38,40 +37,7 @@ export default function AppLayout() {
     <WalksProvider>
       <Stack initialRouteName="(tabs)" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen
-          name="(modals)/profile"
-          options={{
-            title: "Profile",
-            headerShown: true,
-            presentation: "modal",
-            headerLeft: () => <HeaderBackButton />,
-          }}
-        />
-        <Stack.Screen
-          name="(modals)/new-walk"
-          options={{
-            title: "Schedule a new walk",
-            headerShown: true,
-            presentation: "modal",
-            headerLeft: () => <HeaderBackButton />,
-          }}
-        />
-        <Stack.Screen
-          name="(modals)/edit-walk/[id]"
-          options={{
-            title: "Edit walk",
-            headerShown: true,
-            presentation: "modal",
-            headerLeft: () => <HeaderBackButton />,
-          }}
-        />
-        <Stack.Screen
-          name="(modals)/walk/[id]"
-          options={{
-            title: "Let's walk",
-            headerLeft: () => <HeaderBackButton />,
-          }}
-        />
+        <Stack.Screen name="(modals)" options={{ presentation: "modal" }} />
       </Stack>
     </WalksProvider>
   );

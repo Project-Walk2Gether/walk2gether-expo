@@ -1,144 +1,69 @@
 import firestore, {
-  addDoc,
   collection,
-  doc,
-  getDoc,
-  onSnapshot,
   orderBy,
-  query,
-  serverTimestamp,
+  query as fbQuery,
 } from "@react-native-firebase/firestore";
 import { ArrowLeft } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Avatar, Button, Text, XStack } from "tamagui";
-import WalkChat, { ChatMessage } from "../../../../components/Chat/WalkChat";
+import { Friendship, Message, UserData } from "walk2gether-shared";
+import WalkChat from "../../../../components/Chat/WalkChat";
 import { useAuth } from "../../../../context/AuthContext";
-
-// Define types for the friend data
-type Message = ChatMessage & {
-  recipientId: string;
-};
-
-type Friend = {
-  id: string;
-  name: string;
-  profilePicUrl?: string;
-};
+import { useDoc, useQuery } from "../../../../utils/firestore";
+import { sendMessage as sendMessageUtil } from "../../../../utils/messages";
 
 export default function ChatDetailScreen() {
   const params = useLocalSearchParams<{ id: string }>();
-  const friendId = params.id;
+  const friendshipId = params.id || '';
   const { user } = useAuth();
   const router = useRouter();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [friend, setFriend] = useState<Friend | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Fetch friend data
-    const fetchFriend = async () => {
-      if (!user || !friendId) return;
-
-      try {
-        const db = firestore();
-        const friendDocRef = doc(db, `users/${user.uid}/friends/${friendId}`);
-        const friendDoc = await getDoc(friendDocRef);
-
-        if (friendDoc.exists) {
-          setFriend({
-            id: friendDoc.id,
-            name: friendDoc.data().name || "Unknown",
-            profilePicUrl: friendDoc.data().profilePicUrl,
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching friend data:", error);
-      }
-    };
-
-    fetchFriend();
-
-    // Subscribe to messages
-    const subscribeToMessages = () => {
-      if (!user || !friendId) return;
-
-      const db = firestore();
-      // Create a query to get messages between the current user and the friend
-      const messagesRef = collection(
-        db,
-        `users/${user.uid}/friends/${friendId}/messages`
-      );
-      const q = query(messagesRef, orderBy("createdAt", "asc"));
-
-      return onSnapshot(q, (snapshot) => {
-        const messagesList = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            senderId: data.senderId,
-            recipientId: data.recipientId,
-            message: data.message,
-            createdAt: data.createdAt,
-            read: data.read || false,
-          };
-        });
-
-        setMessages(messagesList);
-        setLoading(false);
-
-        // Mark received messages as read (would implement in a real app)
-        // This would involve updating the message documents in Firestore
-
-        // Messages loaded successfully
-      });
-    };
-
-    const unsubscribe = subscribeToMessages();
-
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, [user, friendId]);
+  const [loading, setLoading] = useState(false);
+  
+  // Use useDoc to directly load the friendship document by ID
+  const { doc: friendship, status: friendshipStatus } = useDoc<Friendship>(
+    friendshipId ? `friendships/${friendshipId}` : undefined
+  );
+  
+  // Find the friend's ID from the friendship uids
+  const friendId = friendship?.uids?.find(uid => uid !== user?.uid) || '';
+  
+  // Use useDoc to get the friend's user data
+  const { doc: friendData, status: friendStatus } = useDoc<UserData>(
+    friendId ? `users/${friendId}` : undefined
+  );
+  
+  // Use useQuery to load messages from the friendship
+  const messagesQuery = friendshipId ? fbQuery(
+    collection(firestore(), `friendships/${friendshipId}/messages`),
+    orderBy('createdAt', 'asc')
+  ) : undefined;
+  
+  // Type needs to match WalkChat component expectations
+  const { docs: messagesData, status: messagesStatus } = useQuery<Message>(messagesQuery);
+  
+  // Convert Firebase data to ChatMessage type needed by WalkChat
+  const messages = useMemo(() => {
+    return messagesData.map(msg => ({
+      ...msg,
+      id: msg.id,
+      senderId: msg.senderId,
+      recipientId: msg.recipientId,
+      message: msg.message,
+      createdAt: msg.createdAt,
+      read: msg.read || false
+    })) as (Message & ChatMessage)[];
+  }, [messagesData]);
 
   const handleBack = () => {
     router.back();
   };
 
   const sendMessage = async (messageText: string) => {
-    if (!messageText.trim() || !user || !friendId) return;
+    if (!messageText.trim() || !user?.uid || !friendId || !friendshipId) return;
 
     try {
-      const db = firestore();
-      // Add the message to the current user's message collection
-      const messagesRef = collection(
-        db,
-        `users/${user.uid}/friends/${friendId}/messages`
-      );
-      await addDoc(messagesRef, {
-        senderId: user.uid,
-        recipientId: friendId,
-        message: messageText,
-        createdAt: serverTimestamp(),
-        read: false,
-      });
-
-      // Also add the message to the friend's message collection (so they can see it)
-      // In a production app, this would typically be handled by a Cloud Function
-      // to ensure both writes succeed or fail together
-      const friendMessagesRef = collection(
-        db,
-        `users/${friendId}/friends/${user.uid}/messages`
-      );
-      await addDoc(friendMessagesRef, {
-        senderId: user.uid,
-        recipientId: friendId,
-        message: messageText,
-        createdAt: serverTimestamp(),
-        read: false,
-      });
+      await sendMessageUtil(friendshipId, user.uid, friendId, messageText);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -151,18 +76,18 @@ export default function ChatDetailScreen() {
           headerTitle: () => (
             <XStack alignItems="center" gap="$2">
               <Avatar circular size="$4">
-                {friend?.profilePicUrl ? (
-                  <Avatar.Image src={friend.profilePicUrl} />
+                {friendData?.profilePicUrl ? (
+                  <Avatar.Image src={friendData.profilePicUrl} />
                 ) : (
                   <Avatar.Fallback backgroundColor="#8BEBA0">
                     <Text color="white" fontWeight="bold">
-                      {friend?.name?.charAt(0)?.toUpperCase() || "?"}
+                      {friendData?.name?.charAt(0)?.toUpperCase() || "?"}
                     </Text>
                   </Avatar.Fallback>
                 )}
               </Avatar>
               <Text fontWeight="bold" fontSize="$5">
-                {friend?.name || "Chat"}
+                {friendData?.name || "Chat"}
               </Text>
             </XStack>
           ),
@@ -185,7 +110,7 @@ export default function ChatDetailScreen() {
 
       <WalkChat
         messages={messages}
-        loading={loading}
+        loading={friendshipStatus === "loading" || friendStatus === "loading" || messagesStatus === "loading"}
         currentUserId={user?.uid || ""}
         onSendMessage={sendMessage}
         keyboardVerticalOffset={90}

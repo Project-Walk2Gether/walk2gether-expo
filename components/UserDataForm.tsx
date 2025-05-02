@@ -119,9 +119,12 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
           height={100}
         />
       </YStack>
-      <ActionButton onPress={handleSave} disabled={isSaving} loading={isSaving}>
-        Save Profile
-      </ActionButton>
+      <ActionButton
+        label="Save Profile"
+        onPress={handleSave}
+        disabled={isSaving}
+        loading={isSaving}
+      />
     </YStack>
   );
 };

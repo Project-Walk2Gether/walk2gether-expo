@@ -62,9 +62,16 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
               onChangeFormattedText={handleChange("formattedPhoneNumber")}
               containerStyle={{
                 width: "100%",
+                padding: 0,
+                margin: 0,
+              }}
+              flagButtonStyle={{
+                padding: 0,
+                width: "auto",
               }}
               textContainerStyle={{
-                paddingHorizontal: 0,
+                paddingLeft: 10,
+                paddingRight: 0,
                 borderRadius: 10,
                 paddingVertical: 8,
                 backgroundColor: "transparent",
@@ -73,14 +80,10 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
               textInputStyle={{
                 height: 50,
                 marginLeft: 10,
-                // borderWidth: 1,
-                // borderColor: "#ddd",
                 borderBottomColor: "#ddd",
                 borderBottomWidth: 1,
-                // borderRadius: 10,
                 paddingHorizontal: 15,
                 fontSize: 16,
-                backgroundColor: "#f9f9f9",
               }}
               codeTextStyle={{
                 color: "#000",

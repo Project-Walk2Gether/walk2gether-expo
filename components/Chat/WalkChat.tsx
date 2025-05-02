@@ -18,7 +18,7 @@ import {
 import { Message } from "walk2gether-shared";
 import { COLORS } from "../../styles/colors";
 
-type WalkChatProps = {
+type Props = {
   messages: Message[];
   loading?: boolean;
   currentUserId: string;
@@ -34,7 +34,7 @@ export default function WalkChat({
   onSendMessage,
   keyboardVerticalOffset = 140,
   containerStyle = {},
-}: WalkChatProps) {
+}: Props) {
   const scrollViewRef = useRef<RNScrollView | null>(null);
   const [messageText, setMessageText] = useState("");
 

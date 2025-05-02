@@ -15,11 +15,6 @@ import { BrandGradient } from "../UI";
 import BottomRow from "./BottomRow";
 import WalkingCharacters from "./WalkingCharacters";
 
-const getTopPadding = (screenHeight: number): number => {
-  const isLargeScreen = screenHeight > 700;
-  return isLargeScreen ? 50 : 20;
-};
-
 export interface AuthScenicLayoutProps {
   children: React.ReactNode;
   showLogo?: React.ReactNode;
@@ -109,7 +104,7 @@ export default function AuthScenicLayout({
           contentContainerStyle={{
             flexGrow: 1,
             paddingBottom: 100,
-            paddingTop: insets.top + getTopPadding(screenHeight),
+            paddingTop: insets.top + 35,
             ...contentContainerStyle,
           }}
           keyboardShouldPersistTaps="handled"

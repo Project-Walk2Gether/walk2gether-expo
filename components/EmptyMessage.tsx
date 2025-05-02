@@ -1,29 +1,46 @@
-import { Text, YStack } from "tamagui";
+import React from "react";
+import { Text, XStack, YStack } from "tamagui";
 import { COLORS } from "../styles/colors";
+
+interface EmptyMessageProps {
+  message: string;
+  subtitle?: string;
+  icon?: React.ComponentType<{ size?: number; color?: string; opacity?: number }>;
+  iconSize?: number;
+  iconColor?: string;
+}
 
 export const EmptyMessage = ({
   message,
   subtitle,
-}: {
-  message: string;
-  subtitle?: string;
-}) => (
+  icon: Icon,
+  iconSize = 60,
+  iconColor = COLORS.primary,
+}: EmptyMessageProps) => (
   <YStack
-    padding={15}
+    padding={20}
     marginTop={10}
     paddingHorizontal={20}
     backgroundColor="rgba(255, 255, 255, 0.2)"
+    borderRadius={12}
+    ai="center"
+    gap="$4"
   >
+    {Icon && (
+      <XStack ai="center" jc="center" mb="$2">
+        <Icon size={iconSize} color={iconColor} opacity={0.9} />
+      </XStack>
+    )}
     <Text
-      fontSize={16}
+      fontSize={18}
+      fontWeight="600"
       color={COLORS.textOnLight}
-      marginBottom={10}
-      borderRadius={10}
+      textAlign="center"
     >
       {message}
     </Text>
     {subtitle && (
-      <Text fontSize={14} color={COLORS.textOnLight} opacity={0.8}>
+      <Text fontSize={14} color={COLORS.textOnLight} opacity={0.8} textAlign="center">
         {subtitle}
       </Text>
     )}

@@ -38,7 +38,14 @@ function AppContent() {
               headerShown: false,
             }}
           />
-          <Stack.Screen name="auth" options={{ headerShown: false }} />
+          <Stack.Screen name="join" options={{ 
+            headerShown: false,
+            animation: "none",
+          }} />
+          <Stack.Screen name="auth" options={{ 
+            headerShown: false,
+            animation: "none",
+          }} />
         </Stack>
       </ErrorBoundary>
     </GestureHandlerRootView>

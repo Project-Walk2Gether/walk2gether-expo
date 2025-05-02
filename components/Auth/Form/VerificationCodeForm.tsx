@@ -1,6 +1,7 @@
+import { Pencil } from "@tamagui/lucide-icons";
 import { Formik } from "formik";
 import { useState } from "react";
-import { Button, Input, Text, YStack } from "tamagui";
+import { Button, Input, Text, XStack, YStack } from "tamagui";
 import * as yup from "yup";
 import { ActionButton } from "../../ActionButton";
 
@@ -49,24 +50,25 @@ export default function VerificationCodeForm({
         isValid,
       }) => (
         <>
-          <YStack width="100%" marginBottom="$3">
-            <Button
-              backgroundColor="transparent"
-              width="auto"
-              height={40}
-              marginBottom="$1"
-              justifyContent="center"
-              alignItems="center"
-              pressStyle={{ opacity: 0.7 }}
-              onPress={goBack}
-            >
-              <Text color="$blue10" fontSize="$3" fontWeight="500">
-                ← Change number
+          <YStack width="100%" marginBottom="$2">
+            <XStack ai="center" jc="space-between">
+              <Text color="$gray10" fontSize="$3" textAlign="center">
+                Sent to {phoneNumber}
               </Text>
-            </Button>
-            <Text color="$gray10" fontSize="$3" textAlign="center">
-              Confirmation code sent to {phoneNumber}
-            </Text>
+              <Button
+                backgroundColor="transparent"
+                width="auto"
+                height={40}
+                marginBottom="$1"
+                justifyContent="center"
+                alignItems="center"
+                pressStyle={{ opacity: 0.7 }}
+                onPress={goBack}
+                icon={<Pencil />}
+              >
+                Change
+              </Button>
+            </XStack>
           </YStack>
           <YStack width="100%" marginBottom="$3">
             <Input

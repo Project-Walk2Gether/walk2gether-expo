@@ -1,14 +1,14 @@
-import { Plus } from "@tamagui/lucide-icons";
+import { Leaf, Plus } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList } from "react-native";
-import { Button, ScrollView, View } from "tamagui";
+import { ScrollView, View } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
 import { EmptyMessage } from "../../../../components/EmptyMessage";
+import FAB from "../../../../components/FAB";
 import { BrandGradient } from "../../../../components/UI";
 import WalkCard from "../../../../components/WalkCard";
 import { useWalks } from "../../../../context/WalksContext";
-import { COLORS } from "../../../../styles/colors";
 
 export default function ActiveTabScreen() {
   const router = useRouter();
@@ -40,32 +40,19 @@ export default function ActiveTabScreen() {
           />
         ) : (
           <EmptyMessage
-            message="Looks like it's a quiet moment 🌱"
-            subtitle="Invite a friend or start a walk to get moving!"
+            message="Looks like it's a quiet moment"
+            subtitle="Invite a friend or start a walk to get walking!"
+            icon={Leaf}
+            iconSize={70}
+            iconColor="#7C5F45"
           />
         )}
       </ScrollView>
-      <Button
-        position="absolute"
-        width={60}
-        height={60}
-        alignItems="center"
-        justifyContent="center"
-        right={20}
-        bottom={30}
-        backgroundColor={COLORS.action}
-        borderRadius={30}
-        elevation={8}
-        shadowColor="#000"
-        shadowOffset={{ width: 0, height: 4 }}
-        shadowOpacity={0.3}
-        shadowRadius={4}
+      <FAB
+        icon={<Plus size={28} color="white" />}
+        accessibilityLabel="Create a new walk"
         onPress={() => router.push("/new-walk")}
-        circular
-        unstyled
-      >
-        <Plus size={24} color="white" />
-      </Button>
+      />
     </BrandGradient>
   );
 }

@@ -5,7 +5,7 @@ import {
 } from "@react-native-firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { WithId } from "walk2gether-shared";
-import { DocumentReferenceLike } from "walk2gether-shared/lib/utils/documentReference";
+import { DocumentReferenceLike } from "walk2gether-shared/lib/firestore/documentReference";
 import { db } from "../config/firebase";
 
 export function useDoc<T extends FirebaseFirestoreTypes.DocumentData>(
