@@ -1,11 +1,12 @@
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
 import { Card, Spacer, Text, View, YStack } from "tamagui";
 import { Slogan } from "../components/AnimatedLogo/Slogan";
 import AnimatedLogo from "../components/AnimatedLogo/index";
 import AuthScenicLayout from "../components/Auth/AuthScenicLayout";
 import PhoneForm from "../components/Auth/Form/PhoneForm";
+import TokenSignInForm from "../components/Auth/Form/TokenSignInForm";
 import VerificationCodeForm, {
   VerificationSchema,
 } from "../components/Auth/Form/VerificationCodeForm";
@@ -17,9 +18,11 @@ const logoWidth = width * 0.7;
 
 export default function Auth() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ token?: string }>();
   const { signInWithPhoneCredential } = useAuth();
   const [verificationId, setVerificationId] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [authMode, setAuthMode] = useState<"phone" | "token">("phone");
 
   const handleVerificationCodeFormSubmit = async (
     values: VerificationSchema
@@ -38,6 +41,13 @@ export default function Auth() {
       router.replace("/");
     }
   };
+  
+  // Check for token in URL params
+  useEffect(() => {
+    if (params.token) {
+      setAuthMode("token");
+    }
+  }, [params.token]);
 
   return (
     <AuthScenicLayout
@@ -70,10 +80,22 @@ export default function Auth() {
           elevation={5}
         >
           <Text fontSize={26} textAlign="center" color="#333" marginBottom="$2">
-            {verificationId ? "Enter confirmation code" : "Get Started"}
+            {authMode === "token" 
+              ? "Token Authentication" 
+              : verificationId 
+                ? "Enter confirmation code" 
+                : "Get Started"}
           </Text>
           <View mb="$1">
-            {verificationId ? (
+            {authMode === "token" ? (
+              <TokenSignInForm 
+                token={params.token || ""}
+                onCancel={() => {
+                  setAuthMode("phone");
+                  router.setParams({});
+                }}
+              />
+            ) : verificationId ? (
               <VerificationCodeForm
                 goBack={() => setVerificationId("")}
                 handleSubmit={handleVerificationCodeFormSubmit}

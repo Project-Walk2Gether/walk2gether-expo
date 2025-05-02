@@ -12,6 +12,7 @@ import { tamaguiConfig } from "../tamagui.config";
 
 // Import background location task registration
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import ErrorBoundary from "../components/ErrorBoundary";
 import { registerBackgroundTask } from "../utils/backgroundLocationTask";
 
 // https://github.com/FaridSafi/react-native-google-places-autocomplete#more-examples
@@ -28,16 +29,18 @@ function AppContent() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen
-          name="(app)"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen name="auth" options={{ headerShown: false }} />
-      </Stack>
+      <ErrorBoundary>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen
+            name="(app)"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen name="auth" options={{ headerShown: false }} />
+        </Stack>
+      </ErrorBoundary>
     </GestureHandlerRootView>
   );
 }

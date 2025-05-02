@@ -1,11 +1,11 @@
 import { Formik } from "formik";
 import { useCallback, useRef, useState } from "react";
-import { ActivityIndicator, Alert } from "react-native";
+import { Alert } from "react-native";
 import PhoneInput from "react-native-phone-number-input";
-import { Button, Text, View } from "tamagui";
-import { ActionButton } from "../../ActionButton";
+import { Text, View } from "tamagui";
 import * as yup from "yup";
 import { useAuth } from "../../../context/AuthContext";
+import { ActionButton } from "../../ActionButton";
 
 const signInSchema = yup.object().shape({
   phoneNumber: yup.string().required("Phone number is required"),
@@ -93,15 +93,10 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
             )}
           </View>
           <ActionButton
-  onPress={handleSubmit}
-  disabled={!isValid || loading}
->
-  {loading ? (
-    <ActivityIndicator color="white" size="small" />
-  ) : (
-    "Send Code"
-  )}
-</ActionButton>
+            label="Send Code"
+            onPress={handleSubmit}
+            disabled={!isValid || loading}
+          ></ActionButton>
         </>
       )}
     </Formik>

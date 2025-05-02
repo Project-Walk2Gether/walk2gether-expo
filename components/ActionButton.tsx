@@ -1,23 +1,27 @@
 import React from "react";
 import { ActivityIndicator } from "react-native";
-import { Button, Text } from "tamagui";
+import { Button, ButtonProps, Text, XStack } from "tamagui";
 
 interface Props {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  children?: React.ReactNode;
+  label: string;
+  icon?: React.ReactNode;
   iconAfter?: React.ReactNode;
   testID?: string;
+  theme?: ButtonProps["theme"];
 }
 
 export function ActionButton({
   onPress,
   disabled = false,
   loading = false,
-  children,
+  label,
+  icon,
   iconAfter,
   testID,
+  ...rest
 }: Props) {
   return (
     <Button
@@ -26,10 +30,11 @@ export function ActionButton({
       width="100%"
       height={55}
       marginTop={10}
-      backgroundColor="#4EB1BA"
+      backgroundColor={rest.theme ? undefined : "#4EB1BA"}
       borderRadius={10}
       justifyContent="center"
       alignItems="center"
+      {...rest}
       style={{
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
@@ -43,14 +48,15 @@ export function ActionButton({
       testID={testID}
     >
       {loading ? (
-        <ActivityIndicator color="white" />
+        <ActivityIndicator />
       ) : (
-        <>
-          <Text color="white" fontSize={20} fontWeight="bold">
-            {children}
+        <XStack alignItems="center" space="$2">
+          {icon}
+          <Text fontSize={20} color="white" fontWeight="bold">
+            {label}
           </Text>
           {iconAfter}
-        </>
+        </XStack>
       )}
     </Button>
   );

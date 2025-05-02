@@ -30,6 +30,9 @@ export default function CompleteYourProfile() {
   const [locationMode, setLocationMode] = useState<"none" | "auto" | "manual">(
     "none"
   );
+
+  if (!user) return <Redirect href="/auth" />;
+
   const initialFriendInvitationCode = user!.uid
     .substring(0, 8)
     .split("")

@@ -1,22 +1,14 @@
-import { useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import { Redirect } from "expo-router";
+import React from "react";
 import { ActivityIndicator } from "react-native";
 import { YStack } from "tamagui";
 import { useAuth } from "../context/AuthContext";
 
-export default function Index() {
-  const router = useRouter();
+export default function IndexScreen() {
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading) {
-      if (user) {
-        router.replace("/home/active");
-      } else {
-        router.replace("/auth");
-      }
-    }
-  }, [user, loading, router]);
+  if (!loading && user) return <Redirect href="/home/active" />;
+  if (!loading && !user) return <Redirect href="/auth" />;
 
   // Show loading indicator while checking auth state
   return (

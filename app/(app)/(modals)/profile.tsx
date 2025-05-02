@@ -260,7 +260,9 @@ export default function ProfileScreen() {
             Sign Out
           </Text>
         </Button>
-        {authUser?.uid && <UIDInfo uid={authUser.uid} version={appVersion} />}
+        {authUser?.uid && (
+          <UIDInfo uid={authUser.uid} version={`${appVersion}.patch`} />
+        )}
       </ScrollView>
     </>
   );

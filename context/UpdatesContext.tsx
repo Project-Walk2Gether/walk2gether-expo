@@ -47,7 +47,7 @@ export const UpdatesProvider: React.FC<UpdatesProviderProps> = ({
       try {
         if (__DEV__) return;
 
-        if (Updates.channel === "production") {
+        if (!Updates.channel || Updates.channel.length === 0) {
           console.log(`Checking for updates (current version: ${appVersion})`);
           const updateStatus = await Updates.checkForUpdateAsync();
           setUpdateAvailable(updateStatus.isAvailable);

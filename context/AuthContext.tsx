@@ -25,6 +25,8 @@ interface AuthContextType {
     verificationId: string,
     code: string
   ) => Promise<FirebaseAuthTypes.UserCredential>;
+  // Custom token auth method
+  signInWithToken: (token: string) => Promise<FirebaseAuthTypes.UserCredential>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -234,6 +236,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const signInWithToken = async (token: string): Promise<FirebaseAuthTypes.UserCredential> => {
+    try {
+      const userCredential = await auth_instance.signInWithCustomToken(token);
+      showMessage({
+        message: "Success",
+        description: "Signed in successfully!",
+        type: "success",
+        duration: 3000,
+      });
+      return userCredential;
+    } catch (error: any) {
+      console.error("Error signing in with token:", error);
+      let errorMessage = "Failed to sign in with token";
+
+      if (error.code === "auth/invalid-custom-token") {
+        errorMessage = "Invalid authentication token";
+      } else if (error.code === "auth/custom-token-mismatch") {
+        errorMessage = "Token was issued for a different project";
+      }
+
+      showMessage({
+        message: "Error",
+        description: errorMessage,
+        type: "danger",
+        duration: 4000,
+      });
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -247,6 +279,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         sendPhoneVerificationCode,
         verifyPhoneCode,
         signInWithPhoneCredential,
+        // Custom token auth method
+        signInWithToken,
       }}
     >
       {children}

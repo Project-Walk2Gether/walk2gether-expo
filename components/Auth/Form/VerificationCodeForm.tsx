@@ -1,9 +1,8 @@
 import { Formik } from "formik";
 import { useState } from "react";
-import { ActivityIndicator } from "react-native";
 import { Button, Input, Text, YStack } from "tamagui";
-import { ActionButton } from "../../ActionButton";
 import * as yup from "yup";
+import { ActionButton } from "../../ActionButton";
 
 const verificationSchema = yup.object().shape({
   verificationCode: yup.string().required("Verification code is required"),
@@ -98,15 +97,11 @@ export default function VerificationCodeForm({
           </YStack>
 
           <ActionButton
-  onPress={handleSubmit}
-  disabled={!isValid || loading}
->
-  {loading ? (
-    <ActivityIndicator color="white" size="small" />
-  ) : (
-    "Let's go!"
-  )}
-</ActionButton>
+            onPress={handleSubmit}
+            disabled={!isValid || loading}
+            loading={loading}
+            label="Let's go!"
+          ></ActionButton>
         </>
       )}
     </Formik>
