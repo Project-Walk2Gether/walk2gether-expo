@@ -1,16 +1,22 @@
-import {
-  collection,
-  getDocs,
-  getFirestore,
-} from "@react-native-firebase/firestore";
+import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
-import { MapPin, MessageCircle, UserPlus, X } from "@tamagui/lucide-icons";
+import {
+  MapPin,
+  MessageCircle,
+  UserPlus,
+  Users,
+  X,
+} from "@tamagui/lucide-icons";
 import React, { useEffect, useRef, useState } from "react";
 import MapView from "react-native-maps";
 import { Button, Card, Input, Text, XStack, YStack } from "tamagui";
+import { Friendship } from "walk2gether-shared";
+import { ContentCard } from "../../../components/ContentCard";
+import { firestore_instance } from "../../../config/firebase";
 import { useAuth } from "../../../context/AuthContext";
 import { useWalkForm } from "../../../context/WalkFormContext";
 import { COLORS } from "../../../styles/colors";
+import { useQuery } from "../../../utils/firestore";
 import FriendsList from "../../FriendsList";
 import WizardWrapper from "./WizardWrapper";
 
@@ -69,31 +75,22 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   const [phoneNumbers, setPhoneNumbers] = useState<string[]>(
     formData.invitedPhoneNumbers || []
   );
-  const [hasFriends, setHasFriends] = useState(false);
-  const [loadingFriends, setLoadingFriends] = useState(true);
   const mapRef = useRef<MapView>(null);
 
-  // Check if user has any friends
-  useEffect(() => {
-    const checkForFriends = async () => {
-      if (!user) return;
+  // Query friendships for current user where deletedAt is null (not deleted)
+  const friendshipsQuery = user?.uid
+    ? query(
+        collection(firestore_instance, "friendships"),
+        where("uids", "array-contains", user.uid),
+        where("deletedAt", "==", null)
+      )
+    : undefined;
 
-      setLoadingFriends(true);
-      try {
-        const db = getFirestore();
-        const friendsRef = collection(db, `users/${user.uid}/friends`);
-        const snapshot = await getDocs(friendsRef);
-        setHasFriends(snapshot.size > 0);
-      } catch (error) {
-        console.error("Error checking for friends:", error);
-        setHasFriends(false);
-      } finally {
-        setLoadingFriends(false);
-      }
-    };
+  const { docs: friendships, status } = useQuery<Friendship>(friendshipsQuery);
+  const loadingFriends = status === "loading";
 
-    checkForFriends();
-  }, [user]);
+  // Determine if user has any friends
+  const hasFriends = friendships && friendships.length > 0;
 
   const isNeighborhoodWalk = formData.walkType === "neighborhood";
   const isFriendsWalk = formData.walkType === "friends";
@@ -206,50 +203,26 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
           {isFriendsWalk && (
             <YStack gap="$5">
               {hasFriends ? (
-                <Card
-                  elevate
-                  backgroundColor="#fff"
-                  borderRadius={20}
-                  marginVertical="$2"
-                  padding="$3"
-                  shadowColor="#000"
-                  shadowOpacity={0.06}
-                  shadowRadius={5}
-                  shadowOffset={{ width: 0, height: 2 }}
+                <ContentCard
+                  title="Select Friends"
+                  icon={<Users size={20} color={COLORS.textOnLight} />}
+                  description="Choose friends to invite to your walk."
                 >
                   <FriendsList
                     onSelectFriend={(friend) => handleFriendToggle(friend.id)}
-                    title="Select Friends"
                     searchEnabled={true}
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
+                    selectedFriendIds={selectedFriends}
                   />
-                </Card>
+                </ContentCard>
               ) : null}
 
-              <YStack
-                gap="$3"
-                backgroundColor="rgba(255, 255, 255, 0.7)"
-                borderRadius={18}
-                padding="$5"
-                shadowColor="#000"
-                shadowOpacity={0.05}
-                shadowRadius={7}
-                shadowOffset={{ width: 0, height: 2 }}
+              <ContentCard
+                title="Invite by phone number"
+                icon={<MessageCircle size={20} color={COLORS.textOnLight} />}
+                description="Add friends not yet on Walk2Gether by inviting them via text."
               >
-                <XStack alignItems="center" gap="$2" marginBottom="$2">
-                  <MessageCircle size={20} color={COLORS.textOnLight} />
-                  <Text
-                    fontSize={19}
-                    fontWeight="700"
-                    color={COLORS.textOnLight}
-                  >
-                    Invite by phone number
-                  </Text>
-                </XStack>
-                <Text fontSize={15} color="#6b7280" marginBottom={2}>
-                  Add friends not yet on Walk2Gether by inviting them via text.
-                </Text>
                 <XStack gap="$2" alignItems="center">
                   <Input
                     placeholder="Enter phone number"
@@ -257,11 +230,10 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                     onChangeText={setPhoneNumber}
                     keyboardType="phone-pad"
                     backgroundColor="#fff"
-                    borderRadius={9999}
                     fontSize={16}
                     flex={1}
                     color={COLORS.text}
-                    paddingLeft={16}
+                    size="$5"
                     borderWidth={1}
                     borderColor="#e5e7eb"
                   />
@@ -278,6 +250,11 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                     pressStyle={{ backgroundColor: "#4b2e13" }}
                   />
                 </XStack>
+
+                <Text fontSize={12} color="$gray10" marginTop="$2">
+                  We'll invite your friends by SMS. Make sure you have their
+                  permission to message them.
+                </Text>
 
                 {phoneNumbers.length > 0 && (
                   <YStack gap="$2" marginTop="$2">
@@ -299,11 +276,11 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                     </XStack>
                   </YStack>
                 )}
-              </YStack>
+              </ContentCard>
 
               <Text
                 fontSize={16}
-                color={COLORS.textOnDark}
+                color={COLORS.textOnLight}
                 marginTop="$2"
                 textAlign="center"
                 fontWeight="600"

@@ -15,9 +15,10 @@ export default function WalkStackLayout() {
         <Stack.Screen name="request" options={{ headerShown: true }} />
         <Stack.Screen
           name="show"
-          options={{ headerShown: true, title: "Let's walk2gether!" }}
+          options={{
+            title: "Let's walk2gether!",
+          }}
         />
-        <Stack.Screen name="waiting-room" options={{ headerShown: true }} />
       </Stack>
     </>
   );

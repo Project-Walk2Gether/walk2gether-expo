@@ -38,23 +38,38 @@ export function WalkWizard() {
 
       // Convert form data to the Walk format
       // Using type assertion to include the invitationCode property
+      // Create location object from form data
+      const locationData = {
+        name: formData.location.name,
+        placeId: "", // Default empty string for placeId
+        latitude: formData.location.latitude,
+        longitude: formData.location.longitude,
+      };
+      
+      // Create complete walk payload with all required fields from the Walk type
       const walkPayload = {
+        // Basic walk properties
         active: false,
-        location: {
-          name: formData.location.name,
-          placeId: "",
-          latitude: formData.location.latitude,
-          longitude: formData.location.longitude,
-        },
         date: Timestamp.fromDate(formData.date),
         durationMinutes: formData.duration,
         organizerName: userData?.name || "",
         createdByUid: user!.uid,
         type: formData.walkType as any,
-        invitationCode: invitationCode, // Add the invitation code to the walk
-        // Include the invited user IDs if available
+        
+        // Location data - For friends walk, both start and current are the same initially
+        startLocation: locationData,
+        currentLocation: locationData,
+        location: locationData, // This is used in UI for display purposes
+        
+        // Invitation details
+        invitationCode: invitationCode,
         invitedUserIds: formData.invitedUserIds || [],
-      } as Walk;
+        invitedPhoneNumbers: formData.invitedPhoneNumbers || [],
+        rsvpdUserIds: [],
+        
+        // Additional required fields for Friends walk
+        rounds: [],
+      } as unknown as Walk; // Cast to unknown first to resolve type mismatch
 
       // Create the walk
       await createWalk(walkPayload);

@@ -28,8 +28,7 @@ export default function ModalsLayout() {
       <Stack.Screen
         name="walk/[id]"
         options={{
-          title: "Let's walk",
-          headerLeft: () => <HeaderBackButton />,
+          headerShown: false,
         }}
       />
     </Stack>

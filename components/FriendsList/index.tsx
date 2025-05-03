@@ -1,18 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
-import {
-  collection,
-  getDocs,
-  getFirestore,
-} from "@react-native-firebase/firestore";
-import { Search } from "@tamagui/lucide-icons";
-import React, { useEffect, useState } from "react";
+import { collection, query, where } from "@react-native-firebase/firestore";
+import React, { useMemo } from "react";
 import { Card, Input, Spinner, Text, XStack, YStack } from "tamagui";
+import { Friendship } from "walk2gether-shared";
+import { firestore_instance } from "../../config/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { COLORS } from "../../styles/colors";
+import { useQuery } from "../../utils/firestore";
 
+// Type for simplified friend data derived from friendship document
 type Friend = {
   id: string;
   name: string;
+  profilePicUrl?: string;
   [key: string]: any;
 };
 
@@ -22,6 +22,7 @@ type Props = {
   searchEnabled?: boolean;
   searchQuery?: string;
   onSearchChange?: (text: string) => void;
+  selectedFriendIds?: string[]; // Add prop for tracking selected friends
 };
 
 export default function FriendsList({
@@ -30,38 +31,51 @@ export default function FriendsList({
   searchEnabled = false,
   searchQuery = "",
   onSearchChange,
+  selectedFriendIds = [], // Default to empty array
 }: Props) {
   const { user } = useAuth();
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  // Fetch user's friends from Firestore
-  useEffect(() => {
-    const fetchFriends = async () => {
-      if (!user) return;
+  // Query friendships for current user where deletedAt is null (not deleted)
+  const friendshipsQuery = user?.uid
+    ? query(
+        collection(firestore_instance, "friendships"),
+        where("uids", "array-contains", user.uid),
+        where("deletedAt", "==", null)
+      )
+    : undefined;
 
-      setLoading(true);
-      try {
-        const db = getFirestore();
-        const friendsRef = collection(db, `users/${user.uid}/friends`);
-        const friendsSnapshot = await getDocs(friendsRef);
+  const { docs: friendships, status } = useQuery<Friendship>(friendshipsQuery);
+  const loading = status === "loading";
 
-        const friendsData = friendsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          name: doc.data().name || "Unknown Friend",
-          ...doc.data(),
-        }));
+  // Process friendships to extract friend data
+  const friends: Friend[] = useMemo(() => {
+    if (!friendships || !user) return [];
 
-        setFriends(friendsData);
-      } catch (error) {
-        console.error("Error fetching friends:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    return friendships
+      .map((friendship) => {
+        // Find the other user's ID (not the current user)
+        const friendId = friendship.uids.find((uid) => uid !== user.uid);
+        if (!friendId || !friendship.userDataByUid?.[friendId]) return null;
 
-    fetchFriends();
-  }, [user]);
+        // Get the friend's user data from the friendship document
+        const friendData = friendship.userDataByUid[friendId];
+
+        // Extract what we need from friendData, avoiding property duplication
+        const {
+          name = "Unknown Friend",
+          profilePicUrl,
+          ...otherData
+        } = friendData;
+
+        return {
+          id: friendId,
+          name,
+          profilePicUrl,
+          ...otherData, // Include other friend data
+        };
+      })
+      .filter(Boolean) as Friend[];
+  }, [friendships, user]);
 
   // Filter friends if search is enabled and has query
   const filteredFriends = searchQuery
@@ -72,13 +86,7 @@ export default function FriendsList({
 
   if (loading) {
     return (
-      <YStack
-        gap="$2"
-        mt="$2"
-        alignItems="center"
-        justifyContent="center"
-        p="$4"
-      >
+      <YStack gap="$2" alignItems="center" justifyContent="center" p="$4">
         <Spinner size="large" color="$blue10" />
         <Text>Loading friends...</Text>
       </YStack>
@@ -86,27 +94,27 @@ export default function FriendsList({
   }
 
   return (
-    <YStack gap="$2" mt="$2" padding="$2">
-      <Text fontSize="$5" fontWeight="bold">
-        {title}
-      </Text>
-
+    <YStack gap="$2">
       {/* Only show search if enabled and there are friends */}
       {searchEnabled && friends.length > 0 && (
-        <XStack alignItems="center" gap="$2" marginVertical="$2">
-          <Search color={COLORS.text} size="$1" />
-          <Input
-            placeholder="Search friends"
-            value={searchQuery}
-            onChangeText={onSearchChange}
-            backgroundColor="white"
-            borderRadius={10}
-            paddingHorizontal={15}
-            fontSize={16}
-            flex={1}
-            borderWidth={0}
-            color={COLORS.text}
-          />
+        <XStack marginVertical="$2" width="100%">
+          {/* Container with relative positioning to properly contain the absolute element */}
+          <XStack position="relative" flex={1}>
+            <Input
+              placeholder="Search friends"
+              value={searchQuery}
+              onChangeText={onSearchChange}
+              backgroundColor="white"
+              borderRadius={10}
+              paddingLeft={80} // Exact pixel value for search icon + space
+              paddingRight={12}
+              fontSize={16}
+              flex={1}
+              size="$5"
+              borderWidth={0}
+              color={COLORS.text}
+            />
+          </XStack>
         </XStack>
       )}
 
@@ -115,21 +123,36 @@ export default function FriendsList({
           No friends found. Add friends to invite them.
         </Text>
       ) : (
-        filteredFriends.map((friend) => (
-          <Card
-            bordered
-            key={friend.id}
-            pressStyle={{ opacity: 0.8 }}
-            onPress={() => onSelectFriend(friend)}
-          >
-            <Card.Header padded>
-              <XStack alignItems="center" gap="$2">
-                <Ionicons name="person" size={20} color="#4285F4" />
-                <Text>{friend.name}</Text>
-              </XStack>
-            </Card.Header>
-          </Card>
-        ))
+        filteredFriends.map((friend) => {
+          // Check if this friend is selected
+          const isSelected = selectedFriendIds.includes(friend.id);
+
+          return (
+            <Card
+              key={friend.id}
+              pressStyle={{ opacity: 0.8 }}
+              // Use backgroundColor to indicate selection state
+              backgroundColor={isSelected ? "$blue2" : "white"}
+              // Add a border when selected
+              borderWidth={isSelected ? 2 : 1}
+              borderColor={isSelected ? "$blue8" : "$gray5"}
+              onPress={() => onSelectFriend(friend)}
+            >
+              <Card.Header padded>
+                <XStack alignItems="center" justifyContent="space-between">
+                  <XStack alignItems="center" gap="$2">
+                    <Ionicons
+                      name={isSelected ? "checkmark-circle" : "person"}
+                      size={20}
+                      color={isSelected ? "#3f78e0" : "#4285F4"}
+                    />
+                    <Text>{friend.name}</Text>
+                  </XStack>
+                </XStack>
+              </Card.Header>
+            </Card>
+          );
+        })
       )}
     </YStack>
   );
