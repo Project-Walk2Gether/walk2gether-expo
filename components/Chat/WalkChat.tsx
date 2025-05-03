@@ -1,9 +1,9 @@
 import { Send } from "@tamagui/lucide-icons";
-import { Timestamp } from "firebase/firestore";
 import React, { useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView as RNScrollView,
 } from "react-native";
 import {
@@ -17,26 +17,46 @@ import {
 } from "tamagui";
 import { Message } from "walk2gether-shared";
 import { COLORS } from "../../styles/colors";
+import { useAuth } from "../../context/AuthContext";
+import { MessageOptionsSheet } from "./MessageOptionsSheet";
 
 type Props = {
   messages: Message[];
   loading?: boolean;
-  currentUserId: string;
   onSendMessage: (message: string) => void;
+  onDeleteMessage?: (messageId: string) => Promise<void>;
   keyboardVerticalOffset?: number;
   containerStyle?: any;
+  headerTitle?: React.ReactNode;
 };
 
 export default function WalkChat({
   messages,
   loading = false,
-  currentUserId,
   onSendMessage,
+  onDeleteMessage,
   keyboardVerticalOffset = 140,
   containerStyle = {},
+  headerTitle,
 }: Props) {
+  const { user } = useAuth();
   const scrollViewRef = useRef<RNScrollView | null>(null);
   const [messageText, setMessageText] = useState("");
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [optionsSheetOpen, setOptionsSheetOpen] = useState(false);
+  
+  // Handle long press on message
+  const handleLongPress = (message: Message) => {
+    setSelectedMessage(message);
+    setOptionsSheetOpen(true);
+  };
+  
+  // Handle delete message
+  const handleDeleteMessage = async (messageId: string) => {
+    if (onDeleteMessage) {
+      await onDeleteMessage(messageId);
+    }
+  };
 
   const handleSendMessage = () => {
     if (!messageText.trim()) return;
@@ -45,37 +65,43 @@ export default function WalkChat({
   };
 
   // Format timestamp for display
-  const formatMessageTime = (timestamp: Timestamp | null) => {
-    if (!timestamp) return "";
+  const formatMessageTime = (timestamp: any) => {
+    if (!timestamp || !timestamp.toDate) return "";
     const date = timestamp.toDate();
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   // Render individual message
   const renderMessage = (message: Message) => {
-    const isMe = message.senderId === currentUserId;
+    const isMe = message.senderId === user?.uid;
 
     return (
-      <YStack
+      <Pressable
         key={message.id}
-        alignSelf={isMe ? "flex-end" : "flex-start"}
-        backgroundColor={isMe ? "#4EB1BA" : "#eee"}
-        paddingHorizontal="$4"
-        paddingVertical="$3"
-        borderRadius="$4"
-        maxWidth="80%"
+        onLongPress={() => handleLongPress(message)}
+        delayLongPress={500}
       >
-        <Text color={isMe ? "white" : "black"}>{message.message}</Text>
-        <Text
-          fontSize="$2"
-          color={isMe ? "rgba(255,255,255,0.8)" : "#888"}
-          alignSelf="flex-end"
+        <YStack
+          alignSelf={isMe ? "flex-end" : "flex-start"}
+          backgroundColor={isMe ? "#4EB1BA" : "#eee"}
+          paddingHorizontal="$4"
+          paddingVertical="$3"
+          borderRadius="$4"
+          maxWidth="80%"
+          marginBottom="$3"
         >
-          {message.createdAt
-            ? formatMessageTime(message.createdAt)
-            : "Sending..."}
-        </Text>
-      </YStack>
+          <Text color={isMe ? "white" : "black"}>{message.message}</Text>
+          <Text
+            fontSize="$2"
+            color={isMe ? "rgba(255,255,255,0.8)" : "#888"}
+            alignSelf="flex-end"
+          >
+            {message.createdAt
+              ? formatMessageTime(message.createdAt)
+              : "Sending..."}
+          </Text>
+        </YStack>
+      </Pressable>
     );
   };
 
@@ -149,6 +175,14 @@ export default function WalkChat({
           />
         </XStack>
       </YStack>
+      
+      {/* Message options sheet */}
+      <MessageOptionsSheet
+        open={optionsSheetOpen}
+        onOpenChange={setOptionsSheetOpen}
+        selectedMessage={selectedMessage}
+        onDeleteMessage={handleDeleteMessage}
+      />
     </KeyboardAvoidingView>
   );
 }

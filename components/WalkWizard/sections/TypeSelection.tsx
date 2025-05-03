@@ -39,7 +39,7 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue }) => {
           icon="people-outline"
           color="#5A67F2"
           backgroundColor="#E7E9FE"
-          description="Schedule a walk with a friend"
+          description="Walk with a friend"
           selected={formData.walkType === "friends"}
           onSelect={setSelectedWalkType}
         />

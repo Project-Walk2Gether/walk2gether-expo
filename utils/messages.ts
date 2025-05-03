@@ -1,6 +1,7 @@
 import firestore, {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   serverTimestamp,
 } from "@react-native-firebase/firestore";
@@ -49,6 +50,36 @@ export const sendMessage = async (
     });
   } catch (error) {
     console.error("Error sending message:", error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a message from a friendship conversation
+ * @param friendshipId The ID of the friendship document
+ * @param messageId The ID of the message to delete
+ * @returns Promise that resolves when the message is deleted
+ */
+export const deleteMessage = async (
+  friendshipId: string,
+  messageId: string
+): Promise<void> => {
+  if (!friendshipId || !messageId) {
+    throw new Error("Missing required parameters for deleting a message");
+  }
+
+  try {
+    const db = firestore();
+    const messagePath = `friendships/${friendshipId}/messages/${messageId}`;
+    const messageRef = doc(db, messagePath);
+    
+    await deleteDoc(messageRef);
+    
+    // You could update the lastMessageAt field based on the newest remaining message
+    // For simplicity, I'm not implementing that here, but it would require a query
+    // to find the newest message and update the friendship document
+  } catch (error) {
+    console.error("Error deleting message:", error);
     throw error;
   }
 };

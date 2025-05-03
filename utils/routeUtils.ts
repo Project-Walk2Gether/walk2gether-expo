@@ -37,14 +37,14 @@ export async function getDirectionsUrl(
 
     if (
       !walkData?.location ||
-      !walkData.meetupLocation.latitude ||
-      !walkData.meetupLocation.longitude
+      !walkData.startLocation.latitude ||
+      !walkData.startLocation.longitude
     )
       return null;
 
     // Generate Google Maps URL
     const origin = `${participant.lastLocation.latitude},${participant.lastLocation.longitude}`;
-    const destination = `${walkData.meetupLocation.latitude},${walkData.meetupLocation.longitude}`;
+    const destination = `${walkData.startLocation.latitude},${walkData.startLocation.longitude}`;
     return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=walking`;
   } catch (error) {
     console.error("Error generating directions URL:", error);

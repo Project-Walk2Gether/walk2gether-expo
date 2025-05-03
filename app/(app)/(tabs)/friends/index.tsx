@@ -25,43 +25,28 @@ export default function FriendsScreen() {
   );
   const { docs: friendships } = useQuery<Friendship>(friendshipsQuery);
 
-  // Simple time formatter
-  const formatMessageTime = (date: Date | null) => {
-    if (!date) return "";
+  const navigateToChat = (friendship: Friendship) => {
+    if (!friendship.id) return;
+    
+    // Find the ID of the user that isn't the current user
+    const friendId = user?.uid
+      ? friendship.uids.find((uid) => uid !== user.uid)
+      : null;
 
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (dayDiff === 0) {
-      // Today, show time
-      return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } else if (dayDiff === 1) {
-      // Yesterday
-      return "Yesterday";
-    } else if (dayDiff < 7) {
-      // Day of the week
-      const days = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ];
-      return days[date.getDay()];
-    } else {
-      // MM/DD/YYYY
-      return date.toLocaleDateString();
-    }
-  };
-
-  const navigateToChat = (friendId: string) => {
-    router.push(`/(app)/(tabs)/friends/${friendId}`);
+    // Get friend data from the denormalized friendship document
+    const friendData =
+      friendId && friendship.userDataByUid
+        ? friendship.userDataByUid[friendId]
+        : null;
+    
+    // Get the friend's name from denormalized data or use a default
+    const friendName = friendData?.name || "Chat";
+    
+    // Navigate to the friendship detail screen with the friend's name as a parameter
+    router.push({
+      pathname: "/friends/[id]",
+      params: { id: friendship.id, friendName: friendName }
+    });
   };
 
   return (
@@ -99,7 +84,7 @@ export default function FriendsScreen() {
                   <FriendshipCard
                     key={friendship.id}
                     friendship={friendship}
-                    onPress={() => navigateToChat(friendship.id)}
+                    onPress={() => navigateToChat(friendship)}
                   />
                 ))
               )}

@@ -230,11 +230,11 @@ export default function LiveWalkMap({ walkId }: Props) {
               pinColor="#4CAF50" // Green color for start point
             />
           )}
-          {walk?.meetupLocation ? (
+          {walk?.startLocation ? (
             <MeetupSpot
               coordinate={{
-                latitude: walk.meetupLocation.latitude,
-                longitude: walk.meetupLocation.longitude,
+                latitude: walk.startLocation.latitude,
+                longitude: walk.startLocation.longitude,
               }}
               title="Meetup Spot"
             />

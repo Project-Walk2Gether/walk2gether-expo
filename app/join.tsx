@@ -1,13 +1,15 @@
 import { collection, doc, query, where } from "@react-native-firebase/firestore";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Avatar, Button, Spinner, Text, XStack, YStack } from "tamagui";
+import { Button, Spinner, Text, XStack, YStack } from "tamagui";
 import { createFriendship } from "../utils/invitation";
 import { useFlashMessage } from "../context/FlashMessageContext";
 import AuthScenicLayout from "../components/Auth/AuthScenicLayout";
 import { firestore_instance } from "../config/firebase";
 import { useAuth } from "../context/AuthContext";
 import { useQuery } from "../utils/firestore";
+import { UserAvatar } from "../components/UserAvatar";
+import { getInitials } from "../utils/userUtils";
 
 export default function JoinScreen() {
   const { code } = useLocalSearchParams<{ code?: string }>();
@@ -104,17 +106,32 @@ export default function JoinScreen() {
               {inviter.name} invited you to walk together
             </Text>
             
-            <Avatar circular size="$12">
-              {inviter.profilePicUrl ? (
-                <Avatar.Image src={inviter.profilePicUrl} />
-              ) : (
-                <Avatar.Fallback backgroundColor="$primary">
-                  <Text color="white" fontSize={28} fontWeight="bold">
-                    {inviter.name.charAt(0).toUpperCase()}
-                  </Text>
-                </Avatar.Fallback>
-              )}
-            </Avatar>
+            {/* For the inviter, we manually handle their userData instead of using useDoc (since we already have it) */}
+            {inviter.profilePicUrl ? (
+              <YStack width={96} height={96}>
+                <UserAvatar 
+                  uid={inviter.id} 
+                  size={96} 
+                  backgroundColor="$primary"
+                  borderWidth={3}
+                />
+              </YStack>
+            ) : (
+              <YStack
+                width={96}
+                height={96}
+                borderRadius={48}
+                backgroundColor="$primary"
+                justifyContent="center"
+                alignItems="center"
+                borderWidth={3}
+                borderColor="#fff"
+              >
+                <Text color="white" fontSize={38} fontWeight="bold">
+                  {getInitials(inviter.name)}
+                </Text>
+              </YStack>
+            )}
             
             <Text fontSize={24} fontWeight="600" textAlign="center">
               {inviter.name}
