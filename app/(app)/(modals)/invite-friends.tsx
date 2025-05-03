@@ -149,14 +149,10 @@ export default function InviteFriendsScreen() {
                 flex={1}
               >
                 <YStack padding="$4" gap="$4">
-                  <Text fontSize="$5" fontWeight="bold" color="#333">
-                    Invite friends to join you on Walk2gether
-                  </Text>
-
                   {/* Invitation Link section */}
                   <YStack gap="$2">
                     <Text fontSize="$4" fontWeight="500" color="#333">
-                      Share Invitation Link
+                      Invitation Link
                     </Text>
                     <XStack
                       backgroundColor="#f5f5f5"

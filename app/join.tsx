@@ -1,14 +1,14 @@
-import { collection, doc, query, where } from "@react-native-firebase/firestore";
+import { collection, query, where } from "@react-native-firebase/firestore";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Button, Spinner, Text, XStack, YStack } from "tamagui";
-import { createFriendship } from "../utils/invitation";
-import { useFlashMessage } from "../context/FlashMessageContext";
 import AuthScenicLayout from "../components/Auth/AuthScenicLayout";
+import { UserAvatar } from "../components/UserAvatar";
 import { firestore_instance } from "../config/firebase";
 import { useAuth } from "../context/AuthContext";
+import { useFlashMessage } from "../context/FlashMessageContext";
 import { useQuery } from "../utils/firestore";
-import { UserAvatar } from "../components/UserAvatar";
+import { createFriendship } from "../utils/invitation";
 import { getInitials } from "../utils/userUtils";
 
 export default function JoinScreen() {
@@ -56,23 +56,23 @@ export default function JoinScreen() {
   // Create friendship when accepting an invitation
   const handleAcceptInvitation = async () => {
     if (!user || !inviter) return;
-    
+
     try {
       setCreatingFriendship(true);
-      
+
       // Don't allow creating a friendship with yourself
       if (user.uid === inviter.id) {
         setCreatingFriendship(false);
         showMessage("You cannot add yourself as a friend", "error");
         return;
       }
-      
+
       // Use the createFriendship utility function
       await createFriendship(user.uid, inviter.id);
-      
+
       // Show success message
       showMessage(`You are now friends with ${inviter.name}!`, "success");
-      
+
       // Navigate to the friends tab
       router.replace("/(app)/(tabs)/friends");
     } catch (err) {
@@ -81,7 +81,7 @@ export default function JoinScreen() {
       setCreatingFriendship(false);
     }
   };
-  
+
   // Redirect unauthenticated users with invitation data directly to auth
   if (!user && inviter) {
     return <Redirect href={`/auth?referredByUid=${inviter.id}`} />;
@@ -90,10 +90,6 @@ export default function JoinScreen() {
   return (
     <AuthScenicLayout>
       <YStack jc="center" ai="center" p="$4" gap="$4">
-        <Text fontSize={28} fontWeight="700" mb="$2" textAlign="center">
-          Join Walk2Gether
-        </Text>
-        
         {isLoading ? (
           <Spinner size="large" />
         ) : error ? (
@@ -102,16 +98,12 @@ export default function JoinScreen() {
           </Text>
         ) : inviter ? (
           <YStack ai="center" gap="$4">
-            <Text fontSize={20} textAlign="center" opacity={0.8} mb="$2">
-              {inviter.name} invited you to walk together
-            </Text>
-            
             {/* For the inviter, we manually handle their userData instead of using useDoc (since we already have it) */}
             {inviter.profilePicUrl ? (
               <YStack width={96} height={96}>
-                <UserAvatar 
-                  uid={inviter.id} 
-                  size={96} 
+                <UserAvatar
+                  uid={inviter.id}
+                  size={96}
                   backgroundColor="$primary"
                   borderWidth={3}
                 />
@@ -132,15 +124,15 @@ export default function JoinScreen() {
                 </Text>
               </YStack>
             )}
-            
+
             <Text fontSize={24} fontWeight="600" textAlign="center">
               {inviter.name}
             </Text>
-            
+
             <Text fontSize={18} textAlign="center" opacity={0.8}>
               has invited you to join Walk2Gether
             </Text>
-            
+
             {user ? (
               <XStack gap="$2">
                 <Button

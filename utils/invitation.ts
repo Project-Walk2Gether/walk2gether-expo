@@ -1,5 +1,5 @@
-import { collection, doc, query, setDoc, Timestamp, where } from "@react-native-firebase/firestore";
-import { friendshipSchema } from "walk2gether-shared";
+import { collection, doc, getDoc, query, setDoc, Timestamp, where } from "@react-native-firebase/firestore";
+import { friendshipSchema, UserData } from "walk2gether-shared";
 import { firestore_instance } from "../config/firebase";
 
 export interface InviterData {
@@ -22,14 +22,32 @@ export const createFriendship = async (currentUserId: string, inviterId: string)
   // Create a unique ID for the friendship document
   const friendshipId = doc(collection(firestore_instance, "friendships")).id;
   
-  // Create the friendship data
+  // Fetch both users' data to include in the friendship document
+  const [currentUserDoc, inviterUserDoc] = await Promise.all([
+    getDoc(doc(firestore_instance, "users", currentUserId)),
+    getDoc(doc(firestore_instance, "users", inviterId))
+  ]);
+  
+  if (!currentUserDoc.exists || !inviterUserDoc.exists) {
+    throw new Error("Could not find one or both users");
+  }
+  
+  const currentUserData = currentUserDoc.data() as UserData;
+  const inviterUserData = inviterUserDoc.data() as UserData;
+  
+  // Create the friendship data with userDataByUid
   const friendshipData = {
     id: friendshipId,
     uids: [currentUserId, inviterId],
+    userDataByUid: {
+      [currentUserId]: currentUserData,
+      [inviterId]: inviterUserData,
+    },
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
     createdByUid: currentUserId,
     acceptedAt: Timestamp.now(),
+    deletedAt: null, // Explicitly set deletedAt to null as required by schema
   };
   
   // Validate using the schema

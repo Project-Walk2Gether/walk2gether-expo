@@ -2,6 +2,8 @@ import {
   doc as firebaseDoc,
   FirebaseFirestoreTypes,
   onSnapshot,
+  serverTimestamp,
+  updateDoc,
 } from "@react-native-firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { WithId } from "walk2gether-shared";
@@ -56,6 +58,30 @@ export function useDoc<T extends FirebaseFirestoreTypes.DocumentData>(
   }, [docPath]);
 
   return { status, doc, updateDoc, error, docPath };
+}
+
+/**
+ * Mark a friendship as deleted
+ * @param friendshipId The ID of the friendship to mark as deleted
+ * @param userId The ID of the user who initiated the deletion
+ * @returns Promise that resolves when the friendship is marked as deleted
+ */
+export async function markFriendshipAsDeleted(friendshipId: string, userId: string): Promise<void> {
+  if (!friendshipId || !userId) {
+    throw new Error("Missing required parameters for deleting friendship");
+  }
+
+  try {
+    const friendshipRef = firebaseDoc(db, `friendships/${friendshipId}`);
+    
+    await updateDoc(friendshipRef, {
+      deletedAt: serverTimestamp(),
+      deletedByUid: userId,
+    });
+  } catch (error) {
+    console.error("Error marking friendship as deleted:", error);
+    throw error;
+  }
 }
 
 export function useQuery<T extends FirebaseFirestoreTypes.DocumentData>(

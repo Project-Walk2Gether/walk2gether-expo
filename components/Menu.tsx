@@ -21,7 +21,7 @@ interface Props {
 export default function Menu({
   title,
   items,
-  color = "white",
+  color,
   trigger,
   snapPoints = [40],
 }: Props) {

@@ -1,9 +1,10 @@
-import { ArrowLeft } from "@tamagui/lucide-icons";
+import { ArrowLeft, UserMinus } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { Button, Spinner, Text, XStack, YStack } from "tamagui";
+import { Button, Spinner, Text, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
 import { FriendshipChat } from "../../../../components/Chat/FriendshipChat";
+import Menu from "../../../../components/Menu";
 import { useAuth } from "../../../../context/AuthContext";
 import { useDoc } from "../../../../utils/firestore";
 
@@ -26,19 +27,40 @@ export default function ChatDetailScreen() {
   // Find the friend's data from the friendship document
   const getFriendData = () => {
     if (!friendship || !user?.uid) return null;
-    
+
     // Find the ID of the user that isn't the current user
-    const friendId = friendship.uids.find(uid => uid !== user.uid);
-    
+    const friendId = friendship.uids.find((uid) => uid !== user.uid);
+
     // Get friend data from the denormalized friendship document
     return friendId && friendship.userDataByUid
       ? friendship.userDataByUid[friendId]
       : null;
   };
-  
+
   const friendData = getFriendData();
   const friendName = params.friendName || friendData?.name || "Chat";
-  
+
+  // Check if friendship has been deleted, and if so, navigate back
+  useEffect(() => {
+    if (friendship?.deletedAt) {
+      // Friendship has been deleted, navigate back to the friends list
+      router.back();
+    }
+  }, [friendship?.deletedAt, router]);
+
+  // Navigate to unfriend modal
+  const handleNavigateToUnfriend = () => {
+    if (!friendshipId) return;
+
+    router.push({
+      pathname: "/(app)/(modals)/unfriend",
+      params: {
+        id: friendshipId,
+        friendName: friendName,
+      },
+    });
+  };
+
   const renderHeader = () => {
     return {
       headerLeft: () => (
@@ -55,6 +77,23 @@ export default function ChatDetailScreen() {
         <Text fontWeight="bold" fontSize="$5">
           {friendName}
         </Text>
+      ),
+      headerRight: () => (
+        <Menu
+          title="Friendship Options"
+          items={[
+            {
+              label: "Something's wrong",
+              icon: <UserMinus size="$1" />,
+              onPress: handleNavigateToUnfriend,
+              buttonProps: {
+                color: "$red10",
+                backgroundColor: "$red3",
+              },
+            },
+          ]}
+          snapPoints={[25]}
+        />
       ),
       headerStyle: {
         backgroundColor: "white",
@@ -75,9 +114,14 @@ export default function ChatDetailScreen() {
           </Text>
         </YStack>
       ) : friendship ? (
-        <FriendshipChat friendship={friendship} onBack={handleBack} />
+        <FriendshipChat friendship={friendship} />
       ) : (
-        <YStack flex={1} justifyContent="center" alignItems="center" padding="$4">
+        <YStack
+          flex={1}
+          justifyContent="center"
+          alignItems="center"
+          padding="$4"
+        >
           <Text fontSize="$5" textAlign="center" color="#666">
             Conversation not found
           </Text>
@@ -91,6 +135,8 @@ export default function ChatDetailScreen() {
           </Button>
         </YStack>
       )}
+
+      {/* No longer using inline confirmation dialog */}
     </>
   );
 }

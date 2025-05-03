@@ -19,9 +19,11 @@ export default function FriendsScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  // Query friendships for current user where deletedAt is null (not deleted)
   const friendshipsQuery = query(
     collection(firestore_instance, "friendships"),
-    where("uids", "array-contains", user?.uid)
+    where("uids", "array-contains", user?.uid),
+    where("deletedAt", "==", null)
   );
   const { docs: friendships } = useQuery<Friendship>(friendshipsQuery);
 
