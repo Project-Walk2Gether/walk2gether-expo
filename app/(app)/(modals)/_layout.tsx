@@ -25,12 +25,6 @@ export default function ModalsLayout() {
           headerLeft: () => <HeaderBackButton />,
         }}
       />
-      <Stack.Screen
-        name="walk/[id]"
-        options={{
-          headerShown: false,
-        }}
-      />
     </Stack>
   );
 }

@@ -11,9 +11,9 @@ import React from "react";
 import { View as RNView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar, Button, Text, View } from "tamagui";
-import { BrandGradient, ScreenTitle } from "../../../../components/UI";
-import { useUserData } from "../../../../context/UserDataContext";
-import { COLORS } from "../../../../styles/colors";
+import { BrandGradient, ScreenTitle } from "../../../../../components/UI";
+import { useUserData } from "../../../../../context/UserDataContext";
+import { COLORS } from "../../../../../styles/colors";
 
 const { Navigator } = createMaterialTopTabNavigator();
 

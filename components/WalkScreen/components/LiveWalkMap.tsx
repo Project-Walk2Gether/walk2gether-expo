@@ -1,7 +1,6 @@
 import { Expand } from "@tamagui/lucide-icons";
 import * as Linking from "expo-linking";
 import * as Location from "expo-location";
-import { Stack } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert } from "react-native";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
@@ -200,7 +199,6 @@ export default function LiveWalkMap({ walkId }: Props) {
 
   return (
     <>
-      <Stack.Screen options={{ title: walkId }} />
       <View flex={1} justifyContent="center" alignItems="center">
         {renderMapControls()}
 

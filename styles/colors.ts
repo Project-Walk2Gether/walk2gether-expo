@@ -15,6 +15,7 @@ export const COLORS = {
   background: "#F5EFE6",    // Soft cream parchment
   card: "#FFFFFF",          // Pure white for cards
   subtle: "#F9F6F2",        // Whisper beige for subtle backgrounds
+  chatBackground: "#F5F5F5", // Light gray for chat areas
   
   // Accent colors
   accent1: "#7D9D72",       // Forest moss green

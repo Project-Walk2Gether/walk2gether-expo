@@ -7,12 +7,11 @@ export default function WalkStackLayout() {
       <Stack
         screenOptions={{
           animation: "none",
-          presentation: "modal",
         }}
       >
-        <Stack.Screen name="index" options={{ headerShown: true }} />
+        <Stack.Screen name="index" />
         <Stack.Screen name="edit" options={{ title: "Edit Walk" }} />
-        <Stack.Screen name="request" options={{ headerShown: true }} />
+        <Stack.Screen name="request" />
         <Stack.Screen
           name="show"
           options={{

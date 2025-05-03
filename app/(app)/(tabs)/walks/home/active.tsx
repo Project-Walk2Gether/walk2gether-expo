@@ -4,11 +4,11 @@ import React from "react";
 import { FlatList } from "react-native";
 import { ScrollView, View } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
-import { EmptyMessage } from "../../../../components/EmptyMessage";
-import FAB from "../../../../components/FAB";
-import { BrandGradient } from "../../../../components/UI";
-import WalkCard from "../../../../components/WalkCard";
-import { useWalks } from "../../../../context/WalksContext";
+import { EmptyMessage } from "../../../../../components/EmptyMessage";
+import FAB from "../../../../../components/FAB";
+import { BrandGradient } from "../../../../../components/UI";
+import WalkCard from "../../../../../components/WalkCard";
+import { useWalks } from "../../../../../context/WalksContext";
 
 export default function ActiveTabScreen() {
   const router = useRouter();

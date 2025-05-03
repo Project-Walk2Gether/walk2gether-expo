@@ -8,7 +8,7 @@ import { COLORS } from "../../../styles/colors";
 export default function TabLayout() {
   return (
     <Tabs
-      initialRouteName="home"
+      initialRouteName="walks"
       screenOptions={{
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.inactive,
@@ -47,7 +47,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="home"
+        name="walks"
         options={{
           title: "Walks",
           tabBarIcon: ({ color, size }) => (

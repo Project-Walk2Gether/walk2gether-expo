@@ -2,9 +2,9 @@ import React from "react";
 import { FlatList } from "react-native";
 import { ScrollView, Text, View } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
-import { BrandGradient } from "../../../../components/UI";
-import WalkCardTest from "../../../../components/WalkCard";
-import { useMyPastWalks } from "../../../../services/walksService";
+import { BrandGradient } from "../../../../../components/UI";
+import WalkCard from "../../../../../components/WalkCard";
+import { useMyPastWalks } from "../../../../../services/walksService";
 
 export default function HistoryTabScreen() {
   const pastWalks = useMyPastWalks();
@@ -35,7 +35,7 @@ export default function HistoryTabScreen() {
         ) : (
           <FlatList
             data={pastWalks as unknown as WithId<Walk>[]}
-            renderItem={({ item }) => <WalkCardTest walk={item} />}
+            renderItem={({ item }) => <WalkCard walk={item} />}
             keyExtractor={(item) => item.id || String(Date.now())}
             contentContainerStyle={{
               paddingVertical: 10,

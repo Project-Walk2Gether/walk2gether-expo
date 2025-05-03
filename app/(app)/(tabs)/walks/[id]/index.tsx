@@ -35,14 +35,14 @@ export default function WalkRouter() {
       // Walk owner or approved participant - show the walk details
       // Use router.replace with proper typings
       router.replace({
-        pathname: "/walk/[id]/show",
+        pathname: "/walks/[id]/show",
         params: { id: id as string },
       });
     } else {
       // Participant with pending request or non-participant - show request page
       // Use router.replace with proper typings
       router.replace({
-        pathname: "/walk/[id]/request",
+        pathname: "/walks/[id]/request",
         params: { id: id as string },
       });
     }

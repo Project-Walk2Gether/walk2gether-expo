@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 export default function IndexScreen() {
   const { user, loading } = useAuth();
 
-  if (!loading && user) return <Redirect href="/home/active" />;
+  if (!loading && user) return <Redirect href="/walks/home/active" />;
   if (!loading && !user) return <Redirect href="/auth" />;
 
   // Show loading indicator while checking auth state

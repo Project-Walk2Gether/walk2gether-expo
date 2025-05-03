@@ -52,7 +52,7 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
   const router = useRouter();
   const handlePress = () => {
     // If user is the walk owner, always go to walk details
-    router.push(`/walk/${walk.id}`);
+    router.push({ pathname: `/walks/[id]`, params: { id: walk.id } });
   };
   const distanceFromMe = getDistanceFromLocation({
     location: walk.location,
