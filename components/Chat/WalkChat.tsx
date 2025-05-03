@@ -10,7 +10,6 @@ type Props = {
   loading?: boolean;
   onDeleteMessage?: (messageId: string) => Promise<void>;
   currentUserId: string;
-  containerStyle?: any;
   headerTitle?: React.ReactNode;
 };
 
@@ -19,7 +18,6 @@ export default function WalkChat({
   loading = false,
   onDeleteMessage,
   currentUserId,
-  containerStyle = {},
 }: Props) {
   const scrollViewRef = useRef<RNScrollView | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<MessageType | null>(
@@ -35,16 +33,12 @@ export default function WalkChat({
 
   // Handle delete message
   const handleDeleteMessage = async (messageId: string) => {
-    if (onDeleteMessage) {
-      await onDeleteMessage(messageId);
-    }
+    if (onDeleteMessage) await onDeleteMessage(messageId);
   };
-
-  // Using the extracted Message component
 
   return (
     <>
-      <YStack flex={1} style={containerStyle}>
+      <YStack>
         {loading ? (
           <YStack flex={1} justifyContent="center" alignItems="center">
             <Spinner size="large" color="#4EB1BA" />
@@ -57,7 +51,10 @@ export default function WalkChat({
             ref={scrollViewRef}
             flex={1}
             padding="$4"
-            contentContainerStyle={{ paddingTop: 10, paddingBottom: 80 }} // Added paddingBottom for space under messages
+            contentContainerStyle={{
+              flex: 1,
+              paddingBottom: 80,
+            }} // Added paddingBottom for space under messages
             onContentSizeChange={() =>
               scrollViewRef.current?.scrollToEnd({ animated: false })
             }

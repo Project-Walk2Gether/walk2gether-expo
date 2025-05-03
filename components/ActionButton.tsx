@@ -1,6 +1,6 @@
 import React from "react";
 import { ActivityIndicator } from "react-native";
-import { Button, ButtonProps, Text, XStack } from "tamagui";
+import { Button, ButtonProps, ColorProp, Text, XStack } from "tamagui";
 
 interface Props {
   onPress: () => void;
@@ -10,6 +10,7 @@ interface Props {
   icon?: React.ReactNode;
   iconAfter?: React.ReactNode;
   testID?: string;
+  color?: ColorProp;
   theme?: ButtonProps["theme"];
 }
 
@@ -21,6 +22,7 @@ export function ActionButton({
   icon,
   iconAfter,
   testID,
+  color = "white",
   ...rest
 }: Props) {
   return (
@@ -52,7 +54,7 @@ export function ActionButton({
       ) : (
         <XStack alignItems="center" space="$2">
           {icon}
-          <Text fontSize={20} color="white" fontWeight="bold">
+          <Text fontSize={20} color={color} fontWeight="bold">
             {label}
           </Text>
           {iconAfter}

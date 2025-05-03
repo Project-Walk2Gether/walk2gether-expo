@@ -1,9 +1,8 @@
-import React, { forwardRef, useImperativeHandle, useCallback } from 'react';
-import { Button, Text, View, YStack, XStack } from 'tamagui';
-import { COLORS } from '../../../styles/colors';
-import { ParticipantWithRoute } from 'walk2gether-shared';
-import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
-import { Avatar } from 'tamagui';
+import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import React, { forwardRef, useCallback, useImperativeHandle } from "react";
+import { Avatar, Button, Text, XStack, YStack } from "tamagui";
+import { ParticipantWithRoute } from "walk2gether-shared";
+import { COLORS } from "../../../styles/colors";
 
 export interface ParticipantApprovalDrawerRef {
   openDrawer: (participant: ParticipantWithRoute) => void;
@@ -20,10 +19,11 @@ const ParticipantApprovalDrawer = forwardRef<
   ParticipantApprovalDrawerProps
 >(({ onApprove, onReject }, ref) => {
   const bottomSheetRef = React.useRef<BottomSheet>(null);
-  const [selectedParticipant, setSelectedParticipant] = React.useState<ParticipantWithRoute | null>(null);
+  const [selectedParticipant, setSelectedParticipant] =
+    React.useState<ParticipantWithRoute | null>(null);
 
   // Snap points for the bottom sheet
-  const snapPoints = React.useMemo(() => ['25%'], []);
+  const snapPoints = React.useMemo(() => ["25%"], []);
 
   // Handle opening and closing the drawer
   const openDrawer = useCallback((participant: ParticipantWithRoute) => {
@@ -72,9 +72,9 @@ const ParticipantApprovalDrawer = forwardRef<
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      index={-1}
       snapPoints={snapPoints}
       enablePanDownToClose
+      index={0}
       backdropComponent={renderBackdrop}
     >
       <YStack padding="$4" space="$4">
@@ -93,15 +93,19 @@ const ParticipantApprovalDrawer = forwardRef<
                 )}
               </Avatar>
               <YStack>
-                <Text fontSize="$5" fontWeight="bold">{selectedParticipant.displayName}</Text>
-                <Text fontSize="$3" color="$gray11">requested to join this walk</Text>
+                <Text fontSize="$5" fontWeight="bold">
+                  {selectedParticipant.displayName}
+                </Text>
+                <Text fontSize="$3" color="$gray11">
+                  requested to join this walk
+                </Text>
               </YStack>
             </XStack>
 
             <XStack space="$3" justifyContent="space-between">
-              <Button 
+              <Button
                 flex={1}
-                backgroundColor="$gray3" 
+                backgroundColor="$gray3"
                 color="$gray11"
                 borderColor="$gray5"
                 borderWidth={1}
@@ -109,9 +113,9 @@ const ParticipantApprovalDrawer = forwardRef<
               >
                 Not this time
               </Button>
-              <Button 
+              <Button
                 flex={1}
-                backgroundColor={COLORS.primary} 
+                backgroundColor={COLORS.primary}
                 color="white"
                 onPress={handleApprove}
               >

@@ -1,6 +1,11 @@
-import { Car, CheckCircle2, Footprints, AlertCircle } from "@tamagui/lucide-icons";
+import {
+  AlertCircle,
+  Car,
+  CheckCircle2,
+  Footprints,
+} from "@tamagui/lucide-icons";
 import React from "react";
-import { FlatList, Pressable } from "react-native";
+import { FlatList } from "react-native";
 import { Avatar, Text, XStack, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
 import { COLORS } from "../../../styles/colors";
@@ -9,14 +14,12 @@ interface ParticipantsListProps {
   participants: ParticipantWithRoute[];
   currentUserId?: string;
   onParticipantPress?: (participant: ParticipantWithRoute) => void;
-  isWalkOwner?: boolean;
 }
 
 export default function ParticipantsList({
   participants,
   currentUserId,
   onParticipantPress,
-  isWalkOwner = false,
 }: ParticipantsListProps) {
   // Sort participants: current user first, then by status (arrived, on-the-way, pending)
   const sortedParticipants = [...participants].sort((a, b) => {
@@ -41,12 +44,16 @@ export default function ParticipantsList({
     const isArrived = item.status === "arrived";
     const isOnTheWay = item.status === "on-the-way";
     const needsApproval = !item.approvedAt && !item.rejectedAt;
+    const isRejected = !!item.rejectedAt;
 
     // Determine status display text and color
     let statusText = "Not on the way yet";
     let statusColor = "$gray11";
 
-    if (isArrived) {
+    if (isRejected) {
+      statusText = "Rejected";
+      statusColor = "$red9";
+    } else if (isArrived) {
       statusText = "Arrived!";
       statusColor = "$green9";
     } else if (isOnTheWay) {
@@ -63,56 +70,43 @@ export default function ParticipantsList({
     }
 
     const handlePress = () => {
-      if (needsApproval && isWalkOwner && onParticipantPress) {
-        onParticipantPress(item);
-      }
+      onParticipantPress?.(item);
     };
 
     return (
-      <Pressable
+      <XStack
         onPress={handlePress}
-        disabled={!(needsApproval && isWalkOwner)}
+        padding="$2"
+        margin="$1"
+        gap="$2"
+        alignItems="center"
+        pressStyle={{ scale: 0.98 }}
+        animation="quick"
+        borderRadius="$4"
+        backgroundColor="$gray1"
+        borderWidth={1}
+        borderColor={
+          isCurrentUser ? COLORS.primary : needsApproval ? "$orange7" : "$gray4"
+        }
+        opacity={item.rejectedAt ? 0.5 : 1}
       >
-        <YStack
-          padding="$2"
-          width={110}
-          margin="$1"
-          borderRadius="$4"
-          backgroundColor="$gray1"
-          borderWidth={1}
-          borderColor={isCurrentUser ? COLORS.primary : needsApproval ? "$orange7" : "$gray4"}
-          opacity={item.rejectedAt ? 0.5 : 1}
-        >
-          {/* Row 1: Avatar and name */}
-          <XStack alignItems="center" gap="$2" marginBottom="$2">
-            <Avatar circular size="$3">
-              {item.photoURL ? (
-                <Avatar.Image src={item.photoURL} />
-              ) : (
-                <Avatar.Fallback
-                  justifyContent="center"
-                  alignItems="center"
-                  backgroundColor={COLORS.primary}
-                >
-                  <Text color="white" fontSize="$2">
-                    {item.displayName?.charAt(0).toUpperCase()}
-                  </Text>
-                </Avatar.Fallback>
-              )}
-            </Avatar>
-
-            <Text
-              fontSize="$2"
-              fontWeight="bold"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              flexShrink={1}
+        {/* Row 1: Avatar and name */}
+        <Avatar circular size="$3">
+          {item.photoURL ? (
+            <Avatar.Image src={item.photoURL} />
+          ) : (
+            <Avatar.Fallback
+              justifyContent="center"
+              alignItems="center"
+              backgroundColor={COLORS.primary}
             >
-              {isCurrentUser ? "You" : item.displayName}
-            </Text>
-          </XStack>
-
-          {/* Row 2: Combined mode icon and status with ETA */}
+              <Text color="white" fontSize="$2">
+                {item.displayName?.charAt(0).toUpperCase()}
+              </Text>
+            </Avatar.Fallback>
+          )}
+        </Avatar>
+        <YStack gap="$1">
           <XStack alignItems="center" gap="$1">
             {/* Mode/status icon */}
             {isArrived ? (
@@ -126,7 +120,18 @@ export default function ParticipantsList({
             ) : needsApproval ? (
               <AlertCircle size={14} color="$orange9" />
             ) : null}
-
+            <Text
+              fontSize="$2"
+              fontWeight="bold"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              flexShrink={1}
+            >
+              {isCurrentUser ? "You" : item.displayName}
+            </Text>
+          </XStack>
+          {/* Row 2: Combined mode icon and status with ETA */}
+          <XStack alignItems="center" gap="$1">
             {/* Status text with ETA */}
             <Text
               fontSize="$1"
@@ -139,20 +144,18 @@ export default function ParticipantsList({
             </Text>
           </XStack>
         </YStack>
-      </Pressable>
+      </XStack>
     );
   };
 
   return (
-    <YStack borderTopWidth={1} borderTopColor="$gray4" paddingVertical="$2">
-      <FlatList
-        data={sortedParticipants}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id || `participant-${item.userUid}`}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 12 }}
-      />
-    </YStack>
+    <FlatList
+      data={sortedParticipants}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.id || `participant-${item.userUid}`}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ paddingHorizontal: 12 }}
+    />
   );
 }

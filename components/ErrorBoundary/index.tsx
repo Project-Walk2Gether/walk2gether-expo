@@ -121,14 +121,14 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
               <Separator marginVertical="$2" />
 
-              <YStack space="$3">
+              <YStack gap="$2">
                 <ActionButton
                   onPress={this.handleReset}
                   theme="blue"
+                  color="black"
                   label="Restart App"
                   icon={<Ionicons name="refresh" size={20} />}
                 />
-
                 <ActionButton
                   onPress={() => {
                     auth_instance.signOut();

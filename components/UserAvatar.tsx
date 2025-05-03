@@ -1,5 +1,6 @@
-import { Avatar, Image, Text, View } from "tamagui";
+import { Avatar, Text } from "tamagui";
 import { UserData } from "walk2gether-shared";
+import { COLORS } from "../styles/colors";
 import { useDoc } from "../utils/firestore";
 import { getInitials } from "../utils/userUtils";
 
@@ -10,45 +11,28 @@ interface UserAvatarProps {
   backgroundColor?: string;
 }
 
-export function UserAvatar({ 
-  uid, 
-  size = 36, 
+export function UserAvatar({
+  uid,
+  size = 36,
   borderWidth = 2,
-  backgroundColor = "#E0E0E0"
+  backgroundColor = COLORS.primary,
 }: UserAvatarProps) {
   const { doc: userData } = useDoc<UserData>(`users/${uid}`);
-
-  const borderRadius = size / 2;
-  const fontSize = size * 0.4; // Proportional font size
-
-  if (!userData?.profilePicUrl) {
-    return (
-      <View
-        width={size}
-        height={size}
-        borderRadius={borderRadius}
-        backgroundColor={backgroundColor}
-        justifyContent="center"
-        alignItems="center"
-        borderWidth={borderWidth}
-        borderColor="#fff"
-      >
-        <Text fontWeight="bold" fontSize={fontSize} color="white">
-          {userData?.name ? getInitials(userData.name) : "..."}
-        </Text>
-      </View>
-    );
-  }
+  const fontSize = size * 0.4; // Proportional font size for initials
 
   return (
-    <Image
-      source={{ uri: userData.profilePicUrl }}
-      width={size}
-      height={size}
-      borderRadius={borderRadius}
+    <Avatar
+      size={size}
+      circular
       borderWidth={borderWidth}
       borderColor="#fff"
-    />
+    >
+      <Avatar.Image src={userData?.profilePicUrl || undefined} />
+      <Avatar.Fallback backgroundColor={backgroundColor}>
+        <Text fontSize={fontSize} color="white" fontWeight="bold">
+          {userData?.name ? getInitials(userData.name) : "..."}
+        </Text>
+      </Avatar.Fallback>
+    </Avatar>
   );
 }
-

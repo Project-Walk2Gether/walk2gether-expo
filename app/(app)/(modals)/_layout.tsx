@@ -16,11 +16,10 @@ export default function ModalsLayout() {
           headerLeft: () => <HeaderBackButton />,
         }}
       />
-
       <Stack.Screen
-        name="edit-walk/[id]"
+        name="review-participant"
         options={{
-          title: "Edit walk",
+          title: "Review Participant",
           headerShown: true,
           headerLeft: () => <HeaderBackButton />,
         }}

@@ -34,6 +34,7 @@ export default function ChatForm({
       <XStack
         backgroundColor="white"
         padding="$3"
+        pt={0}
         alignItems="center"
         gap="$2"
         // borderTopWidth={1}

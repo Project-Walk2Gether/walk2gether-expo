@@ -1,14 +1,11 @@
 import {
   addDoc,
   collection,
-  doc,
   orderBy,
   query,
   serverTimestamp,
-  updateDoc,
 } from "@react-native-firebase/firestore";
-import { useHeaderHeight } from "@react-navigation/elements";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useRef } from "react";
 import ChatForm from "../../../../../components/Chat/ChatForm";
 import WalkChat from "../../../../../components/Chat/WalkChat";
@@ -18,17 +15,15 @@ import { useDoc, useQuery } from "../../../../../utils/firestore";
 // Removed StyleSheet import; using Tamagui for styles
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import HeaderBackButton from "components/HeaderBackButton";
-import { Dimensions, KeyboardAvoidingView } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, View } from "tamagui";
+import { LinearGradient } from "expo-linear-gradient";
+import { KeyboardAvoidingView } from "react-native";
+import { Text, useTheme, View, YStack } from "tamagui";
 import { Message, ParticipantWithRoute, Walk } from "walk2gether-shared";
 import FullScreenLoader from "../../../../../components/FullScreenLoader";
 import WalkMenu from "../../../../../components/WalkMenu";
 import LiveWalkMap from "../../../../../components/WalkScreen/components/LiveWalkMap";
-import ParticipantApprovalDrawer, {
-  ParticipantApprovalDrawerRef,
-} from "../../../../../components/WalkScreen/components/ParticipantApprovalDrawer";
-import ParticipantsList from "../../../../../components/WalkScreen/components/ParticipantsList";
+
+import ParticipantsList from "components/WalkScreen/components/ParticipantsList";
 import { useWalkParticipants } from "../../../../../hooks/useWaitingParticipants";
 import { COLORS } from "../../../../../styles/colors";
 
@@ -37,28 +32,22 @@ export default function WalkScreen() {
   const id = params.id as string;
   const { user } = useAuth();
   const { doc: walk } = useDoc<Walk>(`walks/${id}`);
-  const insets = useSafeAreaInsets();
   // Get walk messages using the useQuery hook
   const messagesRef = collection(firestore_instance, `walks/${id}/messages`);
   const q = query(messagesRef, orderBy("createdAt", "asc"));
   const { docs: messages } = useQuery<Message>(q);
-
-  const headerHeight = useHeaderHeight();
+  const theme = useTheme();
 
   // Get all participants for the walk
   const participants = useWalkParticipants(id);
 
-  // References for both drawers
-  const approvalDrawerRef = useRef<ParticipantApprovalDrawerRef>(null);
+  // Reference for chat bottom sheet
   const chatBottomSheetRef = useRef<BottomSheet>(null);
-
-  // Calculate dimensions for proper layout
-  const { height: screenHeight } = Dimensions.get("window");
 
   // Define snap points for the chat bottom sheet (30% and 100% of screen height)
   // Get collapsed height for calculations (30% of screen height)
-  const collapsedHeight = screenHeight * 0.3;
-  const chatSnapPoints = useMemo(() => [collapsedHeight, "100%"], []);
+  const collapsedHeight = 230;
+  const chatSnapPoints = useMemo(() => [collapsedHeight, "70%", "100%"], []);
 
   // Check if the current user is the walk owner
   const isWalkOwner = walk?.createdByUid === user?.uid;
@@ -83,39 +72,17 @@ export default function WalkScreen() {
     }
   };
 
-  // Handle opening the approval drawer
+  // Handle opening the approval modal
   const handleParticipantPress = (participant: ParticipantWithRoute) => {
-    approvalDrawerRef.current?.openDrawer(participant);
-  };
+    if (!isWalkOwner) return;
 
-  // Handle approving a participant
-  const handleApproveParticipant = async (participantId: string) => {
-    try {
-      const participantRef = doc(
-        firestore_instance,
-        `walks/${id}/participants/${participantId}`
-      );
-      await updateDoc(participantRef, {
-        approvedAt: serverTimestamp(),
-      });
-    } catch (error) {
-      console.error("Error approving participant:", error);
-    }
-  };
-
-  // Handle rejecting a participant
-  const handleRejectParticipant = async (participantId: string) => {
-    try {
-      const participantRef = doc(
-        firestore_instance,
-        `walks/${id}/participants/${participantId}`
-      );
-      await updateDoc(participantRef, {
-        rejectedAt: serverTimestamp(),
-      });
-    } catch (error) {
-      console.error("Error rejecting participant:", error);
-    }
+    router.push({
+      pathname: "/(app)/(modals)/review-participant",
+      params: {
+        walkId: id,
+        participantId: participant.id,
+      },
+    });
   };
 
   // We don't need to render a backdrop for this bottom sheet
@@ -135,115 +102,101 @@ export default function WalkScreen() {
       {/* Main container */}
       <View flex={1} backgroundColor="#fff">
         {/* Map and Participants container - with padding to account for collapsed bottom sheet */}
-        <View flex={1} pb={collapsedHeight}>
-          {/* Map taking most of the available space */}
-          <View flex={1}>
-            <LiveWalkMap walkId={id} />
-          </View>
-
-          {/* Participants List - Positioned above the collapsed bottom sheet */}
-          <ParticipantsList
-            participants={participants}
-            currentUserId={user?.uid}
-            onParticipantPress={handleParticipantPress}
-            isWalkOwner={isWalkOwner}
-          />
-        </View>
-
-        {/* Walk Chat in Bottom Sheet - Contains only messages */}
-        {true && (
-          <BottomSheet
-            ref={chatBottomSheetRef}
-            index={0}
-            snapPoints={chatSnapPoints}
-            enablePanDownToClose={false}
-            enableOverDrag={false}
-            enableContentPanningGesture={true}
-            enableHandlePanningGesture={true}
-            handleStyle={{
-              backgroundColor: COLORS.chatBackground,
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-            }}
-            handleIndicatorStyle={{
-              width: 40,
-              backgroundColor: "#4EB1BA",
-              opacity: 0.6,
-            }}
-            backdropComponent={undefined} // Disable the dark overlay
-            backgroundStyle={{
-              backgroundColor: COLORS.chatBackground,
-            }}
+        <View flex={1} pb={collapsedHeight - 30}>
+          <LiveWalkMap walkId={id} />
+          <LinearGradient
+            colors={["rgba(0,0,0,0.5)", "transparent"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
             style={{
-              backgroundColor: COLORS.chatBackground,
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: -5 },
-              shadowOpacity: 0.1,
-              shadowRadius: 5,
-              elevation: 5,
+              position: "absolute",
+              left: 0,
+              right: 0,
+              paddingVertical: 10,
             }}
           >
-            {/* Chat Title */}
-            <View paddingHorizontal="$4" paddingVertical="$2">
+            <ParticipantsList
+              participants={participants}
+              currentUserId={user?.uid}
+              onParticipantPress={handleParticipantPress}
+            />
+          </LinearGradient>
+        </View>
+        <BottomSheet
+          ref={chatBottomSheetRef}
+          index={0}
+          snapPoints={chatSnapPoints}
+          // enablePanDownToClose={false}
+          // enableOverDrag={false}
+          // enableContentPanningGesture={true}
+          // enableHandlePanningGesture={true}
+          handleStyle={{
+            backgroundColor: COLORS.chatBackground,
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+          }}
+          handleIndicatorStyle={{
+            width: 40,
+            backgroundColor: "#4EB1BA",
+            opacity: 0.6,
+          }}
+          backgroundStyle={{
+            backgroundColor: COLORS.chatBackground,
+          }}
+          style={{
+            backgroundColor: COLORS.chatBackground,
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: -5 },
+            shadowOpacity: 0.1,
+            shadowRadius: 5,
+            elevation: 5,
+          }}
+        >
+          <BottomSheetScrollView contentContainerStyle={{ paddingTop: 20 }}>
+            <View position="absolute" top={0} left={0} right={0} h={30}>
               <Text
-                fontSize="$5"
                 textAlign="center"
+                fontSize="$5"
                 fontWeight="bold"
+                mx="$4"
+                mb="$2"
                 color="#4EB1BA"
               >
-                Walk Chat
+                Chat
               </Text>
             </View>
+            <WalkChat
+              messages={messages}
+              currentUserId={user?.uid || ""}
+              loading={false}
+            />
+          </BottomSheetScrollView>
+        </BottomSheet>
 
-            <BottomSheetScrollView
-              style={{ flex: 1 }}
-              contentContainerStyle={{
-                paddingBottom: 70,
-                paddingHorizontal: 10,
-                minHeight: "100%", // This ensures the grey background fills the entire height
-              }}
-            >
-              <WalkChat
-                messages={messages}
-                currentUserId={user?.uid || ""}
-                loading={false}
-                containerStyle={{
-                  flex: 1,
-                  backgroundColor: COLORS.chatBackground,
-                }}
-              />
-            </BottomSheetScrollView>
-          </BottomSheet>
-        )}
         <KeyboardAvoidingView
           keyboardVerticalOffset={100}
           behavior="padding"
           style={{
             position: "absolute",
+            backgroundColor: "white",
             bottom: 0,
             left: 0,
-            backgroundColor: "white",
             right: 0,
             zIndex: 3,
           }}
         >
-          <ChatForm
-            onSendMessage={handleSendMessage}
-            keyboardVerticalOffset={90}
-            containerStyle={{
-              backgroundColor: COLORS.chatBackground,
-            }}
-          />
+          <YStack borderTopWidth={1} borderTopColor="$gray4" pt="$2" gap="$2">
+            <ChatForm
+              onSendMessage={handleSendMessage}
+              keyboardVerticalOffset={90}
+              containerStyle={{
+                backgroundColor: COLORS.chatBackground,
+              }}
+            />
+          </YStack>
         </KeyboardAvoidingView>
-
-        {/* Participant Approval Drawer */}
-        <ParticipantApprovalDrawer
-          ref={approvalDrawerRef}
-          onApprove={handleApproveParticipant}
-          onReject={handleRejectParticipant}
-        />
       </View>
     </>
   );

@@ -13,9 +13,9 @@ import { useAuth } from "../../context/AuthContext";
 import { useLocation } from "../../context/LocationContext";
 import { COLORS } from "../../styles/colors";
 import { useQuery } from "../../utils/firestore";
+import { getDistanceToLocation } from "../../utils/locationUtils";
 import { getWalkTypeLabel } from "../../utils/walkType";
 import { getWalkStatus } from "../../utils/walkUtils";
-import { getDistanceFromLocation } from "./utils/locationUtils";
 
 // Props interface for WalkCard
 interface WalkCardProps {
@@ -54,12 +54,47 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
     // If user is the walk owner, always go to walk details
     router.push({ pathname: `/walks/[id]`, params: { id: walk.id } });
   };
-  const distanceFromMe = getDistanceFromLocation({
-    location: walk.location,
-    coords,
-    loading: locationLoading,
-    error: locationError,
-  });
+
+  // Calculate the distance and prepare the location display text
+  const locationDisplay = (() => {
+    if (walkIsNeighborhoodWalk(walk)) return null;
+
+    const locationName = walk.currentLocation?.name || '';
+    let displayContent;
+    
+    if (coords) {
+      const distance = getDistanceToLocation({
+        targetLocation: walk.currentLocation,
+        userCoords: coords,
+        loading: locationLoading,
+        error: locationError,
+      });
+      
+      if (distance) {
+        displayContent = (
+          <>
+            {locationName}{' '}
+            <Text fontSize={13} color="#888" fontWeight="500">
+              ({distance})
+            </Text>
+          </>
+        );
+      } else {
+        displayContent = locationName;
+      }
+    } else {
+      displayContent = locationName;
+    }
+    
+    return (
+      <XStack alignItems="center" gap={6}>
+        <Pin size={16} color="#666" />
+        <Text fontSize={14} color="#666" numberOfLines={1}>
+          {displayContent}
+        </Text>
+      </XStack>
+    );
+  })();
 
   return (
     <Card
@@ -142,14 +177,7 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
             {walk.durationMinutes} minutes
           </Text>
         </XStack>
-        {walkIsNeighborhoodWalk(walk) ? null : (
-          <XStack alignItems="center" gap={6}>
-            <Pin size={16} color="#666" />
-            <Text fontSize={14} color="#666" numberOfLines={1}>
-              {walk.location.name}
-            </Text>
-          </XStack>
-        )}
+        {locationDisplay}
         {status === "active" && (
           <XStack>
             <XStack
@@ -186,9 +214,11 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
                     >
                       <Avatar.Image src={participant.photoURL || undefined} />
                       <Avatar.Fallback backgroundColor={COLORS.primary}>
-                        {(participant.displayName || "A")
-                          .charAt(0)
-                          .toUpperCase()}
+                        <Text>
+                          {(participant.displayName || "A")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </Text>
                       </Avatar.Fallback>
                     </Avatar>
                   ))}
