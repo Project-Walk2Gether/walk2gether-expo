@@ -6,8 +6,8 @@ import Two from "./Two";
 import Walk from "./Walk";
 import { logoColor } from "./color";
 
-const PULSE_DURATION = 300;
-const PULSE_SCALE = 1.13;
+const PULSE_DURATION = 250;
+const PULSE_SCALE = 1.2;
 const PULSE_DELAY = 180;
 const STARTING_DELAY = 1500;
 

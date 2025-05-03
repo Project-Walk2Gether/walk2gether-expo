@@ -1,18 +1,23 @@
 import { doc, setDoc } from "@react-native-firebase/firestore";
-import { Car, Check, Footprints } from "@tamagui/lucide-icons";
+import { Car, Check, Footprints, MapPin } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable } from "react-native";
-import { Button, Spinner, Switch, Text, XStack } from "tamagui";
+import { Button, Spinner, Switch, Text, XStack, YStack } from "tamagui";
+import Menu, { MenuItem } from "../../../components/Menu";
 import { firestore_instance } from "../../../config/firebase";
 import { COLORS } from "../../../styles/colors";
+import SlideToStart from "./SlideToStart";
 
 type WalkStatusControlsProps = {
   walkId: string;
   userId: string | undefined;
   initialStatus?: "pending" | "on-the-way" | "arrived";
   initialNavigationMethod?: "walking" | "driving";
-  onStatusChange?: (isOnMyWay: boolean) => void;
+  isOwner?: boolean;
+  walkStarted?: boolean;
+  onStatusChange?: (status: "pending" | "on-the-way" | "arrived") => void;
   onNavigationMethodChange?: (isDriving: boolean) => void;
+  onStartWalk?: () => void;
 };
 
 /**
@@ -23,11 +28,16 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
   userId,
   initialStatus = "pending",
   initialNavigationMethod = "walking",
+  isOwner = false,
+  walkStarted = false,
   onStatusChange,
   onNavigationMethodChange,
+  onStartWalk,
 }) => {
   // Status state
-  const [isOnMyWay, setIsOnMyWay] = useState(initialStatus === "on-the-way");
+  const [status, setStatus] = useState<"pending" | "on-the-way" | "arrived">(
+    initialStatus
+  );
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   // Navigation method state
@@ -37,22 +47,22 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
 
   // Update local state when props change
   useEffect(() => {
-    setIsOnMyWay(initialStatus === "on-the-way");
+    setStatus(initialStatus);
   }, [initialStatus]);
 
   useEffect(() => {
     setIsDriving(initialNavigationMethod === "driving");
   }, [initialNavigationMethod]);
 
-  // Handle the "I'm on my way" button press
-  const handleOnMyWayPress = async () => {
+  // Handle status change
+  const handleStatusChange = async (
+    newStatus: "pending" | "on-the-way" | "arrived"
+  ) => {
     if (!userId || !walkId) return;
+    if (status === newStatus) return; // Don't update if status is the same
 
     setIsUpdatingStatus(true);
     try {
-      // Toggle the status
-      const newStatus = !isOnMyWay;
-
       // Update status in Firestore
       const participantDocRef = doc(
         firestore_instance,
@@ -62,8 +72,8 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
       await setDoc(
         participantDocRef,
         {
-          // Set the proper status field according to the schema
-          status: newStatus ? "on-the-way" : "pending",
+          // Set the status field according to the schema
+          status: newStatus,
           // Also update the timestamp when status changes
           statusUpdatedAt: new Date().getTime(),
           // Always ensure navigation method is set
@@ -72,15 +82,38 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
         { merge: true }
       );
 
+      // If user is walk owner and changing from "arrived" to another status,
+      // reset the walk's startedAt property
+      if (
+        isOwner &&
+        status === "arrived" &&
+        newStatus !== "arrived" &&
+        walkStarted
+      ) {
+        const walkDocRef = doc(firestore_instance, `walks/${walkId}`);
+
+        await setDoc(
+          walkDocRef,
+          {
+            startedAt: null,
+          },
+          { merge: true }
+        );
+
+        console.log(
+          "Walk startedAt reset because owner changed status from arrived"
+        );
+      }
+
       // Update local state
-      setIsOnMyWay(newStatus);
+      setStatus(newStatus);
 
       // Notify parent component
       if (onStatusChange) {
         onStatusChange(newStatus);
       }
     } catch (error) {
-      console.error("Error updating 'on my way' status:", error);
+      console.error("Error updating status:", error);
       Alert.alert("Error", "Failed to update your status. Please try again.");
     } finally {
       setIsUpdatingStatus(false);
@@ -120,37 +153,117 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
     }
   };
 
-  return (
+  // Get status button color based on the current status
+  const getStatusButtonColor = () => {
+    // Show a distinct color when the walk has started
+    if (walkStarted && status === "arrived") {
+      return "$purple9"; // Purple for walk started
+    }
+
+    switch (status) {
+      case "on-the-way":
+        return "$green9";
+      case "arrived":
+        return "$blue9";
+      default:
+        return COLORS.primary;
+    }
+  };
+
+  // Get status button text based on the current status
+  const getStatusButtonText = () => {
+    // Show "Walk started" when the walk has started and user has arrived or is the owner
+    if (walkStarted && status === "arrived") {
+      return "Walk started";
+    }
+
+    switch (status) {
+      case "on-the-way":
+        return "On my way";
+      case "arrived":
+        // Don't show text when slider is active
+        return showSlider ? "" : "I've arrived";
+      default:
+        return "I'm not on my way yet";
+    }
+  };
+
+  // Get status button icon based on the current status
+  const getStatusButtonIcon = () => {
+    if (isUpdatingStatus) {
+      return <Spinner color="white" size="small" />;
+    }
+
+    switch (status) {
+      case "on-the-way":
+        return <Check size={20} color="white" />;
+      case "arrived":
+        return <MapPin size={20} color="white" />;
+      default:
+        return null;
+    }
+  };
+
+  // Create menu items for the status menu
+  const statusMenuItems: MenuItem[] = [
+    {
+      label: "I'm not on my way yet",
+      onPress: () => handleStatusChange("pending"),
+      buttonProps: {
+        backgroundColor: COLORS.primary,
+        color: COLORS.textOnDark,
+      },
+    },
+    {
+      label: "I'm on my way",
+      onPress: () => handleStatusChange("on-the-way"),
+      buttonProps: {
+        backgroundColor: "$green9",
+      },
+      icon: <Check size={16} color="white" />,
+    },
+    {
+      label: "I've arrived",
+      onPress: () => handleStatusChange("arrived"),
+      buttonProps: {
+        backgroundColor: "$blue9",
+      },
+      icon: <MapPin size={16} color="white" />,
+    },
+  ];
+
+  // Create the menu trigger button
+  const menuTrigger = (
     <Button
-      backgroundColor={isOnMyWay ? "$green9" : COLORS.primary}
+      backgroundColor={getStatusButtonColor()}
       color="white"
       borderRadius={30}
       paddingHorizontal={15}
-      onPress={handleOnMyWayPress}
-      disabled={isUpdatingStatus}
       pressStyle={{ opacity: 0.8 }}
     >
-      {/* Button content */}
       <XStack width="100%" alignItems="center" justifyContent="space-between">
         {/* Button text and status indicator */}
         <XStack flex={1} alignItems="center" gap="$1">
-          {isUpdatingStatus ? (
-            <Spinner color="white" size="small" />
-          ) : isOnMyWay ? (
-            <Check size={20} color="white" />
-          ) : null}
-          <Text
-            textAlign={isOnMyWay ? "left" : "center"}
-            flexGrow={isOnMyWay ? undefined : 1}
-            color="white"
-            fontWeight="bold"
-          >
-            {isOnMyWay ? "On my way" : "Tell others I'm on my way"}
-          </Text>
+          {getStatusButtonIcon()}
+          <XStack alignItems="center" gap="$1" flexGrow={1}>
+            <Text
+              textAlign={status === "on-the-way" ? "left" : "center"}
+              color="white"
+              fontWeight="bold"
+              flexGrow={status !== "on-the-way" ? 1 : undefined}
+            >
+              {getStatusButtonText()}
+            </Text>
+            {status === "pending" && (
+              <Text color="white" opacity={0.8} fontSize={12}>
+                (change)
+              </Text>
+            )}
+          </XStack>
         </XStack>
 
-        {/* Mode toggle with icons on right side */}
-        {isOnMyWay ? (
+        {/* Mode toggle with icons on right side - only show when on the way */}
+        {status === "on-the-way" && (
           <XStack alignItems="center" gap="$2">
             {/* Walking section - clickable */}
             <Pressable onPress={() => handleNavigationMethodChange(false)}>
@@ -197,9 +310,50 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
               </XStack>
             </Pressable>
           </XStack>
-        ) : null}
+        )}
       </XStack>
     </Button>
+  );
+
+  // Handle walk start action
+  const handleStartWalk = () => {
+    if (onStartWalk) {
+      onStartWalk();
+    }
+  };
+
+  // Check if we should show the slider instead of regular button
+  const showStartWalkSlider = isOwner && status === "arrived" && !walkStarted;
+
+  // We'll show the regular button all the time, and overlay the slider when needed
+  const showSlider = showStartWalkSlider;
+
+  // Otherwise show the regular menu
+  return (
+    <YStack position="absolute" bottom={45} left={0} right={0} px="$4">
+      <YStack position="relative">
+        <Menu
+          title="Update your status"
+          items={statusMenuItems}
+          trigger={menuTrigger}
+          snapPoints={[35]}
+        />
+
+        {/* Slide To Start overlay */}
+        {showSlider && (
+          <YStack
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            zIndex={10}
+          >
+            <SlideToStart onSlideComplete={handleStartWalk} />
+          </YStack>
+        )}
+      </YStack>
+    </YStack>
   );
 };
 

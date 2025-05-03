@@ -14,13 +14,13 @@ import { auth_instance } from "../config/firebase";
 interface AuthContextType {
   user: FirebaseAuthTypes.User | null;
   loading: boolean;
-  isAdmin: boolean;
   signOut: () => Promise<void>;
   validateToken: (firebaseUser?: FirebaseAuthTypes.User) => Promise<void>;
   refreshToken: () => Promise<string | undefined>;
   // Phone auth methods
   sendPhoneVerificationCode: (phoneNumber: string) => Promise<string>;
   verifyPhoneCode: (verificationId: string, code: string) => Promise<void>;
+  claims: null | { permissionsSet: boolean };
   signInWithPhoneCredential: (
     verificationId: string,
     code: string
@@ -46,7 +46,7 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [claims, setClaims] = useState<null | Record<string, any>>(null);
 
   // Function to validate the user's token and get custom claims
   const validateToken = async (firebaseUser?: FirebaseAuthTypes.User) => {
@@ -56,16 +56,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       // Get the ID token result which contains custom claims
       const idTokenResult = await firebaseUser?.getIdTokenResult();
-
-      // Check for admin claim
-      const hasAdminClaim = idTokenResult?.claims.admin === true;
-      setIsAdmin(hasAdminClaim);
-
-      console.log("User claims validated, admin status:", hasAdminClaim);
+      setClaims(idTokenResult?.claims || null);
     } catch (error) {
       signOut();
       console.error("Error refreshing token:", error);
-      setIsAdmin(false);
     }
   };
 
@@ -97,7 +91,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signOut = async () => {
     try {
       await auth_instance.signOut();
-      setIsAdmin(false);
       showMessage({
         message: "Success",
         description: "Signed out successfully!",
@@ -130,7 +123,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
         } else {
           setUser(null);
-          setIsAdmin(false);
+          setClaims(null);
         }
         setLoading(false);
       }
@@ -236,7 +229,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const signInWithToken = async (token: string): Promise<FirebaseAuthTypes.UserCredential> => {
+  const signInWithToken = async (
+    token: string
+  ): Promise<FirebaseAuthTypes.UserCredential> => {
     try {
       const userCredential = await auth_instance.signInWithCustomToken(token);
       showMessage({
@@ -271,7 +266,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       value={{
         user,
         loading,
-        isAdmin,
+        claims,
         signOut,
         validateToken,
         refreshToken,

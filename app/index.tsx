@@ -5,20 +5,25 @@ import { YStack } from "tamagui";
 import { useAuth } from "../context/AuthContext";
 
 export default function IndexScreen() {
-  const { user, loading } = useAuth();
-
-  if (!loading && user) return <Redirect href="/walks/home/active" />;
-  if (!loading && !user) return <Redirect href="/auth" />;
+  const { user, loading, claims } = useAuth();
 
   // Show loading indicator while checking auth state
-  return (
-    <YStack
-      flex={1}
-      justifyContent="center"
-      alignItems="center"
-      backgroundColor="#f5f5f5"
-    >
-      <ActivityIndicator size="large" color="#4285F4" />
-    </YStack>
-  );
+  if (loading)
+    return (
+      <YStack
+        flex={1}
+        justifyContent="center"
+        alignItems="center"
+        backgroundColor="#f5f5f5"
+      >
+        <ActivityIndicator size="large" color="#4285F4" />
+      </YStack>
+    );
+
+  if (!user) return <Redirect href="/auth" />;
+
+  if (!claims?.permissionsSet)
+    return <Redirect href="/onboarding/notification-permissions" />;
+
+  return <Redirect href="/walks/home/active" />;
 }

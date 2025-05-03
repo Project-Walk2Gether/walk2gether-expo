@@ -48,7 +48,7 @@ export default function CompleteYourProfile() {
         location: values.location,
         friendInvitationCode: values.friendInvitationCode,
       });
-      router.replace("/");
+      router.replace("/onboarding/notification-permissions");
     } catch (error) {
       console.error("Error saving profile:", error);
     } finally {

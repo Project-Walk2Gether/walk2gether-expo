@@ -69,13 +69,16 @@ export default function ParticipantsList({
       statusColor = "$orange9";
     }
 
+    // Only allow pressing participants that are not the current user
     const handlePress = () => {
-      onParticipantPress?.(item);
+      if (!isCurrentUser && onParticipantPress) {
+        onParticipantPress(item);
+      }
     };
 
     return (
       <XStack
-        onPress={handlePress}
+        onPress={isCurrentUser ? undefined : handlePress}
         padding="$2"
         margin="$1"
         gap="$2"

@@ -72,3 +72,11 @@ export async function callFunction<T = any>(
 ): Promise<T> {
   return callApi<T>(`${functionName}`, data);
 }
+
+/**
+ * Sets the permissionsSet custom claim for the current user
+ * This should be called after the user has responded to notification permissions
+ */
+export async function setPermissionsClaim(): Promise<{ success: boolean }> {
+  return callApi<{ success: boolean }>("user/set-permissions-claim");
+}

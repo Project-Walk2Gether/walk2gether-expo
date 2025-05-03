@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { doc, Timestamp, updateDoc } from "@react-native-firebase/firestore";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
@@ -14,8 +13,6 @@ type NotificationPermissionStatus = {
   granted: boolean;
   canAskAgain: boolean;
 };
-
-const NOTIFICATION_PERMISSION_KEY = "notificationPermissionGranted";
 
 import { useRef } from "react";
 
@@ -177,11 +174,6 @@ export function useNotificationPermissions() {
         granted: status === "granted",
         canAskAgain: true,
       });
-
-      // If permission is granted, store it for future reference
-      if (status === "granted") {
-        await AsyncStorage.setItem(NOTIFICATION_PERMISSION_KEY, "granted");
-      }
     } catch (error) {
       console.error("Error checking notification permissions:", error);
     } finally {
@@ -208,11 +200,6 @@ export function useNotificationPermissions() {
         granted: status === "granted",
         canAskAgain: true,
       });
-
-      // Store the permission status
-      if (status === "granted") {
-        await AsyncStorage.setItem(NOTIFICATION_PERMISSION_KEY, "granted");
-      }
 
       return status === "granted";
     } catch (error) {

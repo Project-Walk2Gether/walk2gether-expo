@@ -1,9 +1,11 @@
+import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, Alert } from "react-native";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Text, View } from "tamagui";
 import { ParticipantWithRoute, Walk } from "walk2gether-shared";
+import { firestore_instance } from "../../../config/firebase";
 import { useAuth } from "../../../context/AuthContext";
 import { useLocationTracking } from "../../../hooks/useLocationTracking";
 import { useWalkParticipants } from "../../../hooks/useWaitingParticipants";
@@ -69,8 +71,15 @@ export default function LiveWalkMap({
     }
   }, [participants, user]);
 
-  // Get walk data to access start location
+  // Get walk data to access start location and check if user is owner
   const { doc: walk } = useDoc<Walk>(`walks/${walkId}`);
+
+  // Check if current user is the walk owner
+  const isWalkOwner = walk?.createdByUid === user?.uid;
+
+  // Check if walk has started
+  // The status field might be named differently in the database vs type
+  const hasWalkStarted = Boolean(walk?.startedAt);
 
   // The user and walkId are now passed directly to the background task
   // through the useLocationTracking hook's startBackgroundLocationTracking function
@@ -79,6 +88,28 @@ export default function LiveWalkMap({
   useEffect(() => {
     onNavigationMethodChange?.(navigationMethod);
   }, [navigationMethod, onNavigationMethodChange]);
+
+  // Handler for starting a walk (owner only)
+  const handleStartWalk = async () => {
+    if (!walkId || !user?.uid || !isWalkOwner) return;
+
+    try {
+      // Update walk status to in-progress
+      const walkDocRef = doc(firestore_instance, `walks/${walkId}`);
+      await setDoc(
+        walkDocRef,
+        {
+          // Use startedAt timestamp to indicate the walk has started
+          startedAt: Timestamp.now(),
+          active: true,
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error("Error starting walk:", error);
+      Alert.alert("Error", "Failed to start the walk. Please try again.");
+    }
+  };
 
   // Render location permission denied message
   if (locationPermission === false) {
@@ -233,18 +264,19 @@ export default function LiveWalkMap({
         {renderCurrentUserRoute()}
       </MapView>
 
-      {/* Combined control for status and navigation method */}
-      <View position="absolute" bottom={45} width="90%" alignSelf="center">
-        <WalkStatusControls
-          walkId={walkId}
-          userId={user?.uid}
-          initialStatus={userParticipant?.status || "pending"}
-          initialNavigationMethod={navigationMethod}
-          onNavigationMethodChange={(isDriving) =>
-            setNavigationMethod(isDriving ? "driving" : "walking")
-          }
-        />
-      </View>
+      {/* Controls rendered using absolute positioning */}
+      <WalkStatusControls
+        walkId={walkId}
+        userId={user?.uid}
+        initialStatus={userParticipant?.status || "pending"}
+        initialNavigationMethod={navigationMethod}
+        isOwner={isWalkOwner}
+        walkStarted={hasWalkStarted}
+        onNavigationMethodChange={(isDriving) =>
+          setNavigationMethod(isDriving ? "driving" : "walking")
+        }
+        onStartWalk={handleStartWalk}
+      />
     </View>
   );
 }

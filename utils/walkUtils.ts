@@ -33,13 +33,10 @@ export function isFuture(walk: Walk): boolean {
  * 2. Within the time window of when it should be active, with a 1-hour leeway on either side
  */
 export function isActive(walk: Walk): boolean {
-  // If explicitly marked active, return true
-  if (walk.active) return true;
-
   // If no date, can't determine if it's active based on time
-  if (!walk.date) return false;
+  if (!walk.startedAt) return false;
 
-  const walkDate = walk.date.toDate();
+  const walkDate = walk.startedAt.toDate();
   const now = new Date();
 
   // Duration in minutes, with a default of 60 minutes if not specified

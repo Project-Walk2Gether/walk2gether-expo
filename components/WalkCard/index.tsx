@@ -59,9 +59,9 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
   const locationDisplay = (() => {
     if (walkIsNeighborhoodWalk(walk)) return null;
 
-    const locationName = walk.currentLocation?.name || '';
+    const locationName = walk.currentLocation?.name || "";
     let displayContent;
-    
+
     if (coords) {
       const distance = getDistanceToLocation({
         targetLocation: walk.currentLocation,
@@ -69,11 +69,11 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
         loading: locationLoading,
         error: locationError,
       });
-      
+
       if (distance) {
         displayContent = (
           <>
-            {locationName}{' '}
+            {locationName}{" "}
             <Text fontSize={13} color="#888" fontWeight="500">
               ({distance})
             </Text>
@@ -85,7 +85,9 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
     } else {
       displayContent = locationName;
     }
-    
+
+    if (!displayContent) return null;
+
     return (
       <XStack alignItems="center" gap={6}>
         <Pin size={16} color="#666" />
@@ -112,7 +114,7 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
       onPress={handlePress}
     >
       {/* Walk Card Header */}
-      <YStack gap="$2" px="$3" pt="$2" pb="$3" flex={1}>
+      <YStack gap="$2" pb="$3" px="$3" pt="$2" flex={1}>
         <XStack
           p="$2"
           alignItems="center"
@@ -178,6 +180,117 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
           </Text>
         </XStack>
         {locationDisplay}
+
+        {/* Actions footer */}
+        {avatarsToDisplay.length > 0 && (
+          <XStack alignItems="center" gap="$2">
+            <XStack flexDirection="column" gap={8}>
+              {/* Approved participant avatars */}
+              <XStack justifyContent="flex-start" gap={-10}>
+                {avatarsToDisplay.length > 0 ? (
+                  <>
+                    {avatarsToDisplay.map((participant, index) => (
+                      <Avatar
+                        key={participant.id || index}
+                        size={32}
+                        circular
+                        borderColor="white"
+                        borderWidth={2}
+                      >
+                        <Avatar.Image src={participant.photoURL || undefined} />
+                        <Avatar.Fallback
+                          justifyContent="center"
+                          alignItems="center"
+                          backgroundColor={COLORS.primary}
+                        >
+                          <Text color="white">
+                            {(participant.displayName || "A")
+                              .charAt(0)
+                              .toUpperCase()}
+                          </Text>
+                        </Avatar.Fallback>
+                      </Avatar>
+                    ))}
+                    {overflow > 0 && (
+                      <View
+                        backgroundColor={COLORS.primary}
+                        width={32}
+                        height={32}
+                        borderRadius={16}
+                        alignItems="center"
+                        justifyContent="center"
+                        borderColor="white"
+                        borderWidth={2}
+                      >
+                        <Text
+                          fontSize={11}
+                          color="white"
+                          fontWeight="bold"
+                        >{`+${overflow}`}</Text>
+                      </View>
+                    )}
+                    <Text
+                      fontSize={13}
+                      color="$gray9"
+                      ml={16}
+                      alignSelf="center"
+                    >
+                      {approvedCount}{" "}
+                      {approvedCount === 1 ? "participant" : "participants"}
+                    </Text>
+                  </>
+                ) : (
+                  <Text fontSize={13} color="$gray9">
+                    No participants yet
+                  </Text>
+                )}
+              </XStack>
+            </XStack>
+
+            {/* Only show pending participants for active or upcoming walks, and only if you're the owner */}
+            {isMine && status !== "past" && unapprovedCount > 0 ? (
+              <XStack flexShrink={1} alignItems="center" gap={8} py={4} mt={4}>
+                <View
+                  backgroundColor="rgba(230, 126, 34, 0.15)"
+                  borderRadius={8}
+                  paddingHorizontal={10}
+                  paddingVertical={6}
+                  flex={1}
+                >
+                  <Text fontWeight="600" fontSize={13} color="#e67e22">
+                    {unapprovedCount}{" "}
+                    {unapprovedCount === 1 ? "person" : "people"} waiting for
+                    approval
+                  </Text>
+                </View>
+                <Button
+                  size="$2"
+                  backgroundColor="#e67e22"
+                  color="white"
+                  onPress={() => router.push(`/walk/${walk.id}/waiting-room`)}
+                  borderRadius={8}
+                  px={12}
+                  py={4}
+                >
+                  <Text color="white" fontWeight="bold" fontSize={13}>
+                    See requests
+                  </Text>
+                </Button>
+              </XStack>
+            ) : null}
+            {isMine ? null : (
+              <Button
+                backgroundColor={COLORS.primary}
+                icon={<Hand color="white" />}
+                size="$3"
+              >
+                <Text fontSize={12} fontWeight="bold" color="white">
+                  Ask to join
+                </Text>
+              </Button>
+            )}
+          </XStack>
+        )}
         {status === "active" && (
           <XStack>
             <XStack
@@ -195,108 +308,6 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
           </XStack>
         )}
       </YStack>
-
-      {/* Actions footer */}
-      {avatarsToDisplay.length > 0 && (
-        <XStack py="$3" alignItems="center" gap="$2" paddingHorizontal={12}>
-          <XStack flexDirection="column" gap={8} mt={8}>
-            {/* Approved participant avatars */}
-            <XStack justifyContent="flex-start" gap={-10}>
-              {avatarsToDisplay.length > 0 ? (
-                <>
-                  {avatarsToDisplay.map((participant, index) => (
-                    <Avatar
-                      key={participant.id || index}
-                      size={32}
-                      circular
-                      borderColor="white"
-                      borderWidth={2}
-                    >
-                      <Avatar.Image src={participant.photoURL || undefined} />
-                      <Avatar.Fallback backgroundColor={COLORS.primary}>
-                        <Text>
-                          {(participant.displayName || "A")
-                            .charAt(0)
-                            .toUpperCase()}
-                        </Text>
-                      </Avatar.Fallback>
-                    </Avatar>
-                  ))}
-                  {overflow > 0 && (
-                    <View
-                      backgroundColor={COLORS.primary}
-                      width={32}
-                      height={32}
-                      borderRadius={16}
-                      alignItems="center"
-                      justifyContent="center"
-                      borderColor="white"
-                      borderWidth={2}
-                    >
-                      <Text
-                        fontSize={11}
-                        color="white"
-                        fontWeight="bold"
-                      >{`+${overflow}`}</Text>
-                    </View>
-                  )}
-                  <Text fontSize={13} color="$gray9" ml={16} alignSelf="center">
-                    {approvedCount}{" "}
-                    {approvedCount === 1 ? "participant" : "participants"}
-                  </Text>
-                </>
-              ) : (
-                <Text fontSize={13} color="$gray9">
-                  No participants yet
-                </Text>
-              )}
-            </XStack>
-          </XStack>
-
-          {/* Only show pending participants for active or upcoming walks, and only if you're the owner */}
-          {isMine && status !== "past" && unapprovedCount > 0 ? (
-            <XStack flexShrink={1} alignItems="center" gap={8} py={4} mt={4}>
-              <View
-                backgroundColor="rgba(230, 126, 34, 0.15)"
-                borderRadius={8}
-                paddingHorizontal={10}
-                paddingVertical={6}
-                flex={1}
-              >
-                <Text fontWeight="600" fontSize={13} color="#e67e22">
-                  {unapprovedCount}{" "}
-                  {unapprovedCount === 1 ? "person" : "people"} waiting for
-                  approval
-                </Text>
-              </View>
-              <Button
-                size="$2"
-                backgroundColor="#e67e22"
-                color="white"
-                onPress={() => router.push(`/walk/${walk.id}/waiting-room`)}
-                borderRadius={8}
-                px={12}
-                py={4}
-              >
-                <Text color="white" fontWeight="bold" fontSize={13}>
-                  See requests
-                </Text>
-              </Button>
-            </XStack>
-          ) : null}
-          {isMine ? null : (
-            <Button
-              backgroundColor={COLORS.primary}
-              icon={<Hand color="white" />}
-              size="$3"
-            >
-              <Text fontSize={12} fontWeight="bold" color="white">
-                Ask to join
-              </Text>
-            </Button>
-          )}
-        </XStack>
-      )}
     </Card>
   );
 };
