@@ -9,13 +9,6 @@ export const API_BASE_URL = isLive
   ? "https://us-central1-walkmate-d42b4.cloudfunctions.net/api/"
   : "http://localhost:5001/walkmate-d42b4/us-central1/api/";
 
-/**
- * Makes an authenticated API call to the backend
- * @param path The API path (without the base URL)
- * @param data Optional request body
- * @param options Optional axios request config overrides
- * @returns Promise with the API response data
- */
 export async function callApi<T = any>(
   path: string,
   data?: unknown,

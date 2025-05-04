@@ -2,7 +2,6 @@ import { Check } from "@tamagui/lucide-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Dimensions } from "react-native";
-import { COLORS } from "styles/colors";
 import {
   Avatar,
   Button,
@@ -27,6 +26,7 @@ import VerificationCodeForm, {
 import { firestore_instance } from "../config/firebase";
 import { useAuth } from "../context/AuthContext";
 import { useInvitationFlow } from "../hooks/useInvitationFlow";
+import { COLORS } from "../styles/colors";
 
 const { width } = Dimensions.get("window");
 const logoWidth = width * 0.7;
@@ -92,7 +92,7 @@ export default function Auth() {
         router.replace("/onboarding/complete-your-profile");
       }
     } else {
-      router.replace("/walks/home/active");
+      router.replace("/walks/home");
     }
   };
 

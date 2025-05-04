@@ -13,7 +13,7 @@ type Props = {
   headerTitle?: React.ReactNode;
 };
 
-export default function WalkChat({
+export default function MessageList({
   messages,
   loading = false,
   onDeleteMessage,
@@ -38,7 +38,7 @@ export default function WalkChat({
 
   return (
     <>
-      <YStack>
+      <YStack f={1}>
         {loading ? (
           <YStack flex={1} justifyContent="center" alignItems="center">
             <Spinner size="large" color="#4EB1BA" />
@@ -50,9 +50,13 @@ export default function WalkChat({
           <ScrollView
             ref={scrollViewRef}
             flex={1}
-            padding="$4"
+            flexGrow={1}
+            keyboardShouldPersistTaps="handled"
             contentContainerStyle={{
               flex: 1,
+              flexGrow: 1,
+              padding: 20,
+              backgroundColor: "white",
               paddingBottom: 80,
             }} // Added paddingBottom for space under messages
             onContentSizeChange={() =>
@@ -60,8 +64,8 @@ export default function WalkChat({
             }
           >
             {messages.length === 0 ? (
-              <YStack height={200} justifyContent="center" alignItems="center">
-                <Text color="#666" textAlign="center">
+              <YStack height={80} justifyContent="center" alignItems="center">
+                <Text color="#999" textAlign="center">
                   No messages yet. Say hello!
                 </Text>
               </YStack>

@@ -114,30 +114,7 @@ export function useNotificationPermissions() {
     }
   }, [user, expoPushToken]);
 
-  // Register for push notifications and get token
-  useEffect(() => {
-    registerForPushNotificationsAsync().then((token) =>
-      setExpoPushToken(token || null)
-    );
-
-    // Set up notification handler
-    const notificationListener = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        console.log("Notification received:", notification);
-      }
-    );
-
-    const responseListener =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log("Notification response:", response);
-      });
-
-    return () => {
-      Notifications.removeNotificationSubscription(notificationListener);
-      Notifications.removeNotificationSubscription(responseListener);
-    };
-  }, [user?.uid]);
-
+  // Check for permissions on load
   useEffect(() => {
     checkPermissions();
   }, []);

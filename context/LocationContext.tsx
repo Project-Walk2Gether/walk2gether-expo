@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
 import * as Location from "expo-location";
+import React, { createContext, useContext, useState } from "react";
 
 interface LocationContextValue {
   coords?: { latitude: number; longitude: number };
@@ -15,8 +15,13 @@ const LocationContext = createContext<LocationContextValue>({
 
 export const useLocation = () => useContext(LocationContext);
 
-export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [coords, setCoords] = useState<{ latitude: number; longitude: number }>();
+export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [coords, setCoords] = useState<{
+    latitude: number;
+    longitude: number;
+  }>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
 
@@ -30,8 +35,13 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setLoading(false);
         return;
       }
-      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-      setCoords({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      setCoords({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      });
     } catch (e: any) {
       setError(e.message || "Failed to get location");
     } finally {
@@ -39,12 +49,10 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  useEffect(() => {
-    getLocation();
-  }, []);
-
   return (
-    <LocationContext.Provider value={{ coords, error, loading, refresh: getLocation }}>
+    <LocationContext.Provider
+      value={{ coords, error, loading, refresh: getLocation }}
+    >
       {children}
     </LocationContext.Provider>
   );

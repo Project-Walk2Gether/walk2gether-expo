@@ -1,6 +1,7 @@
 import { collection, query, where } from "@react-native-firebase/firestore";
+import { ActionButton } from "components/ActionButton";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button, Spinner, Text, XStack, YStack } from "tamagui";
 import AuthScenicLayout from "../components/Auth/AuthScenicLayout";
 import { UserAvatar } from "../components/UserAvatar";
@@ -40,6 +41,10 @@ export default function JoinScreen() {
         profilePicUrl: inviterDoc.profilePicUrl,
       }
     : null;
+
+  const handleGoHomeButtonPress = useCallback(() => {
+    router.push("/");
+  }, []);
 
   // Set error if no code provided
   useEffect(() => {
@@ -93,9 +98,12 @@ export default function JoinScreen() {
         {isLoading ? (
           <Spinner size="large" />
         ) : error ? (
-          <Text color="$red10" mb="$4">
-            {error}
-          </Text>
+          <>
+            <Text color="$red10" mb="$4">
+              {error}
+            </Text>
+            <ActionButton onPress={handleGoHomeButtonPress} label="Go home" />
+          </>
         ) : inviter ? (
           <YStack ai="center" gap="$4">
             {/* For the inviter, we manually handle their userData instead of using useDoc (since we already have it) */}

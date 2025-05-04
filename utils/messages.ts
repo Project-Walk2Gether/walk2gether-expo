@@ -4,6 +4,7 @@ import firestore, {
   deleteDoc,
   doc,
   serverTimestamp,
+  Timestamp,
 } from "@react-native-firebase/firestore";
 import { Message } from "walk2gether-shared";
 
@@ -27,21 +28,21 @@ export const sendMessage = async (
 
   try {
     const db = firestore();
-    
+
     // Add the message to the friendship's messages collection
     const friendshipPath = `friendships/${friendshipId}/messages`;
     const messagesRef = collection(db, friendshipPath);
-    
-    const messageData = {
+
+    const messageData: Message = {
       senderId,
       recipientId,
       message: messageText,
-      createdAt: serverTimestamp(),
+      createdAt: Timestamp.now(),
       read: false,
     };
-    
+
     await addDoc(messagesRef, messageData);
-    
+
     // Update the lastMessageAt field in the friendship document
     const friendshipRef = doc(db, "friendships", friendshipId);
     friendshipRef.update({
@@ -72,9 +73,9 @@ export const deleteMessage = async (
     const db = firestore();
     const messagePath = `friendships/${friendshipId}/messages/${messageId}`;
     const messageRef = doc(db, messagePath);
-    
+
     await deleteDoc(messageRef);
-    
+
     // You could update the lastMessageAt field based on the newest remaining message
     // For simplicity, I'm not implementing that here, but it would require a query
     // to find the newest message and update the friendship document

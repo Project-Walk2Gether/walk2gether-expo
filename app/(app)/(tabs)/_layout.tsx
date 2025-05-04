@@ -1,4 +1,4 @@
-import { Bell, Footprints, Users } from "@tamagui/lucide-icons";
+import { Footprints, Image, Users } from "@tamagui/lucide-icons";
 import { Tabs } from "expo-router";
 import React from "react";
 import NotificationBell from "../../../components/NotificationBell";
@@ -56,20 +56,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="stories"
+        options={{
+          title: "Stories",
+          headerShown: true,
+          tabBarIcon: ({ color, size }) => <Image size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="friends"
         options={{
           title: "Friends",
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          title: "Notifications",
-          headerShown: true,
-          headerTitle: "Notifications",
-          tabBarIcon: ({ color, size }) => <Bell size={size} color={color} />,
         }}
       />
     </Tabs>

@@ -8,22 +8,22 @@ import {
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useRef } from "react";
 import ChatForm from "../../../../../components/Chat/ChatForm";
-import WalkChat from "../../../../../components/Chat/WalkChat";
+import MessageList from "../../../../../components/Chat/MessageList";
 import { firestore_instance } from "../../../../../config/firebase";
 import { useAuth } from "../../../../../context/AuthContext";
 import { useDoc, useQuery } from "../../../../../utils/firestore";
 // Removed StyleSheet import; using Tamagui for styles
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import HeaderBackButton from "components/HeaderBackButton";
 import { LinearGradient } from "expo-linear-gradient";
 import { KeyboardAvoidingView } from "react-native";
 import { Text, useTheme, View, YStack } from "tamagui";
 import { Message, ParticipantWithRoute, Walk } from "walk2gether-shared";
 import FullScreenLoader from "../../../../../components/FullScreenLoader";
+import HeaderBackButton from "../../../../../components/HeaderBackButton";
 import WalkMenu from "../../../../../components/WalkMenu";
 import LiveWalkMap from "../../../../../components/WalkScreen/components/LiveWalkMap";
 
-import ParticipantsList from "components/WalkScreen/components/ParticipantsList";
+import ParticipantsList from "../../../../../components/WalkScreen/components/ParticipantsList";
 import { useWalkParticipants } from "../../../../../hooks/useWaitingParticipants";
 import { COLORS } from "../../../../../styles/colors";
 
@@ -167,7 +167,7 @@ export default function WalkScreen() {
                 Chat
               </Text>
             </View>
-            <WalkChat
+            <MessageList
               messages={messages}
               currentUserId={user?.uid || ""}
               loading={false}

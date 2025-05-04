@@ -2,7 +2,7 @@
   "expo": {
     "name": "Walk2Gether",
     "slug": "walkmate",
-    "version": "1.0.27",
+    "version": "1.0.29",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -24,6 +24,9 @@
         "NSLocationAlwaysUsageDescription": "We need your location to track your walks even when the app is in the background.",
         "UIBackgroundModes": ["location", "fetch"],
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "config": {
+        "googleMapsApiKey": "AIzaSyAjnbays5Hi7wYTj9PLljDDFJzZq3Dh3z8"
       }
     },
     "android": {
@@ -40,7 +43,6 @@
           "category": ["BROWSABLE", "DEFAULT"]
         }
       ],
-
 
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -99,7 +101,6 @@
       "eas": {
         "projectId": "7b384d5a-3e2e-4c79-895f-30255a67819a"
       },
-      "googleMapsApiKey": "AIzaSyAjnbays5Hi7wYTj9PLljDDFJzZq3Dh3z8",
       "emulatorsEnabledInDev": true
     },
     "owner": "michaeldawson"

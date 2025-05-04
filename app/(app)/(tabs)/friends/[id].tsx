@@ -15,7 +15,7 @@ export default function ChatDetailScreen() {
   const router = useRouter();
 
   // Use useDoc to directly load the friendship document by ID
-  const { doc: friendship, status: friendshipStatus } = useDoc<Friendship>(
+  const { doc: friendship, status } = useDoc<Friendship>(
     `friendships/${friendshipId}`
   );
 
@@ -106,7 +106,7 @@ export default function ChatDetailScreen() {
     <>
       <Stack.Screen options={renderHeader()} />
 
-      {friendshipStatus === "loading" ? (
+      {status === "loading" ? (
         <YStack flex={1} justifyContent="center" alignItems="center">
           <Spinner size="large" color="#4EB1BA" />
           <Text marginTop="$4" color="#666">

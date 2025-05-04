@@ -15,7 +15,7 @@ interface AuthContextType {
   user: FirebaseAuthTypes.User | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  validateToken: (firebaseUser?: FirebaseAuthTypes.User) => Promise<void>;
+  verifyToken: (firebaseUser?: FirebaseAuthTypes.User) => Promise<void>;
   refreshToken: () => Promise<string | undefined>;
   // Phone auth methods
   sendPhoneVerificationCode: (phoneNumber: string) => Promise<string>;
@@ -47,22 +47,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [claims, setClaims] = useState<null | Record<string, any>>(null);
+  const [hasTokenBeenVerified, setHasTokenBeenVerified] = useState(false);
 
   // Function to validate the user's token and get custom claims
-  const validateToken = async (firebaseUser?: FirebaseAuthTypes.User) => {
+  const verifyToken = async (firebaseUser?: FirebaseAuthTypes.User) => {
     try {
       // Force token refresh to get the latest claims
       await firebaseUser?.getIdToken(true);
 
       // Get the ID token result which contains custom claims
       const idTokenResult = await firebaseUser?.getIdTokenResult();
+      setHasTokenBeenVerified(true);
       setClaims(idTokenResult?.claims || null);
     } catch (error) {
       signOut();
       console.error("Error refreshing token:", error);
     }
   };
-
   // Function to refresh the user's token and return it
   const refreshToken = async () => {
     if (!user) return undefined;
@@ -72,7 +73,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const token = await user.getIdToken(true);
 
       // Also update the admin status
-      await validateToken(user);
+      await verifyToken(user);
 
       return token;
     } catch (error) {
@@ -117,7 +118,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setUser(firebaseUser);
           try {
             // Validate token once when user is loaded
-            await validateToken(firebaseUser);
+            await verifyToken(firebaseUser);
           } catch (error) {
             console.error("Error validating token:", error);
           }
@@ -268,7 +269,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         loading,
         claims,
         signOut,
-        validateToken,
+        verifyToken,
         refreshToken,
         // Phone auth methods
         sendPhoneVerificationCode,

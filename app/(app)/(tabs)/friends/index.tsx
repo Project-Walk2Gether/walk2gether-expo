@@ -1,19 +1,19 @@
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { Plus, Users } from "@tamagui/lucide-icons";
-import Clouds from "components/Clouds";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, View } from "tamagui";
-import { useQuery } from "utils/firestore";
 import { Friendship } from "walk2gether-shared";
+import Clouds from "../../../../components/Clouds";
 import { EmptyMessage } from "../../../../components/EmptyMessage";
 import FAB from "../../../../components/FAB";
 import FriendshipCard from "../../../../components/FriendshipCard";
 import { BrandGradient, ScreenTitle } from "../../../../components/UI";
 import { firestore_instance } from "../../../../config/firebase";
 import { useAuth } from "../../../../context/AuthContext";
+import { useQuery } from "../../../../utils/firestore";
 
 export default function FriendsScreen() {
   const { user } = useAuth();
@@ -29,7 +29,7 @@ export default function FriendsScreen() {
 
   const navigateToChat = (friendship: Friendship) => {
     if (!friendship.id) return;
-    
+
     // Find the ID of the user that isn't the current user
     const friendId = user?.uid
       ? friendship.uids.find((uid) => uid !== user.uid)
@@ -40,14 +40,14 @@ export default function FriendsScreen() {
       friendId && friendship.userDataByUid
         ? friendship.userDataByUid[friendId]
         : null;
-    
+
     // Get the friend's name from denormalized data or use a default
     const friendName = friendData?.name || "Chat";
-    
+
     // Navigate to the friendship detail screen with the friend's name as a parameter
     router.push({
       pathname: "/friends/[id]",
-      params: { id: friendship.id, friendName: friendName }
+      params: { id: friendship.id, friendName: friendName },
     });
   };
 

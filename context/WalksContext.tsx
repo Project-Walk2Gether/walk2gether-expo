@@ -58,7 +58,7 @@ interface WalksProviderProps {
 
 export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
   const [submitting, setSubmitting] = useState(false);
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
 
   console.log("Walks provider re-rendering");
 
@@ -113,7 +113,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
   // We've replaced this useEffect with useQuery hooks above
 
   const createWalk = async (walkData: Walk) => {
-    if (!user && !isAdmin) {
+    if (!user) {
       throw new Error("You must be an admin to create a walk");
     }
 

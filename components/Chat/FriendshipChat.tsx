@@ -4,7 +4,7 @@ import firestore, {
   orderBy,
 } from "@react-native-firebase/firestore";
 import React from "react";
-import { Text, XStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
 import { Friendship, Message } from "walk2gether-shared";
 import { useAuth } from "../../context/AuthContext";
 import { useQuery } from "../../utils/firestore";
@@ -13,7 +13,8 @@ import {
   sendMessage as sendMessageUtil,
 } from "../../utils/messages";
 import { UserAvatar } from "../UserAvatar";
-import WalkChat from "./WalkChat";
+import ChatForm from "./ChatForm";
+import MessageList from "./MessageList";
 
 interface FriendshipChatProps {
   friendship: Friendship;
@@ -34,11 +35,11 @@ export function FriendshipChat({ friendship }: FriendshipChatProps) {
     orderBy("createdAt", "asc")
   );
 
-  // Type needs to match WalkChat component expectations
+  // Type needs to match MessageList component expectations
   const { docs: messagesData, status: messagesStatus } =
     useQuery<Message>(messagesQuery);
 
-  // Convert Firebase data to ChatMessage type needed by WalkChat
+  // Convert Firebase data to ChatMessage type needed by MessageList
   const messages = React.useMemo(() => {
     return messagesData.map((msg) => ({
       ...msg,
@@ -81,13 +82,16 @@ export function FriendshipChat({ friendship }: FriendshipChatProps) {
   );
 
   return (
-    <WalkChat
-      messages={messages}
-      loading={messagesStatus === "loading"}
-      onSendMessage={sendMessage}
-      onDeleteMessage={deleteMessage}
-      keyboardVerticalOffset={90}
-      headerTitle={renderHeaderTitle()}
-    />
+    <YStack f={1}>
+      <View flexGrow={1}>
+        <MessageList
+          messages={messages}
+          loading={messagesStatus === "loading"}
+          onDeleteMessage={deleteMessage}
+          headerTitle={renderHeaderTitle()}
+        />
+      </View>
+      <ChatForm keyboardVerticalOffset={100} onSendMessage={sendMessage} />
+    </YStack>
   );
 }

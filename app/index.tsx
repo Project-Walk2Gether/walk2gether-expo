@@ -25,5 +25,5 @@ export default function IndexScreen() {
   if (!claims?.permissionsSet)
     return <Redirect href="/onboarding/notification-permissions" />;
 
-  return <Redirect href="/walks/home/active" />;
+  return <Redirect href="/walks/home" />;
 }

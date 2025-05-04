@@ -12,6 +12,7 @@ import FullScreenLoader from "../../../../../components/FullScreenLoader";
 import WalkForm from "../../../../../components/WalkForm";
 import { db } from "../../../../../config/firebase";
 import { useDoc } from "../../../../../utils/firestore";
+import Constants from "expo-constants";
 
 export default function EditWalkScreen() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function EditWalkScreen() {
         onSubmit={handleSubmit}
         submitButtonText="Update Walk"
         onCancel={() => router.back()}
-        googleApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY!}
+        googleApiKey={Constants.expoConfig?.extra?.googleMapsApiKey as string}
       />
     </ScrollView>
   );

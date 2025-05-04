@@ -1,82 +1,30 @@
-import Constants from "expo-constants";
-import * as Device from "expo-device";
-import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
-import { useNotificationPermissions } from "hooks/useNotificationPermissions";
 import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
-import { COLORS } from "styles/colors";
 import { Button, Card, Spinner, Text, XStack, YStack } from "tamagui";
 import AuthScenicLayout from "../../components/Auth/AuthScenicLayout";
-import { callApi } from "../../utils/api";
+import { useNotificationPermissions } from "../../hooks/useNotificationPermissions";
+import { COLORS } from "../../styles/colors";
+import { getAndSyncPushToken } from "../../utils/getAndSyncPushToken";
 
 const { height } = Dimensions.get("window");
 
 export default function NotificationPermissionsScreen() {
   const router = useRouter();
-  const { permissionStatus, checkPermissions, requestPermissions } =
-    useNotificationPermissions();
-
-  useEffect(() => {
-    checkPermissions();
-  }, []);
-
-  const [isSettingClaim, setIsSettingClaim] = useState(false);
+  const { permissionStatus, requestPermissions } = useNotificationPermissions();
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const goToNext = () => router.push("/walks/home");
 
   useEffect(() => {
     // When permissions are granted, get the push token and call our API
-    const setPermissionsAndToken = async () => {
-      if (permissionStatus?.granted && !isSettingClaim) {
-        try {
-          setIsSettingClaim(true);
-          setError(null);
-
-          // Get the Expo push token
-          const projectId =
-            Constants?.expoConfig?.extra?.eas?.projectId ??
-            Constants?.easConfig?.projectId;
-
-          if (!Device.isDevice) {
-            console.warn("Using simulator - push notifications won't work");
-            // Call API without push token on simulator
-            await callApi("user/set-permissions-claim");
-          } else if (!projectId) {
-            console.warn("Project ID not found - can't get push token");
-            // Call API without push token
-            await callApi("user/set-permissions-claim");
-          } else {
-            try {
-              // Get the push token
-              const token = await Notifications.getExpoPushTokenAsync({
-                projectId,
-              });
-
-              console.log("Expo push token:", token.data);
-
-              // Call our API endpoint with the push token
-              await callApi("user/set-permissions-claim", {
-                pushToken: token.data,
-              });
-            } catch (tokenError) {
-              console.error("Error getting push token:", tokenError);
-              // Call API without push token if we failed to get one
-              await callApi("user/set-permissions-claim");
-            }
-          }
-
-          // Navigate to home screen after setting the claim
-          router.push("/walks/home/active");
-        } catch (err) {
-          console.error("Error setting permissions claim:", err);
-          setError("Failed to update your account. Please try again.");
-        } finally {
-          setIsSettingClaim(false);
-        }
-      }
-    };
-
-    setPermissionsAndToken();
+    if (permissionStatus?.granted) {
+      setIsLoading(true);
+      getAndSyncPushToken()
+        .then(goToNext)
+        .catch((e) => setError(e.message))
+        .finally(() => setIsLoading(false));
+    }
   }, [permissionStatus]);
 
   return (
@@ -109,12 +57,12 @@ export default function NotificationPermissionsScreen() {
             width="100%"
             fontWeight="bold"
             mt="$2"
-            mb="$1"
+            mb="$2"
             py="$2.5"
             onPress={requestPermissions}
-            disabled={isSettingClaim}
+            disabled={isLoading}
           >
-            {isSettingClaim ? (
+            {isLoading ? (
               <XStack gap="$2" ai="center">
                 <Spinner color="white" size="small" />
                 <Text color="white" fontWeight="bold">
@@ -124,6 +72,21 @@ export default function NotificationPermissionsScreen() {
             ) : (
               "Enable Notifications"
             )}
+          </Button>
+          
+          <Button
+            size="$3"
+            variant="outlined"
+            borderColor={COLORS.primary}
+            color={COLORS.primary}
+            width="100%"
+            fontWeight="500"
+            mb="$1"
+            onPress={goToNext}
+            disabled={isLoading}
+            opacity={isLoading ? 0.5 : 1}
+          >
+            Skip for now
           </Button>
         </Card>
       </YStack>

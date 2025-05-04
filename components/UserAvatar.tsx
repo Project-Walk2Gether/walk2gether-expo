@@ -21,14 +21,13 @@ export function UserAvatar({
   const fontSize = size * 0.4; // Proportional font size for initials
 
   return (
-    <Avatar
-      size={size}
-      circular
-      borderWidth={borderWidth}
-      borderColor="#fff"
-    >
+    <Avatar size={size} circular borderWidth={borderWidth} borderColor="#fff">
       <Avatar.Image src={userData?.profilePicUrl || undefined} />
-      <Avatar.Fallback backgroundColor={backgroundColor}>
+      <Avatar.Fallback
+        justifyContent="center"
+        alignItems="center"
+        backgroundColor={backgroundColor}
+      >
         <Text fontSize={fontSize} color="white" fontWeight="bold">
           {userData?.name ? getInitials(userData.name) : "..."}
         </Text>

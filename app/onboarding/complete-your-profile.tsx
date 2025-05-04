@@ -93,14 +93,7 @@ export default function CompleteYourProfile() {
           validationSchema={userDataSchema}
           onSubmit={handleSubmit}
         >
-          {({
-            handleSubmit,
-            values,
-            errors,
-            touched,
-            setFieldValue,
-            isSubmitting,
-          }) => (
+          {({ handleSubmit, values, errors, touched, setFieldValue }) => (
             <ScrollView
               ref={scrollViewRef}
               contentContainerStyle={{

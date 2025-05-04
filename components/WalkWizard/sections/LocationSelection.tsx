@@ -1,4 +1,4 @@
-import Constants from "expo-constants";
+import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import {
@@ -16,9 +16,6 @@ interface LocationSelectionProps {
   onBack: () => void;
 }
 
-// Get the Google Maps API key from environment variables
-const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey || "";
-
 // Check if API key is available to provide user feedback
 const isApiKeyMissing = !GOOGLE_MAPS_API_KEY;
 
@@ -26,7 +23,13 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   onContinue,
   onBack,
 }) => {
-  const { formData, updateFormData, userLocation, isLocationLoading, locationError } = useWalkForm();
+  const {
+    formData,
+    updateFormData,
+    userLocation,
+    isLocationLoading,
+    locationError,
+  } = useWalkForm();
   const [location, setLocation] = useState(formData.location || null);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [longPressActive, setLongPressActive] = useState(false);
@@ -36,11 +39,12 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   // Set initial region based on saved location, user location, or default
   const [region, setRegion] = useState({
     latitude: formData.location?.latitude || userLocation?.latitude || 37.78825,
-    longitude: formData.location?.longitude || userLocation?.longitude || -122.4324,
+    longitude:
+      formData.location?.longitude || userLocation?.longitude || -122.4324,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
-  
+
   // Update region when user location changes
   useEffect(() => {
     if (userLocation && !formData.location) {
