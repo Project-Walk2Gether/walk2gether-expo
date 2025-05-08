@@ -82,7 +82,7 @@ export interface BrandGradientProps {
   children?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   colors?: [string, string, ...string[]];
-  variant?: keyof typeof GRADIENTS;
+  variant: keyof typeof GRADIENTS;
   start?: { x: number; y: number };
   end?: { x: number; y: number };
 }
@@ -95,7 +95,7 @@ export const BrandGradient: React.FC<BrandGradientProps> = ({
   children,
   style,
   colors,
-  variant = "outdoor",
+  variant,
   start = { x: 0, y: 1 },
   end = { x: 0, y: 0 },
   ...rest

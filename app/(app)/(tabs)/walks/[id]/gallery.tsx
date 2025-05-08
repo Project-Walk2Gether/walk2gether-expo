@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FlatList, Modal, TouchableOpacity, Dimensions } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
-import firestore, { collection, query, orderBy } from "@react-native-firebase/firestore";
+import firestore from "@react-native-firebase/firestore";
 import { X } from "@tamagui/lucide-icons";
 import { Button, Image, Text, YStack, XStack, Stack as TamaguiStack, Spinner } from "tamagui";
 import { Attachment, Message } from "walk2gether-shared";
 import { useQuery } from "../../../../../utils/firestore";
-import { firestore_instance } from "../../../../../config/firebase";
 import HeaderBackButton from "../../../../../components/HeaderBackButton";
 import { COLORS } from "../../../../../styles/colors";
 
@@ -19,34 +18,23 @@ export default function WalkGalleryScreen() {
   const params = useLocalSearchParams();
   const walkId = params.id as string;
   const [selectedImage, setSelectedImage] = useState<Attachment | null>(null);
-  const [allImages, setAllImages] = useState<Attachment[]>([]);
 
   // Query messages for this specific walk
-  const messagesRef = collection(firestore(), `walks/${walkId}/messages`);
-  const messagesQuery = query(
-    messagesRef,
-    orderBy("createdAt", "desc")
-  );
+  const messagesQuery = firestore()
+    .collection(`walks/${walkId}/messages`)
+    .orderBy("createdAt", "desc");
 
   const { docs: messages, status } = useQuery<Message>(messagesQuery);
 
-  // Extract all image attachments from messages
-  useEffect(() => {
-    if (messages.length > 0) {
-      const images: Attachment[] = [];
+  // Extract all image attachments from messages using flatMap
+  const allImages = useMemo(() => {
+    return messages.flatMap(message => {
+      if (!message.attachments?.length) return [];
       
-      messages.forEach(message => {
-        if (message.attachments && message.attachments.length > 0) {
-          message.attachments.forEach(attachment => {
-            if (attachment.type === "image") {
-              images.push(attachment);
-            }
-          });
-        }
-      });
-      
-      setAllImages(images);
-    }
+      return message.attachments.filter(attachment => 
+        attachment.type === "image"
+      );
+    });
   }, [messages]);
 
   // Handle image tap to show full-screen preview
@@ -107,6 +95,7 @@ export default function WalkGalleryScreen() {
             keyExtractor={(item, index) => `${item.uri}-${index}`}
             numColumns={NUM_COLUMNS}
             contentContainerStyle={{ padding: SPACING }}
+            showsVerticalScrollIndicator={false}
           />
         )}
       </YStack>

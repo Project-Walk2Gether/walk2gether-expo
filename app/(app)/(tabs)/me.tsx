@@ -1,70 +1,22 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import Clipboard from "@react-native-clipboard/clipboard";
+import { Edit3, LogOut, QrCode } from "@tamagui/lucide-icons";
 import storage from "@react-native-firebase/storage";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, ScrollView } from "react-native";
-import { Button, Text, YStack, XStack, View } from "tamagui";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Image, ScrollView, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Avatar, Button, Card, H4, Separator, Stack, Text, View, YStack } from "tamagui";
 import { Location, UserData } from "walk2gether-shared";
-import { BrandGradient } from "../../../components/UI";
+import { BrandGradient, ScreenTitle } from "../../../components/UI";
 import { PlaceData } from "../../../components/UI/PlacesAutocomplete";
+import UIDInfo from "../../../components/UIDInfo";
 import { UserDataForm } from "../../../components/UserDataForm";
 import { useAuth } from "../../../context/AuthContext";
 import { useFlashMessage } from "../../../context/FlashMessageContext";
 import { useUserData } from "../../../context/UserDataContext";
 import { COLORS } from "../../../styles/colors";
 import { appVersion } from "../../../utils/version";
-
-// UIDInfo component for showing user ID and app version
-const UIDInfo: React.FC<{ uid: string; version: string }> = ({
-  uid,
-  version,
-}) => {
-  const { showMessage } = useFlashMessage();
-  
-  const handleCopy = () => {
-    Clipboard.setString(uid);
-    showMessage("User ID copied to clipboard!", "success");
-  };
-  
-  return (
-    <YStack mt={10} ai="center" mb={20}>
-      <Text
-        fontSize={12}
-        color="$gray10"
-        opacity={0.7}
-        selectable
-        onPress={handleCopy}
-        pressStyle={{ opacity: 0.5 }}
-        style={{ textAlign: "center" }}
-        mb="$2"
-      >
-        Version: {version}
-      </Text>
-
-      <Text
-        fontSize={12}
-        color="$gray10"
-        opacity={0.7}
-        selectable
-        onPress={handleCopy}
-        pressStyle={{ opacity: 0.5 }}
-        style={{ textAlign: "center" }}
-      >
-        User ID: {uid}
-      </Text>
-
-      <Text
-        fontSize={10}
-        color="$gray10"
-        opacity={0.5}
-        style={{ textAlign: "center" }}
-      >
-        Tap to copy
-      </Text>
-    </YStack>
-  );
-};
 
 export default function MeScreen() {
   const { user: authUser, signOut } = useAuth();
@@ -75,12 +27,14 @@ export default function MeScreen() {
   const [aboutMe, setAboutMe] = useState("");
   const [profilePicUrl, setProfilePicUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const insets = useSafeAreaInsets();
 
   // Update local state when userData changes
   useEffect(() => {
     if (userData) {
       setName(userData.name || "");
+      setProfilePicUrl(userData.profilePicUrl || "");
+      setAboutMe(userData.aboutMe || "");
 
       // Handle location differently based on what's stored in userData
       if (userData.location) {
@@ -99,13 +53,31 @@ export default function MeScreen() {
       } else {
         setLocation(null);
       }
-
-      setAboutMe(userData.aboutMe || "");
-      setProfilePicUrl(userData.profilePicUrl || "");
     }
   }, [userData]);
 
   const { showMessage } = useFlashMessage();
+
+  const handlePickImage = async () => {
+    // Request permissions
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      showMessage("Permission to access photos is required", "error");
+      return;
+    }
+
+    // Launch image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      await uploadImage(result.assets[0].uri);
+    }
+  };
 
   const uploadImage = async (uri: string) => {
     if (!authUser) return;
@@ -149,18 +121,20 @@ export default function MeScreen() {
       setIsSaving(true);
 
       // Make sure location has the correct structure that matches Location type
-      const formattedLocation: Location | null = location ? {
-        name: location.name,
-        placeId: location.placeId || "", // Ensure placeId is never undefined
-        latitude: location.latitude,
-        longitude: location.longitude
-      } : null;
-      
+      const formattedLocation: Location | null = location
+        ? {
+            name: location.name,
+            placeId: location.placeId || "", // Ensure placeId is never undefined
+            latitude: location.latitude,
+            longitude: location.longitude,
+          }
+        : null;
+
       // Create a partial UserData object to update
       const updateData: Partial<UserData> = {
         name,
         location: formattedLocation,
-        aboutMe
+        aboutMe,
       };
 
       // Update user data in Firestore
@@ -175,6 +149,13 @@ export default function MeScreen() {
     }
   };
 
+  const handleEditProfile = () => {
+    // Navigate to a modal where user can edit their profile
+    router.push("/");
+    // In a real implementation, you would create a proper edit profile route
+    showMessage("Edit profile functionality coming soon", "info");
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -186,82 +167,121 @@ export default function MeScreen() {
 
   if (userDataLoading) {
     return (
-      <YStack
-        f={1}
-        jc="center"
-        ai="center"
-        bg="#fff"
-        width="100%"
-        height="100%"
-      >
-        <ActivityIndicator size="large" color={COLORS.action} />
-      </YStack>
+      <BrandGradient variant="modern" style={{ flex: 1 }}>
+        <YStack f={1} jc="center" ai="center" width="100%" height="100%">
+          <ActivityIndicator size="large" color={COLORS.action} />
+        </YStack>
+      </BrandGradient>
     );
   }
 
   return (
-    <BrandGradient style={{ flex: 1 }}>
-      <YStack f={1} padding="$4">
-        <XStack justifyContent="space-between" marginBottom="$4">
-          <Text fontSize={28} fontWeight="bold" color="$gray12">
-            My Profile
-          </Text>
-          <Button
-            backgroundColor={COLORS.primary}
-            size="$3"
-            circular
-            color="#fff"
-            borderRadius={10}
-            onPress={() => router.push("/qr-code")}
-            icon={<MaterialIcons name="qr-code-2" color={"white"} size={24} />}
-          />
-        </XStack>
-        
-        <View
-          backgroundColor="white"
-          borderRadius={16}
-          shadowColor="black"
-          shadowOpacity={0.1}
-          shadowRadius={10}
-          flex={1}
-        >
-          <ScrollView ref={scrollViewRef} contentContainerStyle={{ padding: 20 }}>
-            {userData && (
-              <UserDataForm
-                userData={{
-                  name: userData.name,
-                  aboutMe: userData.aboutMe,
-                  profilePicUrl: userData.profilePicUrl,
-                  location: userData.location as PlaceData | null
-                }}
-                onSave={({ name: newName, aboutMe: newAboutMe, location: newLocation }) => {
-                  setName(newName);
-                  setAboutMe(newAboutMe);
-                  setLocation(newLocation);
-                  handleSaveProfile();
-                }}
-                isSaving={isSaving}
-              />
+    <BrandGradient variant="modern" style={{ flex: 1 }}>
+      <YStack f={1} pt={insets.top} px="$4">
+        <Stack height={180} alignItems="center" justifyContent="center">
+          <TouchableOpacity onPress={handlePickImage}>
+            {profilePicUrl ? (
+              <Avatar circular size={120} borderWidth={3} borderColor="white">
+                <Avatar.Image src={profilePicUrl} />
+                <Avatar.Fallback backgroundColor={COLORS.primary} />
+              </Avatar>
+            ) : (
+              <Avatar circular size={120} borderWidth={3} borderColor="white">
+                <Avatar.Fallback backgroundColor={COLORS.primary}>
+                  <Text fontSize={36} color="white">
+                    {name ? name.charAt(0).toUpperCase() : "?"}
+                  </Text>
+                </Avatar.Fallback>
+              </Avatar>
             )}
-            <Button
-              variant="outlined"
-              borderColor="#ff3b30"
-              color="#ff3b30"
-              borderWidth={1}
-              borderRadius={8}
-              onPress={handleSignOut}
-              disabled={isSaving}
-              width="100%"
+            <View 
+              position="absolute" 
+              right={0} 
+              bottom={0} 
+              backgroundColor={COLORS.primary}
+              width={36}
+              height={36}
+              borderRadius={18}
+              justifyContent="center"
+              alignItems="center"
+              borderWidth={2}
+              borderColor="white"
             >
-              <Text fontSize={16} fontWeight="600" color="#ff3b30">
-                Sign Out
+              <Edit3 size={18} color="white" />
+            </View>
+          </TouchableOpacity>
+          <H4 mt="$3" mb="$1" fontSize={26} fontWeight="bold" color="white">
+            {name || "Your Name"}
+          </H4>
+          {location && (
+            <Text fontSize={16} color="white" opacity={0.9} mb="$2">
+              {location.name}
+            </Text>
+          )}
+        </Stack>
+
+        <ScrollView 
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: 4 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* About Me Section */}
+          <Card backgroundColor="white" mb="$3" p="$4" borderRadius={16}>
+            <Card.Header mb="$2">
+              <Text fontSize={18} fontWeight="600" color={COLORS.text}>
+                About Me
               </Text>
-            </Button>
-            {authUser?.uid && (
-              <UIDInfo uid={authUser.uid} version={`${appVersion}.patch`} />
-            )}
-          </ScrollView>
-        </View>
+            </Card.Header>
+            <Text fontSize={16} color={COLORS.text}>
+              {aboutMe || "Add some details about yourself..."}
+            </Text>
+          </Card>
+          
+          {/* Actions Section */}
+          <Card backgroundColor="white" mb="$3" borderRadius={16}>
+            <TouchableOpacity onPress={() => router.push("/qr-code")}>
+              <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
+                <View marginRight="$3">
+                  <QrCode size={24} color={COLORS.primary} />
+                </View>
+                <Text fontSize={16} fontWeight="500" color={COLORS.text}>
+                  My QR Code
+                </Text>
+              </YStack>
+            </TouchableOpacity>
+            
+            <Separator borderColor="$gray5" />
+            
+            <TouchableOpacity onPress={handleEditProfile}>
+              <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
+                <View marginRight="$3">
+                  <Edit3 size={24} color={COLORS.primary} />
+                </View>
+                <Text fontSize={16} fontWeight="500" color={COLORS.text}>
+                  Edit Profile
+                </Text>
+              </YStack>
+            </TouchableOpacity>
+            
+            <Separator borderColor="$gray5" />
+            
+            <TouchableOpacity onPress={handleSignOut}>
+              <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
+                <View marginRight="$3">
+                  <LogOut size={24} color="#ff3b30" />
+                </View>
+                <Text fontSize={16} fontWeight="500" color="#ff3b30">
+                  Sign Out
+                </Text>
+              </YStack>
+            </TouchableOpacity>
+          </Card>
+          
+          {/* Version Info */}
+          {authUser?.uid && (
+            <UIDInfo uid={authUser.uid} version={`${appVersion}.patch`} />
+          )}
+        </ScrollView>
       </YStack>
     </BrandGradient>
   );

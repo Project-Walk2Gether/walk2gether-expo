@@ -17,32 +17,15 @@ export default function TabLayout() {
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.inactive,
         headerShown: false,
-        headerShadowVisible: false,
-        sceneStyle: { backgroundColor: "transparent" },
-        headerStyle: {
-          backgroundColor: "#ffffff",
-          elevation: 0,
-          shadowColor: "transparent",
-        },
-        headerTitleStyle: {
-          fontWeight: "bold",
-          fontSize: 18,
-        },
         tabBarStyle: {
           backgroundColor: COLORS.background,
-          borderTopColor: "transparent",
-          elevation: 8,
+          borderTopColor: "#E0E0E0",
+          elevation: 4,
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: -3 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          // Slightly reduce height and add margin for distinction
-          height: 60,
-          marginBottom: 3,
-          marginHorizontal: 8,
-          borderRadius: 12,
+          shadowOffset: { width: 0, height: -1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
         },
-        // Removed ProfileButton since we now have a dedicated profile tab
       }}
     >
       <Tabs.Screen
@@ -58,7 +41,6 @@ export default function TabLayout() {
         name="stories"
         options={{
           title: "Stories",
-          headerShown: true,
           tabBarIcon: ({ color, size }) => <Image size={size} color={color} />,
         }}
       />

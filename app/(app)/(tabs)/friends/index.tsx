@@ -46,7 +46,7 @@ export default function FriendsScreen() {
   return (
     <>
       <StatusBar style="dark" />
-      <BrandGradient style={{ flex: 1 }}>
+      <BrandGradient variant="outdoor" style={{ flex: 1 }}>
         <View position="absolute" top={-80} left={0} right={0} bottom={0}>
           <Clouds />
         </View>
@@ -86,10 +86,8 @@ export default function FriendsScreen() {
           </View>
         </ScrollView>
       </BrandGradient>
-      {/* Floating Action Button */}
       <FAB
-        icon={<Plus size={28} color="white" />}
-        accessibilityLabel="Invite a friend"
+        text="Invite a friend"
         onPress={() => router.push("/(app)/(modals)/invite-friends")}
       />
     </>

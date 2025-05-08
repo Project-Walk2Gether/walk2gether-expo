@@ -78,8 +78,8 @@ export default function ActiveTabScreen() {
           )}
         </ScrollView>
         <FAB
-          icon={<Plus size={28} color="white" />}
-          accessibilityLabel="Create a new walk"
+          icon={<Plus size={24} color="white" />}
+          text="New Walk"
           onPress={() => router.push("/new-walk")}
         />
       </View>

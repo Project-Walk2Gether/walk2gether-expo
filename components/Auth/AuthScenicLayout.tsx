@@ -38,13 +38,11 @@ export default function AuthScenicLayout({
   showTree = true,
 }: AuthScenicLayoutProps) {
   const insets = useSafeAreaInsets();
-  const { height: screenHeight } =
-    require("react-native").Dimensions.get("window");
 
   const ScrollOrView = scroll ? ScrollView : View;
 
   return (
-    <BrandGradient style={{ flex: 1 }}>
+    <BrandGradient variant="outdoor" style={{ flex: 1 }}>
       {showSun && (
         <Sun style={{ position: "absolute", left: 0, top: 20, zIndex: 1 }} />
       )}
