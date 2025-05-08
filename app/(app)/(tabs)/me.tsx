@@ -3,11 +3,10 @@ import { LogOut, Pencil, QrCode } from "@tamagui/lucide-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Camera, Trash } from '@tamagui/lucide-icons';
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Card, H4, Separator, Text, View, YStack } from "tamagui";
-import { BrandGradient } from "../../../components/UI";
+import { Screen, BrandGradient } from "../../../components/UI";
 import { PlaceData } from "../../../components/UI/PlacesAutocomplete";
 import Menu from "../../../components/Menu";
 import UIDInfo from "../../../components/UIDInfo";
@@ -27,7 +26,6 @@ export default function MeScreen() {
   const [aboutMe, setAboutMe] = useState("");
   const [profilePicUrl, setProfilePicUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const insets = useSafeAreaInsets();
 
   // Update local state when userData changes
   useEffect(() => {
@@ -163,16 +161,7 @@ export default function MeScreen() {
   }
 
   return (
-    <BrandGradient variant="modern" style={{ flex: 1 }}>
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          paddingTop: insets.top + 20,
-          paddingBottom: 40,
-          paddingHorizontal: 16,
-        }}
-        showsVerticalScrollIndicator={false}
-      >
+    <Screen title="" gradientVariant="modern">
         <YStack alignItems="center" mb="$6">
           <Menu
             title="Profile Picture"
@@ -281,7 +270,6 @@ export default function MeScreen() {
         {authUser?.uid && (
           <UIDInfo uid={authUser.uid} version={`${appVersion}.patch`} />
         )}
-      </ScrollView>
-    </BrandGradient>
+    </Screen>
   );
 }

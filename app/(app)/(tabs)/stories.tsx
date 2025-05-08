@@ -2,32 +2,16 @@ import { useSharedWalks } from "@/hooks/useSharedWalks";
 import { Book } from "@tamagui/lucide-icons";
 import React from "react";
 import { FlatList } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ScrollView, Text, View } from "tamagui";
-import { BrandGradient, ScreenTitle } from "../../../components/UI";
+import { View } from "tamagui";
+import { Screen } from "../../../components/UI";
 import { EmptyMessage } from "../../../components/EmptyMessage";
 import WalkCard from "../../../components/WalkCard";
 
 export default function HistoryTabScreen() {
   const walks = useSharedWalks();
-  const insets = useSafeAreaInsets();
 
   return (
-    <BrandGradient variant="modern" style={{ flex: 1 }}>
-      <View f={1} pt={insets.top}>
-        <View px="$4">
-          <ScreenTitle>Stories</ScreenTitle>
-        </View>
-        <ScrollView
-          flex={1}
-          width="100%"
-          contentContainerStyle={{
-            paddingBottom: 40,
-            paddingTop: 10,
-            paddingHorizontal: 20,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
+    <Screen title="Stories" gradientVariant="modern">
           {walks.length > 0 ? (
             <FlatList
               data={walks}
@@ -48,8 +32,6 @@ export default function HistoryTabScreen() {
               iconColor="#3E7CB9"
             />
           )}
-        </ScrollView>
-      </View>
-    </BrandGradient>
+    </Screen>
   );
 }

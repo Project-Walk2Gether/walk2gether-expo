@@ -7,6 +7,29 @@ import uuid from "react-native-uuid";
 import { Friendship, UserData, Walk } from "walk2gether-shared";
 import { WalkFormData } from "../context/WalkFormContext";
 
+/**
+ * Gets a list of unique user IDs from the user's friendships to share the walk with
+ *
+ * @param userId The current user's ID
+ * @param formData The walk form data
+ * @param friendships List of user's friendships
+ * @returns Array of unique user IDs from friendships, excluding the current user
+ */
+const getSharedWithUserUids = (
+  userId: string,
+  friendships: Friendship[] = []
+): string[] => {
+  // Extract all user IDs from friendships
+  const friendUids = friendships.flatMap((friendship) => friendship.uids);
+
+  // Filter out the current user and create a unique list
+  const uniqueFriendUids = [
+    ...new Set(friendUids.filter((uid) => uid !== userId)),
+  ];
+
+  return uniqueFriendUids;
+};
+
 interface CreateWalkParams {
   formData: WalkFormData;
   userData: UserData | null;
@@ -71,7 +94,7 @@ export const createWalkFromForm = async ({
       rsvpdUserIds: [],
 
       // Sharing
-      sharedWithUserUids: getSharedWithUserUids(userId, formData, friendships),
+      sharedWithUserUids: getSharedWithUserUids(userId, friendships),
 
       // Additional required fields for Friends walk
       rounds: [],
