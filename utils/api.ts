@@ -24,7 +24,7 @@ export async function callApi<T = any>(
 
   // Construct the full URL
   const url = `${API_BASE_URL}${path}`;
-  console.log(`Making API call to ${url}`, { path, isLive });
+  console.log(`Making API call to ${url}`, { path, isLive, token });
 
   // Set up request configuration
   const config: AxiosRequestConfig = {

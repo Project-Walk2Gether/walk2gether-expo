@@ -6,23 +6,29 @@ import firestore, {
   serverTimestamp,
   Timestamp,
 } from "@react-native-firebase/firestore";
-import { Message } from "walk2gether-shared";
+import { Attachment, Message } from "walk2gether-shared";
 
 /**
  * Send a message in a friendship conversation
  * @param friendshipId The ID of the friendship document
  * @param senderId The user ID of the message sender
+ * @param senderName The display name of the message sender
  * @param recipientId The user ID of the message recipient
- * @param messageText The content of the message
+ * @param messageData The message content and optional attachments
  * @returns Promise that resolves when the message is sent
  */
 export const sendMessage = async (
   friendshipId: string,
   senderId: string,
+  senderName: string,
   recipientId: string,
-  messageText: string
+  messageData: { message?: string; attachments?: Attachment[] }
 ): Promise<void> => {
-  if (!messageText.trim() || !senderId || !recipientId || !friendshipId) {
+  // Require either message text or attachments
+  const hasText = messageData.message && messageData.message.trim().length > 0;
+  const hasAttachments = messageData.attachments && messageData.attachments.length > 0;
+  
+  if ((!hasText && !hasAttachments) || !senderId || !senderName || !recipientId || !friendshipId) {
     throw new Error("Missing required parameters for sending a message");
   }
 
@@ -33,15 +39,17 @@ export const sendMessage = async (
     const friendshipPath = `friendships/${friendshipId}/messages`;
     const messagesRef = collection(db, friendshipPath);
 
-    const messageData: Message = {
+    const newMessage: Message = {
       senderId,
+      senderName,
       recipientId,
-      message: messageText,
+      message: messageData.message || "",
       createdAt: Timestamp.now(),
       read: false,
+      attachments: messageData.attachments || [],
     };
 
-    await addDoc(messagesRef, messageData);
+    await addDoc(messagesRef, newMessage);
 
     // Update the lastMessageAt field in the friendship document
     const friendshipRef = doc(db, "friendships", friendshipId);

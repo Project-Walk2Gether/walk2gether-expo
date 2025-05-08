@@ -1,12 +1,10 @@
-import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useRouter } from "expo-router";
 import { useCallback } from "react";
-import uuid from "react-native-uuid";
-import { Walk } from "walk2gether-shared";
 import { useAuth } from "../../context/AuthContext";
 import { useUserData } from "../../context/UserDataContext";
 import { useWalkForm } from "../../context/WalkFormContext";
 import { useWalks } from "../../context/WalksContext";
+import { createWalkFromForm } from "../../utils/walkSubmission";
 import HeaderBackButton from "../HeaderBackButton";
 import {
   DurationSelection,
@@ -27,76 +25,15 @@ export function WalkWizard() {
   const { userData } = useUserData();
 
   const handleSubmit = useCallback(async () => {
-    if (!formData.date || !formData.location || !formData.duration) {
-      console.error("Missing required form data");
-      return;
-    }
+    if (!user) return;
 
-    try {
-      // Generate a unique invitation code
-      const invitationCode = uuid.v4().toString().slice(0, 8);
-
-      // Convert form data to the Walk format
-      // Using type assertion to include the invitationCode property
-      // Create location object from form data
-      const locationData = {
-        name: formData.location.name,
-        placeId: "", // Default empty string for placeId
-        latitude: formData.location.latitude,
-        longitude: formData.location.longitude,
-      };
-      
-      // Create complete walk payload with all required fields from the Walk type
-      const walkPayload = {
-        // Basic walk properties
-        active: false,
-        date: Timestamp.fromDate(formData.date),
-        durationMinutes: formData.duration,
-        organizerName: userData?.name || "",
-        createdByUid: user!.uid,
-        type: formData.walkType as any,
-        
-        // Location data - For friends walk, both start and current are the same initially
-        startLocation: locationData,
-        currentLocation: locationData,
-        location: locationData, // This is used in UI for display purposes
-        
-        // Invitation details
-        invitationCode: invitationCode,
-        invitedUserIds: formData.invitedUserIds || [],
-        invitedPhoneNumbers: formData.invitedPhoneNumbers || [],
-        rsvpdUserIds: [],
-        
-        // Additional required fields for Friends walk
-        rounds: [],
-      } as unknown as Walk; // Cast to unknown first to resolve type mismatch
-
-      // Create the walk
-      await createWalk(walkPayload);
-
-      // If there are phone numbers to invite, send SMS invitations
-      const phoneNumbers = formData.invitedPhoneNumbers || [];
-      if (phoneNumbers.length > 0) {
-        try {
-          console.log("Sending SMS invitations to:", phoneNumbers);
-          // This would typically call a Cloud Function to send SMS invites
-          // We'll implement this functionality on the backend
-        } catch (error) {
-          console.error("Error sending SMS invitations:", error);
-        }
-      }
-
-      // Immediately redirect to home screen after creating a walk
-      router.back();
-
-      // Show confetti animation after a delay once the screen is closed
-      setTimeout(() => {
-        // showConfetti(0);
-      }, 600);
-    } catch (error) {
-      console.error("Error creating walk:", error);
-      // TODO: Show error message
-    }
+    await createWalkFromForm({
+      formData,
+      userData,
+      userId: user.uid,
+      createWalk,
+      router,
+    });
   }, [formData, createWalk, router, userData, user]);
 
   const handleBackPress = useCallback(() => {

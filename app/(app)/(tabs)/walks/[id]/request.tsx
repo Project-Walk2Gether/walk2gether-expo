@@ -5,7 +5,7 @@ import HeaderBackButton from "../../../../../components/HeaderBackButton";
 import RequestToJoinWalkScreen from "../../../../../components/RequestToJoinWalkScreen";
 import { useDoc } from "../../../../../utils/firestore";
 
-export default function WalkCheckIn() {
+export default function WalkRequestScreen() {
   const { id } = useLocalSearchParams();
   const { doc: walk } = useDoc<Walk>(`walks/${id}`);
 

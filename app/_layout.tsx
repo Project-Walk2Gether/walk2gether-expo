@@ -4,6 +4,7 @@ import { TamaguiProvider } from "tamagui";
 import "../config/emulators";
 import { WithAuthProvider } from "../context/AuthContext";
 import { FlashMessageProvider } from "../context/FlashMessageContext";
+import { FriendsProvider } from "../context/FriendsContext";
 import { LocationProvider } from "../context/LocationContext";
 import { UpdatesProvider } from "../context/UpdatesContext";
 import { UserDataProvider } from "../context/UserDataContext";
@@ -59,7 +60,9 @@ function RootLayout() {
         <FlashMessageProvider>
           <UpdatesProvider>
             <UserDataProvider>
-              <AppContent />
+              <FriendsProvider>
+                <AppContent />
+              </FriendsProvider>
             </UserDataProvider>
           </UpdatesProvider>
         </FlashMessageProvider>

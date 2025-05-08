@@ -1,20 +1,22 @@
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
 import { Button, Card, Spinner, Text, XStack, YStack } from "tamagui";
-import AuthScenicLayout from "../../components/Auth/AuthScenicLayout";
-import { useNotificationPermissions } from "../../hooks/useNotificationPermissions";
-import { COLORS } from "../../styles/colors";
-import { getAndSyncPushToken } from "../../utils/getAndSyncPushToken";
+import AuthScenicLayout from "../../../components/Auth/AuthScenicLayout";
+import { useNotificationPermissions } from "../../../hooks/useNotificationPermissions";
+import { COLORS } from "../../../styles/colors";
+import { getAndSyncPushToken } from "../../../utils/getAndSyncPushToken";
 
 const { height } = Dimensions.get("window");
 
 export default function NotificationPermissionsScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const { permissionStatus, requestPermissions } = useNotificationPermissions();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const goToNext = () => router.push("/walks/home");
+  const goToNext = () => router.push("/walks");
 
   useEffect(() => {
     // When permissions are granted, get the push token and call our API
@@ -73,22 +75,22 @@ export default function NotificationPermissionsScreen() {
               "Enable Notifications"
             )}
           </Button>
-          
+        </Card>
+
+        <XStack justifyContent="flex-end" width="100%">
           <Button
             size="$3"
             variant="outlined"
-            borderColor={COLORS.primary}
             color={COLORS.primary}
-            width="100%"
             fontWeight="500"
-            mb="$1"
+            borderWidth={0}
             onPress={goToNext}
             disabled={isLoading}
             opacity={isLoading ? 0.5 : 1}
           >
             Skip for now
           </Button>
-        </Card>
+        </XStack>
       </YStack>
     </AuthScenicLayout>
   );

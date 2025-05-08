@@ -24,7 +24,7 @@ export function useUpcomingWalks() {
   const { user } = useAuth();
   const midnightToday = startOfDay(new Date());
 
-  const upcomingWalksQuery = useMemo(() => {
+  const currentWalksQuery = useMemo(() => {
     if (!user) return undefined;
 
     return query(
@@ -36,9 +36,9 @@ export function useUpcomingWalks() {
     );
   }, [user, midnightToday]);
   // Use the useQuery hook to fetch walks
-  const { docs: upcomingWalks } = useQuery<Walk>(upcomingWalksQuery);
+  const { docs: currentWalks } = useQuery<Walk>(currentWalksQuery);
 
-  return upcomingWalks;
+  return currentWalks;
 }
 
 export const createWalk = async (

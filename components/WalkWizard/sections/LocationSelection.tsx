@@ -16,9 +16,6 @@ interface LocationSelectionProps {
   onBack: () => void;
 }
 
-// Check if API key is available to provide user feedback
-const isApiKeyMissing = !GOOGLE_MAPS_API_KEY;
-
 export const LocationSelection: React.FC<LocationSelectionProps> = ({
   onContinue,
   onBack,
@@ -234,25 +231,23 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
           overflow="hidden"
           position="relative"
         >
-          {!isApiKeyMissing && (
-            <MapView
-              ref={mapRef}
-              style={{ width: "100%", height: "100%" }}
-              initialRegion={region}
-              onLongPress={handleMapLongPress}
-            >
-              {location && (
-                <Marker
-                  coordinate={{
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                  }}
-                  title={location.name}
-                  description={location.description}
-                />
-              )}
-            </MapView>
-          )}
+          <MapView
+            ref={mapRef}
+            style={{ width: "100%", height: "100%" }}
+            initialRegion={region}
+            onLongPress={handleMapLongPress}
+          >
+            {location && (
+              <Marker
+                coordinate={{
+                  latitude: location.latitude,
+                  longitude: location.longitude,
+                }}
+                title={location.name}
+                description={location.description}
+              />
+            )}
+          </MapView>
 
           <Text color="white" fontSize={14} fontWeight="500" textAlign="center">
             Tap and hold on the map to choose a location
@@ -280,23 +275,8 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
               </Text>
             </View>
           )}
-          {isApiKeyMissing && (
-            <View
-              style={{ width: "100%", height: "100%" }}
-              backgroundColor="rgba(0, 0, 0, 0.2)"
-              justifyContent="center"
-              alignItems="center"
-            >
-              <Text
-                color={COLORS.textOnDark}
-                textAlign="center"
-                fontWeight="600"
-              >
-                Map preview unavailable without API key
-              </Text>
-            </View>
-          )}
-          {locationError && !isApiKeyMissing && (
+
+          {locationError && (
             <View
               style={{ width: "100%", height: "100%" }}
               backgroundColor="rgba(0, 0, 0, 0.2)"

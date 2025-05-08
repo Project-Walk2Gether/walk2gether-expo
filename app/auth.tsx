@@ -92,7 +92,7 @@ export default function Auth() {
         router.replace("/onboarding/complete-your-profile");
       }
     } else {
-      router.replace("/walks/home");
+      router.replace("/walks");
     }
   };
 

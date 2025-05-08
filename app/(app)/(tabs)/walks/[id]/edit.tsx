@@ -1,4 +1,5 @@
 import { doc, updateDoc } from "@react-native-firebase/firestore";
+import Constants from "expo-constants";
 import {
   useGlobalSearchParams,
   useLocalSearchParams,
@@ -12,7 +13,6 @@ import FullScreenLoader from "../../../../../components/FullScreenLoader";
 import WalkForm from "../../../../../components/WalkForm";
 import { db } from "../../../../../config/firebase";
 import { useDoc } from "../../../../../utils/firestore";
-import Constants from "expo-constants";
 
 export default function EditWalkScreen() {
   const router = useRouter();
@@ -53,7 +53,7 @@ export default function EditWalkScreen() {
         onSubmit={handleSubmit}
         submitButtonText="Update Walk"
         onCancel={() => router.back()}
-        googleApiKey={Constants.expoConfig?.extra?.googleMapsApiKey as string}
+        googleApiKey={Constants.expoConfig!.ios!.config!.googleMapsApiKey!}
       />
     </ScrollView>
   );

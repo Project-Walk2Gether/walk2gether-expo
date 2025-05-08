@@ -9,16 +9,16 @@ interface WalkingCharactersProps {
   style?: any;
 }
 
-const TIME_TO_WALK_ACROSS_SCREEN = 12.5;
+const TIME_TO_WALK_ACROSS_SCREEN = 11;
 const PAUSE_TIME = 6;
 
 // The pencil - walking behind
 const CHARACTER_1_SIZE = 320;
-const CHARACTER_1_SPEED = 0.6;
+const CHARACTER_1_SPEED = 0.8;
 
 // The onion - walking in front
 const CHARACTER_2_SIZE = 270;
-const CHARACTER_2_SPEED = 0.75;
+const CHARACTER_2_SPEED = 0.9;
 
 export default function WalkingCharacters({ style }: WalkingCharactersProps) {
   // Horizontal position animations

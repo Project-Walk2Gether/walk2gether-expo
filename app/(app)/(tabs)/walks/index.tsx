@@ -15,7 +15,7 @@ import { useWalks } from "../../../../context/WalksContext";
 
 export default function ActiveTabScreen() {
   const router = useRouter();
-  const { upcomingWalks } = useWalks();
+  const { activeWalks, upcomingWalks } = useWalks();
   const { userData } = useUserData();
   const insets = useSafeAreaInsets();
   const renderWalkItem = ({ item }: { item: WithId<Walk> }) => (
@@ -70,14 +70,38 @@ export default function ActiveTabScreen() {
           }}
           showsVerticalScrollIndicator={false}
         >
-          {upcomingWalks.length > 0 ? (
-            <FlatList
-              data={upcomingWalks as unknown as WithId<Walk>[]}
-              renderItem={renderWalkItem}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-              ItemSeparatorComponent={() => <View height={16} />}
-            />
+          {activeWalks.length > 0 || upcomingWalks.length > 0 ? (
+            <>
+              {activeWalks.length > 0 && (
+                <>
+                  <Text fontWeight="bold" fontSize={20} mb="$2" ml="$2">
+                    Active Walks
+                  </Text>
+                  <FlatList
+                    data={activeWalks}
+                    renderItem={renderWalkItem}
+                    keyExtractor={(item) => item.id}
+                    scrollEnabled={false}
+                    ItemSeparatorComponent={() => <View height={16} />}
+                    contentContainerStyle={{ marginBottom: 24 }}
+                  />
+                </>
+              )}
+              {upcomingWalks.length > 0 && (
+                <>
+                  <Text fontWeight="bold" fontSize={20} mb="$2" ml="$2">
+                    Upcoming Walks
+                  </Text>
+                  <FlatList
+                    data={upcomingWalks}
+                    renderItem={renderWalkItem}
+                    keyExtractor={(item) => item.id}
+                    scrollEnabled={false}
+                    ItemSeparatorComponent={() => <View height={16} />}
+                  />
+                </>
+              )}
+            </>
           ) : (
             <EmptyMessage
               message="Looks like it's a quiet moment"

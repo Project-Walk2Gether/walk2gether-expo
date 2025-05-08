@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Redirect, Stack, useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { View } from "tamagui";
@@ -13,48 +13,36 @@ export default function WalkRouter() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { user } = useAuth();
   const { doc: walk } = useDoc<Walk>(`walks/${id}`);
-  const router = useRouter();
 
   // Get the participant doc to check if user is approved
   const { doc: participant } = useDoc<Participant>(
     id && user?.uid ? `walks/${id}/participants/${user.uid}` : undefined
   );
 
-  // Handle routing based on user permissions using imperative navigation
-  useEffect(() => {
-    // Don't navigate while still loading data
-    if (!walk || (user && participant === undefined)) {
-      return;
-    }
+  // Determine if we have all the data needed to make routing decisions
+  const isLoading = !walk || (user && participant === undefined);
 
-    // Determine the appropriate destination based on permissions
-    if (
-      user?.uid === walk.createdByUid ||
-      (participant && participant.approvedAt)
-    ) {
-      // Walk owner or approved participant - show the walk details
-      // Use router.replace with proper typings
-      router.replace({
-        pathname: "/walks/[id]/show",
-        params: { id: id as string },
-      });
-    } else {
-      // Participant with pending request or non-participant - show request page
-      // Use router.replace with proper typings
-      router.replace({
-        pathname: "/walks/[id]/request",
-        params: { id: id as string },
-      });
-    }
-  }, [walk, participant, user, id, router]);
+  // If still loading, show a loading indicator
+  if (isLoading) {
+    return (
+      <>
+        <Stack.Screen options={{ title: "Loading..." }} />
+        <View flex={1} jc="center" ai="center" p={20}>
+          <ActivityIndicator size="large" />
+        </View>
+      </>
+    );
+  }
 
-  // Show loading indicator while data is loading or during navigation
-  return (
-    <>
-      <Stack.Screen options={{ title: "Loading..." }} />
-      <View flex={1} jc="center" ai="center" p={20}>
-        <ActivityIndicator size="large" />
-      </View>
-    </>
-  );
+  // Determine the appropriate destination based on permissions
+  if (
+    user?.uid === walk.createdByUid ||
+    (participant && participant.approvedAt)
+  ) {
+    // Walk owner or approved participant - show the walk details
+    return <Redirect href={`/walks/${id}/show`} />
+  } else {
+    // Participant with pending request or non-participant - show request page
+    return <Redirect href={`/walks/${id}/request`} />
+  }
 }

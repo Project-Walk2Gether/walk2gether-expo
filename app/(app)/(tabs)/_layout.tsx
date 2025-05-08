@@ -1,11 +1,16 @@
+import { useUserData } from "@/context/UserDataContext";
 import { Footprints, Image, Users } from "@tamagui/lucide-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import React from "react";
-import NotificationBell from "../../../components/NotificationBell";
 import { ProfileButton } from "../../../components/ProfileButton";
 import { COLORS } from "../../../styles/colors";
 
 export default function TabLayout() {
+  const { userData, loading: userDataLoading } = useUserData();
+
+  if (!userDataLoading && !userData) {
+    return <Redirect href="/onboarding/complete-your-profile" />;
+  }
   return (
     <Tabs
       initialRouteName="walks"
@@ -40,7 +45,6 @@ export default function TabLayout() {
         },
         headerRight: () => (
           <React.Fragment>
-            <NotificationBell />
             <ProfileButton />
           </React.Fragment>
         ),
@@ -49,7 +53,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="walks"
         options={{
-          title: "Walks",
+          title: "Let's Walk!",
           tabBarIcon: ({ color, size }) => (
             <Footprints size={size} color={color} />
           ),

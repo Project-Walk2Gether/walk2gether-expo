@@ -9,15 +9,15 @@ interface UpcomingWalksProps {
 }
 
 export default function UpcomingWalks({ maxWalks = 3 }: UpcomingWalksProps) {
-  const { upcomingWalks } = useWalks();
+  const { currentWalks } = useWalks();
 
-  if (!upcomingWalks || upcomingWalks.length === 0) {
+  if (!currentWalks || currentWalks.length === 0) {
     return null;
   }
 
   return (
     <YStack gap="$3">
-      {upcomingWalks.slice(0, maxWalks).map((walk) => (
+      {currentWalks.slice(0, maxWalks).map((walk) => (
         <WalkCard key={walk.id} walk={walk} isUpcoming={true} />
       ))}
     </YStack>

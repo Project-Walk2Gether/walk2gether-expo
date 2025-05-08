@@ -18,6 +18,12 @@ export default function WalkStackLayout() {
             title: "Let's walk2gether!",
           }}
         />
+        <Stack.Screen
+          name="gallery"
+          options={{
+            title: "Photo Gallery",
+          }}
+        />
       </Stack>
     </>
   );

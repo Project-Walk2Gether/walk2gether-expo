@@ -1,4 +1,3 @@
-import { collection, query, where } from "@react-native-firebase/firestore";
 import { Plus, Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -11,21 +10,14 @@ import { EmptyMessage } from "../../../../components/EmptyMessage";
 import FAB from "../../../../components/FAB";
 import FriendshipCard from "../../../../components/FriendshipCard";
 import { BrandGradient, ScreenTitle } from "../../../../components/UI";
-import { firestore_instance } from "../../../../config/firebase";
 import { useAuth } from "../../../../context/AuthContext";
-import { useQuery } from "../../../../utils/firestore";
+import { useFriends } from "../../../../context/FriendsContext";
 
 export default function FriendsScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  // Query friendships for current user where deletedAt is null (not deleted)
-  const friendshipsQuery = query(
-    collection(firestore_instance, "friendships"),
-    where("uids", "array-contains", user?.uid),
-    where("deletedAt", "==", null)
-  );
-  const { docs: friendships } = useQuery<Friendship>(friendshipsQuery);
+  const { friendships } = useFriends();
 
   const navigateToChat = (friendship: Friendship) => {
     if (!friendship.id) return;

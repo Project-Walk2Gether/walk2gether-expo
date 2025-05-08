@@ -28,7 +28,8 @@ import { useQuery } from "../utils/firestore";
 import { useAuth } from "./AuthContext";
 
 interface WalksContextType {
-  upcomingWalks: Walk[];
+  upcomingWalks: WithId<Walk>[];
+  activeWalks: WithId<Walk>[];
   walksLoading: boolean; // Loading state for fetching walks
   submitting: boolean; // Loading state for mutations (create, RSVP, etc)
   userRSVPs: string[]; // Array of walk IDs the user has RSVPed to
@@ -67,7 +68,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
   const oneHourAgo = addHours(now, -1);
 
   // Create query for upcoming walks
-  const upcomingWalksQuery = useMemo(() => {
+  const currentWalksQuery = useMemo(() => {
     if (!user) return undefined;
 
     return query(
@@ -90,8 +91,8 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
   }, [user]);
 
   // Use the useQuery hook to fetch walks
-  const { docs: upcomingWalks, status: walksStatus } =
-    useQuery<WithId<Walk>>(upcomingWalksQuery);
+  const { docs: currentWalks, status: walksStatus } =
+    useQuery<WithId<Walk>>(currentWalksQuery);
 
   // Use the useQuery hook to fetch RSVPs
   const { docs: rsvpDocs, status: rsvpsStatus } = useQuery(userRSVPsQuery);
@@ -104,10 +105,29 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
   // Loading state for fetching data
   const walksLoading = walksStatus === "loading" || rsvpsStatus === "loading";
 
+  // Split walks into active and upcoming
+  const { activeWalks, upcomingWalks } = useMemo(() => {
+    const now = new Date();
+    const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+    
+    return currentWalks.reduce(
+      (acc, walk) => {
+        // If walk date is less than 30 minutes from now, it's active
+        if (walk.date && walk.date.toDate() <= thirtyMinutesFromNow) {
+          acc.activeWalks.push(walk);
+        } else {
+          acc.upcomingWalks.push(walk);
+        }
+        return acc;
+      },
+      { activeWalks: [] as WithId<Walk>[], upcomingWalks: [] as WithId<Walk>[] }
+    );
+  }, [currentWalks]);
+
   // Current active walk
   const currentWalk = useMemo(
-    () => upcomingWalks.find((walk) => walk.active) || null,
-    [upcomingWalks]
+    () => currentWalks.find((walk) => walk.active) || null,
+    [currentWalks]
   );
 
   // We've replaced this useEffect with useQuery hooks above
@@ -172,13 +192,14 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
 
   // Add getWalkById function to find a walk by its ID
   const getWalkById = (walkId: string): Walk | undefined => {
-    return upcomingWalks.find((walk) => walk.id === walkId);
+    return currentWalks.find((walk) => walk.id === walkId);
   };
 
   return (
     <WalksContext.Provider
       value={{
         upcomingWalks,
+        activeWalks,
         walksLoading,
         submitting,
         userRSVPs,

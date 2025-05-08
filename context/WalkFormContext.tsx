@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
 import * as Location from "expo-location";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 export interface WalkFormData {
   walkType: "friends" | "meetup" | "neighborhood" | null;
@@ -41,7 +41,7 @@ const initialFormData: WalkFormData = {
   time: null,
   location: null,
   duration: 30, // Default duration in minutes
-  invitees: null, 
+  invitees: null,
   invitedUserIds: null,
   invitedPhoneNumbers: null,
   isNeighborhoodWalk: false,
@@ -51,13 +51,22 @@ const WalkFormContext = createContext<WalkFormContextType | undefined>(
   undefined
 );
 
-export const WalkFormProvider: React.FC<{ children: React.ReactNode }> = ({
+export interface WalkFormProviderProps {
+  children: React.ReactNode;
+  isLocationReady?: boolean;
+}
+
+export const WalkFormProvider: React.FC<WalkFormProviderProps> = ({
   children,
+  isLocationReady = true,
 }) => {
   const [formData, setFormData] = useState<WalkFormData>(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
   const totalSteps = 6; // Type selection + 4 wizard steps
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [isLocationLoading, setIsLocationLoading] = useState<boolean>(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
@@ -95,32 +104,32 @@ export const WalkFormProvider: React.FC<{ children: React.ReactNode }> = ({
   const fetchUserLocation = async () => {
     setIsLocationLoading(true);
     setLocationError(null);
-    
+
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
-      if (status !== 'granted') {
-        setLocationError('Permission to access location was denied');
+
+      if (status !== "granted") {
+        setLocationError("Permission to access location was denied");
         setIsLocationLoading(false);
         return;
       }
-      
+
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      
+
       setUserLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       });
     } catch (error) {
-      setLocationError('Could not get your location');
-      console.error('Error getting location:', error);
+      setLocationError("Could not get your location");
+      console.error("Error getting location:", error);
     } finally {
       setIsLocationLoading(false);
     }
   };
-  
+
   // Fetch location when component mounts
   useEffect(() => {
     fetchUserLocation();
@@ -153,4 +162,19 @@ export const useWalkForm = (): WalkFormContextType => {
     throw new Error("useWalkForm must be used within a WalkFormProvider");
   }
   return context;
+};
+
+// Higher-Order Component (HOC) that wraps a component with the WalkFormProvider
+export const WithWalkFormProvider = <P extends object>(
+  Component: React.ComponentType<P>
+): React.FC<P & Partial<WalkFormProviderProps>> => {
+  return (props) => {
+    const { isLocationReady, ...componentProps } = props;
+
+    return (
+      <WalkFormProvider isLocationReady={isLocationReady}>
+        <Component {...(componentProps as P)} />
+      </WalkFormProvider>
+    );
+  };
 };

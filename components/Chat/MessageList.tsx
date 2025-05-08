@@ -56,9 +56,8 @@ export default function MessageList({
               flex: 1,
               flexGrow: 1,
               padding: 20,
-              backgroundColor: "white",
               paddingBottom: 80,
-            }} // Added paddingBottom for space under messages
+            }}
             onContentSizeChange={() =>
               scrollViewRef.current?.scrollToEnd({ animated: false })
             }

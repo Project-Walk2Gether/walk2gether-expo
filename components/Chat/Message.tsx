@@ -1,7 +1,14 @@
-import React from "react";
-import { Pressable } from "react-native";
-import { Text, YStack } from "tamagui";
-import { Message as MessageType } from "walk2gether-shared";
+import { X } from "@tamagui/lucide-icons";
+import React, { useState } from "react";
+import {
+  Dimensions,
+  FlatList,
+  Modal,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
+import { Button, Image, Stack, Text, XStack, YStack } from "tamagui";
+import { Attachment, Message as MessageType } from "walk2gether-shared";
 
 interface MessageProps {
   message: MessageType;
@@ -15,35 +22,217 @@ export const formatMessageTime = (timestamp: any) => {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
-export default function Message({ message, currentUserId, onLongPress }: MessageProps) {
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const MAX_IMAGE_WIDTH = SCREEN_WIDTH * 0.6; // 60% of screen width
+const THUMBNAIL_HEIGHT = 120; // Fixed height for thumbnails in the horizontal list
+const SINGLE_IMAGE_HEIGHT = 200; // Max height for single images
+
+// Helper function to calculate image dimensions for display
+const calculateImageDimensions = (attachment: Attachment, isThumbnail = false) => {
+  // If we don't have metadata, use some reasonable defaults
+  if (!attachment.metadata?.width || !attachment.metadata?.height) {
+    return isThumbnail 
+      ? { width: THUMBNAIL_HEIGHT, height: THUMBNAIL_HEIGHT } 
+      : { width: MAX_IMAGE_WIDTH, height: SINGLE_IMAGE_HEIGHT };
+  }
+  
+  const aspectRatio = attachment.metadata.width / attachment.metadata.height;
+  
+  if (isThumbnail) {
+    // For thumbnails in a horizontal list, use fixed height and calculate width
+    let height = THUMBNAIL_HEIGHT;
+    let width = height * aspectRatio;
+    
+    // Don't let thumbnails get too wide or too narrow
+    if (width > THUMBNAIL_HEIGHT * 1.5) width = THUMBNAIL_HEIGHT * 1.5;
+    if (width < THUMBNAIL_HEIGHT * 0.7) width = THUMBNAIL_HEIGHT * 0.7;
+    
+    return { width, height };
+  } else {
+    // For single images, respect max width and calculate height
+    let width = Math.min(attachment.metadata.width, MAX_IMAGE_WIDTH);
+    let height = width / aspectRatio;
+    
+    // Don't let the image get too tall
+    if (height > SINGLE_IMAGE_HEIGHT) {
+      height = SINGLE_IMAGE_HEIGHT;
+      width = height * aspectRatio;
+    }
+    
+    return { width, height };
+  }
+};
+
+export default function Message({
+  message,
+  currentUserId,
+  onLongPress,
+}: MessageProps) {
   const isMe = message.senderId === currentUserId;
+  const hasAttachments = message.attachments && message.attachments.length > 0;
+  const hasText = message.message && message.message.trim().length > 0;
+  const [selectedImage, setSelectedImage] = useState<Attachment | null>(null);
+
+  // Handle image tap to show full-screen preview
+  const handleImagePress = (attachment: Attachment) => {
+    setSelectedImage(attachment);
+  };
+
+  // Close the image preview modal
+  const closeImagePreview = () => {
+    setSelectedImage(null);
+  };
 
   return (
-    <Pressable
-      key={message.id}
-      onLongPress={() => onLongPress(message)}
-      delayLongPress={500}
-    >
-      <YStack
-        alignSelf={isMe ? "flex-end" : "flex-start"}
-        backgroundColor={isMe ? "#4EB1BA" : "#eee"}
-        paddingHorizontal="$4"
-        paddingVertical="$3"
-        borderRadius="$4"
-        maxWidth="80%"
-        marginBottom="$3"
+    <>
+      <Pressable
+        key={message.id}
+        onLongPress={() => onLongPress(message)}
+        delayLongPress={500}
       >
-        <Text color={isMe ? "white" : "black"}>{message.message}</Text>
-        <Text
-          fontSize="$2"
-          color={isMe ? "rgba(255,255,255,0.8)" : "#888"}
-          alignSelf="flex-end"
+        <YStack
+          alignSelf={isMe ? "flex-end" : "flex-start"}
+          backgroundColor={isMe ? "#4EB1BA" : "#eee"}
+          paddingHorizontal={hasAttachments ? "$2" : "$4"}
+          paddingVertical={hasAttachments ? "$2" : "$3"}
+          borderRadius="$4"
+          maxWidth="80%"
+          marginBottom="$3"
+          overflow="hidden"
         >
-          {message.createdAt
-            ? formatMessageTime(message.createdAt)
-            : "Sending..."}
-        </Text>
-      </YStack>
-    </Pressable>
+          {/* Display attachments if present */}
+          {hasAttachments && message.attachments && (
+            <YStack mb={hasText ? "$2" : "$0"} overflow="hidden">
+              {message.attachments.length === 1 ? (
+                // Single image
+                <YStack>
+                  {message.attachments.map((attachment, index) => {
+                    if (attachment.type === "image") {
+                      const { width, height } = calculateImageDimensions(attachment, false);
+                      return (
+                        <TouchableOpacity
+                          key={index}
+                          onPress={() => handleImagePress(attachment)}
+                        >
+                          <Image
+                            source={{ uri: attachment.uri }}
+                            width={width}
+                            height={height}
+                            borderRadius="$2"
+                            resizeMode="cover"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return null;
+                  })}
+                </YStack>
+              ) : (
+                // Multiple images in a horizontal FlatList
+                <FlatList
+                  data={message.attachments.filter(
+                    (att) => att.type === "image"
+                  )}
+                  keyExtractor={(_, index) => `image-${index}`}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={{ height: THUMBNAIL_HEIGHT }}
+                  contentContainerStyle={{ paddingBottom: 0 }}
+                  ItemSeparatorComponent={() => <XStack width={8} />}
+                  renderItem={({ item: attachment }) => (
+                    <TouchableOpacity onPress={() => handleImagePress(attachment)}>
+                      {(() => {
+                        const { width, height } = calculateImageDimensions(attachment, true);
+                        return (
+                          <Image
+                            source={{ uri: attachment.uri }}
+                            width={width}
+                            height={height}
+                            borderRadius="$2"
+                            resizeMode="cover"
+                          />
+                        );
+                      })()}
+                    </TouchableOpacity>
+                  )}
+                />
+              )}
+            </YStack>
+          )}
+
+          {/* Display sender name for messages from others */}
+          {!isMe && (
+            <Text
+              fontSize="$2"
+              fontWeight="bold"
+              color="#555"
+              mb="$1"
+              px={hasAttachments ? "$2" : "$0"}
+            >
+              {message.senderName || "Unknown"}
+            </Text>
+          )}
+
+          {/* Display message text if present */}
+          {hasText && (
+            <Text
+              color={isMe ? "white" : "black"}
+              px={hasAttachments ? "$2" : "$0"}
+            >
+              {message.message}
+            </Text>
+          )}
+
+          {/* Display message timestamp */}
+          <Text
+            fontSize="$2"
+            color={isMe ? "rgba(255,255,255,0.8)" : "#888"}
+            alignSelf="flex-end"
+            px={hasAttachments ? "$2" : "$0"}
+            mt="$1"
+          >
+            {message.createdAt
+              ? formatMessageTime(message.createdAt)
+              : "Sending..."}
+          </Text>
+        </YStack>
+      </Pressable>
+
+      {/* Full-screen image preview modal */}
+      <Modal
+        visible={!!selectedImage}
+        transparent
+        animationType="fade"
+        onRequestClose={closeImagePreview}
+      >
+        <Stack
+          flex={1}
+          backgroundColor="rgba(0,0,0,0.9)"
+          justifyContent="center"
+          alignItems="center"
+        >
+          {selectedImage && (
+            <>
+              <Image
+                source={{ uri: selectedImage.uri }}
+                width="100%"
+                height="80%"
+                resizeMode="contain"
+              />
+              <Button
+                position="absolute"
+                top={40}
+                right={20}
+                size="$4"
+                circular
+                backgroundColor="rgba(0,0,0,0.5)"
+                onPress={closeImagePreview}
+                icon={<X color="white" />}
+              />
+            </>
+          )}
+        </Stack>
+      </Modal>
+    </>
   );
 }

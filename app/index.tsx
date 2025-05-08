@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 export default function IndexScreen() {
   const { user, loading, claims } = useAuth();
 
-  // Show loading indicator while checking auth state
+  // Show loading indicator while loading auth state
   if (loading)
     return (
       <YStack
@@ -25,5 +25,5 @@ export default function IndexScreen() {
   if (!claims?.permissionsSet)
     return <Redirect href="/onboarding/notification-permissions" />;
 
-  return <Redirect href="/walks/home" />;
+  return <Redirect href="/walks" />;
 }

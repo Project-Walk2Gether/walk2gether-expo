@@ -11,13 +11,13 @@ import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Card, Input, ScrollView, Text, XStack, YStack } from "tamagui";
 import { userDataSchema } from "walk2gether-shared";
-import { ActionButton } from "../../components/ActionButton";
-import AuthScenicLayout from "../../components/Auth/AuthScenicLayout";
-import AutoDetectLocation from "../../components/AutoDetectLocation";
-import LocationAutocomplete from "../../components/LocationAutocomplete";
-import { useAuth } from "../../context/AuthContext";
-import { useUserData } from "../../context/UserDataContext";
-import { COLORS } from "../../styles/colors";
+import { ActionButton } from "../../../components/ActionButton";
+import AuthScenicLayout from "../../../components/Auth/AuthScenicLayout";
+import AutoDetectLocation from "../../../components/AutoDetectLocation";
+import LocationAutocomplete from "../../../components/LocationAutocomplete";
+import { useAuth } from "../../../context/AuthContext";
+import { useUserData } from "../../../context/UserDataContext";
+import { COLORS } from "../../../styles/colors";
 
 export default function CompleteYourProfile() {
   const { setUserData } = useUserData();

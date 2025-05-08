@@ -7,10 +7,11 @@ import {
 } from "@react-native-firebase/firestore";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useRef } from "react";
-import ChatForm from "../../../../../components/Chat/ChatForm";
+import MessageForm from "../../../../../components/Chat/MessageForm";
 import MessageList from "../../../../../components/Chat/MessageList";
 import { firestore_instance } from "../../../../../config/firebase";
 import { useAuth } from "../../../../../context/AuthContext";
+import { useUserData } from "../../../../../context/UserDataContext";
 import { useDoc, useQuery } from "../../../../../utils/firestore";
 // Removed StyleSheet import; using Tamagui for styles
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
@@ -31,6 +32,7 @@ export default function WalkScreen() {
   const params = useLocalSearchParams();
   const id = params.id as string;
   const { user } = useAuth();
+  const { userData } = useUserData();
   const { doc: walk } = useDoc<Walk>(`walks/${id}`);
   // Get walk messages using the useQuery hook
   const messagesRef = collection(firestore_instance, `walks/${id}/messages`);
@@ -52,9 +54,10 @@ export default function WalkScreen() {
   // Check if the current user is the walk owner
   const isWalkOwner = walk?.createdByUid === user?.uid;
 
-  // Handle sending a message
-  const handleSendMessage = (message: string) => {
-    if (!message.trim() || !user || !id) return;
+  // Handle sending a message with optional attachments
+  const handleSendMessage = ({ message, attachments }: { message?: string, attachments?: any[] }) => {
+    // Require either text or attachments
+    if ((!message || !message.trim()) && (!attachments || attachments.length === 0) || !user || !id || !userData) return;
 
     try {
       const messagesRef = collection(
@@ -63,9 +66,11 @@ export default function WalkScreen() {
       );
       addDoc(messagesRef, {
         senderId: user.uid,
-        message,
+        senderName: userData.name || user.displayName || 'Unknown User',
+        message: message || '',
         createdAt: serverTimestamp(),
         read: false,
+        attachments: attachments || [],
       });
     } catch (error) {
       console.error("Error sending message:", error);
@@ -126,10 +131,6 @@ export default function WalkScreen() {
           ref={chatBottomSheetRef}
           index={0}
           snapPoints={chatSnapPoints}
-          // enablePanDownToClose={false}
-          // enableOverDrag={false}
-          // enableContentPanningGesture={true}
-          // enableHandlePanningGesture={true}
           handleStyle={{
             backgroundColor: COLORS.chatBackground,
             borderTopLeftRadius: 16,
@@ -188,12 +189,14 @@ export default function WalkScreen() {
           }}
         >
           <YStack borderTopWidth={1} borderTopColor="$gray4" pt="$2" gap="$2">
-            <ChatForm
+            <MessageForm
               onSendMessage={handleSendMessage}
               keyboardVerticalOffset={90}
               containerStyle={{
                 backgroundColor: COLORS.chatBackground,
               }}
+              chatId={id}
+              senderId={user?.uid || ""}
             />
           </YStack>
         </KeyboardAvoidingView>

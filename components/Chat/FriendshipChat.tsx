@@ -7,13 +7,14 @@ import React from "react";
 import { Text, View, XStack, YStack } from "tamagui";
 import { Friendship, Message } from "walk2gether-shared";
 import { useAuth } from "../../context/AuthContext";
+import { useUserData } from "../../context/UserDataContext";
 import { useQuery } from "../../utils/firestore";
 import {
   deleteMessage as deleteMessageUtil,
   sendMessage as sendMessageUtil,
 } from "../../utils/messages";
 import { UserAvatar } from "../UserAvatar";
-import ChatForm from "./ChatForm";
+import MessageForm from "./MessageForm";
 import MessageList from "./MessageList";
 
 interface FriendshipChatProps {
@@ -22,6 +23,7 @@ interface FriendshipChatProps {
 
 export function FriendshipChat({ friendship }: FriendshipChatProps) {
   const { user } = useAuth();
+  const { userData } = useUserData();
 
   // Find the friend's ID from the friendship uids
   const friendId = friendship.uids.find((uid) => uid !== user?.uid) || "";
@@ -52,11 +54,14 @@ export function FriendshipChat({ friendship }: FriendshipChatProps) {
     }));
   }, [messagesData]);
 
-  // Function to send a message
-  const sendMessage = async (messageText: string) => {
-    if (!user || !friendId || !friendship.id) return;
-
-    await sendMessageUtil(friendship.id, user.uid, friendId, messageText);
+  // Function to send a message with optional attachments
+  const sendMessage = async (messageData: { message?: string; attachments?: any[] }) => {
+    if (!user || !friendId || !friendship.id || !userData) return;
+    
+    // Get the sender's name from userData or fallback to display name or generic name
+    const senderName = userData.name || user.displayName || 'Unknown User';
+    
+    await sendMessageUtil(friendship.id, user.uid, senderName, friendId, messageData);
   };
 
   // Function to delete a message
@@ -89,9 +94,15 @@ export function FriendshipChat({ friendship }: FriendshipChatProps) {
           loading={messagesStatus === "loading"}
           onDeleteMessage={deleteMessage}
           headerTitle={renderHeaderTitle()}
+          currentUserId={user?.uid || ""}
         />
       </View>
-      <ChatForm keyboardVerticalOffset={100} onSendMessage={sendMessage} />
+      <MessageForm 
+        keyboardVerticalOffset={100} 
+        onSendMessage={sendMessage} 
+        chatId={friendship.id || ""} 
+        senderId={user?.uid || ""}
+      />
     </YStack>
   );
 }
