@@ -1,8 +1,7 @@
 import { useUserData } from "@/context/UserDataContext";
-import { Footprints, Image, Users } from "@tamagui/lucide-icons";
+import { Footprints, Image, User, Users } from "@tamagui/lucide-icons";
 import { Redirect, Tabs } from "expo-router";
 import React from "react";
-import { ProfileButton } from "../../../components/ProfileButton";
 import { COLORS } from "../../../styles/colors";
 
 export default function TabLayout() {
@@ -43,11 +42,7 @@ export default function TabLayout() {
           marginHorizontal: 8,
           borderRadius: 12,
         },
-        headerRight: () => (
-          <React.Fragment>
-            <ProfileButton />
-          </React.Fragment>
-        ),
+        // Removed ProfileButton since we now have a dedicated profile tab
       }}
     >
       <Tabs.Screen
@@ -65,6 +60,14 @@ export default function TabLayout() {
           title: "Stories",
           headerShown: true,
           tabBarIcon: ({ color, size }) => <Image size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="me"
+        options={{
+          title: "Me",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
       <Tabs.Screen

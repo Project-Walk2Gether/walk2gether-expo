@@ -1,12 +1,12 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import Clipboard from "@react-native-clipboard/clipboard";
 import storage from "@react-native-firebase/storage";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView } from "react-native";
-import { showMessage } from "react-native-flash-message";
-import { Button, Text, YStack } from "tamagui";
-import HeaderCloseButton from "../../../components/HeaderCloseButton";
+import { Button, Text, YStack, XStack, View } from "tamagui";
+import { Location, UserData } from "walk2gether-shared";
+import { BrandGradient } from "../../../components/UI";
 import { PlaceData } from "../../../components/UI/PlacesAutocomplete";
 import { UserDataForm } from "../../../components/UserDataForm";
 import { useAuth } from "../../../context/AuthContext";
@@ -15,15 +15,18 @@ import { useUserData } from "../../../context/UserDataContext";
 import { COLORS } from "../../../styles/colors";
 import { appVersion } from "../../../utils/version";
 
+// UIDInfo component for showing user ID and app version
 const UIDInfo: React.FC<{ uid: string; version: string }> = ({
   uid,
   version,
 }) => {
   const { showMessage } = useFlashMessage();
+  
   const handleCopy = () => {
     Clipboard.setString(uid);
     showMessage("User ID copied to clipboard!", "success");
   };
+  
   return (
     <YStack mt={10} ai="center" mb={20}>
       <Text
@@ -63,7 +66,7 @@ const UIDInfo: React.FC<{ uid: string; version: string }> = ({
   );
 };
 
-export default function ProfileScreen() {
+export default function MeScreen() {
   const { user: authUser, signOut } = useAuth();
   const { userData, loading: userDataLoading, updateUserData } = useUserData();
   const router = useRouter();
@@ -72,7 +75,6 @@ export default function ProfileScreen() {
   const [aboutMe, setAboutMe] = useState("");
   const [profilePicUrl, setProfilePicUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Update local state when userData changes
@@ -103,7 +105,7 @@ export default function ProfileScreen() {
     }
   }, [userData]);
 
-  // Removed pickImage: now handled by ProfilePicturePicker
+  const { showMessage } = useFlashMessage();
 
   const uploadImage = async (uri: string) => {
     if (!authUser) return;
@@ -133,18 +135,10 @@ export default function ProfileScreen() {
       // Update local state
       setProfilePicUrl(downloadURL);
 
-      showMessage({
-        message: "Success",
-        description: "Profile picture updated successfully",
-        type: "success",
-      });
+      showMessage("Profile picture updated successfully", "success");
     } catch (error) {
       console.error("Error uploading image:", error);
-      showMessage({
-        message: "Error",
-        description: "Failed to upload image",
-        type: "danger",
-      });
+      showMessage("Failed to upload image", "error");
     } finally {
       setIsSaving(false);
     }
@@ -154,33 +148,30 @@ export default function ProfileScreen() {
     try {
       setIsSaving(true);
 
-      // Update user data in Firestore
-      await updateUserData({
+      // Make sure location has the correct structure that matches Location type
+      const formattedLocation: Location | null = location ? {
+        name: location.name,
+        placeId: location.placeId || "", // Ensure placeId is never undefined
+        latitude: location.latitude,
+        longitude: location.longitude
+      } : null;
+      
+      // Create a partial UserData object to update
+      const updateData: Partial<UserData> = {
         name,
-        location,
-        aboutMe,
-      });
+        location: formattedLocation,
+        aboutMe
+      };
 
-      showMessage({
-        message: "Success",
-        description: "Profile updated successfully",
-        type: "success",
-      });
+      // Update user data in Firestore
+      await updateUserData(updateData);
+
+      showMessage("Profile updated successfully", "success");
     } catch (error) {
       console.error("Error saving profile:", error);
-      showMessage({
-        message: "Error",
-        description: "Failed to update profile",
-        type: "danger",
-      });
+      showMessage("Failed to update profile", "error");
     } finally {
       setIsSaving(false);
-
-      if (router.canGoBack()) {
-        router.back();
-      } else {
-        router.replace("/");
-      }
     }
   };
 
@@ -209,61 +200,69 @@ export default function ProfileScreen() {
   }
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: "My Profile",
-          headerLeft: () => (
-            <Button
-              backgroundColor="#5A4430"
-              size="$3"
-              circular
-              color="#fff"
-              bg="$colorTransparent"
-              borderRadius={10}
-              width="100%"
-              fontWeight="600"
-              fontSize={16}
-              onPress={() => router.push("/qr-code")}
-              icon={
-                <MaterialIcons name="qr-code-2" color={"black"} size={30} />
-              }
-            />
-          ),
-          headerRight: () => <HeaderCloseButton />,
-        }}
-      ></Stack.Screen>
-      <ScrollView ref={scrollViewRef} contentContainerStyle={{ padding: 20 }}>
-        {userData && (
-          <UserDataForm
-            userData={userData}
-            onSave={({ name, aboutMe, location }) => {
-              setName(name);
-              setAboutMe(aboutMe);
-              setLocation(location);
-              handleSaveProfile();
-            }}
-            isSaving={isSaving}
-          />
-        )}
-        <Button
-          variant="outlined"
-          borderColor="#ff3b30"
-          color="#ff3b30"
-          borderWidth={1}
-          borderRadius={8}
-          onPress={handleSignOut}
-          disabled={isSaving}
-          width="100%"
-        >
-          <Text fontSize={16} fontWeight="600" color="#ff3b30">
-            Sign Out
+    <BrandGradient style={{ flex: 1 }}>
+      <YStack f={1} padding="$4">
+        <XStack justifyContent="space-between" marginBottom="$4">
+          <Text fontSize={28} fontWeight="bold" color="$gray12">
+            My Profile
           </Text>
-        </Button>
-        {authUser?.uid && (
-          <UIDInfo uid={authUser.uid} version={`${appVersion}.patch`} />
-        )}
-      </ScrollView>
-    </>
+          <Button
+            backgroundColor={COLORS.primary}
+            size="$3"
+            circular
+            color="#fff"
+            borderRadius={10}
+            onPress={() => router.push("/qr-code")}
+            icon={<MaterialIcons name="qr-code-2" color={"white"} size={24} />}
+          />
+        </XStack>
+        
+        <View
+          backgroundColor="white"
+          borderRadius={16}
+          shadowColor="black"
+          shadowOpacity={0.1}
+          shadowRadius={10}
+          flex={1}
+        >
+          <ScrollView ref={scrollViewRef} contentContainerStyle={{ padding: 20 }}>
+            {userData && (
+              <UserDataForm
+                userData={{
+                  name: userData.name,
+                  aboutMe: userData.aboutMe,
+                  profilePicUrl: userData.profilePicUrl,
+                  location: userData.location as PlaceData | null
+                }}
+                onSave={({ name: newName, aboutMe: newAboutMe, location: newLocation }) => {
+                  setName(newName);
+                  setAboutMe(newAboutMe);
+                  setLocation(newLocation);
+                  handleSaveProfile();
+                }}
+                isSaving={isSaving}
+              />
+            )}
+            <Button
+              variant="outlined"
+              borderColor="#ff3b30"
+              color="#ff3b30"
+              borderWidth={1}
+              borderRadius={8}
+              onPress={handleSignOut}
+              disabled={isSaving}
+              width="100%"
+            >
+              <Text fontSize={16} fontWeight="600" color="#ff3b30">
+                Sign Out
+              </Text>
+            </Button>
+            {authUser?.uid && (
+              <UIDInfo uid={authUser.uid} version={`${appVersion}.patch`} />
+            )}
+          </ScrollView>
+        </View>
+      </YStack>
+    </BrandGradient>
   );
 }

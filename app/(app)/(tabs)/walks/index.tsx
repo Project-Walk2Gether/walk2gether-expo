@@ -1,11 +1,10 @@
 import { useUserData } from "@/context/UserDataContext";
-import { COLORS } from "@/styles/colors";
-import { Leaf, Plus, User } from "@tamagui/lucide-icons";
+import { Leaf, Plus } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Avatar, Button, ScrollView, Text, View } from "tamagui";
+import { ScrollView, Text, View } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
 import { EmptyMessage } from "../../../../components/EmptyMessage";
 import FAB from "../../../../components/FAB";
@@ -25,41 +24,7 @@ export default function ActiveTabScreen() {
   return (
     <BrandGradient variant="modern" style={{ flex: 1 }}>
       <View f={1} pt={insets.top}>
-        <View px="$4">
-          <ScreenTitle
-            rightAction={
-              userData && userData.profilePicUrl ? (
-                <Avatar
-                  size="$3"
-                  circular
-                  onPress={() => router.push("/profile")}
-                  pressStyle={{ opacity: 0.8, scale: 0.97 }}
-                >
-                  <Avatar.Image src={userData.profilePicUrl} />
-                  <Avatar.Fallback backgroundColor={COLORS.action}>
-                    <Text color="white" fontWeight="bold">
-                      {userData.name
-                        ? userData.name.charAt(0).toUpperCase()
-                        : "U"}
-                    </Text>
-                  </Avatar.Fallback>
-                </Avatar>
-              ) : (
-                <Button
-                  size="$3"
-                  circular
-                  icon={<User size="$1.5" color={COLORS.action} />}
-                  borderColor={COLORS.action}
-                  borderWidth={1}
-                  onPress={() => router.push("/profile")}
-                  pressStyle={{ opacity: 0.8, scale: 0.97 }}
-                />
-              )
-            }
-          >
-            Walks
-          </ScreenTitle>
-        </View>
+        <ScreenTitle>Walks</ScreenTitle>
         <ScrollView
           flex={1}
           width="100%"

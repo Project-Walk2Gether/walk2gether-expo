@@ -22,6 +22,7 @@ export const ScreenTitle: React.FC<ScreenTitleProps> = ({
       justifyContent="space-between"
       alignItems="center"
       marginBottom="$5"
+      px="$4"
     >
       {leftAction && <View marginRight="$2">{leftAction}</View>}
       <H1 fontSize={32} fontWeight="bold" flex={1} color={color}>
