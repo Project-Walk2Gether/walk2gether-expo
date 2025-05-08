@@ -1,5 +1,5 @@
+import { db } from "@/config/firebase";
 import { collection, getDocs } from "@react-native-firebase/firestore";
-import { db } from "../../../../config/firebase";
 
 /**
  * Finds the number of nearby walkers within a given radius.

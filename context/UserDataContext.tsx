@@ -1,8 +1,8 @@
+import { db } from "@/config/firebase";
+import { useDoc } from "@/utils/firestore";
 import { doc, setDoc } from "@react-native-firebase/firestore";
 import React, { createContext, ReactNode, useContext } from "react";
 import { UserData } from "walk2gether-shared";
-import { db } from "../config/firebase";
-import { useDoc } from "../utils/firestore";
 import { useAuth } from "./AuthContext";
 
 interface UserDataContextType {

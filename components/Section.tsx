@@ -1,6 +1,6 @@
+import { COLORS } from "@/styles/colors";
 import React, { ReactNode } from "react";
 import { H3, Text, View, XStack, YStack } from "tamagui";
-import { COLORS } from "../styles/colors";
 
 interface SectionProps {
   title: string;
@@ -17,7 +17,7 @@ const Section: React.FC<SectionProps> = ({
 }) => {
   return (
     <YStack gap="$3" mb="$6">
-      <XStack 
+      <XStack
         justifyContent="space-between"
         alignItems="center"
         paddingHorizontal="$1"

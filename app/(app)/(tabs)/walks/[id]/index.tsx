@@ -1,10 +1,10 @@
+import { useAuth } from "@/context/AuthContext";
+import { useDoc } from "@/utils/firestore";
 import { Redirect, Stack, useLocalSearchParams } from "expo-router";
-import React, { useEffect } from "react";
+import React from "react";
 import { ActivityIndicator } from "react-native";
 import { View } from "tamagui";
 import { Participant, Walk } from "walk2gether-shared";
-import { useAuth } from "../../../../../context/AuthContext";
-import { useDoc } from "../../../../../utils/firestore";
 
 // This component serves as a router for walk screens
 // It determines where the user should go based on their permissions
@@ -40,9 +40,9 @@ export default function WalkRouter() {
     (participant && participant.approvedAt)
   ) {
     // Walk owner or approved participant - show the walk details
-    return <Redirect href={`/walks/${id}/show`} />
+    return <Redirect href={`/walks/${id}/show`} />;
   } else {
     // Participant with pending request or non-participant - show request page
-    return <Redirect href={`/walks/${id}/request`} />
+    return <Redirect href={`/walks/${id}/request`} />;
   }
 }

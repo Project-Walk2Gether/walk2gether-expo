@@ -1,8 +1,8 @@
 import { Avatar, Text } from "tamagui";
 import { UserData } from "walk2gether-shared";
-import { COLORS } from "../styles/colors";
-import { useDoc } from "../utils/firestore";
-import { getInitials } from "../utils/userUtils";
+import { COLORS } from "@/styles/colors";
+import { useDoc } from "@/utils/firestore";
+import { getInitials } from "@/utils/userUtils";
 
 interface UserAvatarProps {
   uid: string;

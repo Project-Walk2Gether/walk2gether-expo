@@ -1,3 +1,10 @@
+import { useAuth } from "@/context/AuthContext";
+import { useLocation } from "@/context/LocationContext";
+import { COLORS } from "@/styles/colors";
+import { useQuery } from "@/utils/firestore";
+import { getDistanceToLocation } from "@/utils/locationUtils";
+import { getWalkTypeLabel } from "@/utils/walkType";
+import { getWalkStatus } from "@/utils/walkUtils";
 import { Calendar, Hand, Pin, Timer } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import { useRouter } from "expo-router";
@@ -9,13 +16,6 @@ import {
   walkIsNeighborhoodWalk,
   WithId,
 } from "walk2gether-shared";
-import { useAuth } from "../../context/AuthContext";
-import { useLocation } from "../../context/LocationContext";
-import { COLORS } from "../../styles/colors";
-import { useQuery } from "../../utils/firestore";
-import { getDistanceToLocation } from "../../utils/locationUtils";
-import { getWalkTypeLabel } from "../../utils/walkType";
-import { getWalkStatus } from "../../utils/walkUtils";
 import { UserAvatar } from "../UserAvatar";
 import WalkAttachmentsCarousel from "../WalkAttachmentsCarousel";
 

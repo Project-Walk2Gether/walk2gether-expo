@@ -1,11 +1,11 @@
+import { firestore_instance } from "@/config/firebase";
 import { doc, setDoc } from "@react-native-firebase/firestore";
 import * as Linking from "expo-linking";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { Alert, Platform } from "react-native";
-import { firestore_instance } from "../config/firebase";
-import { 
-  startBackgroundLocationTracking, 
+import {
+  startBackgroundLocationTracking,
   stopBackgroundLocationTracking,
 } from "../utils/backgroundLocationTask";
 
@@ -31,11 +31,16 @@ export function useLocationTracking(
   updateExtraFields?: () => Record<string, any>
 ): LocationTrackingResult {
   // Location state
-  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
-  const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
-  const [backgroundLocationPermission, setBackgroundLocationPermission] = useState<boolean | null>(null);
+  const [userLocation, setUserLocation] =
+    useState<Location.LocationObject | null>(null);
+  const [locationPermission, setLocationPermission] = useState<boolean | null>(
+    null
+  );
+  const [backgroundLocationPermission, setBackgroundLocationPermission] =
+    useState<boolean | null>(null);
   const [locationTracking, setLocationTracking] = useState(false);
-  const [locationSubscription, setLocationSubscription] = useState<Location.LocationSubscription | null>(null);
+  const [locationSubscription, setLocationSubscription] =
+    useState<Location.LocationSubscription | null>(null);
 
   // Request location permissions and initialize tracking
   useEffect(() => {
@@ -54,7 +59,8 @@ export function useLocationTracking(
   // Request permissions and start tracking
   const requestPermissionsAndStartTracking = async () => {
     // Request foreground permission first
-    const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+    const { status: foregroundStatus } =
+      await Location.requestForegroundPermissionsAsync();
     setLocationPermission(foregroundStatus === "granted");
 
     if (foregroundStatus !== "granted") {
@@ -66,7 +72,8 @@ export function useLocationTracking(
     }
 
     // Request background permission
-    const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+    const { status: backgroundStatus } =
+      await Location.requestBackgroundPermissionsAsync();
     setBackgroundLocationPermission(backgroundStatus === "granted");
 
     if (backgroundStatus !== "granted") {
@@ -126,7 +133,8 @@ export function useLocationTracking(
         extraFields: updateExtraFields ? updateExtraFields() : {},
         foregroundService: {
           notificationTitle: "Walk2gether is tracking your location",
-          notificationBody: "This allows others to see your location during the walk",
+          notificationBody:
+            "This allows others to see your location during the walk",
           notificationColor: "#FF5E0E", // Primary color
         },
       });
@@ -177,7 +185,7 @@ export function useLocationTracking(
       );
 
       const extraFields = updateExtraFields ? updateExtraFields() : {};
-      
+
       await setDoc(
         participantDocRef,
         {

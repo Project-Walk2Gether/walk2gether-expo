@@ -1,6 +1,6 @@
-import HeaderCloseButton from "components/HeaderCloseButton"";
+import HeaderBackButton from "@/components/HeaderBackButton";
+import HeaderCloseButton from "@/components/HeaderCloseButton";
 import { Stack } from "expo-router";
-import HeaderBackButton from "../../../components/HeaderBackButton";
 
 export default function ModalsLayout() {
   return (

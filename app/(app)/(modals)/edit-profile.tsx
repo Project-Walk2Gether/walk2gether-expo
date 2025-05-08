@@ -1,4 +1,9 @@
-import HeaderCloseButton from "components/HeaderCloseButton"";
+import HeaderCloseButton from "@/components/HeaderCloseButton";
+import { PlaceData } from "@/components/UI/PlacesAutocomplete";
+import { UserDataForm } from "@/components/UserDataForm";
+import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useUserData } from "@/context/UserDataContext";
+import { COLORS } from "@/styles/colors";
 import { Stack as ExpoStack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -10,11 +15,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { YStack } from "tamagui";
 import { Location, UserData } from "walk2gether-shared";
-import { PlaceData } from "../../../components/UI/PlacesAutocomplete";
-import { UserDataForm } from "../../../components/UserDataForm";
-import { useFlashMessage } from "../../../context/FlashMessageContext";
-import { useUserData } from "../../../context/UserDataContext";
-import { COLORS } from "../../../styles/colors";
 
 export default function EditProfileScreen() {
   const router = useRouter();

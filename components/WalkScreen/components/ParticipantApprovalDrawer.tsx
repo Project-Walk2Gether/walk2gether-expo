@@ -1,8 +1,8 @@
+import { COLORS } from "@/styles/colors";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import React, { forwardRef, useCallback, useImperativeHandle } from "react";
 import { Avatar, Button, Text, XStack, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
-import { COLORS } from "../../../styles/colors";
 
 export interface ParticipantApprovalDrawerRef {
   openDrawer: (participant: ParticipantWithRoute) => void;

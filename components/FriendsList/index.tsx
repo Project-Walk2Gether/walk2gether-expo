@@ -1,12 +1,12 @@
+import { firestore_instance } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { COLORS } from "@/styles/colors";
+import { useQuery } from "@/utils/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, query, where } from "@react-native-firebase/firestore";
 import React, { useMemo } from "react";
 import { Card, Input, Spinner, Text, XStack, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
-import { firestore_instance } from "../../config/firebase";
-import { useAuth } from "../../context/AuthContext";
-import { COLORS } from "../../styles/colors";
-import { useQuery } from "../../utils/firestore";
 
 // Type for simplified friend data derived from friendship document
 type Friend = {

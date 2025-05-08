@@ -1,3 +1,4 @@
+import { WalkFormData } from "@/context/WalkFormContext";
 import {
   FirebaseFirestoreTypes,
   Timestamp,
@@ -5,7 +6,6 @@ import {
 import { Router } from "expo-router";
 import uuid from "react-native-uuid";
 import { Friendship, UserData, Walk } from "walk2gether-shared";
-import { WalkFormData } from "../context/WalkFormContext";
 
 /**
  * Gets a list of unique user IDs from the user's friendships to share the walk with

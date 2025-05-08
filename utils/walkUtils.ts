@@ -1,5 +1,5 @@
+import { auth_instance } from "@/config/firebase";
 import { Walk } from "walk2gether-shared";
-import { auth_instance } from "../config/firebase";
 
 export const isOwner = (walk: Walk) => {
   return walk.createdByUid === auth_instance.currentUser?.uid;

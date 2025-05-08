@@ -1,3 +1,7 @@
+import { firestore_instance } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { COLORS } from "@/styles/colors";
+import { useQuery } from "@/utils/firestore";
 import { collection, orderBy, query } from "@react-native-firebase/firestore";
 import { router } from "expo-router";
 import React from "react";
@@ -5,10 +9,6 @@ import { FlatList, Image, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Card, Text, View, XStack, YStack } from "tamagui";
 import { Notification } from "walk2gether-shared";
-import { firestore_instance } from "../../config/firebase";
-import { useAuth } from "../../context/AuthContext";
-import { COLORS } from "../../styles/colors";
-import { useQuery } from "../../utils/firestore";
 
 // Define NotificationType enum to match what's in shared lib
 enum NotificationType {
@@ -31,7 +31,7 @@ export default function NotificationsScreen() {
       orderBy("createdAt", "desc")
     )
   );
-  
+
   // Cast the data to the Notification type
   const notifications = notificationsData as unknown as Notification[];
 
@@ -54,7 +54,8 @@ export default function NotificationsScreen() {
     // Navigate based on notification type
     if (
       notification.type === NotificationType.NEW_WALK &&
-      notification.data && 'walkId' in notification.data
+      notification.data &&
+      "walkId" in notification.data
     ) {
       router.push(`/(app)/(modals)/walk/${notification.data.walkId}`);
     }
@@ -101,11 +102,11 @@ export default function NotificationsScreen() {
                 </Text>
               </YStack>
               {!item.read && (
-                <View 
-                  width={10} 
-                  height={10} 
-                  borderRadius={5} 
-                  backgroundColor={COLORS.primary} 
+                <View
+                  width={10}
+                  height={10}
+                  borderRadius={5}
+                  backgroundColor={COLORS.primary}
                   marginLeft={8}
                 />
               )}
@@ -121,11 +122,11 @@ export default function NotificationsScreen() {
 
   if (notifications.length === 0) {
     return (
-      <YStack 
-        flex={1} 
-        backgroundColor="#f8f8f8" 
-        justifyContent="center" 
-        alignItems="center" 
+      <YStack
+        flex={1}
+        backgroundColor="#f8f8f8"
+        justifyContent="center"
+        alignItems="center"
         padding={24}
       >
         <Text fontSize="$5" color="$gray9">
@@ -140,19 +141,13 @@ export default function NotificationsScreen() {
   }
 
   return (
-    <View 
-      flex={1} 
-      backgroundColor="#f8f8f8" 
-      paddingBottom={insets.bottom}
-    >
+    <View flex={1} backgroundColor="#f8f8f8" paddingBottom={insets.bottom}>
       <FlatList
         data={notifications}
         renderItem={renderNotification}
-        keyExtractor={(item) => item.id || ''}
+        keyExtractor={(item) => item.id || ""}
         contentContainerStyle={{ padding: 16 }}
       />
     </View>
   );
 }
-
-

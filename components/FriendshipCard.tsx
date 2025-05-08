@@ -1,16 +1,19 @@
+import { useAuth } from "@/context/AuthContext";
+import { COLORS } from "@/styles/colors";
 import React from "react";
 import { Card, Text, XStack, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
-import { useAuth } from "../context/AuthContext";
-import { COLORS } from "../styles/colors";
 import { UserAvatar } from "./UserAvatar";
 
 interface Props {
   friendship: Friendship & {
-    userDataByUid?: Record<string, {
-      name: string;
-      profilePicUrl?: string;
-    }>;
+    userDataByUid?: Record<
+      string,
+      {
+        name: string;
+        profilePicUrl?: string;
+      }
+    >;
   };
   onPress?: () => void;
 }
@@ -91,9 +94,9 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
     >
       <XStack alignItems="center" gap="$3">
         {/* Friend's Avatar */}
-        <UserAvatar 
-          uid={friendId || ''} 
-          size={48} 
+        <UserAvatar
+          uid={friendId || ""}
+          size={48}
           backgroundColor={COLORS.primary}
         />
 

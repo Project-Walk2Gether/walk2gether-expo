@@ -1,11 +1,15 @@
+import { COLORS } from "@/styles/colors";
 import React from "react";
 import { Text, XStack, YStack } from "tamagui";
-import { COLORS } from "../styles/colors";
 
 interface EmptyMessageProps {
   message: string;
   subtitle?: string;
-  icon?: React.ComponentType<{ size?: number; color?: string; opacity?: number }>;
+  icon?: React.ComponentType<{
+    size?: number;
+    color?: string;
+    opacity?: number;
+  }>;
   iconSize?: number;
   iconColor?: string;
 }
@@ -40,7 +44,12 @@ export const EmptyMessage = ({
       {message}
     </Text>
     {subtitle && (
-      <Text fontSize={14} color={COLORS.textOnLight} opacity={0.8} textAlign="center">
+      <Text
+        fontSize={14}
+        color={COLORS.textOnLight}
+        opacity={0.8}
+        textAlign="center"
+      >
         {subtitle}
       </Text>
     )}

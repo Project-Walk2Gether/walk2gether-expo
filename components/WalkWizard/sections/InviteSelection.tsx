@@ -1,3 +1,9 @@
+import { ContentCard } from "@/components/ContentCard";
+import { firestore_instance } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { useWalkForm } from "@/context/WalkFormContext";
+import { COLORS } from "@/styles/colors";
+import { useQuery } from "@/utils/firestore";
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import {
@@ -11,12 +17,6 @@ import React, { useEffect, useRef, useState } from "react";
 import MapView from "react-native-maps";
 import { Button, Card, Input, Text, XStack, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
-import { ContentCard } from "../../../components/ContentCard";
-import { firestore_instance } from "../../../config/firebase";
-import { useAuth } from "../../../context/AuthContext";
-import { useWalkForm } from "../../../context/WalkFormContext";
-import { COLORS } from "../../../styles/colors";
-import { useQuery } from "../../../utils/firestore";
 import FriendsList from "../../FriendsList";
 import WizardWrapper from "./WizardWrapper";
 

@@ -1,6 +1,6 @@
+import { COLORS } from "@/styles/colors";
+import { useDoc } from "@/utils/firestore";
 import { UserData } from "walk2gether-shared";
-import { useDoc } from "../../utils/firestore";
-import { COLORS } from "../../styles/colors";
 import { StatelessAvatar } from "./StatelessAvatar";
 
 interface StatefulAvatarProps {

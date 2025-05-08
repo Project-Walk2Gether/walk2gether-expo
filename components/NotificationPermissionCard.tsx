@@ -1,6 +1,6 @@
+import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
 import React from "react";
-import { Button, Card, Text, View, XStack, YStack } from "tamagui";
-import { useNotificationPermissions } from "../hooks/useNotificationPermissions";
+import { Button, Card, Text, View, YStack } from "tamagui";
 
 export default function NotificationPermissionCard() {
   const { requestPermissions } = useNotificationPermissions();
@@ -18,14 +18,11 @@ export default function NotificationPermissionCard() {
         elevation={5}
       >
         <YStack space="$4">
-          <Text
-            fontSize="$4"
-            lineHeight="$5"
-            color="$gray10"
-          >
-            Want to get notified of new walks in your area? Enable notifications.
+          <Text fontSize="$4" lineHeight="$5" color="$gray10">
+            Want to get notified of new walks in your area? Enable
+            notifications.
           </Text>
-          
+
           <Button
             backgroundColor="#4EB1BA"
             paddingVertical="$3"
@@ -38,7 +35,7 @@ export default function NotificationPermissionCard() {
               Enable Notifications
             </Text>
           </Button>
-          
+
           <Text fontSize="$3" color="$gray8" marginTop="$2">
             You can turn this off at any time.
           </Text>
@@ -47,4 +44,3 @@ export default function NotificationPermissionCard() {
     </View>
   );
 }
-

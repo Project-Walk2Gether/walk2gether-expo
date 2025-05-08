@@ -1,10 +1,10 @@
-import { FriendsProvider } from "context/FriendsContext"";
+import { useAuth } from "@/context/AuthContext";
+import { FriendsProvider } from "@/context/FriendsContext";
+import { WalksProvider } from "@/context/WalksContext";
 import { Redirect, Stack } from "expo-router";
 import React from "react";
 import { ActivityIndicator } from "react-native";
 import { YStack } from "tamagui";
-import { useAuth } from "../../context/AuthContext";
-import { WalksProvider } from "../../context/WalksContext";
 
 export default function AppLayout() {
   const { user, loading } = useAuth();

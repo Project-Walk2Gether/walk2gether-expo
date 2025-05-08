@@ -1,17 +1,17 @@
-import Sun from "components/Sun"";
+import Clouds from "@/components/Clouds";
+import { EmptyMessage } from "@/components/EmptyMessage";
+import FAB from "@/components/FAB";
+import FriendshipCard from "@/components/FriendshipCard";
+import Sun from "@/components/Sun";
+import { Screen } from "@/components/UI";
+import { useAuth } from "@/context/AuthContext";
+import { useFriends } from "@/context/FriendsContext";
 import { Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { View } from "tamagui";
 import { Friendship } from "walk2gether-shared";
-import Clouds from "../../../../components/Clouds";
-import { EmptyMessage } from "../../../../components/EmptyMessage";
-import FAB from "../../../../components/FAB";
-import FriendshipCard from "../../../../components/FriendshipCard";
-import { Screen } from "../../../../components/UI";
-import { useAuth } from "../../../../context/AuthContext";
-import { useFriends } from "../../../../context/FriendsContext";
 
 export default function FriendsScreen() {
   const { user } = useAuth();
@@ -73,15 +73,13 @@ export default function FriendsScreen() {
       >
         <View flex={1}>
           {friendships.length === 0 ? (
-            <View minHeight={300} py="$10">
-              <EmptyMessage
-                message="No Friends Yet"
-                subtitle="Add friends to chat and invite them to walks!"
-                icon={Users}
-                iconSize={70}
-                iconColor="#333"
-              />
-            </View>
+            <EmptyMessage
+              message="No Friends Yet"
+              subtitle="Add friends to chat and invite them to walks!"
+              icon={Users}
+              iconSize={70}
+              iconColor="#333"
+            />
           ) : (
             friendships.map((friendship) => (
               <FriendshipCard

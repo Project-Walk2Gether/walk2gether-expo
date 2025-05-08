@@ -1,24 +1,24 @@
 // Screen for completing user profile after phone auth
+import { ActionButton } from "@/components/ActionButton";
+import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
+import AutoDetectLocation from "@/components/AutoDetectLocation";
+import LocationAutocomplete from "@/components/LocationAutocomplete";
+import { useAuth } from "@/context/AuthContext";
+import { useUserData } from "@/context/UserDataContext";
+import { COLORS } from "@/styles/colors";
 import {
   ArrowRight,
   Keyboard as KeyboardIcon,
   MapPin,
 } from "@tamagui/lucide-icons";
 import { Redirect, useRouter } from "expo-router";
-import { useOnboarding } from "./_layout";
 import { Formik } from "formik";
 import React, { useRef, useState } from "react";
 import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Card, Input, ScrollView, Text, XStack, YStack } from "tamagui";
 import { userDataSchema } from "walk2gether-shared";
-import { ActionButton } from "../../../components/ActionButton";
-import AuthScenicLayout from "../../../components/Auth/AuthScenicLayout";
-import AutoDetectLocation from "../../../components/AutoDetectLocation";
-import LocationAutocomplete from "../../../components/LocationAutocomplete";
-import { useAuth } from "../../../context/AuthContext";
-import { useUserData } from "../../../context/UserDataContext";
-import { COLORS } from "../../../styles/colors";
+import { useOnboarding } from "./_layout";
 
 export default function CompleteYourProfile() {
   const { setUserData } = useUserData();
@@ -44,29 +44,29 @@ export default function CompleteYourProfile() {
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
-      
+
       // Prepare the data to save
       const userData = {
         name: values.name,
         location: values.location,
         friendInvitationCode: values.friendInvitationCode,
       };
-      
+
       // If we have referral info, add it to the user data
       if (referralInfo) {
         console.log("Including referral info in profile data:", referralInfo);
       }
-      
+
       // Save user profile data
       await setUserData(userData);
-      
+
       // Create friendship if needed
       if (referralInfo?.referredByUid && referralInfo?.acceptFriendship) {
         console.log("Creating friendship with", referralInfo.referredByUid);
         // Actual friendship creation would happen elsewhere
         // For example, in the auth.tsx file or in a Firebase function
       }
-      
+
       goToNextScreen();
     } catch (error) {
       console.error("Error saving profile:", error);

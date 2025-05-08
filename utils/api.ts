@@ -1,6 +1,6 @@
+import { emulatorsEnabled } from "@/config/emulators";
+import { auth_instance } from "@/config/firebase";
 import axios, { AxiosRequestConfig } from "axios";
-import { emulatorsEnabled } from "../config/emulators";
-import { auth_instance } from "../config/firebase";
 
 // Base URLs based on environment
 const isLive = !emulatorsEnabled;

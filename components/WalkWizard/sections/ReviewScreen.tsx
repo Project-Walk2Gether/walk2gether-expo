@@ -1,9 +1,9 @@
+import { useWalkForm } from "@/context/WalkFormContext";
+import { COLORS } from "@/styles/colors";
 import { Calendar, Clock, MapPin, Users } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React from "react";
 import { Button, Card, Separator, Text, XStack, YStack } from "tamagui";
-import { useWalkForm } from "../../../context/WalkFormContext";
-import { COLORS } from "../../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
 
 const pluralize = require("pluralize");

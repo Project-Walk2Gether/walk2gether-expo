@@ -1,12 +1,12 @@
+import { useAuth } from "@/context/AuthContext";
+import { useWalkForm } from "@/context/WalkFormContext";
+import { COLORS } from "@/styles/colors";
 import { Handshake, Pin, Speech, Users } from "@tamagui/lucide-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Card, Text, View, XStack, YStack } from "tamagui";
-import { useAuth } from "../../../../context/AuthContext";
-import { useWalkForm } from "../../../../context/WalkFormContext";
-import { COLORS } from "../../../../styles/colors";
 import WizardWrapper from "../WizardWrapper";
 import { findNearbyWalkers } from "./findNearbyWalkers";
 

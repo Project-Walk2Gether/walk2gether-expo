@@ -1,8 +1,8 @@
+import { COLORS } from "@/styles/colors";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import { Alert, Image } from "react-native";
 import { Button, Text, YStack } from "tamagui";
-import { COLORS } from "../styles/colors";
 
 interface ProfilePicturePickerProps {
   profilePicUrl?: string;

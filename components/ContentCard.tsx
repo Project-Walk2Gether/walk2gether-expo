@@ -1,6 +1,6 @@
+import { COLORS } from "@/styles/colors";
 import { ReactNode } from "react";
 import { Text, XStack, YStack } from "tamagui";
-import { COLORS } from "../styles/colors";
 
 type ContentCardProps = {
   title: string;

@@ -1,12 +1,12 @@
+import { useAuth } from "@/context/AuthContext";
+import { COLORS } from "@/styles/colors";
+import { getDirectionsUrl } from "@/utils/routeUtils";
 import { Edit3, Map, Trash } from "@tamagui/lucide-icons";
-import { useRouter } from "expo-router";
 import * as Linking from "expo-linking";
+import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import { Alert } from "react-native";
 import { Walk, WithId } from "walk2gether-shared";
-import { useAuth } from "../../context/AuthContext";
-import { COLORS } from "../../styles/colors";
-import { getDirectionsUrl } from "../../utils/routeUtils";
 import Menu, { MenuItem } from "../Menu";
 
 interface Props {

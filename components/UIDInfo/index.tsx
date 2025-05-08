@@ -1,7 +1,7 @@
+import { useFlashMessage } from "@/context/FlashMessageContext";
 import Clipboard from "@react-native-clipboard/clipboard";
 import React from "react";
 import { Text, YStack } from "tamagui";
-import { useFlashMessage } from "../../context/FlashMessageContext";
 
 interface UIDInfoProps {
   uid: string;
@@ -23,7 +23,6 @@ const UIDInfo: React.FC<UIDInfoProps> = ({ uid, version }) => {
     <YStack mt={10} ai="center" mb={20}>
       <Text
         fontSize={12}
-        color="$gray10"
         opacity={0.7}
         onPress={handleCopy}
         pressStyle={{ opacity: 0.5 }}
@@ -35,7 +34,6 @@ const UIDInfo: React.FC<UIDInfoProps> = ({ uid, version }) => {
 
       <Text
         fontSize={12}
-        color="$gray10"
         opacity={0.7}
         selectable
         onPress={handleCopy}
@@ -45,12 +43,7 @@ const UIDInfo: React.FC<UIDInfoProps> = ({ uid, version }) => {
         User ID: {uid}
       </Text>
 
-      <Text
-        fontSize={10}
-        color="$gray10"
-        opacity={0.5}
-        style={{ textAlign: "center" }}
-      >
+      <Text fontSize={10} opacity={0.5} style={{ textAlign: "center" }}>
         Tap to copy
       </Text>
     </YStack>

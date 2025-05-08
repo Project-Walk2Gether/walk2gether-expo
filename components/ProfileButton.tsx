@@ -1,19 +1,21 @@
+import { useUserData } from "@/context/UserDataContext";
 import { useRouter } from "expo-router";
 import { Image, TouchableOpacity } from "react-native";
-import { Button, Text, View, XStack, YStack } from "tamagui";
-import { useUserData } from "../context/UserDataContext";
+import { Text, View } from "tamagui";
 
 // Helper function to get initials from a name (up to two characters)
 const getInitials = (name: string): string => {
   if (!name) return "U";
-  
-  const nameParts = name.split(' ');
+
+  const nameParts = name.split(" ");
   if (nameParts.length === 1) {
     // Just take the first character of the name
     return nameParts[0].charAt(0).toUpperCase();
   } else {
     // Take first character of first and last name
-    return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+    return (
+      nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)
+    ).toUpperCase();
   }
 };
 
@@ -37,11 +39,7 @@ export const ProfileButton = () => {
           borderWidth={2}
           borderColor="#fff"
         >
-          <Text
-            fontSize={16}
-            fontWeight="bold"
-            color="#555555"
-          >
+          <Text fontSize={16} fontWeight="bold" color="#555555">
             U
           </Text>
         </View>
@@ -76,12 +74,8 @@ export const ProfileButton = () => {
           borderWidth={2}
           borderColor="#fff"
         >
-          <Text
-            fontSize={16}
-            fontWeight="bold"
-            color="#555555"
-          >
-            {userData.name && userData.name.length > 0 
+          <Text fontSize={16} fontWeight="bold" color="#555555">
+            {userData.name && userData.name.length > 0
               ? getInitials(userData.name)
               : "U"}
           </Text>
@@ -90,5 +84,3 @@ export const ProfileButton = () => {
     </TouchableOpacity>
   );
 };
-
-

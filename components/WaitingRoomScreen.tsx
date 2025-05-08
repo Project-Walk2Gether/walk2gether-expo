@@ -1,3 +1,5 @@
+import { firestore_instance } from "@/config/firebase";
+import { useWaitingParticipants } from "@/hooks/useWaitingParticipants";
 import {
   doc,
   FirebaseFirestoreTypes,
@@ -19,8 +21,6 @@ import {
   YStack,
 } from "tamagui";
 import { Participant, Walk, WithId } from "walk2gether-shared";
-import { firestore_instance } from "../config/firebase";
-import { useWaitingParticipants } from "../hooks/useWaitingParticipants";
 
 interface Props {
   walk: WithId<Walk>;

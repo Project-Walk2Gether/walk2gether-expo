@@ -1,8 +1,8 @@
-import { useUserData } from "context/UserDataContext"";
+import { useUserData } from "@/context/UserDataContext";
+import { COLORS } from "@/styles/colors";
 import { Footprints, Image, User, Users } from "@tamagui/lucide-icons";
 import { Redirect, Tabs } from "expo-router";
 import React from "react";
-import { COLORS } from "../../../styles/colors";
 
 export default function TabLayout() {
   const { userData, loading: userDataLoading } = useUserData();
@@ -20,6 +20,7 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: COLORS.background,
           borderTopColor: "#E0E0E0",
+          paddingTop: 6,
           elevation: 4,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: -1 },
@@ -45,19 +46,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="me"
-        options={{
-          title: "Me",
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="friends"
         options={{
           title: "Friends",
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="me"
+        options={{
+          title: "Me",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
     </Tabs>

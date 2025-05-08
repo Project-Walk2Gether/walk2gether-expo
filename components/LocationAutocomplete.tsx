@@ -1,3 +1,5 @@
+import { COLORS } from "@/styles/colors";
+import { ArrowLeft } from "@tamagui/lucide-icons";
 import React, { useRef } from "react";
 import { Keyboard } from "react-native";
 import {
@@ -5,8 +7,6 @@ import {
   GooglePlacesAutocompleteRef,
 } from "react-native-google-places-autocomplete";
 import { Button, Text, YStack } from "tamagui";
-import { ArrowLeft } from '@tamagui/lucide-icons';
-import { COLORS } from "../styles/colors";
 
 interface LocationAutocompleteProps {
   value: any;
@@ -20,7 +20,9 @@ interface LocationAutocompleteProps {
   includeChooseAnotherWayButton?: boolean;
 }
 
-const LocationAutocomplete: React.FC<Omit<LocationAutocompleteProps, 'styles'>> = ({
+const LocationAutocomplete: React.FC<
+  Omit<LocationAutocompleteProps, "styles">
+> = ({
   value,
   setFieldValue,
   showLocationResults,
@@ -36,7 +38,7 @@ const LocationAutocomplete: React.FC<Omit<LocationAutocompleteProps, 'styles'>> 
   // Custom styles for GooglePlacesAutocomplete to match Input in UserDataForm
   const inputStyles = {
     textInput: {
-      width: '100%',
+      width: "100%",
       borderColor: COLORS.primary,
       backgroundColor: COLORS.background,
       color: COLORS.text,
@@ -48,9 +50,9 @@ const LocationAutocomplete: React.FC<Omit<LocationAutocompleteProps, 'styles'>> 
       borderWidth: 1,
     },
     textInputContainer: {
-      width: '100%',
+      width: "100%",
       borderRadius: 10,
-      backgroundColor: 'transparent', // no border or bg on container
+      backgroundColor: "transparent", // no border or bg on container
     },
     listView: {
       borderRadius: 10,

@@ -1,3 +1,8 @@
+import MessageForm from "@/components/Chat/MessageForm";
+import { firestore_instance } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { useUserData } from "@/context/UserDataContext";
+import { useDoc, useQuery } from "@/utils/firestore";
 import {
   addDoc,
   collection,
@@ -7,28 +12,23 @@ import {
 } from "@react-native-firebase/firestore";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useRef } from "react";
-import MessageForm from "../../../../../components/Chat/MessageForm";
 import MessageList, {
   MessageListRef,
 } from "../../../../../components/Chat/MessageList";
-import { firestore_instance } from "../../../../../config/firebase";
-import { useAuth } from "../../../../../context/AuthContext";
-import { useUserData } from "../../../../../context/UserDataContext";
-import { useDoc, useQuery } from "../../../../../utils/firestore";
 // Removed StyleSheet import; using Tamagui for styles
+import FullScreenLoader from "@/components/FullScreenLoader";
+import HeaderBackButton from "@/components/HeaderBackButton";
+import WalkMenu from "@/components/WalkMenu";
+import LiveWalkMap from "@/components/WalkScreen/components/LiveWalkMap";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
 import { KeyboardAvoidingView } from "react-native";
 import { Text, View, YStack } from "tamagui";
 import { Message, ParticipantWithRoute, Walk } from "walk2gether-shared";
-import FullScreenLoader from "../../../../../components/FullScreenLoader";
-import HeaderBackButton from "../../../../../components/HeaderBackButton";
-import WalkMenu from "../../../../../components/WalkMenu";
-import LiveWalkMap from "../../../../../components/WalkScreen/components/LiveWalkMap";
 
-import ParticipantsList from "../../../../../components/WalkScreen/components/ParticipantsList";
-import { useWalkParticipants } from "../../../../../hooks/useWaitingParticipants";
-import { COLORS } from "../../../../../styles/colors";
+import ParticipantsList from "@/components/WalkScreen/components/ParticipantsList";
+import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
+import { COLORS } from "@/styles/colors";
 
 export default function WalkScreen() {
   const params = useLocalSearchParams();

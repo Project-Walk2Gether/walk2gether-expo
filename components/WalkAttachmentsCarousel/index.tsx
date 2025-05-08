@@ -1,3 +1,5 @@
+import { firestore_instance } from "@/config/firebase";
+import { useQuery } from "@/utils/firestore";
 import {
   collection,
   limit,
@@ -6,15 +8,13 @@ import {
 } from "@react-native-firebase/firestore";
 import React, { useMemo, useState } from "react";
 import { FlatList, Image, LayoutChangeEvent } from "react-native";
-import { Text, XStack, YStack, Spinner, View } from "tamagui";
+import { Spinner, Text, View, XStack, YStack } from "tamagui";
 import {
   Attachment as AttachmentType,
   Message,
   Walk,
   WithId,
 } from "walk2gether-shared";
-import { firestore_instance } from "../../config/firebase";
-import { useQuery } from "../../utils/firestore";
 
 interface WalkAttachmentsCarouselProps {
   walk: WithId<Walk>;
@@ -96,12 +96,13 @@ const WalkAttachmentsCarousel: React.FC<WalkAttachmentsCarouselProps> = ({
   }
 
   return (
-    <YStack 
+    <YStack
       width="100%"
       onLayout={(event: LayoutChangeEvent) => {
         const { width } = event.nativeEvent.layout;
         setCarouselWidth(width);
-      }}>
+      }}
+    >
       {loading ? (
         <View height="$12" justifyContent="center" alignItems="center">
           <Spinner size="large" color="$blue10" />

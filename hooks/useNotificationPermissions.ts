@@ -1,11 +1,11 @@
+import { firestore_instance } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
 import { doc, Timestamp, updateDoc } from "@react-native-firebase/firestore";
 import Constants from "expo-constants";
 import { isDevice } from "expo-device";
 import * as Notifications from "expo-notifications";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
-import { firestore_instance } from "../config/firebase";
-import { useAuth } from "../context/AuthContext";
 
 // Define a custom type that includes the properties we need
 type NotificationPermissionStatus = {

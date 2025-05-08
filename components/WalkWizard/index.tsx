@@ -1,10 +1,10 @@
+import { useAuth } from "@/context/AuthContext";
+import { useUserData } from "@/context/UserDataContext";
+import { useWalkForm } from "@/context/WalkFormContext";
+import { useWalks } from "@/context/WalksContext";
+import { createWalkFromForm } from "@/utils/walkSubmission";
 import { Stack, useRouter } from "expo-router";
 import { useCallback } from "react";
-import { useAuth } from "../../context/AuthContext";
-import { useUserData } from "../../context/UserDataContext";
-import { useWalkForm } from "../../context/WalkFormContext";
-import { useWalks } from "../../context/WalksContext";
-import { createWalkFromForm } from "../../utils/walkSubmission";
 import HeaderBackButton from "../HeaderBackButton";
 import {
   DurationSelection,

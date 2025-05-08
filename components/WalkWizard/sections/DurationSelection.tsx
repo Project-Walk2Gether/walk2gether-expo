@@ -1,3 +1,5 @@
+import { useWalkForm } from "@/context/WalkFormContext";
+import { COLORS } from "@/styles/colors";
 import { Clock, Plus, X } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import {
@@ -17,8 +19,6 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import { useWalkForm } from "../../../context/WalkFormContext";
-import { COLORS } from "../../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
 
 interface DurationSelectionProps {

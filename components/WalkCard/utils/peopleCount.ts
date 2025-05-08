@@ -1,5 +1,5 @@
+import { isActive, isFuture, isPast } from "@/utils/walkUtils";
 import { Participant, Walk } from "walk2gether-shared";
-import { isActive, isFuture, isPast } from "../../../utils/walkUtils";
 
 interface Args {
   walk: Walk;

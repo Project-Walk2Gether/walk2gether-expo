@@ -1,3 +1,5 @@
+import { recordError } from "@/utils/recordError";
+import { appVersion } from "@/utils/version";
 import * as Updates from "expo-updates";
 import React, {
   createContext,
@@ -7,8 +9,6 @@ import React, {
   useState,
 } from "react";
 import { AppState, AppStateStatus } from "react-native";
-import { recordError } from "../utils/recordError";
-import { appVersion } from "../utils/version";
 import { useFlashMessage } from "./FlashMessageContext";
 
 interface UpdatesContextType {

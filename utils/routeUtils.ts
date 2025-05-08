@@ -1,6 +1,6 @@
+import { firestore_instance } from "@/config/firebase";
 import { doc, getDoc } from "@react-native-firebase/firestore";
 import { Participant } from "walk2gether-shared";
-import { firestore_instance } from "../config/firebase";
 
 /**
  * Get a Google Maps URL for directions to the walk location

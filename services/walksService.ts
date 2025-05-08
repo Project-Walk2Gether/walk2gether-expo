@@ -1,3 +1,6 @@
+import { db } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { useQuery } from "@/utils/firestore";
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import {
   addDoc,
@@ -16,9 +19,6 @@ import { startOfDay } from "date-fns";
 import { useMemo } from "react";
 import { Walk, WithId } from "walk2gether-shared";
 import { DocumentReferenceLike } from "walk2gether-shared/lib/firestore/documentReference";
-import { db } from "../config/firebase";
-import { useAuth } from "../context/AuthContext";
-import { useQuery } from "../utils/firestore";
 
 export function useUpcomingWalks() {
   const { user } = useAuth();

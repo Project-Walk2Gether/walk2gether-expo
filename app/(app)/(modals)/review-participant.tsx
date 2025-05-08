@@ -1,3 +1,6 @@
+import { firestore_instance } from "@/config/firebase";
+import { COLORS } from "@/styles/colors";
+import { useDoc } from "@/utils/firestore";
 import {
   doc,
   serverTimestamp,
@@ -18,9 +21,6 @@ import {
   YStack,
 } from "tamagui";
 import { ParticipantWithRoute, UserData } from "walk2gether-shared";
-import { firestore_instance } from "../../../config/firebase";
-import { COLORS } from "../../../styles/colors";
-import { useDoc } from "../../../utils/firestore";
 
 export default function ReviewParticipantScreen() {
   const params = useLocalSearchParams();

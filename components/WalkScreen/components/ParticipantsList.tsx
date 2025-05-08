@@ -1,3 +1,4 @@
+import { COLORS } from "@/styles/colors";
 import {
   AlertCircle,
   Car,
@@ -8,7 +9,6 @@ import React from "react";
 import { FlatList } from "react-native";
 import { Avatar, Text, XStack, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
-import { COLORS } from "../../../styles/colors";
 
 interface Props {
   participants: ParticipantWithRoute[];

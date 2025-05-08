@@ -1,3 +1,15 @@
+import Clouds from "@/components/Clouds";
+import Menu from "@/components/Menu";
+import Sun from "@/components/Sun";
+import { BrandGradient, Screen } from "@/components/UI";
+import { PlaceData } from "@/components/UI/PlacesAutocomplete";
+import UIDInfo from "@/components/UIDInfo";
+import { StatelessAvatar } from "@/components/UserAvatar";
+import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useUserData } from "@/context/UserDataContext";
+import { COLORS } from "@/styles/colors";
+import { appVersion } from "@/utils/version";
 import storage from "@react-native-firebase/storage";
 import {
   Camera,
@@ -12,16 +24,6 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, TouchableOpacity } from "react-native";
 import { Card, H4, Separator, Text, View, YStack } from "tamagui";
-import Menu from "../../../../components/Menu";
-import { BrandGradient, Screen } from "../../../../components/UI";
-import { PlaceData } from "../../../../components/UI/PlacesAutocomplete";
-import UIDInfo from "../../../../components/UIDInfo";
-import { StatelessAvatar } from "../../../../components/UserAvatar";
-import { useAuth } from "../../../../context/AuthContext";
-import { useFlashMessage } from "../../../../context/FlashMessageContext";
-import { useUserData } from "../../../../context/UserDataContext";
-import { COLORS } from "../../../../styles/colors";
-import { appVersion } from "../../../../utils/version";
 
 export default function MeScreen() {
   const { user: authUser, signOut } = useAuth();
@@ -166,7 +168,26 @@ export default function MeScreen() {
   }
 
   return (
-    <Screen title="" gradientVariant="modern">
+    <Screen
+      title=""
+      gradientVariant="outdoor"
+      renderAbsolute={
+        <View>
+          <Sun
+            style={{ position: "absolute", top: 20, right: -10, bottom: 20 }}
+          />
+          <Clouds
+            style={{
+              position: "absolute",
+              top: -80,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          />
+        </View>
+      }
+    >
       <YStack alignItems="center" mb="$6">
         <Menu
           title="Profile Picture"
@@ -210,11 +231,11 @@ export default function MeScreen() {
             </View>
           }
         />
-        <H4 mt="$3" mb="$1" fontSize={26} fontWeight="bold" color="white">
+        <H4 mt="$3" mb="$1" fontSize={26} fontWeight="bold">
           {name || "Your Name"}
         </H4>
         {location && (
-          <Text fontSize={16} color="white" opacity={0.9} mb="$2">
+          <Text fontSize={16} opacity={0.9} mb="$2">
             {location.name}
           </Text>
         )}

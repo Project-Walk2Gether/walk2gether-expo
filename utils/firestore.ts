@@ -1,3 +1,4 @@
+import { db } from "@/config/firebase";
 import {
   doc as firebaseDoc,
   FirebaseFirestoreTypes,
@@ -8,7 +9,6 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { WithId } from "walk2gether-shared";
 import { DocumentReferenceLike } from "walk2gether-shared/lib/firestore/documentReference";
-import { db } from "../config/firebase";
 
 export function useDoc<T extends FirebaseFirestoreTypes.DocumentData>(
   docPath?: string
@@ -66,14 +66,17 @@ export function useDoc<T extends FirebaseFirestoreTypes.DocumentData>(
  * @param userId The ID of the user who initiated the deletion
  * @returns Promise that resolves when the friendship is marked as deleted
  */
-export async function markFriendshipAsDeleted(friendshipId: string, userId: string): Promise<void> {
+export async function markFriendshipAsDeleted(
+  friendshipId: string,
+  userId: string
+): Promise<void> {
   if (!friendshipId || !userId) {
     throw new Error("Missing required parameters for deleting friendship");
   }
 
   try {
     const friendshipRef = firebaseDoc(db, `friendships/${friendshipId}`);
-    
+
     await updateDoc(friendshipRef, {
       deletedAt: serverTimestamp(),
       deletedByUid: userId,

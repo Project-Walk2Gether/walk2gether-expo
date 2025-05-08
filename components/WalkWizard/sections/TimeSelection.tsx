@@ -1,10 +1,10 @@
+import { useWalkForm } from "@/context/WalkFormContext";
+import { COLORS } from "@/styles/colors";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { Card, Text, View, XStack, YStack } from "tamagui";
-import { useWalkForm } from "../../../context/WalkFormContext";
-import { COLORS } from "../../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
 
 interface TimeSelectionProps {

@@ -1,11 +1,11 @@
+import Menu, { MenuItem } from "@/components/Menu";
+import { firestore_instance } from "@/config/firebase";
+import { COLORS } from "@/styles/colors";
 import { doc, setDoc } from "@react-native-firebase/firestore";
 import { Car, Check, Footprints, MapPin } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable } from "react-native";
 import { Button, Spinner, Switch, Text, XStack, YStack } from "tamagui";
-import Menu, { MenuItem } from "../../../components/Menu";
-import { firestore_instance } from "../../../config/firebase";
-import { COLORS } from "../../../styles/colors";
 import SlideToStart from "./SlideToStart";
 
 type WalkStatusControlsProps = {

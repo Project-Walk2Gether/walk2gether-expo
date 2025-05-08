@@ -1,3 +1,7 @@
+import { firestore_instance } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { COLORS } from "@/styles/colors";
+import { useDoc } from "@/utils/firestore";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { Calendar, Clock, MapPin, Timer } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
@@ -5,10 +9,6 @@ import { ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Card, SizableText, Text, XStack, YStack } from "tamagui";
 import { Participant, Walk } from "walk2gether-shared";
-import { firestore_instance } from "../config/firebase";
-import { useAuth } from "../context/AuthContext";
-import { COLORS } from "../styles/colors";
-import { useDoc } from "../utils/firestore";
 
 interface CheckInScreenProps {
   walk: Walk;

@@ -1,5 +1,6 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState, useEffect } from "react";
+import { firestore_instance } from "@/config/firebase";
+import { useFlashMessage } from "@/context/FlashMessageContext";
+import { createFriendship, InviterData } from "@/utils/invitation";
 import {
   collection,
   doc,
@@ -8,9 +9,8 @@ import {
   query,
   where,
 } from "@react-native-firebase/firestore";
-import { firestore_instance } from "../config/firebase";
-import { useFlashMessage } from "../context/FlashMessageContext";
-import { createFriendship, InviterData } from "../utils/invitation";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 
 interface UseInvitationFlowProps {
   initialAuthMode?: "phone" | "token" | "invitation";
@@ -63,18 +63,18 @@ export const useInvitationFlow = (
 
     try {
       const usersRef = collection(firestore_instance, "users");
-      
+
       if (referredByUid) {
         // Direct fetch by ID if we have the referrer's ID
         const userDocRef = doc(firestore_instance, "users", referredByUid);
         const userDoc = await getDoc(userDocRef);
-        
+
         if (!userDoc.exists) {
           setInvitationError("Inviter not found");
           setLoadingInvitation(false);
           return;
         }
-        
+
         const userData = userDoc.data();
         if (userData) {
           setInviterData({

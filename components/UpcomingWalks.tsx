@@ -1,6 +1,6 @@
+import { useWalks } from "@/context/WalksContext";
 import React from "react";
 import { YStack } from "tamagui";
-import { useWalks } from "../context/WalksContext";
 import WalkCard from "./WalkCard";
 
 interface UpcomingWalksProps {

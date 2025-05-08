@@ -1,3 +1,12 @@
+import { Slogan } from "@/components/AnimatedLogo/Slogan";
+import AnimatedLogo from "@/components/AnimatedLogo/index";
+import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
+import PhoneForm from "@/components/Auth/Form/PhoneForm";
+import TokenSignInForm from "@/components/Auth/Form/TokenSignInForm";
+import { firestore_instance } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { useInvitationFlow } from "@/hooks/useInvitationFlow";
+import { COLORS } from "@/styles/colors";
 import { Check } from "@tamagui/lucide-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -16,18 +25,9 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import { Slogan } from "../components/AnimatedLogo/Slogan";
-import AnimatedLogo from "../components/AnimatedLogo/index";
-import AuthScenicLayout from "../components/Auth/AuthScenicLayout";
-import PhoneForm from "../components/Auth/Form/PhoneForm";
-import TokenSignInForm from "../components/Auth/Form/TokenSignInForm";
 import VerificationCodeForm, {
   VerificationSchema,
 } from "../components/Auth/Form/VerificationCodeForm";
-import { firestore_instance } from "../config/firebase";
-import { useAuth } from "../context/AuthContext";
-import { useInvitationFlow } from "../hooks/useInvitationFlow";
-import { COLORS } from "../styles/colors";
 
 const { width } = Dimensions.get("window");
 const logoWidth = width * 0.7;
@@ -96,8 +96,10 @@ export default function Auth() {
           pathname: "/onboarding/complete-your-profile",
           params: {
             referredByUid: invitationParams.referredByUid,
-            acceptFriendship: invitationParams.acceptFriendship ? "true" : "false"
-          }
+            acceptFriendship: invitationParams.acceptFriendship
+              ? "true"
+              : "false",
+          },
         });
       } else {
         // Start normal onboarding flow from the beginning

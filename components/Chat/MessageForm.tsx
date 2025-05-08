@@ -1,3 +1,4 @@
+import { COLORS } from "@/styles/colors";
 import { Camera, ImagePlus, Send, X } from "@tamagui/lucide-icons";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
@@ -12,7 +13,6 @@ import {
   YStack,
 } from "tamagui";
 import { Attachment, Message } from "walk2gether-shared";
-import { COLORS } from "../../styles/colors";
 import {
   ImagePickerOption,
   pickImage,

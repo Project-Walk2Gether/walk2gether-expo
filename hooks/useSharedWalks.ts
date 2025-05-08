@@ -1,6 +1,6 @@
-import { db } from "config/firebase"";
-import { useAuth } from "context/AuthContext"";
-import { useQuery } from "utils/firestore"";
+import { db } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { useQuery } from "@/utils/firestore";
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { sortBy } from "lodash";
 import { useMemo } from "react";

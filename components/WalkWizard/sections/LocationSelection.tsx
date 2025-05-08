@@ -1,4 +1,6 @@
-import { GOOGLE_MAPS_API_KEY } from "config/maps"";
+import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
+import { useWalkForm } from "@/context/WalkFormContext";
+import { COLORS } from "@/styles/colors";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import {
@@ -7,8 +9,6 @@ import {
 } from "react-native-google-places-autocomplete";
 import MapView, { Marker } from "react-native-maps";
 import { Text, View, YStack } from "tamagui";
-import { useWalkForm } from "../../../context/WalkFormContext";
-import { COLORS } from "../../../styles/colors";
 import WizardWrapper from "./WizardWrapper";
 
 interface LocationSelectionProps {

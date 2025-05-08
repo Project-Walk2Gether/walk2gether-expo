@@ -1,11 +1,11 @@
+import DateTimeField from "@/components/WalkForm/components/DateTimeField";
+import DurationField from "@/components/WalkForm/components/DurationField";
+import FormProvider from "@/components/WalkForm/components/FormProvider";
+import LocationField from "@/components/WalkForm/components/LocationField";
 import { Timestamp } from "@react-native-firebase/firestore";
 import React from "react";
 import { YStack } from "tamagui";
 import { FriendsWalk, friendsWalkSchema } from "walk2gether-shared";
-import DateTimeField from "../components/DateTimeField";
-import DurationField from "../components/DurationField";
-import FormProvider from "../components/FormProvider";
-import LocationField from "../components/LocationField";
 
 interface Props {
   initialValues: Partial<FriendsWalk>;

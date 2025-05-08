@@ -1,8 +1,8 @@
+import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
+import { COLORS } from "@/styles/colors";
+import { Bell, Heart, MapPin, Shield, Users } from "@tamagui/lucide-icons";
 import React from "react";
-import { MapPin, Bell, Shield, Users, Heart } from "@tamagui/lucide-icons";
 import { Button, H1, Text, XStack, YStack } from "tamagui";
-import AuthScenicLayout from "../../../components/Auth/AuthScenicLayout";
-import { COLORS } from "../../../styles/colors";
 import { useOnboarding } from "./_layout";
 
 export default function HowItWorks() {
@@ -22,24 +22,32 @@ export default function HowItWorks() {
       >
         Skip
       </Button>
-      <AuthScenicLayout
-        scroll
-        showSun={true}
-        showTree={true}
-        showHouse={false}
-      >
+      <AuthScenicLayout scroll showSun={true} showTree={true} showHouse={false}>
         <YStack gap="$6" pt="$10" pb="$10">
           <H1 fontSize={32} fontWeight="bold" textAlign="center" color="white">
             Welcome to Walk2Gether
           </H1>
-          
-          <Text fontSize={18} fontWeight="500" textAlign="center" color="white" mt="$2" mb="$4">
+
+          <Text
+            fontSize={18}
+            fontWeight="500"
+            textAlign="center"
+            color="white"
+            mt="$2"
+            mb="$4"
+          >
             What you need to know:
           </Text>
-          
+
           <YStack gap="$5" width="100%" px="$3">
             {/* Nonprofit Mission */}
-            <XStack backgroundColor="rgba(255, 255, 255, 0.15)" p="$4" borderRadius={12} gap="$3" alignItems="center">
+            <XStack
+              backgroundColor="rgba(255, 255, 255, 0.15)"
+              p="$4"
+              borderRadius={12}
+              gap="$3"
+              alignItems="center"
+            >
               <Heart size={24} color="white" />
               <YStack flex={1}>
                 <Text fontWeight="600" color="white" fontSize={16}>
@@ -50,9 +58,15 @@ export default function HowItWorks() {
                 </Text>
               </YStack>
             </XStack>
-            
+
             {/* Location Sharing */}
-            <XStack backgroundColor="rgba(255, 255, 255, 0.15)" p="$4" borderRadius={12} gap="$3" alignItems="center">
+            <XStack
+              backgroundColor="rgba(255, 255, 255, 0.15)"
+              p="$4"
+              borderRadius={12}
+              gap="$3"
+              alignItems="center"
+            >
               <MapPin size={24} color="white" />
               <YStack flex={1}>
                 <Text fontWeight="600" color="white" fontSize={16}>
@@ -63,9 +77,15 @@ export default function HowItWorks() {
                 </Text>
               </YStack>
             </XStack>
-            
+
             {/* Data Privacy */}
-            <XStack backgroundColor="rgba(255, 255, 255, 0.15)" p="$4" borderRadius={12} gap="$3" alignItems="center">
+            <XStack
+              backgroundColor="rgba(255, 255, 255, 0.15)"
+              p="$4"
+              borderRadius={12}
+              gap="$3"
+              alignItems="center"
+            >
               <Shield size={24} color="white" />
               <YStack flex={1}>
                 <Text fontWeight="600" color="white" fontSize={16}>
@@ -76,9 +96,15 @@ export default function HowItWorks() {
                 </Text>
               </YStack>
             </XStack>
-            
+
             {/* Recommendations */}
-            <XStack backgroundColor="rgba(255, 255, 255, 0.15)" p="$4" borderRadius={12} gap="$3" alignItems="center">
+            <XStack
+              backgroundColor="rgba(255, 255, 255, 0.15)"
+              p="$4"
+              borderRadius={12}
+              gap="$3"
+              alignItems="center"
+            >
               <Users size={24} color="white" />
               <YStack flex={1}>
                 <Text fontWeight="600" color="white" fontSize={16}>
@@ -89,9 +115,15 @@ export default function HowItWorks() {
                 </Text>
               </YStack>
             </XStack>
-            
+
             {/* Notifications */}
-            <XStack backgroundColor="rgba(255, 255, 255, 0.15)" p="$4" borderRadius={12} gap="$3" alignItems="center">
+            <XStack
+              backgroundColor="rgba(255, 255, 255, 0.15)"
+              p="$4"
+              borderRadius={12}
+              gap="$3"
+              alignItems="center"
+            >
               <Bell size={24} color="white" />
               <YStack flex={1}>
                 <Text fontWeight="600" color="white" fontSize={16}>
@@ -103,12 +135,12 @@ export default function HowItWorks() {
               </YStack>
             </XStack>
           </YStack>
-          
+
           <YStack alignItems="center" mt="$6">
             <Text fontSize={20} fontWeight="bold" color="white" mb="$4">
               Let's Walk2Gether!
             </Text>
-            
+
             <Button
               onPress={goToNextScreen}
               backgroundColor={COLORS.action}

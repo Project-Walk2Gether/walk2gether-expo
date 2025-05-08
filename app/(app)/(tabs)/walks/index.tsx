@@ -1,14 +1,14 @@
+import { EmptyMessage } from "@/components/EmptyMessage";
+import FAB from "@/components/FAB";
+import { Screen } from "@/components/UI";
+import WalkCard from "@/components/WalkCard";
+import { useWalks } from "@/context/WalksContext";
 import { Leaf } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList } from "react-native";
 import { Text, View } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
-import { EmptyMessage } from "../../../../components/EmptyMessage";
-import FAB from "../../../../components/FAB";
-import { Screen } from "../../../../components/UI";
-import WalkCard from "../../../../components/WalkCard";
-import { useWalks } from "../../../../context/WalksContext";
 
 export default function WalksScreen() {
   const router = useRouter();

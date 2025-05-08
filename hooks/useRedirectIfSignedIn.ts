@@ -1,6 +1,6 @@
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
 
 /**
  * Hook that redirects to the main app if the user is already signed in

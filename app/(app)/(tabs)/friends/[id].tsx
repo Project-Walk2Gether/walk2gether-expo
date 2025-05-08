@@ -1,12 +1,12 @@
+import { FriendshipChat } from "@/components/Chat/FriendshipChat";
+import Menu from "@/components/Menu";
+import { useAuth } from "@/context/AuthContext";
+import { useDoc } from "@/utils/firestore";
 import { ArrowLeft, UserMinus } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { Button, Spinner, Text, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
-import { FriendshipChat } from "../../../../components/Chat/FriendshipChat";
-import Menu from "../../../../components/Menu";
-import { useAuth } from "../../../../context/AuthContext";
-import { useDoc } from "../../../../utils/firestore";
 
 export default function ChatDetailScreen() {
   const params = useLocalSearchParams<{ id: string; friendName?: string }>();

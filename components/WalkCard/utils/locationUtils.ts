@@ -1,4 +1,4 @@
-import { formatDistance, getDistanceMeters } from "../../../utils/geo";
+import { formatDistance, getDistanceMeters } from "@/utils/geo";
 
 // Helper function to calculate distance from user location to a walk location
 export interface GetDistanceParams {

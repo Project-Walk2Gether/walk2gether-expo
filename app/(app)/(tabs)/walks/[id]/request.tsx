@@ -1,9 +1,9 @@
+import HeaderBackButton from "@/components/HeaderBackButton";
+import RequestToJoinWalkScreen from "@/components/RequestToJoinWalkScreen";
+import { useDoc } from "@/utils/firestore";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Walk } from "walk2gether-shared";
-import HeaderBackButton from "../../../../../components/HeaderBackButton";
-import RequestToJoinWalkScreen from "../../../../../components/RequestToJoinWalkScreen";
-import { useDoc } from "../../../../../utils/firestore";
 
 export default function WalkRequestScreen() {
   const { id } = useLocalSearchParams();

@@ -1,3 +1,9 @@
+import { firestore_instance } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { useLocationTracking } from "@/hooks/useLocationTracking";
+import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
+import { COLORS } from "@/styles/colors";
+import { useDoc } from "@/utils/firestore";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
@@ -5,12 +11,6 @@ import { ActivityIndicator, Alert } from "react-native";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Text, View } from "tamagui";
 import { ParticipantWithRoute, Walk } from "walk2gether-shared";
-import { firestore_instance } from "../../../config/firebase";
-import { useAuth } from "../../../context/AuthContext";
-import { useLocationTracking } from "../../../hooks/useLocationTracking";
-import { useWalkParticipants } from "../../../hooks/useWaitingParticipants";
-import { COLORS } from "../../../styles/colors";
-import { useDoc } from "../../../utils/firestore";
 import MeetupSpot from "./MeetupSpot";
 import WalkStatusControls from "./WalkStatusControls";
 

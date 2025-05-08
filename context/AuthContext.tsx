@@ -1,3 +1,4 @@
+import { auth_instance } from "@/config/firebase";
 import firebase from "@react-native-firebase/app";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import React, {
@@ -9,7 +10,6 @@ import React, {
   useState,
 } from "react";
 import { showMessage } from "react-native-flash-message";
-import { auth_instance } from "../config/firebase";
 
 interface AuthContextType {
   user: FirebaseAuthTypes.User | null;

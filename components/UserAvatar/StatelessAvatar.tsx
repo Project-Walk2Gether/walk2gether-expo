@@ -1,6 +1,6 @@
+import { COLORS } from "@/styles/colors";
+import { getInitials } from "@/utils/userUtils";
 import { Avatar, Text } from "tamagui";
-import { COLORS } from "../../styles/colors";
-import { getInitials } from "../../utils/userUtils";
 
 interface StatelessAvatarProps {
   profilePicUrl?: string;

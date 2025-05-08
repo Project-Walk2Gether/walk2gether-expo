@@ -2,8 +2,8 @@ import { collection, query, where } from "@react-native-firebase/firestore";
 import React, { createContext, ReactNode, useContext } from "react";
 import { Friendship } from "walk2gether-shared";
 
-import { firestore_instance } from "../config/firebase";
-import { useQuery } from "../utils/firestore";
+import { firestore_instance } from "@/config/firebase";
+import { useQuery } from "@/utils/firestore";
 import { useAuth } from "./AuthContext";
 
 interface FriendsContextType {

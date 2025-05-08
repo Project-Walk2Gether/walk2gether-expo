@@ -1,10 +1,10 @@
+import { db } from "@/config/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { COLORS } from "@/styles/colors";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { Button, Paragraph, Text, YStack } from "tamagui";
-import { db } from "../../../config/firebase";
-import { useAuth } from "../../../context/AuthContext";
-import { COLORS } from "../../../styles/colors";
 
 interface TokenSignInFormProps {
   token: string;
@@ -31,14 +31,14 @@ export const TokenSignInForm: React.FC<TokenSignInFormProps> = ({
       try {
         setLoading(true);
         setError(null);
-        
+
         // Attempt to sign in with the token
         const userCredential = await signInWithToken(token);
-        
+
         // Check if the user has a profile
         const userDataDoc = db.collection("users").doc(userCredential.user.uid);
         const hasData = (await userDataDoc.get()).exists;
-        
+
         if (!hasData) {
           router.replace("/onboarding/complete-your-profile");
         } else {

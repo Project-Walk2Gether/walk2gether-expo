@@ -1,3 +1,5 @@
+import { firestore_instance } from "@/config/firebase";
+import { useQuery } from "@/utils/firestore";
 import {
   addDoc,
   collection,
@@ -18,8 +20,6 @@ import React, {
   useState,
 } from "react";
 import { Walk, WithId } from "walk2gether-shared";
-import { firestore_instance } from "../config/firebase";
-import { useQuery } from "../utils/firestore";
 import { useAuth } from "./AuthContext";
 
 interface WalksContextType {

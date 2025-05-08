@@ -1,3 +1,6 @@
+import { useAuth } from "@/context/AuthContext";
+import { useUserData } from "@/context/UserDataContext";
+import { useQuery } from "@/utils/firestore";
 import firestore, {
   collection,
   query as fbQuery,
@@ -6,9 +9,6 @@ import firestore, {
 import React from "react";
 import { Text, View, XStack, YStack } from "tamagui";
 import { Friendship, Message } from "walk2gether-shared";
-import { useAuth } from "../../context/AuthContext";
-import { useUserData } from "../../context/UserDataContext";
-import { useQuery } from "../../utils/firestore";
 import {
   deleteMessage as deleteMessageUtil,
   sendMessage as sendMessageUtil,
@@ -55,13 +55,22 @@ export function FriendshipChat({ friendship }: FriendshipChatProps) {
   }, [messagesData]);
 
   // Function to send a message with optional attachments
-  const sendMessage = async (messageData: { message?: string; attachments?: any[] }) => {
+  const sendMessage = async (messageData: {
+    message?: string;
+    attachments?: any[];
+  }) => {
     if (!user || !friendId || !friendship.id || !userData) return;
-    
+
     // Get the sender's name from userData or fallback to display name or generic name
-    const senderName = userData.name || user.displayName || 'Unknown User';
-    
-    await sendMessageUtil(friendship.id, user.uid, senderName, friendId, messageData);
+    const senderName = userData.name || user.displayName || "Unknown User";
+
+    await sendMessageUtil(
+      friendship.id,
+      user.uid,
+      senderName,
+      friendId,
+      messageData
+    );
   };
 
   // Function to delete a message
@@ -97,10 +106,10 @@ export function FriendshipChat({ friendship }: FriendshipChatProps) {
           currentUserId={user?.uid || ""}
         />
       </View>
-      <MessageForm 
-        keyboardVerticalOffset={100} 
-        onSendMessage={sendMessage} 
-        chatId={friendship.id || ""} 
+      <MessageForm
+        keyboardVerticalOffset={100}
+        onSendMessage={sendMessage}
+        chatId={friendship.id || ""}
         senderId={user?.uid || ""}
       />
     </YStack>

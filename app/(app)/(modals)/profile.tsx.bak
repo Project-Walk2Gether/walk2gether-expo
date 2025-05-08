@@ -6,14 +6,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView } from "react-native";
 import { showMessage } from "react-native-flash-message";
 import { Button, Text, YStack } from "tamagui";
-import HeaderCloseButton from "../../../components/HeaderCloseButton";
-import { PlaceData } from "../../../components/UI/PlacesAutocomplete";
-import { UserDataForm } from "../../../components/UserDataForm";
-import { useAuth } from "../../../context/AuthContext";
-import { useFlashMessage } from "../../../context/FlashMessageContext";
-import { useUserData } from "../../../context/UserDataContext";
-import { COLORS } from "../../../styles/colors";
-import { appVersion } from "../../../utils/version";
+import HeaderCloseButton from "@/components/HeaderCloseButton";
+import { PlaceData } from "@/components/UI/PlacesAutocomplete";
+import { UserDataForm } from "@/components/UserDataForm";
+import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useUserData } from "@/context/UserDataContext";
+import { COLORS } from "@/styles/colors";
+import { appVersion } from "@/utils/version";
 
 const UIDInfo: React.FC<{ uid: string; version: string }> = ({
   uid,

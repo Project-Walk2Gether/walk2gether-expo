@@ -1,19 +1,18 @@
+import { WithAuthProvider } from "@/context/AuthContext";
+import { FlashMessageProvider } from "@/context/FlashMessageContext";
+import { LocationProvider } from "@/context/LocationContext";
+import { UpdatesProvider } from "@/context/UpdatesContext";
+import { UserDataProvider } from "@/context/UserDataContext";
+import { useAppStateUpdates } from "@/hooks/useAppStateUpdates";
 import { Stack } from "expo-router";
-import React, { useEffect } from "react";
+import React from "react";
 import { TamaguiProvider } from "tamagui";
 import "../config/emulators";
-import { WithAuthProvider } from "../context/AuthContext";
-import { FlashMessageProvider } from "../context/FlashMessageContext";
-import { LocationProvider } from "../context/LocationContext";
-import { UpdatesProvider } from "../context/UpdatesContext";
-import { UserDataProvider } from "../context/UserDataContext";
-import { useAppStateUpdates } from "../hooks/useAppStateUpdates";
 import { tamaguiConfig } from "../tamagui.config";
 
 // Import background location task registration
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import ErrorBoundary from "../components/ErrorBoundary";
-import { registerBackgroundTask } from "../utils/backgroundLocationTask";
 
 // https://github.com/FaridSafi/react-native-google-places-autocomplete#more-examples
 (navigator as any).geolocation = require("@react-native-community/geolocation");
@@ -21,11 +20,6 @@ import { registerBackgroundTask } from "../utils/backgroundLocationTask";
 function AppContent() {
   // Use our custom hook to handle app state updates
   useAppStateUpdates();
-
-  // Register background location task when the app starts
-  useEffect(() => {
-    registerBackgroundTask();
-  }, []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

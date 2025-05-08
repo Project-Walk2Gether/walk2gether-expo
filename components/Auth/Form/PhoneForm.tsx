@@ -1,10 +1,10 @@
+import { useAuth } from "@/context/AuthContext";
 import { Formik } from "formik";
 import { useCallback, useRef, useState } from "react";
 import { Alert } from "react-native";
 import PhoneInput from "react-native-phone-number-input";
 import { Text, View } from "tamagui";
 import * as yup from "yup";
-import { useAuth } from "../../../context/AuthContext";
 import { ActionButton } from "../../ActionButton";
 
 const signInSchema = yup.object().shape({

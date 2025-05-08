@@ -1,6 +1,6 @@
+import { COLORS } from "@/styles/colors";
 import React from "react";
 import { H4, Input, Text, YStack } from "tamagui";
-import { COLORS } from "../../../styles/colors";
 
 interface NumberOfRotationsFieldProps {
   value: number;
@@ -17,7 +17,9 @@ export default function NumberOfRotationsField({
 }: NumberOfRotationsFieldProps) {
   return (
     <YStack gap="$1">
-      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">Number of Rotations</H4>
+      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">
+        Number of Rotations
+      </H4>
       <Input
         size="$4"
         value={value.toString()}
@@ -33,7 +35,11 @@ export default function NumberOfRotationsField({
         keyboardType="number-pad"
         placeholder="Enter number of rotations"
       />
-      {error && touched && <Text color="red" fontSize="$2" marginTop="$1">{error}</Text>}
+      {error && touched && (
+        <Text color="red" fontSize="$2" marginTop="$1">
+          {error}
+        </Text>
+      )}
     </YStack>
   );
 }

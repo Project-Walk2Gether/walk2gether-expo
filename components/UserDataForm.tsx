@@ -1,6 +1,6 @@
+import { COLORS } from "@/styles/colors";
 import React, { useEffect, useRef, useState } from "react";
 import { Input, Text, YStack } from "tamagui";
-import { COLORS } from "../styles/colors";
 import { ActionButton } from "./ActionButton";
 import { PlaceData, PlacesAutocomplete } from "./UI/PlacesAutocomplete";
 

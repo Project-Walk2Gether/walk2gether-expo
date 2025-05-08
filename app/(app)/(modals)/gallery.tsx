@@ -1,13 +1,18 @@
-import { db } from "config/firebase"";
-import { collection, collectionGroup, orderBy, query, where } from "@react-native-firebase/firestore";
+import { db } from "@/config/firebase";
+import { COLORS } from "@/styles/colors";
+import { useQuery } from "@/utils/firestore";
+import {
+  collectionGroup,
+  orderBy,
+  query,
+  where,
+} from "@react-native-firebase/firestore";
 import { ChevronLeft, ChevronRight, X } from "@tamagui/lucide-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef } from "react";
 import { Dimensions, FlatList } from "react-native";
 import { Button, Image, Spinner, Text, View, XStack, YStack } from "tamagui";
 import { Attachment, Message } from "walk2gether-shared";
-import { COLORS } from "../../../styles/colors";
-import { useQuery } from "../../../utils/firestore";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -54,7 +59,7 @@ export default function GalleryScreen() {
 
     let globalIndex = 0;
     // Find the specified message
-    const messageIndex = messages.findIndex(msg => msg.id === messageId);
+    const messageIndex = messages.findIndex((msg) => msg.id === messageId);
 
     if (messageIndex === -1) return 0;
 
@@ -62,14 +67,19 @@ export default function GalleryScreen() {
     for (let i = 0; i < messageIndex; i++) {
       const msg = messages[i];
       if (msg.attachments) {
-        globalIndex += msg.attachments.filter(att => att.type === 'image').length;
+        globalIndex += msg.attachments.filter(
+          (att) => att.type === "image"
+        ).length;
       }
     }
 
     // Add the index of the specific attachment in the target message
     const targetMessage = messages[messageIndex];
-    const imageAttachments = targetMessage.attachments?.filter(att => att.type === 'image') || [];
-    return globalIndex + Math.min(initialSelectedIndex, imageAttachments.length - 1);
+    const imageAttachments =
+      targetMessage.attachments?.filter((att) => att.type === "image") || [];
+    return (
+      globalIndex + Math.min(initialSelectedIndex, imageAttachments.length - 1)
+    );
   }, [messages, messageId, initialSelectedIndex]);
 
   // Once images are loaded, scroll to the calculated index

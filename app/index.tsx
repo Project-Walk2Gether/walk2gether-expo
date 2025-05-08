@@ -1,8 +1,8 @@
+import { useAuth } from "@/context/AuthContext";
 import { Redirect } from "expo-router";
 import React from "react";
 import { ActivityIndicator } from "react-native";
 import { YStack } from "tamagui";
-import { useAuth } from "../context/AuthContext";
 
 export default function IndexScreen() {
   const { user, loading, claims } = useAuth();

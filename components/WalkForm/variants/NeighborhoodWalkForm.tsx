@@ -1,10 +1,10 @@
+import DateTimeField from "@/components/WalkForm/components/DateTimeField";
+import DurationField from "@/components/WalkForm/components/DurationField";
+import FormProvider from "@/components/WalkForm/components/FormProvider";
 import React from "react";
 import { YStack } from "tamagui";
 import { NeighborhoodWalk, neighborhoodWalkSchema } from "walk2gether-shared";
 import LocationAutocomplete from "../../LocationAutocomplete";
-import DateTimeField from "../components/DateTimeField";
-import DurationField from "../components/DurationField";
-import FormProvider from "../components/FormProvider";
 
 interface NeighborhoodWalkFormProps {
   initialValues: Partial<NeighborhoodWalk>;

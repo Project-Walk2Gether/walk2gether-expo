@@ -1,8 +1,8 @@
+import { useUserData } from "@/context/UserDataContext";
 import { Stack } from "expo-router";
 import React from "react";
 import QRCode from "react-native-qrcode-svg";
 import { Spinner, Text, YStack } from "tamagui";
-import { useUserData } from "../../../context/UserDataContext";
 
 export default function QrCodeScreen() {
   const { userData, loading } = useUserData();

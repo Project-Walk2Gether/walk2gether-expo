@@ -1,3 +1,6 @@
+import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
+import { COLORS } from "@/styles/colors";
 import firestore from "@react-native-firebase/firestore";
 import { AlertTriangle, ArrowLeft, Flag } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -11,9 +14,6 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import { useAuth } from "../../../context/AuthContext";
-import { useFlashMessage } from "../../../context/FlashMessageContext";
-import { COLORS } from "../../../styles/colors";
 
 export default function UnfriendScreen() {
   const params = useLocalSearchParams<{
@@ -63,7 +63,10 @@ export default function UnfriendScreen() {
       if (reportUser) {
         showMessage(`You've removed and reported ${friendName}`, "success");
       } else {
-        showMessage(`You've removed ${friendName} from your friends`, "success");
+        showMessage(
+          `You've removed ${friendName} from your friends`,
+          "success"
+        );
       }
 
       // Navigate back to the previous screen (friends list)

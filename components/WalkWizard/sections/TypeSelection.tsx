@@ -1,6 +1,6 @@
+import { useWalkForm } from "@/context/WalkFormContext";
 import React from "react";
 import { YStack } from "tamagui";
-import { useWalkForm } from "../../../context/WalkFormContext";
 import WalkTypeCard from "../../WalkTypeCard";
 import WizardWrapper from "./WizardWrapper";
 

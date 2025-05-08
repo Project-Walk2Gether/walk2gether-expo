@@ -1,12 +1,12 @@
-import { useAuth } from "context/AuthContext"";
+import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
+import { useAuth } from "@/context/AuthContext";
+import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
+import { COLORS } from "@/styles/colors";
+import { getAndSyncPushToken } from "@/utils/getAndSyncPushToken";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
 import { Button, Card, Spinner, Text, XStack, YStack } from "tamagui";
-import AuthScenicLayout from "../../../components/Auth/AuthScenicLayout";
-import { useNotificationPermissions } from "../../../hooks/useNotificationPermissions";
-import { COLORS } from "../../../styles/colors";
-import { getAndSyncPushToken } from "../../../utils/getAndSyncPushToken";
 
 const { height } = Dimensions.get("window");
 

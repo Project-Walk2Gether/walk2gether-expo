@@ -1,6 +1,6 @@
+import { useUpdates } from "@/context/UpdatesContext";
 import { useEffect } from "react";
 import { AppState, AppStateStatus } from "react-native";
-import { useUpdates } from "../context/UpdatesContext";
 
 /**
  * Custom hook that checks for updates when the app opens

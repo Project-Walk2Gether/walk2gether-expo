@@ -1,9 +1,8 @@
-import firestore from "@react-native-firebase/firestore";
+import { COLORS } from "@/styles/colors";
+import { useDoc } from "@/utils/firestore";
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
-import { Walk, WithId } from "walk2gether-shared";
-import { useDoc } from "../../utils/firestore";
-import { COLORS } from "../../styles/colors";
+import { Walk } from "walk2gether-shared";
 import WalkCard from "./index";
 
 interface WalkCardFromIdProps {
@@ -26,12 +25,12 @@ export const WalkCardFromId: React.FC<WalkCardFromIdProps> = ({
   // Show loading state while fetching data
   if (status === "loading" || !walk) {
     return (
-      <View 
-        style={{ 
-          height: 150, 
-          justifyContent: "center", 
+      <View
+        style={{
+          height: 150,
+          justifyContent: "center",
           alignItems: "center",
-          marginVertical: 10
+          marginVertical: 10,
         }}
       >
         <ActivityIndicator color={COLORS.primary} />

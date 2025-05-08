@@ -1,5 +1,5 @@
+import { appVersion } from "@/utils/version";
 import { Text, YStack } from "tamagui";
-import { appVersion } from "../../utils/version";
 
 export default function BottomRow() {
   return (

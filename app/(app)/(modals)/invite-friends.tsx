@@ -1,32 +1,21 @@
+import { BrandGradient } from "@/components/UI";
+import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useUserData } from "@/context/UserDataContext";
 import { Copy, Share2 } from "@tamagui/lucide-icons";
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
-import { Share } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
-  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Share,
   TouchableWithoutFeedback,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import {
-  Button,
-  Card,
-  Input,
-  Spinner,
-  Text,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
-import { BrandGradient } from "../../../components/UI";
-import { useFlashMessage } from "../../../context/FlashMessageContext";
-import { useUserData } from "../../../context/UserDataContext";
-import { callApi } from "../../../utils/api";
+import { Button, Card, Spinner, Text, View, XStack, YStack } from "tamagui";
 
 export default function InviteFriendsScreen() {
   const router = useRouter();
@@ -55,9 +44,9 @@ export default function InviteFriendsScreen() {
       setSharing(true);
       const result = await Share.share({
         message: message,
-        title: "Join me on Walk2Gether!"
+        title: "Join me on Walk2Gether!",
       });
-      
+
       if (result.action === Share.sharedAction) {
         showMessage("Invitation shared successfully!", "success");
       }
@@ -129,7 +118,9 @@ export default function InviteFriendsScreen() {
                       </Button>
                     </XStack>
                     <Text fontSize="$2.5" color="#666" marginTop="$1">
-                      Tap "Copy" to copy a personalized invitation message with your link. You can then share this message with friends via your preferred messaging app or social media platform.
+                      Tap "Copy" to copy a personalized invitation message with
+                      your link. You can then share this message with friends
+                      via your preferred messaging app or social media platform.
                     </Text>
                   </YStack>
 
@@ -147,11 +138,12 @@ export default function InviteFriendsScreen() {
                     <Text fontSize="$4" fontWeight="500" color="#333">
                       Share Invitation
                     </Text>
-                    
+
                     <Text fontSize="$2.5" color="#666">
-                      Tap the Share button below to invite friends using your device's sharing options (Messages, WhatsApp, Email, etc).
+                      Tap the Share button below to invite friends using your
+                      device's sharing options (Messages, WhatsApp, Email, etc).
                     </Text>
-                    
+
                     {/* Share button */}
                     <Button
                       backgroundColor="#7C5F45"

@@ -1,3 +1,7 @@
+import { ActionButton } from "@/components/ActionButton";
+import { auth_instance } from "@/config/firebase";
+import { COLORS } from "@/styles/colors";
+import { writeLogIfEnabled } from "@/utils/logging";
 import { Ionicons } from "@expo/vector-icons";
 import crashlytics from "@react-native-firebase/crashlytics";
 import { isDevice } from "expo-device";
@@ -5,10 +9,6 @@ import * as Updates from "expo-updates";
 import React from "react";
 import { showMessage } from "react-native-flash-message";
 import { Card, H3, Paragraph, Separator, Text, XStack, YStack } from "tamagui";
-import { ActionButton } from "../../components/ActionButton";
-import { auth_instance } from "../../config/firebase";
-import { COLORS } from "../../styles/colors";
-import { writeLogIfEnabled } from "../../utils/logging";
 import { ErrorContext } from "./ErrorContext";
 
 interface Props {
