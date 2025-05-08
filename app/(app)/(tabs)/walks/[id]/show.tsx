@@ -6,9 +6,11 @@ import {
   serverTimestamp,
 } from "@react-native-firebase/firestore";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import React, { useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import MessageForm from "../../../../../components/Chat/MessageForm";
-import MessageList from "../../../../../components/Chat/MessageList";
+import MessageList, {
+  MessageListRef,
+} from "../../../../../components/Chat/MessageList";
 import { firestore_instance } from "../../../../../config/firebase";
 import { useAuth } from "../../../../../context/AuthContext";
 import { useUserData } from "../../../../../context/UserDataContext";
@@ -17,7 +19,7 @@ import { useDoc, useQuery } from "../../../../../utils/firestore";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
 import { KeyboardAvoidingView } from "react-native";
-import { Text, useTheme, View, YStack } from "tamagui";
+import { Text, View, YStack } from "tamagui";
 import { Message, ParticipantWithRoute, Walk } from "walk2gether-shared";
 import FullScreenLoader from "../../../../../components/FullScreenLoader";
 import HeaderBackButton from "../../../../../components/HeaderBackButton";
@@ -38,26 +40,50 @@ export default function WalkScreen() {
   const messagesRef = collection(firestore_instance, `walks/${id}/messages`);
   const q = query(messagesRef, orderBy("createdAt", "asc"));
   const { docs: messages } = useQuery<Message>(q);
-  const theme = useTheme();
 
   // Get all participants for the walk
   const participants = useWalkParticipants(id);
 
-  // Reference for chat bottom sheet
+  // References for chat bottom sheet and message list
   const chatBottomSheetRef = useRef<BottomSheet>(null);
+  const messageListRef = useRef<MessageListRef>(null);
 
   // Define snap points for the chat bottom sheet (30% and 100% of screen height)
   // Get collapsed height for calculations (30% of screen height)
   const collapsedHeight = 230;
   const chatSnapPoints = useMemo(() => [collapsedHeight, "70%", "100%"], []);
 
+  // Function to handle when message form takes focus
+  const handleMessageFormFocus = useCallback(() => {
+    // Fully expand the bottom sheet to the maximum height (100%)
+    chatBottomSheetRef.current?.snapToIndex(2);
+
+    // Scroll to the bottom of the message list
+    if (messageListRef.current) {
+      messageListRef.current.scrollToBottom();
+    }
+  }, []);
+
   // Check if the current user is the walk owner
   const isWalkOwner = walk?.createdByUid === user?.uid;
 
   // Handle sending a message with optional attachments
-  const handleSendMessage = ({ message, attachments }: { message?: string, attachments?: any[] }) => {
+  const handleSendMessage = ({
+    message,
+    attachments,
+  }: {
+    message?: string;
+    attachments?: any[];
+  }) => {
     // Require either text or attachments
-    if ((!message || !message.trim()) && (!attachments || attachments.length === 0) || !user || !id || !userData) return;
+    if (
+      ((!message || !message.trim()) &&
+        (!attachments || attachments.length === 0)) ||
+      !user ||
+      !id ||
+      !userData
+    )
+      return;
 
     try {
       const messagesRef = collection(
@@ -66,11 +92,12 @@ export default function WalkScreen() {
       );
       addDoc(messagesRef, {
         senderId: user.uid,
-        senderName: userData.name || user.displayName || 'Unknown User',
-        message: message || '',
+        senderName: userData.name || user.displayName || "Unknown User",
+        message: message || "",
         createdAt: serverTimestamp(),
         read: false,
         attachments: attachments || [],
+        walkId: id, // Explicitly set the walkId for the message
       });
     } catch (error) {
       console.error("Error sending message:", error);
@@ -169,6 +196,7 @@ export default function WalkScreen() {
               </Text>
             </View>
             <MessageList
+              ref={messageListRef}
               messages={messages}
               currentUserId={user?.uid || ""}
               loading={false}
@@ -197,6 +225,7 @@ export default function WalkScreen() {
               }}
               chatId={id}
               senderId={user?.uid || ""}
+              onFocus={handleMessageFormFocus}
             />
           </YStack>
         </KeyboardAvoidingView>

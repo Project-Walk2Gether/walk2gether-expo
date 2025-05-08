@@ -1,16 +1,11 @@
 import {
   addDoc,
-  arrayUnion,
   collection,
-  collectionGroup,
-  doc,
   FirebaseFirestoreTypes,
-  getDoc,
   limit,
   orderBy,
   query,
   Timestamp,
-  updateDoc,
   where,
 } from "@react-native-firebase/firestore";
 import { addHours } from "date-fns";
@@ -32,15 +27,11 @@ interface WalksContextType {
   activeWalks: WithId<Walk>[];
   walksLoading: boolean; // Loading state for fetching walks
   submitting: boolean; // Loading state for mutations (create, RSVP, etc)
-  userRSVPs: string[]; // Array of walk IDs the user has RSVPed to
   currentWalk: Walk | null;
   createWalk: (
     walk: Walk
   ) => Promise<FirebaseFirestoreTypes.DocumentReference<Walk>>;
-  checkIn: (walkId: string) => Promise<void>;
   getWalkById: (walkId: string) => Walk | undefined;
-  cancelRSVP: (walkId: string) => Promise<void>;
-  hasUserRSVPed: (walkId: string) => boolean;
 }
 
 const WalksContext = createContext<WalksContextType | undefined>(undefined);
@@ -80,36 +71,18 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     );
   }, [user, oneHourAgo]);
 
-  // Create query for user RSVPs
-  const userRSVPsQuery = useMemo(() => {
-    if (!user) return undefined;
-
-    return query(
-      collectionGroup(firestore_instance, "rsvps"),
-      where("userId", "==", user.uid)
-    );
-  }, [user]);
-
   // Use the useQuery hook to fetch walks
   const { docs: currentWalks, status: walksStatus } =
     useQuery<WithId<Walk>>(currentWalksQuery);
 
-  // Use the useQuery hook to fetch RSVPs
-  const { docs: rsvpDocs, status: rsvpsStatus } = useQuery(userRSVPsQuery);
-
-  // Extract walkIds from RSVP docs
-  const userRSVPs = useMemo(() => {
-    return rsvpDocs.map((rsvp) => rsvp.walkId).filter(Boolean) as string[];
-  }, [rsvpDocs]);
-
   // Loading state for fetching data
-  const walksLoading = walksStatus === "loading" || rsvpsStatus === "loading";
+  const walksLoading = walksStatus === "loading";
 
   // Split walks into active and upcoming
   const { activeWalks, upcomingWalks } = useMemo(() => {
     const now = new Date();
     const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
-    
+
     return currentWalks.reduce(
       (acc, walk) => {
         // If walk date is less than 30 minutes from now, it's active
@@ -138,54 +111,25 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     }
 
     try {
-      const walksRef = collection(firestore_instance, "walks");
+      const walksRef = collection(
+        firestore_instance,
+        "walks"
+      ) as FirebaseFirestoreTypes.CollectionReference<Walk>;
 
       // Create the walk document
       const newWalk: Walk = {
         ...walkData,
         active: false,
-        rsvpdUserIds: [],
         createdByUid: user!.uid,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
 
-      const walkRef = await addDoc(walksRef, newWalk);
+      const walkRef = await addDoc<Walk>(walksRef, newWalk);
       console.log("Walk created successfully:", walkRef.id);
-      return walkRef.id; // Return the ID
+      return walkRef; // Return the ID
     } catch (error) {
       console.error("Error creating walk:", error);
-      throw error;
-    }
-  };
-
-  const checkIn = async (walkId: string) => {
-    if (!user) {
-      throw new Error("User must be logged in to check in");
-    }
-
-    try {
-      const walkRef = doc(firestore_instance, "walks", walkId);
-      const walkDoc = await getDoc(walkRef);
-
-      if (!walkDoc.exists) {
-        throw new Error("Walk not found");
-      }
-
-      const walkData = walkDoc.data();
-
-      // Add user to the checkedInUsers array if not already present
-      const checkedInUsers = walkData?.checkedInUsers || [];
-
-      if (!checkedInUsers.includes(user.uid)) {
-        await updateDoc(walkRef, {
-          checkedInUsers: arrayUnion(user.uid),
-        });
-      }
-
-      console.log("User checked in successfully:", user.uid);
-    } catch (error) {
-      console.error("Error checking in to walk:", error);
       throw error;
     }
   };
@@ -202,9 +146,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
         activeWalks,
         walksLoading,
         submitting,
-        userRSVPs,
         createWalk,
-        checkIn,
         currentWalk,
         getWalkById,
       }}

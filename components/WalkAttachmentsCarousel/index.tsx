@@ -5,8 +5,8 @@ import {
   query,
 } from "@react-native-firebase/firestore";
 import React, { useMemo, useState } from "react";
-import { Dimensions, FlatList, Image } from "react-native";
-import { Spinner, Text, View, XStack, YStack } from "tamagui";
+import { FlatList, Image, LayoutChangeEvent } from "react-native";
+import { Text, XStack, YStack, Spinner, View } from "tamagui";
 import {
   Attachment as AttachmentType,
   Message,
@@ -26,7 +26,7 @@ const WalkAttachmentsCarousel: React.FC<WalkAttachmentsCarouselProps> = ({
   maxAttachments = 10,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const screenWidth = Dimensions.get("window").width;
+  const [carouselWidth, setCarouselWidth] = useState(0);
 
   // Query the messages collection for the walk - we'll filter for attachments in the code
   const messagesQuery = walk.id
@@ -96,9 +96,14 @@ const WalkAttachmentsCarousel: React.FC<WalkAttachmentsCarouselProps> = ({
   }
 
   return (
-    <YStack width="100%">
+    <YStack 
+      width="100%"
+      onLayout={(event: LayoutChangeEvent) => {
+        const { width } = event.nativeEvent.layout;
+        setCarouselWidth(width);
+      }}>
       {loading ? (
-        <View height={200} justifyContent="center" alignItems="center">
+        <View height="$12" justifyContent="center" alignItems="center">
           <Spinner size="large" color="$blue10" />
         </View>
       ) : (
@@ -111,11 +116,11 @@ const WalkAttachmentsCarousel: React.FC<WalkAttachmentsCarouselProps> = ({
             onScroll={handleScroll}
             scrollEventThrottle={16}
             snapToAlignment="center"
-            snapToInterval={screenWidth}
+            snapToInterval={carouselWidth > 0 ? carouselWidth : undefined}
             decelerationRate="fast"
             style={{ borderTopRightRadius: 14, borderTopLeftRadius: 14 }}
             renderItem={({ item }) => (
-              <View width={screenWidth} height={220}>
+              <View style={{ width: carouselWidth, height: 220 }}>
                 <Image
                   source={{ uri: item.uri }}
                   style={{
@@ -163,9 +168,9 @@ const WalkAttachmentsCarousel: React.FC<WalkAttachmentsCarouselProps> = ({
               {attachments.map((_, index) => (
                 <View
                   key={index}
-                  width={8}
-                  height={8}
-                  borderRadius={4}
+                  width="$1.5"
+                  height="$1.5"
+                  borderRadius="$1"
                   backgroundColor={
                     activeIndex === index
                       ? "rgba(255, 255, 255, 0.9)"

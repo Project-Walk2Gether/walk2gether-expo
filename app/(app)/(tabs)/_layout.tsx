@@ -1,4 +1,4 @@
-import { useUserData } from "@/context/UserDataContext";
+import { useUserData } from "context/UserDataContext"";
 import { Footprints, Image, User, Users } from "@tamagui/lucide-icons";
 import { Redirect, Tabs } from "expo-router";
 import React from "react";

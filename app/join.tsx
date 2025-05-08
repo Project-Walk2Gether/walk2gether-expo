@@ -1,16 +1,16 @@
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { ActionButton } from "components/ActionButton";
+import AuthScenicLayout from "components/Auth/AuthScenicLayout";
+import { UserAvatar } from "components/UserAvatar";
+import { firestore_instance } from "config/firebase";
+import { useAuth } from "context/AuthContext";
+import { useFlashMessage } from "context/FlashMessageContext";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Button, Spinner, Text, XStack, YStack } from "tamagui";
-import AuthScenicLayout from "../components/Auth/AuthScenicLayout";
-import { UserAvatar } from "../components/UserAvatar";
-import { firestore_instance } from "../config/firebase";
-import { useAuth } from "../context/AuthContext";
-import { useFlashMessage } from "../context/FlashMessageContext";
-import { useQuery } from "../utils/firestore";
-import { createFriendship } from "../utils/invitation";
-import { getInitials } from "../utils/userUtils";
+import { useQuery } from "utils/firestore";
+import { createFriendship } from "utils/invitation";
+import { getInitials } from "utils/userUtils";
 
 export default function JoinScreen() {
   const { code } = useLocalSearchParams<{ code?: string }>();

@@ -5,6 +5,7 @@ import {
   MapPin,
 } from "@tamagui/lucide-icons";
 import { Redirect, useRouter } from "expo-router";
+import { useOnboarding } from "./_layout";
 import { Formik } from "formik";
 import React, { useRef, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -23,6 +24,7 @@ export default function CompleteYourProfile() {
   const { setUserData } = useUserData();
   const { signOut, user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const { goToNextScreen, referralInfo } = useOnboarding();
   const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
@@ -42,13 +44,30 @@ export default function CompleteYourProfile() {
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
-      // Save user profile data
-      await setUserData({
+      
+      // Prepare the data to save
+      const userData = {
         name: values.name,
         location: values.location,
         friendInvitationCode: values.friendInvitationCode,
-      });
-      router.replace("/onboarding/notification-permissions");
+      };
+      
+      // If we have referral info, add it to the user data
+      if (referralInfo) {
+        console.log("Including referral info in profile data:", referralInfo);
+      }
+      
+      // Save user profile data
+      await setUserData(userData);
+      
+      // Create friendship if needed
+      if (referralInfo?.referredByUid && referralInfo?.acceptFriendship) {
+        console.log("Creating friendship with", referralInfo.referredByUid);
+        // Actual friendship creation would happen elsewhere
+        // For example, in the auth.tsx file or in a Firebase function
+      }
+      
+      goToNextScreen();
     } catch (error) {
       console.error("Error saving profile:", error);
     } finally {

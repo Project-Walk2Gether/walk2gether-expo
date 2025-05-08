@@ -16,6 +16,7 @@ import { useQuery } from "../../utils/firestore";
 import { getDistanceToLocation } from "../../utils/locationUtils";
 import { getWalkTypeLabel } from "../../utils/walkType";
 import { getWalkStatus } from "../../utils/walkUtils";
+import { UserAvatar } from "../UserAvatar";
 import WalkAttachmentsCarousel from "../WalkAttachmentsCarousel";
 
 // Props interface for WalkCard
@@ -132,12 +133,12 @@ const WalkCard: React.FC<WalkCardProps> = ({
         onPress={handlePress}
       >
         <XStack
-          p="$2"
           alignItems="center"
           justifyContent="space-between"
           flexShrink={0}
         >
           <XStack alignItems="center" gap={8}>
+            <UserAvatar uid={walk.createdByUid} size={32} />
             <Text
               fontSize={18}
               fontWeight="600"
@@ -147,47 +148,48 @@ const WalkCard: React.FC<WalkCardProps> = ({
               flex={1}
             >
               {isMine
-                ? getWalkTypeLabel(walk.type)
+                ? "Your " + getWalkTypeLabel(walk.type)
                 : `${walk.organizerName}'s Friend walk`}
             </Text>
-            {isMine && (
-              <XStack
-                backgroundColor={COLORS.primary}
-                px={8}
-                py={4}
-                borderRadius={4}
-                alignItems="center"
-                justifyContent="center"
-                ml={4}
-              >
-                <Text fontSize={12} color="white" fontWeight="500">
-                  {status === "past" ? "You hosted" : "You're hosting"}
-                </Text>
-              </XStack>
-            )}
-            {status !== "active" && status !== "past" && (
-              <XStack
-                backgroundColor="#2196f3"
-                paddingHorizontal={8}
-                paddingVertical={4}
-                borderRadius={4}
-                alignItems="center"
-                justifyContent="center"
-                ml={4}
-              >
-                <Text fontSize={12} color="white" fontWeight="500">
-                  Upcoming
-                </Text>
-              </XStack>
-            )}
           </XStack>
         </XStack>
 
-        <XStack alignItems="center" gap={6}>
-          <Calendar size={16} color="#666" />
-          <Text fontSize={14} color="#666">
-            {format(walk.date.toDate(), "EEE, MMM d 'at' h:mm a")}
-          </Text>
+        <XStack alignItems="center" gap={6} justifyContent="space-between">
+          <XStack alignItems="center" gap={6}>
+            <Calendar size={16} color="#666" />
+            <Text fontSize={14} color="#666">
+              {format(walk.date.toDate(), "EEE, MMM d 'at' h:mm a")}
+            </Text>
+          </XStack>
+          {status === "active" && (
+            <XStack
+              backgroundColor="#4caf50"
+              paddingHorizontal={8}
+              paddingVertical={4}
+              borderRadius={4}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text fontSize={12} color="white" fontWeight="500">
+                Happening now!
+              </Text>
+            </XStack>
+          )}
+          {status !== "active" && status !== "past" && (
+            <XStack
+              backgroundColor="#2196f3"
+              paddingHorizontal={8}
+              paddingVertical={4}
+              borderRadius={4}
+              alignItems="center"
+              justifyContent="center"
+              ml={4}
+            >
+              <Text fontSize={12} color="white" fontWeight="500">
+                Upcoming
+              </Text>
+            </XStack>
+          )}
         </XStack>
         <XStack alignItems="center" gap={6}>
           <Timer size={16} color="#666" />
@@ -310,22 +312,6 @@ const WalkCard: React.FC<WalkCardProps> = ({
                 </Text>
               </Button>
             )}
-          </XStack>
-        )}
-        {status === "active" && (
-          <XStack>
-            <XStack
-              backgroundColor="#4caf50"
-              paddingHorizontal={8}
-              paddingVertical={4}
-              borderRadius={4}
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Text fontSize={12} color="white" fontWeight="500">
-                Happening now!
-              </Text>
-            </XStack>
           </XStack>
         )}
       </YStack>

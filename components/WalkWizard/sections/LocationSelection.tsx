@@ -1,4 +1,4 @@
-import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
+import { GOOGLE_MAPS_API_KEY } from "config/maps"";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import {

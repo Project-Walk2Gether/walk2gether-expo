@@ -1,11 +1,24 @@
 import { Camera, ImagePlus, Send, X } from "@tamagui/lucide-icons";
+import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
-import { Button, Image, Input, ScrollView, XStack, YStack } from "tamagui";
+import {
+  Button,
+  Image,
+  Input,
+  ScrollView,
+  Spinner,
+  XStack,
+  YStack,
+} from "tamagui";
 import { Attachment, Message } from "walk2gether-shared";
 import { COLORS } from "../../styles/colors";
-import * as ImagePicker from "expo-image-picker";
-import { ImagePickerOption, pickImage, uploadMessageAttachments } from "../../utils/imageUpload";
+import {
+  ImagePickerOption,
+  pickImage,
+  uploadMessageAttachments,
+} from "../../utils/imageUpload";
+import Menu from "../Menu";
 
 type Props = {
   onSendMessage: (message: Partial<Message>) => void;
@@ -13,6 +26,7 @@ type Props = {
   containerStyle?: any;
   chatId: string;
   senderId: string;
+  onFocus?: () => void;
 };
 
 export default function MessageForm({
@@ -21,9 +35,12 @@ export default function MessageForm({
   containerStyle = {},
   chatId,
   senderId,
+  onFocus,
 }: Props) {
   const [messageText, setMessageText] = useState("");
-  const [selectedImages, setSelectedImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+  const [selectedImages, setSelectedImages] = useState<
+    ImagePicker.ImagePickerAsset[]
+  >([]);
   const [isUploading, setIsUploading] = useState(false);
 
   // Remove a specific image from the selection
@@ -39,41 +56,19 @@ export default function MessageForm({
         setSelectedImages((prev) => [...prev, ...assets]);
       }
     } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to select image');
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Failed to select image");
     }
-  };
-
-  // Show image picker options
-  const showImagePickerOptions = () => {
-    Alert.alert(
-      'Add Photos',
-      'Choose an option',
-      [
-        {
-          text: 'Take Photo',
-          onPress: () => handleImagePicker('camera'),
-        },
-        {
-          text: 'Choose from Library',
-          onPress: () => handleImagePicker('multiple'),
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ],
-      { cancelable: true }
-    );
   };
 
   const handleSendMessage = async () => {
     // Require either text or images to send a message
-    if ((!messageText.trim() && selectedImages.length === 0) || isUploading) return;
-    
+    if ((!messageText.trim() && selectedImages.length === 0) || isUploading)
+      return;
+
     try {
       setIsUploading(true);
-      
+
       // Upload attachments if there are any
       let attachments: Attachment[] = [];
       if (selectedImages.length > 0) {
@@ -88,13 +83,13 @@ export default function MessageForm({
         message: messageText.trim(),
         attachments: attachments.length > 0 ? attachments : undefined,
       };
-      
+
       onSendMessage(message);
       setMessageText("");
       setSelectedImages([]);
     } catch (error) {
-      console.error('Error sending message:', error);
-      Alert.alert('Error', 'Failed to send message');
+      console.error("Error sending message:", error);
+      Alert.alert("Error", "Failed to send message");
     } finally {
       setIsUploading(false);
     }
@@ -141,7 +136,7 @@ export default function MessageForm({
             </XStack>
           </ScrollView>
         )}
-        
+
         {/* Message input and buttons */}
         <XStack
           backgroundColor="white"
@@ -150,23 +145,41 @@ export default function MessageForm({
           alignItems="center"
           gap="$2"
         >
-          <XStack gap="$1" alignItems="center">
-            <Button
-              size="$3"
-              circular
-              backgroundColor="transparent"
-              onPress={() => handleImagePicker('camera')}
-              icon={<Camera size="$1.5" color={COLORS.primary} />}
-            />
-            <Button
-              size="$3"
-              circular
-              backgroundColor="transparent"
-              onPress={() => handleImagePicker('multiple')}
-              icon={<ImagePlus size="$1.5" color={COLORS.primary} />}
-            />
-          </XStack>
-          
+          <Menu
+            title="Add Photos"
+            snapPoints={[30]}
+            items={[
+              {
+                label: "Take a photo",
+                icon: <Camera size="$1" color={COLORS.primary} />,
+                onPress: () => handleImagePicker("camera"),
+                buttonProps: {
+                  backgroundColor: "transparent",
+                  borderColor: "$gray5",
+                  borderWidth: 1,
+                },
+              },
+              {
+                label: "Select photos",
+                icon: <ImagePlus size="$1" color={COLORS.primary} />,
+                onPress: () => handleImagePicker("multiple"),
+                buttonProps: {
+                  backgroundColor: "transparent",
+                  borderColor: "$gray5",
+                  borderWidth: 1,
+                },
+              },
+            ]}
+            trigger={
+              <Button
+                size="$3"
+                circular
+                backgroundColor="transparent"
+                icon={<ImagePlus size="$1.5" color={COLORS.primary} />}
+              />
+            }
+          />
+
           <Input
             flex={1}
             placeholder="Type a message..."
@@ -181,20 +194,33 @@ export default function MessageForm({
             paddingHorizontal="$3"
             paddingVertical="$2"
             onSubmitEditing={handleSendMessage}
+            onFocus={onFocus}
             disabled={isUploading}
           />
-          
+
           <Button
             size="$4"
             circular
             backgroundColor="#4EB1BA"
             onPress={handleSendMessage}
-            disabled={(!messageText.trim() && selectedImages.length === 0) || isUploading}
-            icon={isUploading ? undefined : <Send size="$1" color="white" />}
-            opacity={(!messageText.trim() && selectedImages.length === 0) || isUploading ? 0.5 : 1}
-          >
-            {isUploading && "Uploading..."}
-          </Button>
+            disabled={
+              (!messageText.trim() && selectedImages.length === 0) ||
+              isUploading
+            }
+            icon={
+              isUploading ? (
+                <Spinner size="small" color="white" />
+              ) : (
+                <Send size="$1" color="white" />
+              )
+            }
+            opacity={
+              (!messageText.trim() && selectedImages.length === 0) ||
+              isUploading
+                ? 0.5
+                : 1
+            }
+          />
         </XStack>
       </YStack>
     </KeyboardAvoidingView>

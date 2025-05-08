@@ -1,6 +1,7 @@
-import { Copy, Plus, Send, X } from "@tamagui/lucide-icons";
+import { Copy, Share2 } from "@tamagui/lucide-icons";
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
+import { Share } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
@@ -31,17 +32,7 @@ export default function InviteFriendsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { userData } = useUserData();
-  const [phoneNumbers, setPhoneNumbers] = useState<string[]>([""]);
-  const [sending, setSending] = useState(false);
-  const [sendResult, setSendResult] = useState<{
-    success: boolean;
-    summary?: {
-      total: number;
-      successful: number;
-      failed: number;
-    };
-    error?: string;
-  } | null>(null);
+  const [sharing, setSharing] = useState(false);
 
   const invitationUrl = `https://projectwalk2gether.org/join?code=${userData?.friendInvitationCode}`;
   const message = `Want to walk with me using the Walk2Gether app? Use this link to add me as a friend! \n\n${invitationUrl}`;
@@ -59,66 +50,22 @@ export default function InviteFriendsScreen() {
     }
   };
 
-  const handleAddPhoneNumber = () => {
-    setPhoneNumbers([...phoneNumbers, ""]);
-  };
-
-  const handleRemovePhoneNumber = (index: number) => {
-    if (phoneNumbers.length > 1) {
-      setPhoneNumbers(phoneNumbers.filter((_, i) => i !== index));
-    } else {
-      // If it's the last one, just clear it instead of removing
-      setPhoneNumbers([""]);
-    }
-  };
-
-  const handlePhoneNumberChange = (text: string, index: number) => {
-    const newPhoneNumbers = [...phoneNumbers];
-    newPhoneNumbers[index] = text;
-    setPhoneNumbers(newPhoneNumbers);
-  };
-
-  const handleSendInvitations = async () => {
-    // Filter out empty phone numbers
-    const validPhoneNumbers = phoneNumbers.filter(
-      (phone) => phone.trim() !== ""
-    );
-
-    if (validPhoneNumbers.length === 0) {
-      Alert.alert("Error", "Please add at least one phone number");
-      return;
-    }
-
-    setSending(true);
-    setSendResult(null);
-
+  const handleShare = async () => {
     try {
-      // Make the API call to our Firebase function using the callApi utility
-      const response = await callApi("sms/send-invitations", {
-        phoneNumbers: validPhoneNumbers,
+      setSharing(true);
+      const result = await Share.share({
         message: message,
+        title: "Join me on Walk2Gether!"
       });
-
-      console.log("SMS invitation response:", response);
-
-      setSendResult({
-        success: true,
-        summary: response.summary,
-      });
-
-      // Clear phone numbers on success
-      if (response.data.success) {
-        setPhoneNumbers([""]);
+      
+      if (result.action === Share.sharedAction) {
+        showMessage("Invitation shared successfully!", "success");
       }
     } catch (error) {
-      console.error("Error sending SMS invitations:", error);
-      setSendResult({
-        success: false,
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      console.error("Error sharing invitation:", error);
+      showMessage("Failed to share invitation", "error");
     } finally {
-      setSending(false);
+      setSharing(false);
     }
   };
 
@@ -129,7 +76,7 @@ export default function InviteFriendsScreen() {
         style={{ flex: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <BrandGradient style={{ flex: 1 }}>
+          <BrandGradient variant="subtle" style={{ flex: 1 }}>
             <StatusBar style="light" />
             <Toast topOffset={10} />
             <View
@@ -181,6 +128,9 @@ export default function InviteFriendsScreen() {
                         Copy
                       </Button>
                     </XStack>
+                    <Text fontSize="$2.5" color="#666" marginTop="$1">
+                      Tap "Copy" to copy a personalized invitation message with your link. You can then share this message with friends via your preferred messaging app or social media platform.
+                    </Text>
                   </YStack>
 
                   {/* Or divider */}
@@ -192,103 +142,29 @@ export default function InviteFriendsScreen() {
                     <View height={1} backgroundColor="#ddd" flex={1} />
                   </XStack>
 
-                  {/* SMS Invitations section */}
+                  {/* Share section */}
                   <YStack gap="$2">
                     <Text fontSize="$4" fontWeight="500" color="#333">
-                      Send SMS Invitations
+                      Share Invitation
                     </Text>
-
-                    {/* Phone numbers input fields */}
-                    <YStack gap="$2">
-                      {phoneNumbers.map((phoneNumber, index) => (
-                        <XStack key={index} gap="$2" alignItems="center">
-                          <Input
-                            flex={1}
-                            size="$4"
-                            placeholder="Enter phone number"
-                            value={phoneNumber}
-                            onChangeText={(text) =>
-                              handlePhoneNumberChange(text, index)
-                            }
-                            keyboardType="phone-pad"
-                            autoCapitalize="none"
-                          />
-                          <Button
-                            size="$3"
-                            circular
-                            icon={
-                              index === phoneNumbers.length - 1 &&
-                              index === 0 ? (
-                                <Plus size="$1" color="white" />
-                              ) : (
-                                <X size="$1" color="white" />
-                              )
-                            }
-                            onPress={() =>
-                              index === phoneNumbers.length - 1 && index === 0
-                                ? handleAddPhoneNumber()
-                                : handleRemovePhoneNumber(index)
-                            }
-                            backgroundColor="#7C5F45"
-                          />
-                        </XStack>
-                      ))}
-
-                      {phoneNumbers.length > 0 &&
-                        phoneNumbers[phoneNumbers.length - 1] !== "" && (
-                          <Button
-                            size="$3"
-                            backgroundColor="transparent"
-                            color="#7C5F45"
-                            onPress={handleAddPhoneNumber}
-                            icon={<Plus size="$1" color="#7C5F45" />}
-                            marginTop="$1"
-                          >
-                            Add another number
-                          </Button>
-                        )}
-                    </YStack>
-
-                    {/* Send button */}
+                    
+                    <Text fontSize="$2.5" color="#666">
+                      Tap the Share button below to invite friends using your device's sharing options (Messages, WhatsApp, Email, etc).
+                    </Text>
+                    
+                    {/* Share button */}
                     <Button
                       backgroundColor="#7C5F45"
                       color="white"
                       size="$4"
-                      onPress={handleSendInvitations}
-                      icon={sending ? undefined : Send}
+                      onPress={handleShare}
+                      icon={sharing ? undefined : Share2}
                       height={50}
                       marginTop="$3"
-                      disabled={
-                        sending || phoneNumbers.every((p) => p.trim() === "")
-                      }
+                      disabled={sharing}
                     >
-                      {sending ? <Spinner color="white" /> : "Send Invitations"}
+                      {sharing ? <Spinner color="white" /> : "Share Invitation"}
                     </Button>
-
-                    {/* Results display */}
-                    {sendResult && (
-                      <YStack
-                        backgroundColor={
-                          sendResult.success ? "#e8f5e9" : "#ffebee"
-                        }
-                        borderRadius="$2"
-                        padding="$3"
-                        marginTop="$2"
-                      >
-                        <Text
-                          color={sendResult.success ? "#2e7d32" : "#c62828"}
-                          fontSize="$3.5"
-                        >
-                          {sendResult.success
-                            ? `Successfully sent ${
-                                sendResult.summary?.successful
-                              } of ${sendResult.summary?.total} invitation${
-                                sendResult.summary?.total !== 1 ? "s" : ""
-                              }.`
-                            : `Error sending invitations: ${sendResult.error}`}
-                        </Text>
-                      </YStack>
-                    )}
                   </YStack>
                 </YStack>
               </Card>

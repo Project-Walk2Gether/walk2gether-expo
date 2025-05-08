@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useImperativeHandle, forwardRef } from "react";
 import { ScrollView as RNScrollView } from "react-native";
 import { ScrollView, Spinner, Text, YStack } from "tamagui";
 import { Message as MessageType } from "walk2gether-shared";
@@ -13,17 +13,32 @@ type Props = {
   headerTitle?: React.ReactNode;
 };
 
-export default function MessageList({
-  messages,
-  loading = false,
-  onDeleteMessage,
-  currentUserId,
-}: Props) {
+export type MessageListRef = {
+  scrollToBottom: () => void;
+};
+
+const MessageList = forwardRef<MessageListRef, Props>((
+  {
+    messages,
+    loading = false,
+    onDeleteMessage,
+    currentUserId,
+  }, ref
+) => {
   const scrollViewRef = useRef<RNScrollView | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<MessageType | null>(
     null
   );
   const [optionsSheetOpen, setOptionsSheetOpen] = useState(false);
+  
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    scrollToBottom: () => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }
+  }));
 
   // Handle long press on message
   const handleLongPress = (message: MessageType) => {
@@ -91,4 +106,6 @@ export default function MessageList({
       />
     </>
   );
-}
+});
+
+export default MessageList;

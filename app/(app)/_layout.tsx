@@ -1,4 +1,4 @@
-import { FriendsProvider } from "@/context/FriendsContext";
+import { FriendsProvider } from "context/FriendsContext"";
 import { Redirect, Stack } from "expo-router";
 import React from "react";
 import { ActivityIndicator } from "react-native";

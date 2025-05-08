@@ -47,14 +47,12 @@ export const UpdatesProvider: React.FC<UpdatesProviderProps> = ({
       try {
         if (__DEV__) return;
 
-        if (!Updates.channel || Updates.channel.length === 0) {
-          console.log(`Checking for updates (current version: ${appVersion})`);
-          const updateStatus = await Updates.checkForUpdateAsync();
-          setUpdateAvailable(updateStatus.isAvailable);
+        console.log(`Checking for updates (current version: ${appVersion})`);
+        const updateStatus = await Updates.checkForUpdateAsync();
+        setUpdateAvailable(updateStatus.isAvailable);
 
-          if (updateStatus.isAvailable) {
-            console.log("Update available on launch");
-          }
+        if (updateStatus.isAvailable) {
+          console.log("Update available on launch");
         }
       } catch (error) {
         console.error("Error checking for initial update:", error);

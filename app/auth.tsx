@@ -86,20 +86,22 @@ export default function Auth() {
       });
       router.replace("/walks");
     } else {
-      // If there's a referredByUid, pass it to the profile completion screen
+      // Start the onboarding flow
       if (params.referredByUid) {
+        // If there's a referredByUid, prepare the referral info
         const invitationParams = getInvitationParams();
+
+        // Navigate directly to the profile completion screen with params
         router.replace({
           pathname: "/onboarding/complete-your-profile",
           params: {
             referredByUid: invitationParams.referredByUid,
-            acceptFriendship: invitationParams.acceptFriendship
-              ? "true"
-              : "false",
-          },
+            acceptFriendship: invitationParams.acceptFriendship ? "true" : "false"
+          }
         });
       } else {
-        router.replace("/onboarding/complete-your-profile");
+        // Start normal onboarding flow from the beginning
+        router.replace("/onboarding/how-it-works");
       }
     }
   };

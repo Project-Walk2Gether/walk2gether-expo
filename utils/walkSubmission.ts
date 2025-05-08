@@ -91,7 +91,6 @@ export const createWalkFromForm = async ({
       invitationCode: invitationCode,
       invitedUserIds: formData.invitedUserIds || [],
       invitedPhoneNumbers: formData.invitedPhoneNumbers || [],
-      rsvpdUserIds: [],
 
       // Sharing
       sharedWithUserUids: getSharedWithUserUids(userId, friendships),

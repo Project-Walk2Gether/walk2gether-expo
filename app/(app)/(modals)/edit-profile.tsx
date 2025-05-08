@@ -1,4 +1,4 @@
-import HeaderCloseButton from "@/components/HeaderCloseButton";
+import HeaderCloseButton from "components/HeaderCloseButton"";
 import { Stack as ExpoStack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {

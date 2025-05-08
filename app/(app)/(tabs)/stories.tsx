@@ -1,4 +1,4 @@
-import { useSharedWalks } from "@/hooks/useSharedWalks";
+import { useSharedWalks } from "hooks/useSharedWalks"";
 import { Book } from "@tamagui/lucide-icons";
 import React from "react";
 import { FlatList } from "react-native";

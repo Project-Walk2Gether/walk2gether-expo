@@ -1,4 +1,3 @@
-import { useUserData } from "@/context/UserDataContext";
 import { Leaf } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -11,10 +10,9 @@ import { Screen } from "../../../../components/UI";
 import WalkCard from "../../../../components/WalkCard";
 import { useWalks } from "../../../../context/WalksContext";
 
-export default function ActiveTabScreen() {
+export default function WalksScreen() {
   const router = useRouter();
   const { activeWalks, upcomingWalks } = useWalks();
-  const { userData } = useUserData();
   const renderWalkItem = ({ item }: { item: WithId<Walk> }) => (
     <WalkCard key={item.id} walk={item} />
   );
@@ -31,7 +29,7 @@ export default function ActiveTabScreen() {
         <>
           {activeWalks.length > 0 && (
             <>
-              <Text fontWeight="bold" fontSize={20} mb="$2" ml="$2">
+              <Text fontWeight="bold" fontSize={20} mb="$2">
                 Active Walks
               </Text>
               <FlatList

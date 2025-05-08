@@ -56,7 +56,6 @@ export const createWalk = async (
     const newWalk: Walk = {
       ...walkData,
       active: false,
-      rsvpdUserIds: [],
       createdByUid: user!.uid,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),

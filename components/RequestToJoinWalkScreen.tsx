@@ -47,7 +47,6 @@ export default function RequestToJoinScreen({ walk }: CheckInScreenProps) {
         },
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
-        userUid: user.uid,
       };
 
       await setDoc(participantRef, participant, { merge: true });

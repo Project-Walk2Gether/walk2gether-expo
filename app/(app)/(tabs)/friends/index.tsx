@@ -1,4 +1,4 @@
-import Sun from "@/components/Sun";
+import Sun from "components/Sun"";
 import { Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";

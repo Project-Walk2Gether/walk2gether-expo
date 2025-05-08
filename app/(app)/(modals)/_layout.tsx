@@ -1,3 +1,4 @@
+import HeaderCloseButton from "components/HeaderCloseButton"";
 import { Stack } from "expo-router";
 import HeaderBackButton from "../../../components/HeaderBackButton";
 
@@ -13,7 +14,7 @@ export default function ModalsLayout() {
         options={{
           title: "Invite Friends",
           headerShown: true,
-          headerLeft: () => <HeaderBackButton />,
+          headerRight: () => <HeaderCloseButton />,
         }}
       />
       <Stack.Screen

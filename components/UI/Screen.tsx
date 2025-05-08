@@ -1,12 +1,19 @@
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { H1, ScrollView, View } from "tamagui";
+import { H1, ScrollView } from "tamagui";
 import { BrandGradient } from "./BrandGradient";
 
 interface ScreenProps {
   title: React.ReactNode;
   children: React.ReactNode;
-  gradientVariant?: "modern" | "main" | "natural" | "earthy" | "vibrant" | "subtle" | "outdoor";
+  gradientVariant?:
+    | "modern"
+    | "main"
+    | "natural"
+    | "earthy"
+    | "vibrant"
+    | "subtle"
+    | "outdoor";
   titleColor?: string;
   renderAbsolute?: React.ReactNode;
   floatingAction?: React.ReactNode;
@@ -35,7 +42,12 @@ export const Screen: React.FC<ScreenProps> = ({
         }}
         showsVerticalScrollIndicator={false}
       >
-        <H1 fontSize={32} fontWeight="bold" marginBottom="$5" color={titleColor}>
+        <H1
+          fontSize={32}
+          fontWeight="bold"
+          marginBottom="$2"
+          color={titleColor}
+        >
           {title}
         </H1>
         {children}

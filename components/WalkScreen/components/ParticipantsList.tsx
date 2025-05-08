@@ -10,7 +10,7 @@ import { Avatar, Text, XStack, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
 import { COLORS } from "../../../styles/colors";
 
-interface ParticipantsListProps {
+interface Props {
   participants: ParticipantWithRoute[];
   currentUserId?: string;
   onParticipantPress?: (participant: ParticipantWithRoute) => void;
@@ -20,7 +20,7 @@ export default function ParticipantsList({
   participants,
   currentUserId,
   onParticipantPress,
-}: ParticipantsListProps) {
+}: Props) {
   // Sort participants: current user first, then by status (arrived, on-the-way, pending)
   const sortedParticipants = [...participants].sort((a, b) => {
     // Current user first
