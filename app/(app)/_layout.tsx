@@ -1,3 +1,4 @@
+import { FriendsProvider } from "@/context/FriendsContext";
 import { Redirect, Stack } from "expo-router";
 import React from "react";
 import { ActivityIndicator } from "react-native";
@@ -28,10 +29,12 @@ export default function AppLayout() {
 
   return (
     <WalksProvider>
-      <Stack initialRouteName="(tabs)" screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(modals)" options={{ presentation: "modal" }} />
-      </Stack>
+      <FriendsProvider>
+        <Stack initialRouteName="(tabs)" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(modals)" options={{ presentation: "modal" }} />
+        </Stack>
+      </FriendsProvider>
     </WalksProvider>
   );
 }

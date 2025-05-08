@@ -3,8 +3,8 @@ import React, { createContext, ReactNode, useContext } from "react";
 import { Friendship } from "walk2gether-shared";
 
 import { firestore_instance } from "../config/firebase";
-import { useAuth } from "./AuthContext";
 import { useQuery } from "../utils/firestore";
+import { useAuth } from "./AuthContext";
 
 interface FriendsContextType {
   friendships: Friendship[];
@@ -29,14 +29,14 @@ interface FriendsProviderProps {
 
 export const FriendsProvider = ({ children }: FriendsProviderProps) => {
   const { user } = useAuth();
-  
+
   // Query friendships for current user where deletedAt is null (not deleted)
   const friendshipsQuery = query(
     collection(firestore_instance, "friendships"),
-    where("uids", "array-contains", user?.uid),
+    where("uids", "array-contains", user!.uid),
     where("deletedAt", "==", null)
   );
-  
+
   const { docs: friendships, status } = useQuery<Friendship>(friendshipsQuery);
   const loading = status === "loading";
 

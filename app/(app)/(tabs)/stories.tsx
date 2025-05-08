@@ -9,12 +9,15 @@ export default function HistoryTabScreen() {
   const walks = useSharedWalks();
 
   return (
-    <BrandGradient variant="modern" style={{ flex: 1 }}>
+    <BrandGradient variant="vibrant" style={{ flex: 1 }}>
       <FlatList
         data={walks}
-        renderItem={({ item }) => <WalkCard walk={item} />}
+        renderItem={({ item }) => (
+          <WalkCard walk={item} showAttachments={true} />
+        )}
         keyExtractor={(item) => item.id || String(Date.now())}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ padding: 20 }}
         ListEmptyComponent={() => (
           <View
             flex={1}

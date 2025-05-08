@@ -16,13 +16,18 @@ import { useQuery } from "../../utils/firestore";
 import { getDistanceToLocation } from "../../utils/locationUtils";
 import { getWalkTypeLabel } from "../../utils/walkType";
 import { getWalkStatus } from "../../utils/walkUtils";
+import WalkAttachmentsCarousel from "../WalkAttachmentsCarousel";
 
 // Props interface for WalkCard
 interface WalkCardProps {
   walk: WithId<Walk>;
+  showAttachments?: boolean;
 }
 
-const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
+const WalkCard: React.FC<WalkCardProps> = ({
+  walk,
+  showAttachments = false,
+}) => {
   const {
     coords,
     loading: locationLoading,
@@ -107,14 +112,25 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
       shadowRadius={8}
       shadowOffset={{ width: 0, height: 2 }}
       marginVertical={10}
-      pressStyle={{ scale: 0.98 }}
       borderTopLeftRadius={18}
       borderTopRightRadius={18}
       animation="bouncy"
-      onPress={handlePress}
+      overflow="hidden"
+      // Remove onPress from the main card
     >
-      {/* Walk Card Header */}
-      <YStack gap="$2" pb="$3" px="$3" pt="$2" flex={1}>
+      {/* Attachments Carousel - Not pressable */}
+      {showAttachments && <WalkAttachmentsCarousel walk={walk} />}
+
+      {/* Card Content - Pressable */}
+      <YStack
+        gap="$2"
+        pb="$3"
+        px="$3"
+        pt="$2"
+        flex={1}
+        pressStyle={{ scale: 0.98 }}
+        onPress={handlePress}
+      >
         <XStack
           p="$2"
           alignItems="center"
@@ -267,7 +283,12 @@ const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
                   size="$2"
                   backgroundColor="#e67e22"
                   color="white"
-                  onPress={() => router.push(`/walk/${walk.id}/waiting-room`)}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/walks/[id]",
+                      params: { id: walk.id, tab: "waiting-room" },
+                    })
+                  }
                   borderRadius={8}
                   px={12}
                   py={4}
