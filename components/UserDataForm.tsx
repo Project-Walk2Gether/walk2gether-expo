@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Input, Text, YStack } from "tamagui";
 import { COLORS } from "../styles/colors";
 import { ActionButton } from "./ActionButton";
-import ProfilePicturePicker from "./ProfilePicturePicker";
 import { PlaceData, PlacesAutocomplete } from "./UI/PlacesAutocomplete";
 
 export interface UserDataFormProps {
@@ -82,11 +81,6 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
           fontSize={18}
         />
       </YStack>
-      <ProfilePicturePicker
-        profilePicUrl={profilePicUrl}
-        onChange={(url?: string) => setProfilePicUrl(url)}
-        disabled={isSaving}
-      />
       <YStack width="100%" gap="$2">
         <Text fontWeight="500" fontSize="$4">
           Location

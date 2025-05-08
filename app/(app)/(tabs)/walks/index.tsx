@@ -1,5 +1,5 @@
 import { useUserData } from "@/context/UserDataContext";
-import { Leaf, Plus } from "@tamagui/lucide-icons";
+import { Leaf } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList } from "react-native";
@@ -77,11 +77,7 @@ export default function ActiveTabScreen() {
             />
           )}
         </ScrollView>
-        <FAB
-          icon={<Plus size={24} color="white" />}
-          text="New Walk"
-          onPress={() => router.push("/new-walk")}
-        />
+        <FAB text="New Walk" onPress={() => router.push("/new-walk")} />
       </View>
     </BrandGradient>
   );

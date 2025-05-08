@@ -2,6 +2,7 @@ import { Check } from "@tamagui/lucide-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Dimensions } from "react-native";
+import { showMessage } from "react-native-flash-message";
 import {
   Avatar,
   Button,
@@ -63,11 +64,13 @@ export default function Auth() {
       values.verificationCode
     );
     // Now, check if the user has a profile
-    const userDataDoc = firestore_instance
+    const userDataDocRef = firestore_instance
       .collection("users")
       .doc(userCredential.user.uid);
 
-    const hasData = (await userDataDoc.get()).exists;
+    const userDataDoc = await userDataDocRef.get();
+    const userData = userDataDoc.data();
+    const hasData = !!userData;
 
     // If there was a friendship invitation and the user wants to accept it
     // Create friendship regardless of whether user has profile data
@@ -75,7 +78,14 @@ export default function Auth() {
       await handleCreateFriendship(userCredential.user.uid);
     }
 
-    if (!hasData) {
+    if (hasData) {
+      // If the user has a profile, redirect to the walks screen with a welcome back message
+      showMessage({
+        message: `Welcome back, ${userData.displayName}!`,
+        type: "success",
+      });
+      router.replace("/walks");
+    } else {
       // If there's a referredByUid, pass it to the profile completion screen
       if (params.referredByUid) {
         const invitationParams = getInvitationParams();
@@ -91,8 +101,6 @@ export default function Auth() {
       } else {
         router.replace("/onboarding/complete-your-profile");
       }
-    } else {
-      router.replace("/walks");
     }
   };
 

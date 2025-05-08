@@ -1,17 +1,17 @@
-import { MaterialIcons } from "@expo/vector-icons";
-import { Edit3, LogOut, QrCode } from "@tamagui/lucide-icons";
 import storage from "@react-native-firebase/storage";
+import { LogOut, Pencil, QrCode } from "@tamagui/lucide-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, TouchableOpacity } from "react-native";
+import { ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import { Camera, Trash } from '@tamagui/lucide-icons';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Avatar, Button, Card, H4, Separator, Stack, Text, View, YStack } from "tamagui";
-import { Location, UserData } from "walk2gether-shared";
-import { BrandGradient, ScreenTitle } from "../../../components/UI";
+import { Card, H4, Separator, Text, View, YStack } from "tamagui";
+import { BrandGradient } from "../../../components/UI";
 import { PlaceData } from "../../../components/UI/PlacesAutocomplete";
+import Menu from "../../../components/Menu";
 import UIDInfo from "../../../components/UIDInfo";
-import { UserDataForm } from "../../../components/UserDataForm";
+import { StatelessAvatar } from "../../../components/UserAvatar";
 import { useAuth } from "../../../context/AuthContext";
 import { useFlashMessage } from "../../../context/FlashMessageContext";
 import { useUserData } from "../../../context/UserDataContext";
@@ -60,7 +60,8 @@ export default function MeScreen() {
 
   const handlePickImage = async () => {
     // Request permissions
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
       showMessage("Permission to access photos is required", "error");
       return;
@@ -76,6 +77,27 @@ export default function MeScreen() {
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       await uploadImage(result.assets[0].uri);
+    }
+  };
+  
+  const handleRemoveImage = async () => {
+    if (!authUser) return;
+    
+    try {
+      setIsSaving(true);
+      
+      // Update the user's profile picture URL in Firestore to null/empty
+      await updateUserData({ profilePicUrl: "" });
+      
+      // Update local state
+      setProfilePicUrl("");
+      
+      showMessage("Profile picture removed", "success");
+    } catch (error) {
+      console.error("Error removing image:", error);
+      showMessage("Failed to remove image", "error");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -116,44 +138,9 @@ export default function MeScreen() {
     }
   };
 
-  const handleSaveProfile = async () => {
-    try {
-      setIsSaving(true);
-
-      // Make sure location has the correct structure that matches Location type
-      const formattedLocation: Location | null = location
-        ? {
-            name: location.name,
-            placeId: location.placeId || "", // Ensure placeId is never undefined
-            latitude: location.latitude,
-            longitude: location.longitude,
-          }
-        : null;
-
-      // Create a partial UserData object to update
-      const updateData: Partial<UserData> = {
-        name,
-        location: formattedLocation,
-        aboutMe,
-      };
-
-      // Update user data in Firestore
-      await updateUserData(updateData);
-
-      showMessage("Profile updated successfully", "success");
-    } catch (error) {
-      console.error("Error saving profile:", error);
-      showMessage("Failed to update profile", "error");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const handleEditProfile = () => {
-    // Navigate to a modal where user can edit their profile
-    router.push("/");
-    // In a real implementation, you would create a proper edit profile route
-    showMessage("Edit profile functionality coming soon", "info");
+    // Navigate to the edit profile modal
+    router.push("/(app)/(modals)/edit-profile");
   };
 
   const handleSignOut = async () => {
@@ -177,39 +164,58 @@ export default function MeScreen() {
 
   return (
     <BrandGradient variant="modern" style={{ flex: 1 }}>
-      <YStack f={1} pt={insets.top} px="$4">
-        <Stack height={180} alignItems="center" justifyContent="center">
-          <TouchableOpacity onPress={handlePickImage}>
-            {profilePicUrl ? (
-              <Avatar circular size={120} borderWidth={3} borderColor="white">
-                <Avatar.Image src={profilePicUrl} />
-                <Avatar.Fallback backgroundColor={COLORS.primary} />
-              </Avatar>
-            ) : (
-              <Avatar circular size={120} borderWidth={3} borderColor="white">
-                <Avatar.Fallback backgroundColor={COLORS.primary}>
-                  <Text fontSize={36} color="white">
-                    {name ? name.charAt(0).toUpperCase() : "?"}
-                  </Text>
-                </Avatar.Fallback>
-              </Avatar>
-            )}
-            <View 
-              position="absolute" 
-              right={0} 
-              bottom={0} 
-              backgroundColor={COLORS.primary}
-              width={36}
-              height={36}
-              borderRadius={18}
-              justifyContent="center"
-              alignItems="center"
-              borderWidth={2}
-              borderColor="white"
-            >
-              <Edit3 size={18} color="white" />
-            </View>
-          </TouchableOpacity>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingTop: insets.top + 20,
+          paddingBottom: 40,
+          paddingHorizontal: 16,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <YStack alignItems="center" mb="$6">
+          <Menu
+            title="Profile Picture"
+            snapPoints={[35, 25]}
+            items={[
+              {
+                label: "Change Picture",
+                icon: <Camera size={24} color={COLORS.primary} />,
+                onPress: handlePickImage,
+              },
+              {
+                label: "Remove Picture",
+                icon: <Trash size={24} color={"#ff3b30"} />,
+                onPress: handleRemoveImage,
+              },
+            ]}
+            trigger={
+              <View position="relative">
+                <StatelessAvatar
+                  profilePicUrl={profilePicUrl}
+                  name={name}
+                  size={120}
+                  borderWidth={3}
+                  backgroundColor={COLORS.primary}
+                />
+                <View
+                  position="absolute"
+                  right={0}
+                  bottom={0}
+                  backgroundColor={COLORS.primary}
+                  width={36}
+                  height={36}
+                  borderRadius={18}
+                  justifyContent="center"
+                  alignItems="center"
+                  borderWidth={2}
+                  borderColor="white"
+                >
+                  <Pencil size={18} color="white" />
+                </View>
+              </View>
+            }
+          />
           <H4 mt="$3" mb="$1" fontSize={26} fontWeight="bold" color="white">
             {name || "Your Name"}
           </H4>
@@ -218,71 +224,64 @@ export default function MeScreen() {
               {location.name}
             </Text>
           )}
-        </Stack>
-
-        <ScrollView 
-          style={{ flex: 1 }}
-          contentContainerStyle={{ padding: 4 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* About Me Section */}
-          <Card backgroundColor="white" mb="$3" p="$4" borderRadius={16}>
-            <Card.Header mb="$2">
-              <Text fontSize={18} fontWeight="600" color={COLORS.text}>
-                About Me
-              </Text>
-            </Card.Header>
-            <Text fontSize={16} color={COLORS.text}>
+        </YStack>
+        {/* About Me Section */}
+        <Card backgroundColor="white" mb="$3" borderRadius={16}>
+          <YStack px="$4" py="$3">
+            <Text fontSize={16} fontWeight="600" color={COLORS.text} mb="$2">
+              About Me
+            </Text>
+            <Text fontSize={16} color={COLORS.text} opacity={aboutMe ? 1 : 0.7}>
               {aboutMe || "Add some details about yourself..."}
             </Text>
-          </Card>
-          
-          {/* Actions Section */}
-          <Card backgroundColor="white" mb="$3" borderRadius={16}>
-            <TouchableOpacity onPress={() => router.push("/qr-code")}>
-              <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-                <View marginRight="$3">
-                  <QrCode size={24} color={COLORS.primary} />
-                </View>
-                <Text fontSize={16} fontWeight="500" color={COLORS.text}>
-                  My QR Code
-                </Text>
-              </YStack>
-            </TouchableOpacity>
-            
-            <Separator borderColor="$gray5" />
-            
-            <TouchableOpacity onPress={handleEditProfile}>
-              <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-                <View marginRight="$3">
-                  <Edit3 size={24} color={COLORS.primary} />
-                </View>
-                <Text fontSize={16} fontWeight="500" color={COLORS.text}>
-                  Edit Profile
-                </Text>
-              </YStack>
-            </TouchableOpacity>
-            
-            <Separator borderColor="$gray5" />
-            
-            <TouchableOpacity onPress={handleSignOut}>
-              <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-                <View marginRight="$3">
-                  <LogOut size={24} color="#ff3b30" />
-                </View>
-                <Text fontSize={16} fontWeight="500" color="#ff3b30">
-                  Sign Out
-                </Text>
-              </YStack>
-            </TouchableOpacity>
-          </Card>
-          
-          {/* Version Info */}
-          {authUser?.uid && (
-            <UIDInfo uid={authUser.uid} version={`${appVersion}.patch`} />
-          )}
-        </ScrollView>
-      </YStack>
+          </YStack>
+        </Card>
+
+        {/* Actions Section */}
+        <Card backgroundColor="white" mb="$3" borderRadius={16}>
+          <TouchableOpacity onPress={() => router.push("/qr-code")}>
+            <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
+              <View marginRight="$3">
+                <QrCode size={24} color={COLORS.primary} />
+              </View>
+              <Text fontSize={16} fontWeight="500" color={COLORS.text}>
+                My QR Code
+              </Text>
+            </YStack>
+          </TouchableOpacity>
+
+          <Separator borderColor="$gray5" />
+
+          <TouchableOpacity onPress={handleEditProfile}>
+            <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
+              <View marginRight="$3">
+                <Pencil size={24} color={COLORS.primary} />
+              </View>
+              <Text fontSize={16} fontWeight="500" color={COLORS.text}>
+                Edit Profile
+              </Text>
+            </YStack>
+          </TouchableOpacity>
+
+          <Separator borderColor="$gray5" />
+
+          <TouchableOpacity onPress={handleSignOut}>
+            <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
+              <View marginRight="$3">
+                <LogOut size={24} color="#ff3b30" />
+              </View>
+              <Text fontSize={16} fontWeight="500" color="#ff3b30">
+                Sign Out
+              </Text>
+            </YStack>
+          </TouchableOpacity>
+        </Card>
+
+        {/* Version Info */}
+        {authUser?.uid && (
+          <UIDInfo uid={authUser.uid} version={`${appVersion}.patch`} />
+        )}
+      </ScrollView>
     </BrandGradient>
   );
 }
