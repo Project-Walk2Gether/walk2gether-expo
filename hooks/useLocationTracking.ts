@@ -7,7 +7,7 @@ import { Alert, Platform } from "react-native";
 import {
   startBackgroundLocationTracking,
   stopBackgroundLocationTracking,
-} from "../utils/backgroundLocationTask";
+} from "../background/backgroundLocationTask";
 
 type LocationTrackingResult = {
   userLocation: Location.LocationObject | null;

@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { TouchableOpacity } from "react-native";
 import { Card, Text, XStack } from "tamagui";
 
 export interface Invitation {
@@ -59,7 +58,11 @@ export function InvitationCard({ invitation, onRemove }: InvitationCardProps) {
             h={32}
             elevation={isPhone ? 4 : 2}
           >
-            <Ionicons name="close" size={20} color={isPhone ? "#fff" : "#777"} />
+            <Ionicons
+              name="close"
+              size={20}
+              color={isPhone ? "#fff" : "#777"}
+            />
           </Card>
         </XStack>
       </XStack>

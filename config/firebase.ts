@@ -1,4 +1,5 @@
 import auth, { connectAuthEmulator } from "@react-native-firebase/auth";
+import crashlytics from "@react-native-firebase/crashlytics";
 import firestore, {
   connectFirestoreEmulator,
 } from "@react-native-firebase/firestore";
@@ -19,6 +20,7 @@ export const firestore_instance = firestore();
 export const db = firestore_instance;
 export const functions_instance = functions();
 export const storage_instance = storage();
+export const crashlytics_instance = crashlytics();
 
 // Use emulators in dev mode if needed
 if (emulatorsEnabled) {

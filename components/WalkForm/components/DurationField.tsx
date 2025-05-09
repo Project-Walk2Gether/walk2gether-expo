@@ -1,8 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import React, { useState } from "react";
-import { Platform } from "react-native";
-import { Button, Card, H4, Text, View, XStack, YStack } from "tamagui";
+import { Button, Card, H4, Text, XStack, YStack } from "tamagui";
 
 interface DurationFieldProps {
   value: number; // Duration in minutes
@@ -27,13 +26,15 @@ export default function DurationField({
 
   // Generate options for hours (0-5)
   const hourOptions = Array.from({ length: 6 }, (_, i) => i);
-  
+
   // Generate options for minutes (0, 15, 30, 45)
   const minuteOptions = [0, 15, 30, 45];
 
   return (
     <YStack>
-      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">Duration</H4>
+      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">
+        Duration
+      </H4>
       <Button
         size="$4"
         onPress={() => setShowPicker(!showPicker)}
@@ -44,10 +45,17 @@ export default function DurationField({
       </Button>
 
       {showPicker && (
-        <Card backgroundColor="white" padding="$5" borderRadius="$3" marginTop="$2">
+        <Card
+          backgroundColor="white"
+          padding="$5"
+          borderRadius="$3"
+          marginTop="$2"
+        >
           <XStack justifyContent="space-between" marginBottom="$5">
             <YStack flex={1} alignItems="center">
-              <Text fontSize="$4" marginBottom="$2">Hours</Text>
+              <Text fontSize="$4" marginBottom="$2">
+                Hours
+              </Text>
               <Picker
                 selectedValue={Math.floor(value / 60)}
                 style={{ width: 100, height: 120 }}
@@ -68,7 +76,9 @@ export default function DurationField({
             </YStack>
 
             <YStack flex={1} alignItems="center">
-              <Text fontSize="$4" marginBottom="$2">Minutes</Text>
+              <Text fontSize="$4" marginBottom="$2">
+                Minutes
+              </Text>
               <Picker
                 selectedValue={value % 60}
                 style={{ width: 100, height: 120 }}
@@ -95,8 +105,11 @@ export default function DurationField({
         </Card>
       )}
 
-      {error && touched && <Text color="red" fontSize="$2" marginTop="$1">{error}</Text>}
+      {error && touched && (
+        <Text color="red" fontSize="$2" marginTop="$1">
+          {error}
+        </Text>
+      )}
     </YStack>
   );
 }
-

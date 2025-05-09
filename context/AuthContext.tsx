@@ -285,7 +285,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 };
 
 // Higher-Order Component to wrap components with AuthProvider
-export const WithAuthProvider = <P extends object>(
+export const withAuthProvider = <P extends object>(
   Component: ComponentType<P>
 ) => {
   const WithAuthWrapper = (props: P) => {
@@ -298,7 +298,7 @@ export const WithAuthProvider = <P extends object>(
 
   // Set display name for debugging
   const displayName = Component.displayName || Component.name || "Component";
-  WithAuthWrapper.displayName = `WithAuthProvider(${displayName})`;
+  WithAuthWrapper.displayName = `withAuthProvider(${displayName})`;
 
   return WithAuthWrapper;
 };

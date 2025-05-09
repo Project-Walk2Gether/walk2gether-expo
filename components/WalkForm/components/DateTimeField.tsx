@@ -3,7 +3,7 @@ import { Timestamp } from "@react-native-firebase/firestore";
 import { Calendar, Clock } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import { Platform } from "react-native";
-import { Button, Card, H4, Text, View, XStack, YStack } from "tamagui";
+import { Button, Card, H4, Text, XStack, YStack } from "tamagui";
 
 interface DateTimeFieldProps {
   value: Timestamp;
@@ -43,7 +43,9 @@ export default function DateTimeField({
 
   return (
     <YStack>
-      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">Date & Time</H4>
+      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">
+        Date & Time
+      </H4>
       <XStack gap="$2">
         <Button
           size="$4"
@@ -65,7 +67,12 @@ export default function DateTimeField({
       </XStack>
 
       {pickerMode === "date" && (
-        <Card backgroundColor="white" padding="$5" borderRadius="$3" marginTop="$2">
+        <Card
+          backgroundColor="white"
+          padding="$5"
+          borderRadius="$3"
+          marginTop="$2"
+        >
           <DateTimePicker
             value={date}
             mode="date"
@@ -92,7 +99,12 @@ export default function DateTimeField({
       )}
 
       {pickerMode === "time" && (
-        <Card backgroundColor="white" padding="$5" borderRadius="$3" marginTop="$2">
+        <Card
+          backgroundColor="white"
+          padding="$5"
+          borderRadius="$3"
+          marginTop="$2"
+        >
           <DateTimePicker
             value={date}
             mode="time"
@@ -119,7 +131,11 @@ export default function DateTimeField({
         </Card>
       )}
 
-      {error && touched && <Text color="red" fontSize="$2" marginTop="$1">{error}</Text>}
+      {error && touched && (
+        <Text color="red" fontSize="$2" marginTop="$1">
+          {error}
+        </Text>
+      )}
     </YStack>
   );
 }

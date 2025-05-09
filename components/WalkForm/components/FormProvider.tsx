@@ -31,7 +31,11 @@ export default function FormProvider<T>({
         <YStack gap="$4">
           {children(formikProps)}
 
-          <XStack flexDirection="row" justifyContent="space-between" marginTop="$4">
+          <XStack
+            flexDirection="row"
+            justifyContent="space-between"
+            marginTop="$4"
+          >
             <Button
               size="$4"
               onPress={() => formikProps.handleSubmit()}

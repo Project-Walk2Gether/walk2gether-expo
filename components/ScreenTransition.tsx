@@ -1,6 +1,6 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
-import { Animated, BackHandler, Platform, View as RNView } from "react-native";
+import { Animated, BackHandler, Platform } from "react-native";
 import { View } from "tamagui";
 
 interface ScreenTransitionProps {
@@ -60,23 +60,24 @@ const ScreenTransition: React.FC<ScreenTransitionProps> = ({ children }) => {
     });
 
     // Handle hardware back button on Android
-    const backHandler = Platform.OS === 'android'
-      ? BackHandler.addEventListener('hardwareBackPress', () => {
-          if (isFocused && !isTransitioning && navigation.canGoBack()) {
-            setIsTransitioning(true);
-            Animated.timing(opacity, {
-              toValue: 0,
-              duration: 200,
-              useNativeDriver: true,
-            }).start(() => {
-              setIsTransitioning(false);
-              navigation.goBack();
-            });
-            return true; // Prevent default back action
-          }
-          return false;
-        })
-      : { remove: () => {} };
+    const backHandler =
+      Platform.OS === "android"
+        ? BackHandler.addEventListener("hardwareBackPress", () => {
+            if (isFocused && !isTransitioning && navigation.canGoBack()) {
+              setIsTransitioning(true);
+              Animated.timing(opacity, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+              }).start(() => {
+                setIsTransitioning(false);
+                navigation.goBack();
+              });
+              return true; // Prevent default back action
+            }
+            return false;
+          })
+        : { remove: () => {} };
 
     return () => {
       unsubscribeBlur();
@@ -86,9 +87,7 @@ const ScreenTransition: React.FC<ScreenTransitionProps> = ({ children }) => {
 
   return (
     <View flex={1}>
-      <Animated.View style={{ flex: 1, opacity }}>
-        {children}
-      </Animated.View>
+      <Animated.View style={{ flex: 1, opacity }}>{children}</Animated.View>
     </View>
   );
 };

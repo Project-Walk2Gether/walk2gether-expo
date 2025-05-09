@@ -2,6 +2,8 @@ import { config } from "@tamagui/config/v3";
 import { createTamagui } from "tamagui";
 import { COLORS } from "./styles/colors";
 
+console.log({ config });
+
 const customTheme = {
   primary: COLORS.primary,
   secondary: COLORS.secondary,

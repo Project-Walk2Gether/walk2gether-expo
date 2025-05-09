@@ -24,7 +24,7 @@ export const ScreenTitle: React.FC<ScreenTitleProps> = ({
       marginBottom="$5"
       px="$4"
     >
-      {leftAction && <View marginRight="$2">{leftAction}</View>}
+      {leftAction && <View mr="$2">{leftAction}</View>}
       <H1 fontSize={32} fontWeight="bold" flex={1} color={color}>
         {children}
       </H1>

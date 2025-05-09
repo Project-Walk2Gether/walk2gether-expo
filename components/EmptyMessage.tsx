@@ -2,7 +2,7 @@ import { COLORS } from "@/styles/colors";
 import React from "react";
 import { Text, XStack, YStack } from "tamagui";
 
-interface EmptyMessageProps {
+interface Props {
   message: string;
   subtitle?: string;
   icon?: React.ComponentType<{
@@ -20,7 +20,7 @@ export const EmptyMessage = ({
   icon: Icon,
   iconSize = 60,
   iconColor = COLORS.primary,
-}: EmptyMessageProps) => (
+}: Props) => (
   <YStack
     padding={20}
     marginTop={10}

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MapView, { Marker } from "react-native-maps";
-import { H4, Text, View, YStack } from "tamagui";
+import { H4, Text, YStack } from "tamagui";
 import { Location } from "walk2gether-shared";
 
 interface LocationFieldProps {
@@ -39,7 +39,9 @@ export default function LocationField({
   return (
     <>
       <YStack>
-        <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">Location</H4>
+        <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">
+          Location
+        </H4>
         <GooglePlacesAutocomplete
           placeholder="Search for a location"
           fetchDetails={true}
@@ -102,7 +104,11 @@ export default function LocationField({
             },
           }}
         />
-        {error && touched && <Text color="red" fontSize="$2" marginTop="$1">{error}</Text>}
+        {error && touched && (
+          <Text color="red" fontSize="$2" marginTop="$1">
+            {error}
+          </Text>
+        )}
       </YStack>
       {value?.latitude ? (
         <MapView

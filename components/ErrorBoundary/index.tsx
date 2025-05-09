@@ -1,9 +1,9 @@
 import { ActionButton } from "@/components/ActionButton";
-import { auth_instance } from "@/config/firebase";
+import { auth_instance, crashlytics_instance } from "@/config/firebase";
 import { COLORS } from "@/styles/colors";
 import { writeLogIfEnabled } from "@/utils/logging";
 import { Ionicons } from "@expo/vector-icons";
-import crashlytics from "@react-native-firebase/crashlytics";
+import { recordError } from "@react-native-firebase/crashlytics";
 import { isDevice } from "expo-device";
 import * as Updates from "expo-updates";
 import React from "react";
@@ -38,7 +38,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: any, _errorInfo: any) {
-    crashlytics().recordError(error);
+    recordError(crashlytics_instance, error);
   }
 
   handleReset = () => {
@@ -63,10 +63,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
       return (
         <YStack
           flex={1}
-          backgroundColor="#FEF7DC"
-          justifyContent="center"
+          bg="#FEF7DC"
           alignItems="center"
-          padding="$4"
+          justifyContent="center"
+          p="$4"
         >
           <Card
             width="90%"
@@ -80,7 +80,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             shadowOpacity={0.1}
             shadowRadius={8}
           >
-            <Card.Header paddingHorizontal="$0" paddingBottom="$0">
+            <Card.Header px="$0" pb="$0">
               <XStack
                 backgroundColor={COLORS.error}
                 paddingVertical="$4"
@@ -96,20 +96,14 @@ export class ErrorBoundary extends React.Component<Props, State> {
               </XStack>
             </Card.Header>
 
-            <YStack padding="$4" space="$4">
+            <YStack p="$4" space="$4">
               <Paragraph>
                 We've encountered an unexpected error. Our team has been
                 notified and is working on it. Please try restarting the app.
               </Paragraph>
 
-              <Card
-                backgroundColor="$gray2"
-                borderRadius="$4"
-                marginTop="$2"
-                padding="$3"
-              >
+              <Card bg="$gray2" borderRadius="$4" marginTop="$2" padding="$3">
                 <Text
-                  fontFamily="$mono"
                   fontSize="$2"
                   color={COLORS.error}
                   numberOfLines={3}
@@ -119,7 +113,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 </Text>
               </Card>
 
-              <Separator marginVertical="$2" />
+              <Separator my="$2" />
 
               <YStack gap="$2">
                 <ActionButton

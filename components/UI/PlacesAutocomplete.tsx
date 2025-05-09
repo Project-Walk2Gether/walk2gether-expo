@@ -57,7 +57,7 @@ export const PlacesAutocomplete = React.forwardRef<
     return (
       <YStack marginBottom="$5" {...containerStyle}>
         {withLabel && (
-          <Text 
+          <Text
             fontSize="$4"
             fontWeight="500"
             marginBottom="$1"
@@ -136,9 +136,12 @@ export const PlacesAutocomplete = React.forwardRef<
             }}
           />
         </View>
-        {error && touched && <Text color="red" fontSize="$2" marginTop="$1">{error}</Text>}
+        {error && touched && (
+          <Text color="red" fontSize="$2" marginTop="$1">
+            {error}
+          </Text>
+        )}
       </YStack>
     );
   }
 );
-

@@ -261,7 +261,7 @@ export default function MeScreen() {
       <Card backgroundColor="white" mb="$3" borderRadius={16}>
         <TouchableOpacity onPress={() => router.push("/qr-code")}>
           <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-            <View marginRight="$3">
+            <View mr="$3">
               <QrCode size={24} color={COLORS.primary} />
             </View>
             <Text fontSize={16} fontWeight="500" color={COLORS.text}>
@@ -274,7 +274,7 @@ export default function MeScreen() {
 
         <TouchableOpacity onPress={() => router.push("/me/history")}>
           <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-            <View marginRight="$3">
+            <View mr="$3">
               <Clock size={24} color={COLORS.primary} />
             </View>
             <Text fontSize={16} fontWeight="500" color={COLORS.text}>
@@ -287,7 +287,7 @@ export default function MeScreen() {
 
         <TouchableOpacity onPress={handleEditProfile}>
           <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-            <View marginRight="$3">
+            <View mr="$3">
               <Pencil size={24} color={COLORS.primary} />
             </View>
             <Text fontSize={16} fontWeight="500" color={COLORS.text}>
@@ -300,7 +300,7 @@ export default function MeScreen() {
 
         <TouchableOpacity onPress={handleSignOut}>
           <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-            <View marginRight="$3">
+            <View mr="$3">
               <LogOut size={24} color="#ff3b30" />
             </View>
             <Text fontSize={16} fontWeight="500" color="#ff3b30">

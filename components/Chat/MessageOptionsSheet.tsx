@@ -1,7 +1,6 @@
 import { Trash2 } from "@tamagui/lucide-icons";
 import React from "react";
-import { StyleSheet } from "react-native";
-import { Button, Sheet, Text, View, XStack, YStack } from "tamagui";
+import { Button, Sheet, Text, YStack } from "tamagui";
 import { Message } from "walk2gether-shared";
 
 interface MessageOptionsSheetProps {
@@ -46,7 +45,7 @@ export function MessageOptionsSheet({
           <Text fontSize="$6" fontWeight="bold" textAlign="center">
             Message Options
           </Text>
-          
+
           <Button
             backgroundColor="$red5"
             pressStyle={{ backgroundColor: "$red8" }}

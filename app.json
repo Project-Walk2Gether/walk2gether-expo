@@ -6,14 +6,17 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#FEF7DC"
     },
     "scheme": "walk2gether",
-    "assetBundlePatterns": ["**/*", "assets/animations/*.lottie"],
+    "assetBundlePatterns": [
+      "**/*",
+      "assets/animations/*.lottie"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "org.projectwalk2gether.walk2gether",
@@ -22,7 +25,10 @@
         "NSLocationWhenInUseUsageDescription": "Allow this app to access your location.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow this app to access your location when using the app to create walks in your local area.",
         "NSLocationAlwaysUsageDescription": "We need your location to track your walks even when the app is in the background.",
-        "UIBackgroundModes": ["location", "fetch"],
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ],
         "ITSAppUsesNonExemptEncryption": false
       },
       "config": {
@@ -40,10 +46,12 @@
               "pathPrefix": "/"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
-
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -84,7 +92,8 @@
           "isIosBackgroundLocationEnabled": true,
           "isAndroidBackgroundLocationEnabled": true
         }
-      ]
+      ],
+      "expo-background-task"
     ],
     "updates": {
       "enabled": true,
