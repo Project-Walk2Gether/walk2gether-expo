@@ -163,8 +163,6 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
       coordinate.longitude
     );
 
-    console.log({ newLocation });
-
     // Update the text in Google Places Autocomplete input
     if (googlePlacesRef.current && newLocation) {
       // Clear the input first to ensure proper update
@@ -197,6 +195,8 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
         <View zIndex={1}>
           <GooglePlacesAutocomplete
             ref={googlePlacesRef}
+            predefinedPlaces={[]}
+            textInputProps={{}}
             placeholder="Search for a location or long-press on map"
             onPress={handleLocationSelect}
             fetchDetails={true}

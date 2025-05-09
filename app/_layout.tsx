@@ -12,6 +12,8 @@ import { TamaguiProvider } from "tamagui";
 import "../config/emulators";
 import { tamaguiConfig } from "../tamagui.config";
 
+import "react-native-get-random-values";
+
 // https://github.com/FaridSafi/react-native-google-places-autocomplete#more-examples
 (navigator as any).geolocation = require("@react-native-community/geolocation");
 
