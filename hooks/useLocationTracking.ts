@@ -1,5 +1,4 @@
-import { firestore_instance } from "@/config/firebase";
-import { doc, setDoc } from "@react-native-firebase/firestore";
+import { locationService } from "@/utils/locationService";
 import * as Linking from "expo-linking";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
@@ -27,8 +26,7 @@ type LocationTrackingResult = {
  */
 export function useLocationTracking(
   walkId: string,
-  userId: string | undefined,
-  updateExtraFields?: () => Record<string, any>
+  userId: string | undefined
 ): LocationTrackingResult {
   // Location state
   const [userLocation, setUserLocation] =
@@ -45,9 +43,7 @@ export function useLocationTracking(
   // Request location permissions and initialize tracking
   useEffect(() => {
     if (walkId && userId) {
-      (async () => {
-        await requestPermissionsAndStartTracking();
-      })();
+      requestPermissionsAndStartTracking();
     }
 
     return () => {
@@ -130,7 +126,6 @@ export function useLocationTracking(
       await startBackgroundLocationTracking({
         walkId,
         userId,
-        extraFields: updateExtraFields ? updateExtraFields() : {},
         foregroundService: {
           notificationTitle: "Walk2gether is tracking your location",
           notificationBody:
@@ -173,31 +168,12 @@ export function useLocationTracking(
     setLocationTracking(false);
   };
 
-  // Update user's location in Firestore
+  // Update user's location in Firestore using the location service
   const updateLocation = async (location: Location.LocationObject) => {
     if (!userId || !walkId) return;
 
     try {
-      // Update the user's location in Firestore
-      const participantDocRef = doc(
-        firestore_instance,
-        `walks/${walkId}/participants/${userId}`
-      );
-
-      const extraFields = updateExtraFields ? updateExtraFields() : {};
-
-      await setDoc(
-        participantDocRef,
-        {
-          lastLocation: {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            timestamp: new Date().getTime(),
-          },
-          ...extraFields,
-        },
-        { merge: true }
-      );
+      await locationService.updateLocation(walkId, userId, location);
     } catch (error) {
       console.error("Error updating user location:", error);
     }

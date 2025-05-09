@@ -1,11 +1,6 @@
-import { auth_instance, firestore_instance } from "@/config/firebase";
-import {
-  addDoc,
-  collection,
-  doc,
-  Timestamp,
-  updateDoc,
-} from "@react-native-firebase/firestore";
+import { auth_instance } from "@/config/firebase";
+import { Timestamp } from "@react-native-firebase/firestore";
+import { locationService } from "@/utils/locationService";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as ExpoLocation from "expo-location";
 import * as TaskManager from "expo-task-manager";
@@ -18,7 +13,6 @@ export const LOCATION_TRACKING_TASK = "background-location-tracking";
 interface LocationTaskOptions extends ExpoLocation.LocationTaskOptions {
   walkId?: string;
   userId?: string;
-  extraFields?: Record<string, any>;
 }
 
 // Define the background task for location tracking
@@ -47,51 +41,20 @@ TaskManager.defineTask(
         console.error("Error getting task options:", e);
       }
 
-      const { walkId, userId, extraFields = {} } = taskOptions;
+      console.log("Sending background location");
+
+      const { walkId, userId } = taskOptions;
+
+      console.log({ walkId, userId });
 
       // Use auth instance if userId isn't available in options
       const uid = userId; //|| auth_instance.currentUser?.uid;
 
       if (uid && walkId) {
         try {
-          // Create a timestamp for this location update
-          const timestamp = Timestamp.now();
-
-          // Create a new location document in the locations subcollection
-          const locationsCollectionRef = collection(
-            firestore_instance,
-            `walks/${walkId}/participants/${uid}/locations`
-          );
-
-          // Prepare location data according to the schema
-          const locationData = {
-            // Basic location data matching LocationType schema
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            createdAt: timestamp,
-            updatedAt: timestamp,
-            timestamp, // Additional field for the timestamp of this specific ping
-            // Additional references to connect this location with the walk and participant
-            walkId,
-            participantId: uid,
-          };
-
-          // Add the new location document
-          await addDoc(locationsCollectionRef, locationData);
-
-          // Also update the lastLocation field for backward compatibility
-          const participantDocRef = doc(
-            firestore_instance,
-            `walks/${walkId}/participants/${uid}`
-          );
-          await updateDoc(participantDocRef, {
-            lastLocation: {
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-              timestamp,
-            },
-            ...extraFields,
-          });
+          // Use the centralized location service to update location
+          // This handles both the location history and lastLocation update
+          await locationService.updateLocation(walkId, uid, location);
           return BackgroundFetch.BackgroundFetchResult.NewData;
         } catch (err) {
           console.error("Error updating location in background:", err);
@@ -107,7 +70,6 @@ TaskManager.defineTask(
 export const startBackgroundLocationTracking = async ({
   walkId,
   userId,
-  extraFields = {},
   ...locationOptions
 }: LocationTaskOptions = {}) => {
   if (!walkId) {
@@ -140,7 +102,6 @@ export const startBackgroundLocationTracking = async ({
     // Store these values to access in the background task
     walkId,
     userId: uid,
-    extraFields,
   };
 
   await writeLogIfEnabled({

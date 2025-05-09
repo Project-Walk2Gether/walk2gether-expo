@@ -1,11 +1,14 @@
+import { firestore_instance } from "@/config/firebase";
 import { WalkFormData } from "@/context/WalkFormContext";
 import {
   FirebaseFirestoreTypes,
   Timestamp,
+  doc,
+  setDoc,
 } from "@react-native-firebase/firestore";
 import { Router } from "expo-router";
 import uuid from "react-native-uuid";
-import { Friendship, UserData, Walk } from "walk2gether-shared";
+import { Friendship, Participant, UserData, Walk } from "walk2gether-shared";
 
 /**
  * Gets a list of unique user IDs from the user's friendships to share the walk with
@@ -100,7 +103,38 @@ export const createWalkFromForm = async ({
     } as unknown as Walk; // Cast to unknown first to resolve type mismatch
 
     // Create the walk
-    await createWalk(walkPayload);
+    const walkDocRef = await createWalk(walkPayload);
+    const walkId = walkDocRef.id;
+
+    // Add the user as an approved participant
+    try {
+      const participantRef = doc(
+        firestore_instance,
+        `walks/${walkId}/participants/${userId}`
+      );
+
+      const participant: Participant = {
+        userUid: userId,
+        displayName: userData?.name || "Anonymous",
+        photoURL: userData?.profilePicUrl || null,
+        approvedAt: Timestamp.now(), // Auto-approve the walk creator
+        status: "pending", // Set initial status to arrived
+        navigationMethod: "walking", // Default navigation method
+        lastLocation: {
+          latitude: formData.location.latitude,
+          longitude: formData.location.longitude,
+          timestamp: Timestamp.now(),
+        },
+        route: null,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      };
+      await setDoc(participantRef, participant);
+
+      console.log("Created participant record for walk creator");
+    } catch (error) {
+      console.error("Error creating participant record:", error);
+    }
 
     // If there are phone numbers to invite, send SMS invitations
     const phoneNumbers = formData.invitedPhoneNumbers || [];

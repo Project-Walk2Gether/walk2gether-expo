@@ -118,7 +118,6 @@ const LocationAutocomplete: React.FC<
       {value && includeChooseAnotherWayButton && (
         <Button
           size="$3"
-          variant="chromeless"
           mt="$2"
           backgroundColor="$gray2"
           borderRadius={8}
@@ -139,7 +138,6 @@ const LocationAutocomplete: React.FC<
       {!value && (
         <Button
           size="$3"
-          variant="chromeless"
           mt="$2"
           backgroundColor="$gray2"
           borderRadius={8}

@@ -45,7 +45,7 @@ export default function WalkMenu({
     {
       label: "Edit Walk",
       icon: <Edit3 size="$1" color={COLORS.primary} />,
-      onPress: () => router.push(`/walk/${walk.id}/edit`),
+      onPress: () => router.push(`/walks/${walk.id}/edit`),
       buttonProps: {
         backgroundColor: COLORS.background,
         color: COLORS.primary,

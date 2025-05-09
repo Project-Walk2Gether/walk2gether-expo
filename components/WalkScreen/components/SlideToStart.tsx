@@ -1,31 +1,46 @@
-import { Play } from "@tamagui/lucide-icons";
+import { Play, Square } from "@tamagui/lucide-icons";
 import React from "react";
 import { View } from "react-native";
 import Slider from "react-native-slide-to-unlock";
 import { Text } from "tamagui";
 
-interface SlideToStartProps {
+type SlideActionProps = {
   onSlideComplete: () => void;
-}
+  text?: string;
+  backgroundColor?: string;
+  iconColor?: string;
+  icon?: "play" | "stop";
+};
 
 /**
- * SlideToStart component - uses react-native-slide-to-unlock for a smooth sliding experience
+ * SlideAction component - uses react-native-slide-to-unlock for a smooth sliding experience
+ * with customizable text, colors, and icon
  */
-const SlideToStart: React.FC<SlideToStartProps> = ({ onSlideComplete }) => {
-  const SliderThumb = () => (
-    <View
-      style={{
-        width: 34,
-        height: 34,
-        borderRadius: 20,
-        backgroundColor: "white",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Play size={18} color="#0099ff" />
-    </View>
-  );
+const SlideAction: React.FC<SlideActionProps> = ({ 
+  onSlideComplete,
+  text = "SLIDE TO START WALK",
+  backgroundColor = "rgba(0,153,255,0.9)",
+  iconColor = "#0099ff",
+  icon = "play"
+}) => {
+  const SliderThumb = () => {
+    const IconComponent = icon === "play" ? Play : Square;
+    
+    return (
+      <View
+        style={{
+          width: 34,
+          height: 34,
+          borderRadius: 20,
+          backgroundColor: "white",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <IconComponent size={18} color={iconColor} />
+      </View>
+    );
+  };
 
   return (
     <Slider
@@ -38,7 +53,7 @@ const SlideToStart: React.FC<SlideToStartProps> = ({ onSlideComplete }) => {
         left: 5,
         right: 5,
         bottom: 5,
-        backgroundColor: "rgba(0,153,255,0.9)",
+        backgroundColor,
         borderRadius: 30,
         overflow: "hidden",
         zIndex: 10,
@@ -52,10 +67,10 @@ const SlideToStart: React.FC<SlideToStartProps> = ({ onSlideComplete }) => {
       }}
     >
       <Text color="white" fontWeight="bold" textAlign="center">
-        SLIDE TO START WALK
+        {text}
       </Text>
     </Slider>
   );
 };
 
-export default SlideToStart;
+export default SlideAction;

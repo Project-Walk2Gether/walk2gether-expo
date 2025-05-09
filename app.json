@@ -23,7 +23,8 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow this app to access your location when using the app to create walks in your local area.",
         "NSLocationAlwaysUsageDescription": "We need your location to track your walks even when the app is in the background.",
         "UIBackgroundModes": ["location", "fetch"],
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "This app uses the camera to take photos and videos for your walks, if you choose."
       },
       "config": {
         "googleMapsApiKey": "AIzaSyAjnbays5Hi7wYTj9PLljDDFJzZq3Dh3z8"

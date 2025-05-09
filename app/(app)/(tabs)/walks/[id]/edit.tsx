@@ -1,9 +1,9 @@
 import FullScreenLoader from "@/components/FullScreenLoader";
 import WalkForm from "@/components/WalkForm";
 import { db } from "@/config/firebase";
+import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { useDoc } from "@/utils/firestore";
 import { doc, updateDoc } from "@react-native-firebase/firestore";
-import Constants from "expo-constants";
 import {
   useGlobalSearchParams,
   useLocalSearchParams,
@@ -53,7 +53,7 @@ export default function EditWalkScreen() {
         onSubmit={handleSubmit}
         submitButtonText="Update Walk"
         onCancel={() => router.back()}
-        googleApiKey={Constants.expoConfig!.ios!.config!.googleMapsApiKey!}
+        googleApiKey={GOOGLE_MAPS_API_KEY}
       />
     </ScrollView>
   );

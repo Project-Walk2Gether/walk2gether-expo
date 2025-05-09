@@ -14,7 +14,7 @@ export default function WaitingRoomButton({ pendingRequests, id }: Props) {
       <Button
         chromeless
         size="$2"
-        onPress={() => router.push(`/walk/${id}/waiting-room`)}
+        onPress={() => router.push(`/walks/${id}/waiting-room`)}
         marginLeft={8}
       >
         Want to join

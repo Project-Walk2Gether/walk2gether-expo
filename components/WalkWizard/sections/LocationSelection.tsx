@@ -1,5 +1,6 @@
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { useWalkForm } from "@/context/WalkFormContext";
+import { useLocation } from "@/context/LocationContext";
 import { COLORS } from "@/styles/colors";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
@@ -8,7 +9,7 @@ import {
   GooglePlacesAutocompleteRef,
 } from "react-native-google-places-autocomplete";
 import MapView, { Marker } from "react-native-maps";
-import { Text, View, YStack } from "tamagui";
+import { Button, Text, View, XStack, YStack } from "tamagui";
 import WizardWrapper from "./WizardWrapper";
 
 interface LocationSelectionProps {
@@ -27,6 +28,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
     isLocationLoading,
     locationError,
   } = useWalkForm();
+  const { refresh: getLocation, coords, loading: locationContextLoading, error: locationContextError } = useLocation();
   const [location, setLocation] = useState(formData.location || null);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [longPressActive, setLongPressActive] = useState(false);
@@ -53,6 +55,21 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
       });
     }
   }, [userLocation, formData.location]);
+
+  // Update when coords from LocationContext changes
+  useEffect(() => {
+    if (coords && !isReverseGeocoding) {
+      reverseGeocode(coords.latitude, coords.longitude);
+      
+      // Animate map to selected location
+      mapRef.current?.animateToRegion({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+    }
+  }, [coords]);
 
   const handleLocationSelect = (data: any, details: any) => {
     if (details && details.geometry) {
@@ -196,33 +213,84 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
           <GooglePlacesAutocomplete
             ref={googlePlacesRef}
             predefinedPlaces={[]}
+            listHoverColor="#ececec"
+            listUnderlayColor="#c8c7cc"
+            listViewDisplayed="auto"
+            keepResultsAfterBlur={false}
             textInputProps={{}}
             placeholder="Search for a location or long-press on map"
             onPress={handleLocationSelect}
             fetchDetails={true}
             keyboardShouldPersistTaps="handled"
             styles={{
-              container: {
-                flex: 0,
-              },
               textInput: {
                 height: 50,
                 borderRadius: 10,
                 paddingHorizontal: 15,
                 fontSize: 16,
               },
-              listView: {
-                backgroundColor: "white",
-                borderRadius: 10,
-                marginTop: 5,
-              },
+              // listView: {
+              //   backgroundColor: "white",
+              //   borderRadius: 10,
+              //   marginTop: 5,
+              // },
             }}
             query={{
               key: GOOGLE_MAPS_API_KEY,
               language: "en",
             }}
+            enablePoweredByContainer={false}
+            autoFillOnNotFound={false}
+            currentLocation={false}
+            currentLocationLabel="Current location"
+            debounce={0}
+            disableScroll={false}
+            enableHighAccuracyLocation={true}
+            filterReverseGeocodingByTypes={[]}
+            GooglePlacesDetailsQuery={{}}
+            GooglePlacesSearchQuery={{
+              rankby: "distance",
+              type: "restaurant",
+            }}
+            GoogleReverseGeocodingQuery={{}}
+            isRowScrollable={true}
+            listHoverColor="#ececec"
+            listUnderlayColor="#c8c7cc"
+            listViewDisplayed="auto"
+            keepResultsAfterBlur={false}
+            minLength={0}
+            nearbyPlacesAPI="GooglePlacesSearch"
+            numberOfLines={1}
+            onFail={(e) => {
+              console.warn("Google Place Failed : ", e);
+            }}
+            onNotFound={() => {}}
+            onTimeout={() =>
+              console.warn("google places autocomplete: request timeout")
+            }
+            predefinedPlacesAlwaysVisible={false}
+            suppressDefaultStyles={false}
+            textInputHide={false}
+            timeout={20000}
+            isNewPlacesAPI={false}
+            fields="*"
           />
         </View>
+
+        <XStack marginTop={10} marginBottom={12} space="$2" justifyContent="center">
+          <Button
+            backgroundColor={COLORS.primary}
+            color="white"
+            onPress={() => {
+              setIsReverseGeocoding(true);
+              getLocation();
+            }}
+            pressStyle={{ opacity: 0.8 }}
+            disabled={locationContextLoading || isReverseGeocoding}
+          >
+            {locationContextLoading ? "Getting location..." : "Use my current location"}
+          </Button>
+        </XStack>
 
         <View
           flex={1}
@@ -253,7 +321,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
             Tap and hold on the map to choose a location
           </Text>
 
-          {(isReverseGeocoding || longPressActive || isLocationLoading) && (
+          {(isReverseGeocoding || longPressActive || isLocationLoading || locationContextLoading) && (
             <View
               position="absolute"
               top={0}
@@ -269,7 +337,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
               <Text marginTop={10} color={COLORS.text} fontSize={14}>
                 {longPressActive
                   ? "Location selected! Getting details..."
-                  : isLocationLoading
+                  : isLocationLoading || locationContextLoading
                   ? "Getting your location..."
                   : "Getting location details..."}
               </Text>

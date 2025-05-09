@@ -1,3 +1,4 @@
+import { stopBackgroundLocationTracking } from "@/background/backgroundLocationTask";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationTracking } from "@/hooks/useLocationTracking";
@@ -32,23 +33,14 @@ export default function LiveWalkMap({
     "walking" | "driving"
   >("walking");
 
-  // Get extra fields to include in location updates
-  const getExtraLocationFields = () => ({
-    displayName: user?.displayName || "Anonymous",
-    photoURL: user?.photoURL || null,
-    navigationMethod: navigationMethod,
-  });
-
   // Get walk participants
   const participants = useWalkParticipants(walkId);
 
   // Use the location tracking hook
-  const {
-    userLocation,
-    locationPermission,
-    backgroundLocationPermission,
-    locationTracking,
-  } = useLocationTracking(walkId, user?.uid, getExtraLocationFields);
+  const { userLocation, locationPermission } = useLocationTracking(
+    walkId,
+    user?.uid
+  );
 
   // Get and store current user participant data
   useEffect(() => {
@@ -77,9 +69,9 @@ export default function LiveWalkMap({
   // Check if current user is the walk owner
   const isWalkOwner = walk?.createdByUid === user?.uid;
 
-  // Check if walk has started
-  // The status field might be named differently in the database vs type
+  // Check if walk has started or ended
   const hasWalkStarted = Boolean(walk?.startedAt);
+  const hasWalkEnded = Boolean(walk?.endedAt);
 
   // The user and walkId are now passed directly to the background task
   // through the useLocationTracking hook's startBackgroundLocationTracking function
@@ -111,6 +103,31 @@ export default function LiveWalkMap({
     }
   };
 
+  // Handler for ending a walk (owner only)
+  const handleEndWalk = async () => {
+    if (!walkId || !user?.uid || !isWalkOwner) return;
+
+    try {
+      // Stop background location tracking
+      await stopBackgroundLocationTracking();
+
+      // Update walk status to completed
+      const walkDocRef = doc(firestore_instance, `walks/${walkId}`);
+      await setDoc(
+        walkDocRef,
+        {
+          // Use endedAt timestamp to indicate the walk has ended
+          endedAt: Timestamp.now(),
+          active: false,
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error("Error ending walk:", error);
+      Alert.alert("Error", "Failed to end the walk. Please try again.");
+    }
+  };
+
   // Render location permission denied message
   if (locationPermission === false) {
     return (
@@ -134,6 +151,26 @@ export default function LiveWalkMap({
       </View>
     );
   }
+
+  // Render the official walk route tracked from the walk owner's locations
+  const renderOfficialWalkRoute = () => {
+    if (!walk?.route?.points?.length) return null;
+
+    // Convert route points to map coordinates
+    const polylineCoordinates = walk.route.points.map((point) => ({
+      latitude: point.latitude,
+      longitude: point.longitude,
+    }));
+
+    return (
+      <Polyline
+        coordinates={polylineCoordinates}
+        strokeWidth={5}
+        strokeColor="#FF5E0E" // Use primary orange color with higher width for official route
+        lineDashPattern={[0]} // Solid line
+      />
+    );
+  };
 
   // Render route for current user's participant
   const renderCurrentUserRoute = () => {
@@ -168,6 +205,7 @@ export default function LiveWalkMap({
           coordinates={polylineCoordinates}
           strokeWidth={4}
           strokeColor={COLORS.primary}
+          lineDashPattern={[1, 3]} // Dashed line for user's route
         />
       </>
     );
@@ -220,6 +258,7 @@ export default function LiveWalkMap({
           return isCurrentUser ? (
             // Blue dot for current user location
             <Marker
+              tracksViewChanges={false}
               key={p.id}
               coordinate={{
                 latitude: p.lastLocation.latitude,
@@ -253,12 +292,16 @@ export default function LiveWalkMap({
                 latitude: p.lastLocation.latitude,
                 longitude: p.lastLocation.longitude,
               }}
+              tracksViewChanges={false}
               title={p.displayName || "Participant"}
               description="Participant location"
               pinColor="#2196F3"
             />
           );
         })}
+
+        {/* Render the official walk route (from owner's tracked locations) */}
+        {renderOfficialWalkRoute()}
 
         {/* Render route for current user */}
         {renderCurrentUserRoute()}
@@ -272,10 +315,12 @@ export default function LiveWalkMap({
         initialNavigationMethod={navigationMethod}
         isOwner={isWalkOwner}
         walkStarted={hasWalkStarted}
+        walkEnded={hasWalkEnded}
         onNavigationMethodChange={(isDriving) =>
           setNavigationMethod(isDriving ? "driving" : "walking")
         }
         onStartWalk={handleStartWalk}
+        onEndWalk={handleEndWalk}
       />
     </View>
   );

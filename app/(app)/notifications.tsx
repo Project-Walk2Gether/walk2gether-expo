@@ -57,7 +57,7 @@ export default function NotificationsScreen() {
       notification.data &&
       "walkId" in notification.data
     ) {
-      router.push(`/(app)/(modals)/walk/${notification.data.walkId}`);
+      router.push(`/walks/${notification.data.walkId}`);
     }
   };
 

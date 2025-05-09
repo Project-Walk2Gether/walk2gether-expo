@@ -22,7 +22,7 @@ export default function UnapprovedRequestsRow({
         size="$2"
         backgroundColor="#e67e22"
         color="white"
-        onPress={() => router.push(`/walk/${walkId}/waiting-room`)}
+        onPress={() => router.push(`/walks/${walkId}/waiting-room`)}
         borderRadius={8}
         px={12}
         py={4}
