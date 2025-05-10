@@ -7,17 +7,11 @@ import { COLORS } from "@/styles/colors";
 import { useQuery } from "@/utils/firestore";
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
-import {
-  Copy,
-  Link,
-  MapPin,
-  MessageCircle,
-  Share2,
-  Users
-} from "@tamagui/lucide-icons";
-import * as Sharing from 'expo-sharing';
+import { useFlashMessage } from "@/context/FlashMessageContext";
+import { Copy, Link, MapPin, Share2, Users } from "@tamagui/lucide-icons";
+import * as Sharing from "expo-sharing";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Clipboard, Platform } from "react-native";
+import { Clipboard } from "react-native";
 import MapView from "react-native-maps";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
@@ -29,8 +23,6 @@ interface InviteSelectionProps {
   onBack: () => void;
 }
 
-
-
 export const InviteSelection: React.FC<InviteSelectionProps> = ({
   onContinue,
   onBack,
@@ -38,6 +30,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   const { formData, updateFormData } = useWalkForm();
   const { user } = useAuth();
   const { userData } = useUserData();
+  const { showMessage } = useFlashMessage();
   const [selectedFriends, setSelectedFriends] = useState<string[]>(
     formData.invitedUserIds || []
   );
@@ -79,47 +72,48 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
 
   // Generate and share the invitation link
   const getInvitationLink = () => {
+    console.log({ userData, formData });
     if (!userData?.friendInvitationCode || !formData.invitationCode) return "";
-    
+
     return `https://projectwalk2gether.org/join?code=${userData.friendInvitationCode}&walk=${formData.invitationCode}`;
   };
-  
+
   // Handle sharing the invitation link
   const handleShareLink = async () => {
     const link = getInvitationLink();
     if (!link) {
-      Alert.alert("Error", "Unable to generate invitation link");
+      showMessage("Unable to generate invitation link", "error");
       return;
     }
-    
+
     try {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(link, {
           dialogTitle: "Invite friends to walk",
           mimeType: "text/plain",
-          UTI: "public.plain-text"
+          UTI: "public.plain-text",
         });
       } else {
         // Fallback for web or devices where Sharing is not available
         Clipboard.setString(link);
-        Alert.alert("Link copied", "Invitation link copied to clipboard");
+        showMessage("Invitation link copied to clipboard", "success");
       }
     } catch (error) {
       console.error("Error sharing link:", error);
-      Alert.alert("Error", "Could not share the invitation link");
+      showMessage("Could not share the invitation link", "error");
     }
   };
-  
+
   // Copy link to clipboard
   const copyLinkToClipboard = () => {
     const link = getInvitationLink();
     if (!link) {
-      Alert.alert("Error", "Unable to generate invitation link");
+      showMessage("Unable to generate invitation link", "error");
       return;
     }
-    
+
     Clipboard.setString(link);
-    Alert.alert("Success", "Invitation link copied to clipboard");
+    showMessage("Invitation link copied to clipboard", "success");
   };
 
   const handleContinue = () => {
@@ -155,10 +149,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
       <WizardWrapper
         onContinue={handleContinue}
         onBack={onBack}
-        continueDisabled={
-          !isNeighborhoodWalk &&
-          selectedFriends.length === 0
-        }
+        continueDisabled={!isNeighborhoodWalk && selectedFriends.length === 0}
         continueText="Next"
       >
         <YStack flex={1} gap="$4" paddingHorizontal="$2" paddingVertical="$4">
@@ -207,16 +198,12 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                 </ContentCard>
               ) : null}
 
-                  <ContentCard
+              <ContentCard
                 title="Invite friends"
                 icon={<Link size={20} color={COLORS.textOnLight} />}
                 description="Share an invitation link with friends to join your walk."
               >
                 <YStack gap="$3">
-                  <Text color={COLORS.textSecondary} fontSize={14}>
-                    Share this link with friends to invite them to your walk. They'll be able to join directly by clicking on it.
-                  </Text>
-                  
                   <XStack gap="$3" justifyContent="center">
                     <Button
                       backgroundColor={COLORS.primary}
@@ -231,7 +218,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                     >
                       Share Link
                     </Button>
-                    
+
                     <Button
                       backgroundColor={COLORS.subtle}
                       color={COLORS.text}

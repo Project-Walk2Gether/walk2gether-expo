@@ -5,6 +5,7 @@ import { useWalks } from "@/context/WalksContext";
 import { createWalkFromForm } from "@/utils/walkSubmission";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect } from "react";
+import Toast from "react-native-toast-message";
 import HeaderBackButton from "../HeaderBackButton";
 import {
   DurationSelection,
@@ -43,7 +44,7 @@ export function WalkWizard() {
 
       // Skip the first two steps (type selection and invite selection)
       // Go directly to step 3 (index 2) which is time selection
-      console.log("Running");
+      console.log("Running", { friendId });
       goToStep(2);
     }
   }, [friendId]);
@@ -166,6 +167,8 @@ export function WalkWizard() {
     return <DefaultComponent />;
   };
 
+  console.log("rendering parent");
+
   return (
     <>
       <Stack.Screen
@@ -174,6 +177,7 @@ export function WalkWizard() {
           headerLeft: () => <HeaderBackButton onPress={handleBackPress} />,
         }}
       />
+      <Toast />
       {renderStep()}
     </>
   );

@@ -34,12 +34,6 @@ export default function CompleteYourProfile() {
 
   if (!user) return <Redirect href="/auth" />;
 
-  const initialFriendInvitationCode = user!.uid
-    .substring(0, 8)
-    .split("")
-    .reverse()
-    .join("");
-
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
@@ -48,7 +42,6 @@ export default function CompleteYourProfile() {
       const userData = {
         name: values.name,
         location: values.location,
-        friendInvitationCode: values.friendInvitationCode,
       };
 
       // If we have referral info, add it to the user data
@@ -87,18 +80,11 @@ export default function CompleteYourProfile() {
       >
         Sign Out
       </Button>
-      <AuthScenicLayout
-        scroll
-        showSun={false}
-        showBottomRow={false}
-        showTree={false}
-        showHouse
-      >
+      <AuthScenicLayout scroll showSun={false} showTree={false}>
         <Formik
           initialValues={{
             name: user?.displayName || "",
             location: null,
-            friendInvitationCode: initialFriendInvitationCode,
             profilePicUrl: undefined,
           }}
           validationSchema={userDataSchema}

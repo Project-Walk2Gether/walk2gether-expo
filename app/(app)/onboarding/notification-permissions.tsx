@@ -28,7 +28,7 @@ export default function NotificationPermissionsScreen() {
   }, [permissionStatus]);
 
   return (
-    <AuthScenicLayout showHouse scroll={false}>
+    <AuthScenicLayout scroll={false}>
       <YStack
         minHeight={height}
         width="100%"

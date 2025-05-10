@@ -10,7 +10,6 @@ import {
   Timestamp,
   where,
 } from "@react-native-firebase/firestore";
-import { addHours } from "date-fns";
 import "firebase/compat/firestore";
 import React, { createContext, ReactNode, useContext, useMemo } from "react";
 import { Walk, WithId } from "walk2gether-shared";
@@ -56,6 +55,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
       collection(firestore_instance, "walks"),
       where("active", "==", false),
       where("estimatedEndTime", ">", now),
+      where("invitedUserIds", "array-contains", user.uid),
       orderBy("estimatedEndTime", "asc"),
       limit(10)
     );

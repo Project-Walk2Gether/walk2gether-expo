@@ -10,7 +10,7 @@ export default function HowItWorks() {
 
   return (
     <YStack flex={1}>
-      <AuthScenicLayout scroll showSun={true} showTree={true} showHouse={false}>
+      <AuthScenicLayout scroll showSun={true} showTree={true}>
         <YStack gap="$3" pt="$10" pb="$10">
           <H1 fontSize={32} fontWeight="bold" textAlign="center">
             Welcome to Walk2Gether

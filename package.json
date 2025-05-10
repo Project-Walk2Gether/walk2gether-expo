@@ -56,6 +56,7 @@
     "expo-location": "~18.1.4",
     "expo-notifications": "~0.31.1",
     "expo-router": "~5.0.6",
+    "expo-sharing": "~13.1.5",
     "expo-status-bar": "~2.2.3",
     "expo-task-manager": "~13.1.5",
     "expo-updates": "~0.28.12",
@@ -89,8 +90,7 @@
     "react-native-uuid": "^2.0.3",
     "tamagui": "1.126.9",
     "walk2gether-shared": "github:Project-Walk2Gether/walk2gether-shared",
-    "yup": "^1.6.1",
-    "expo-sharing": "~13.1.5"
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

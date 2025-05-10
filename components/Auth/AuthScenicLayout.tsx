@@ -22,7 +22,6 @@ export interface AuthScenicLayoutProps {
   contentContainerStyle?: any;
   showSun?: boolean;
   showTree?: boolean;
-  showHouse?: boolean;
 }
 
 const { width } = Dimensions.get("screen");

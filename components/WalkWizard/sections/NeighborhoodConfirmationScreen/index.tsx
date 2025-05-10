@@ -3,9 +3,7 @@ import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
 import { Handshake, Pin, Speech, Users } from "@tamagui/lucide-icons";
-import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Card, Spinner, Text, View, XStack, YStack } from "tamagui";
 import WizardWrapper from "../WizardWrapper";
@@ -48,12 +46,16 @@ export const NeighborhoodConfirmationScreen: React.FC<
 > = ({ onSubmit, onBack }) => {
   const { updateFormData } = useWalkForm();
   const { user } = useAuth();
-  const { userLocation, loading: isLoadingLocation, error: locationError } = useLocation();
+  const {
+    userLocation,
+    loading: isLoadingLocation,
+    error: locationError,
+  } = useLocation();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [nearbyWalkers, setNearbyWalkers] = useState(0);
   const [nearbyWalkerIds, setNearbyWalkerIds] = useState<string[]>([]);
   const [isLoadingNearbyUsers, setIsLoadingNearbyUsers] = useState(false);
-  
+
   // Track if we're ready to display the screen
   const isLoading = isLoadingLocation || !userLocation;
 
@@ -73,13 +75,13 @@ export const NeighborhoodConfirmationScreen: React.FC<
       setNearbyWalkers,
       setIsLoadingNearbyUsers,
     });
-    
+
     // Store the nearby walker IDs
     setNearbyWalkerIds(nearbyIds);
-    
+
     // Update the form data with nearby user IDs
     updateFormData({
-      nearbyUserIds: nearbyIds
+      invitedUserIds: nearbyIds,
     });
   };
 
@@ -154,12 +156,16 @@ export const NeighborhoodConfirmationScreen: React.FC<
               <MapView
                 provider={PROVIDER_GOOGLE}
                 style={{ flex: 1 }}
-                initialRegion={userLocation ? {
-                  latitude: userLocation.coords.latitude,
-                  longitude: userLocation.coords.longitude,
-                  latitudeDelta: 0.02,
-                  longitudeDelta: 0.02,
-                } : undefined}
+                initialRegion={
+                  userLocation
+                    ? {
+                        latitude: userLocation.coords.latitude,
+                        longitude: userLocation.coords.longitude,
+                        latitudeDelta: 0.02,
+                        longitudeDelta: 0.02,
+                      }
+                    : undefined
+                }
               >
                 {userLocation && (
                   <>

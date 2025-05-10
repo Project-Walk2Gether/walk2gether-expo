@@ -44,7 +44,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
 
   // Update region when coords change
   useEffect(() => {
-    console.log("Running", { coords, location: formData.location });
+    console.log("Running", { coords: !!coords, location: !!formData.location });
     if (coords && !formData.location) {
       setRegion({
         latitude: coords.latitude,
@@ -53,11 +53,10 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
         longitudeDelta: 0.01,
       });
     }
-  }, [!!coords, !!formData.location]);
+  }, [coords, formData.location]);
 
   // Update when coords from LocationContext changes
   useEffect(() => {
-    console.log("Coords", { coords });
     if (coords && !isReverseGeocoding) {
       reverseGeocode(coords.latitude, coords.longitude);
 
@@ -69,7 +68,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
         longitudeDelta: 0.01,
       });
     }
-  }, [!!coords]);
+  }, [coords]);
 
   const handleLocationSelect = (data: any, details: any) => {
     if (details && details.geometry) {
