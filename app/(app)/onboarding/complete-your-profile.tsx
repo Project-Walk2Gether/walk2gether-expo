@@ -11,7 +11,7 @@ import {
   Keyboard as KeyboardIcon,
   MapPin,
 } from "@tamagui/lucide-icons";
-import { Redirect, useRouter } from "expo-router";
+import { Redirect } from "expo-router";
 import { Formik } from "formik";
 import React, { useRef, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -25,7 +25,6 @@ export default function CompleteYourProfile() {
   const { signOut, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const { goToNextScreen, referralInfo } = useOnboarding();
-  const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
   const [showLocationResults, setShowLocationResults] = useState(false);
@@ -59,13 +58,6 @@ export default function CompleteYourProfile() {
 
       // Save user profile data
       await setUserData(userData);
-
-      // Create friendship if needed
-      if (referralInfo?.referredByUid && referralInfo?.acceptFriendship) {
-        console.log("Creating friendship with", referralInfo.referredByUid);
-        // Actual friendship creation would happen elsewhere
-        // For example, in the auth.tsx file or in a Firebase function
-      }
 
       goToNextScreen();
     } catch (error) {

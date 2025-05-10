@@ -27,6 +27,7 @@ import { Text, View, YStack } from "tamagui";
 import { Message, ParticipantWithRoute, Walk } from "walk2gether-shared";
 
 import ParticipantsList from "@/components/WalkScreen/components/ParticipantsList";
+import WalkStats from "@/components/WalkScreen/components/WalkStats";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
 
@@ -136,6 +137,12 @@ export default function WalkScreen() {
         {/* Map and Participants container - with padding to account for collapsed bottom sheet */}
         <View flex={1} pb={collapsedHeight - 30}>
           <LiveWalkMap walkId={id} />
+          {/* Walk stats will only show when the walk has ended */}
+          {walk.endedAt && (
+            <View position="absolute" top={10} left={0} right={0} zIndex={10}>
+              <WalkStats walk={walk} />
+            </View>
+          )}
           <LinearGradient
             colors={["rgba(0,0,0,0.5)", "transparent"]}
             start={{ x: 0, y: 0 }}

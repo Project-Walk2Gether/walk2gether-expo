@@ -4,7 +4,7 @@ import { View } from "react-native";
 import Slider from "react-native-slide-to-unlock";
 import { Text } from "tamagui";
 
-type SlideActionProps = {
+type Props = {
   onSlideComplete: () => void;
   text?: string;
   backgroundColor?: string;
@@ -16,16 +16,16 @@ type SlideActionProps = {
  * SlideAction component - uses react-native-slide-to-unlock for a smooth sliding experience
  * with customizable text, colors, and icon
  */
-const SlideAction: React.FC<SlideActionProps> = ({ 
+const SlideAction: React.FC<Props> = ({
   onSlideComplete,
   text = "SLIDE TO START WALK",
   backgroundColor = "rgba(0,153,255,0.9)",
   iconColor = "#0099ff",
-  icon = "play"
+  icon = "play",
 }) => {
   const SliderThumb = () => {
     const IconComponent = icon === "play" ? Play : Square;
-    
+
     return (
       <View
         style={{

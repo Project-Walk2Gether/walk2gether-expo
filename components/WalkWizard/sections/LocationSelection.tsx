@@ -1,6 +1,6 @@
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
-import { useWalkForm } from "@/context/WalkFormContext";
 import { useLocation } from "@/context/LocationContext";
+import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
@@ -21,46 +21,46 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   onContinue,
   onBack,
 }) => {
+  const { formData, updateFormData } = useWalkForm();
   const {
-    formData,
-    updateFormData,
-    userLocation,
-    isLocationLoading,
-    locationError,
-  } = useWalkForm();
-  const { refresh: getLocation, coords, loading: locationContextLoading, error: locationContextError } = useLocation();
+    refresh: getLocation,
+    coords,
+    loading: locationLoading,
+    error: locationError,
+  } = useLocation();
+
+  console.log({ locationLoading });
   const [location, setLocation] = useState(formData.location || null);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [longPressActive, setLongPressActive] = useState(false);
   const mapRef = useRef<MapView>(null);
   const googlePlacesRef = useRef<GooglePlacesAutocompleteRef>(null);
 
-  // Set initial region based on saved location, user location, or default
+  // Set initial region based on saved location, context coords, or default
   const [region, setRegion] = useState({
-    latitude: formData.location?.latitude || userLocation?.latitude || 37.78825,
-    longitude:
-      formData.location?.longitude || userLocation?.longitude || -122.4324,
+    latitude: formData.location?.latitude || coords?.latitude || 37.78825,
+    longitude: formData.location?.longitude || coords?.longitude || -122.4324,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
 
-  // Update region when user location changes
+  // Update region when coords change
   useEffect(() => {
-    if (userLocation && !formData.location) {
+    if (coords && !formData.location) {
       setRegion({
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       });
     }
-  }, [userLocation, formData.location]);
+  }, [coords, formData.location]);
 
   // Update when coords from LocationContext changes
   useEffect(() => {
     if (coords && !isReverseGeocoding) {
       reverseGeocode(coords.latitude, coords.longitude);
-      
+
       // Animate map to selected location
       mapRef.current?.animateToRegion({
         latitude: coords.latitude,
@@ -277,18 +277,40 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
           />
         </View>
 
-        <XStack marginTop={10} marginBottom={12} space="$2" justifyContent="center">
+        <XStack
+          marginTop={10}
+          marginBottom={12}
+          space="$2"
+          justifyContent="center"
+        >
           <Button
             backgroundColor={COLORS.primary}
             color="white"
-            onPress={() => {
+            onPress={async () => {
               setIsReverseGeocoding(true);
-              getLocation();
+              try {
+                await getLocation();
+                // After getting the location, we need to call reverse geocode
+                if (coords) {
+                  const newLocation = await reverseGeocode(coords.latitude, coords.longitude);
+                  
+                  // Update the text input field with the resolved address
+                  if (googlePlacesRef.current && newLocation) {
+                    googlePlacesRef.current.setAddressText(
+                      newLocation.description || newLocation.name
+                    );
+                  }
+                }
+              } finally {
+                setIsReverseGeocoding(false);
+              }
             }}
             pressStyle={{ opacity: 0.8 }}
-            disabled={locationContextLoading || isReverseGeocoding}
+            disabled={locationLoading || isReverseGeocoding}
           >
-            {locationContextLoading ? "Getting location..." : "Use my current location"}
+            {locationLoading
+              ? "Getting location..."
+              : "Use my current location"}
           </Button>
         </XStack>
 
@@ -321,7 +343,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
             Tap and hold on the map to choose a location
           </Text>
 
-          {(isReverseGeocoding || longPressActive || isLocationLoading || locationContextLoading) && (
+          {(isReverseGeocoding || longPressActive || locationLoading) && (
             <View
               position="absolute"
               top={0}
@@ -337,7 +359,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
               <Text marginTop={10} color={COLORS.text} fontSize={14}>
                 {longPressActive
                   ? "Location selected! Getting details..."
-                  : isLocationLoading || locationContextLoading
+                  : locationLoading
                   ? "Getting your location..."
                   : "Getting location details..."}
               </Text>

@@ -1,13 +1,12 @@
 import { COLORS } from "@/styles/colors";
-import { Stack, useRouter } from "expo-router";
+import { Stack, usePathname, useRouter } from "expo-router";
 import React, { createContext, useContext, useState } from "react";
 
 // Define the onboarding flow screens in order
 const ONBOARDING_SCREENS = [
-  "/onboarding/how-it-works",
   "/onboarding/complete-your-profile",
+  "/onboarding/how-it-works",
   "/onboarding/notification-permissions",
-  // Add more screens as needed
 ];
 
 // Types for the referral information
@@ -20,12 +19,8 @@ type ReferralInfo = {
 type OnboardingContextType = {
   goToNextScreen: () => void;
   goToPreviousScreen: () => void;
-  skipOnboarding: () => void;
-  currentScreenIndex: number;
-  startOnboarding: (options?: {
-    skipIntro?: boolean;
-    referralInfo?: ReferralInfo;
-  }) => void;
+  getCurrentScreenIndex: () => number;
+  startOnboarding: (options?: { referralInfo?: ReferralInfo }) => void;
   referralInfo: ReferralInfo | null;
 };
 
@@ -37,38 +32,34 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(
 export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const [referralInfo, setReferralInfo] = useState<ReferralInfo | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
-  // Since we can't directly access the current path from the router,
-  // we'll use the screen transitions to track the index
+  // Get the current screen index based on the pathname
+  const getCurrentScreenIndex = (): number => {
+    // Normalize the pathname to match the format in ONBOARDING_SCREENS
+    const normalizedPath = pathname.endsWith("/")
+      ? pathname.slice(0, -1)
+      : pathname;
+    const index = ONBOARDING_SCREENS.findIndex((screen) => {
+      const screenPath = screen.endsWith("/") ? screen.slice(0, -1) : screen;
+      return normalizedPath === screenPath;
+    });
+    return index !== -1 ? index : 0; // Default to 0 if not found
+  };
 
   // Start the onboarding flow with optional parameters
-  const startOnboarding = (options?: {
-    skipIntro?: boolean;
-    referralInfo?: ReferralInfo;
-  }) => {
+  const startOnboarding = (options?: { referralInfo?: ReferralInfo }) => {
     if (options?.referralInfo) {
       setReferralInfo(options.referralInfo);
-    }
-
-    // Determine if we should skip the intro screen
-    if (options?.skipIntro) {
-      setCurrentScreenIndex(1); // Skip to complete-your-profile
-      router.replace({
-        pathname: "/onboarding/complete-your-profile" as any,
-      });
-    } else {
-      setCurrentScreenIndex(0);
-      router.replace("/onboarding/how-it-works" as any);
     }
   };
 
   const goToNextScreen = () => {
-    if (currentScreenIndex < ONBOARDING_SCREENS.length - 1) {
-      const nextScreen = ONBOARDING_SCREENS[currentScreenIndex + 1];
-      setCurrentScreenIndex(currentScreenIndex + 1);
+    const currentIndex = getCurrentScreenIndex();
+    if (currentIndex < ONBOARDING_SCREENS.length - 1) {
+      const nextScreen = ONBOARDING_SCREENS[currentIndex + 1];
       router.push(nextScreen as any);
     } else {
       // If we're at the last screen, complete onboarding and go to main app
@@ -77,16 +68,11 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const goToPreviousScreen = () => {
-    if (currentScreenIndex > 0) {
-      const prevScreen = ONBOARDING_SCREENS[currentScreenIndex - 1];
-      setCurrentScreenIndex(currentScreenIndex - 1);
+    const currentIndex = getCurrentScreenIndex();
+    if (currentIndex > 0) {
+      const prevScreen = ONBOARDING_SCREENS[currentIndex - 1];
       router.push(prevScreen as any);
     }
-  };
-
-  const skipOnboarding = () => {
-    // Skip to the last required screen or complete onboarding
-    router.replace("/onboarding/complete-your-profile" as any);
   };
 
   return (
@@ -94,8 +80,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         goToNextScreen,
         goToPreviousScreen,
-        skipOnboarding,
-        currentScreenIndex,
+        getCurrentScreenIndex,
         startOnboarding,
         referralInfo,
       }}
@@ -118,6 +103,7 @@ export default function OnboardingLayout() {
   return (
     <OnboardingProvider>
       <Stack
+        initialRouteName="complete-your-profile"
         screenOptions={{
           headerShown: false,
           animation: "slide_from_right",

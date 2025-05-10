@@ -12,13 +12,7 @@ import {
 } from "@react-native-firebase/firestore";
 import { addHours } from "date-fns";
 import "firebase/compat/firestore";
-import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, ReactNode, useContext, useMemo } from "react";
 import { Walk, WithId } from "walk2gether-shared";
 import { useAuth } from "./AuthContext";
 
@@ -26,7 +20,6 @@ interface WalksContextType {
   upcomingWalks: WithId<Walk>[];
   activeWalks: WithId<Walk>[];
   walksLoading: boolean; // Loading state for fetching walks
-  submitting: boolean; // Loading state for mutations (create, RSVP, etc)
   currentWalk: Walk | null;
   createWalk: (
     walk: Walk
@@ -49,10 +42,7 @@ interface WalksProviderProps {
 }
 
 export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
-  const [submitting, setSubmitting] = useState(false);
   const { user } = useAuth();
-
-  console.log("Walks provider re-rendering");
 
   // Get the start of today for filtering upcoming walks
   const now = new Date();
@@ -145,7 +135,6 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
         upcomingWalks,
         activeWalks,
         walksLoading,
-        submitting,
         createWalk,
         currentWalk,
         getWalkById,

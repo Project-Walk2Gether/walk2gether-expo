@@ -3,9 +3,9 @@ import AnimatedLogo from "@/components/AnimatedLogo/index";
 import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
 import PhoneForm from "@/components/Auth/Form/PhoneForm";
 import TokenSignInForm from "@/components/Auth/Form/TokenSignInForm";
-import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useInvitationFlow } from "@/hooks/useInvitationFlow";
+import { determineUserRoute, getUserDisplayName } from "@/utils/navigation";
 import { COLORS } from "@/styles/colors";
 import { Check } from "@tamagui/lucide-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -63,49 +63,30 @@ export default function Auth() {
       verificationId,
       values.verificationCode
     );
-    // Now, check if the user has a profile
-    const userDataDocRef = firestore_instance
-      .collection("users")
-      .doc(userCredential.user.uid);
-
-    const userDataDoc = await userDataDocRef.get();
-    const userData = userDataDoc.data();
-    const hasData = !!userData;
-
+    
     // If there was a friendship invitation and the user wants to accept it
     // Create friendship regardless of whether user has profile data
     if (params.referredByUid) {
       await handleCreateFriendship(userCredential.user.uid);
     }
-
-    if (hasData) {
-      // If the user has a profile, redirect to the walks screen with a welcome back message
+    
+    // Determine the appropriate route based on user data
+    const route = await determineUserRoute(userCredential.user.uid, {
+      referredByUid: params.referredByUid
+    });
+    
+    // Show welcome message if going to the main app
+    if (route === "/walks") {
+      const displayName = await getUserDisplayName(userCredential.user.uid);
       showMessage({
-        message: `Welcome back, ${userData.displayName}!`,
+        message: `Welcome back, ${displayName}!`,
         type: "success",
       });
-      router.replace("/walks");
-    } else {
-      // Start the onboarding flow
-      if (params.referredByUid) {
-        // If there's a referredByUid, prepare the referral info
-        const invitationParams = getInvitationParams();
-
-        // Navigate directly to the profile completion screen with params
-        router.replace({
-          pathname: "/onboarding/complete-your-profile",
-          params: {
-            referredByUid: invitationParams.referredByUid,
-            acceptFriendship: invitationParams.acceptFriendship
-              ? "true"
-              : "false",
-          },
-        });
-      } else {
-        // Start normal onboarding flow from the beginning
-        router.replace("/onboarding/how-it-works");
-      }
     }
+    
+    // Navigate to the appropriate route - handle both string and object route types
+    // Using type assertion to avoid TypeScript complexities with expo-router
+    router.replace(route as any);
   };
 
   return (

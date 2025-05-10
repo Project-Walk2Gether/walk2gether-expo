@@ -151,23 +151,21 @@ export default function MessageForm({
             items={[
               {
                 label: "Take a photo",
-                icon: <Camera size="$1" color={COLORS.primary} />,
+                icon: <Camera size="$1" color={COLORS.textOnDark} />,
                 onPress: () => handleImagePicker("camera"),
                 buttonProps: {
-                  backgroundColor: "transparent",
-                  borderColor: "$gray5",
-                  borderWidth: 1,
-                },
+                  backgroundColor: COLORS.primary,
+                  color: COLORS.textOnDark,
+                }
               },
               {
                 label: "Select photos",
-                icon: <ImagePlus size="$1" color={COLORS.primary} />,
+                icon: <ImagePlus size="$1" color={COLORS.textOnDark} />,
                 onPress: () => handleImagePicker("multiple"),
                 buttonProps: {
-                  backgroundColor: "transparent",
-                  borderColor: "$gray5",
-                  borderWidth: 1,
-                },
+                  backgroundColor: COLORS.primary,
+                  color: COLORS.textOnDark,
+                }
               },
             ]}
             trigger={

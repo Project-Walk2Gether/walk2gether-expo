@@ -1,7 +1,7 @@
 import Menu, { MenuItem } from "@/components/Menu";
 import { firestore_instance } from "@/config/firebase";
 import { COLORS } from "@/styles/colors";
-import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
+import { doc, setDoc } from "@react-native-firebase/firestore";
 import { Car, Check, Footprints, MapPin } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable } from "react-native";
@@ -180,7 +180,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
     if (walkEnded && status === "arrived") {
       return "Walk ended";
     }
-    
+
     // Show "Walk started" when the walk has started and user has arrived or is the owner
     if (walkStarted && !walkEnded && status === "arrived") {
       // Don't show text when end walk slider is active
@@ -256,20 +256,33 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
       paddingHorizontal={15}
       pressStyle={{ opacity: 0.8 }}
     >
-      <XStack width="100%" alignItems="center" justifyContent="space-between" position="relative">
+      <XStack
+        width="100%"
+        alignItems="center"
+        justifyContent="space-between"
+        position="relative"
+      >
         {/* Absolutely positioned status icon on the left */}
-        <XStack position="absolute" left="$2" alignItems="center" justifyContent="center" zIndex={1}>
+        <XStack
+          position="absolute"
+          alignItems="center"
+          left={0}
+          justifyContent="center"
+          zIndex={1}
+        >
           {getStatusButtonIcon()}
         </XStack>
-        
+
         {/* Centered button text and status indicator */}
-        <XStack flex={1} alignItems="center" justifyContent="center" width="100%">
+        <XStack
+          flex={1}
+          alignItems="center"
+          justifyContent={status === "on-the-way" ? "flex-start" : "center"}
+          ml={status === "on-the-way" ? "$5" : 0}
+          width="100%"
+        >
           <XStack alignItems="center" gap="$1">
-            <Text
-              textAlign="center"
-              color="white"
-              fontWeight="bold"
-            >
+            <Text textAlign="center" color="white" fontWeight="bold">
               {getStatusButtonText()}
             </Text>
             {status === "pending" && (
@@ -282,7 +295,13 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
 
         {/* Mode toggle with icons on right side - only show when on the way */}
         {status === "on-the-way" && (
-          <XStack position="absolute" right="$2" alignItems="center" gap="$2" zIndex={1}>
+          <XStack
+            position="absolute"
+            right="$2"
+            alignItems="center"
+            gap="$2"
+            zIndex={1}
+          >
             {/* Walking section - clickable */}
             <Pressable onPress={() => handleNavigationMethodChange(false)}>
               <XStack
@@ -339,7 +358,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
       onStartWalk();
     }
   };
-  
+
   // Handle walk end action
   const handleEndWalk = () => {
     if (onEndWalk) {
@@ -348,10 +367,12 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
   };
 
   // Check if we should show the slider instead of regular button
-  const showStartWalkSlider = isOwner && status === "arrived" && !walkStarted && !walkEnded;
-  
+  const showStartWalkSlider =
+    isOwner && status === "arrived" && !walkStarted && !walkEnded;
+
   // Check if we should show the end walk slider
-  const showEndWalkSlider = isOwner && status === "arrived" && walkStarted && !walkEnded;
+  const showEndWalkSlider =
+    isOwner && status === "arrived" && walkStarted && !walkEnded;
 
   // We'll show the regular button all the time, and overlay the slider when needed
   const showSlider = showStartWalkSlider || showEndWalkSlider;
@@ -378,8 +399,8 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
             zIndex={10}
           >
             {showStartWalkSlider && (
-              <SlideAction 
-                onSlideComplete={handleStartWalk} 
+              <SlideAction
+                onSlideComplete={handleStartWalk}
                 text="SLIDE TO START WALK"
                 backgroundColor="rgba(0,153,255,0.9)"
                 iconColor="#0099ff"
@@ -387,8 +408,8 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
               />
             )}
             {showEndWalkSlider && (
-              <SlideAction 
-                onSlideComplete={handleEndWalk} 
+              <SlideAction
+                onSlideComplete={handleEndWalk}
                 text="SLIDE TO END WALK"
                 backgroundColor="rgba(255,59,48,0.9)"
                 iconColor="#FF3B30"

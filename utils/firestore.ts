@@ -31,7 +31,6 @@ export function useDoc<T extends FirebaseFirestoreTypes.DocumentData>(
   );
 
   useEffect(() => {
-    console.log("re-running effect", { docPath });
     if (!docRef) {
       setDoc(null);
       return;

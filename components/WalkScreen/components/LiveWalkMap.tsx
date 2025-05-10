@@ -39,7 +39,7 @@ export default function LiveWalkMap({
   // Use the location tracking hook
   const { userLocation, locationPermission } = useLocationTracking(
     walkId,
-    user?.uid
+    user!.uid
   );
 
   // Get and store current user participant data
@@ -142,15 +142,7 @@ export default function LiveWalkMap({
     );
   }
 
-  // Render loading state
-  if (locationPermission === null || !userLocation) {
-    return (
-      <View flex={1} justifyContent="center" alignItems="center">
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text>Getting your location...</Text>
-      </View>
-    );
-  }
+  // We'll render the map regardless, but with an overlay if location isn't ready yet
 
   // Render the official walk route tracked from the walk owner's locations
   const renderOfficialWalkRoute = () => {
@@ -306,6 +298,31 @@ export default function LiveWalkMap({
         {/* Render route for current user */}
         {renderCurrentUserRoute()}
       </MapView>
+
+      {/* Location loading overlay */}
+      {(locationPermission === null || !userLocation) && (
+        <View
+          position="absolute"
+          top={80}
+          right={15}
+          backgroundColor="rgba(255, 255, 255, 0.8)"
+          padding={10}
+          borderRadius={10}
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="center"
+          shadowColor="#000"
+          // Using Tamagui style props
+          animation="bouncy"
+        >
+          <View marginRight={5}>
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          </View>
+          <Text fontSize={14} color={COLORS.text}>
+            Getting your location...
+          </Text>
+        </View>
+      )}
 
       {/* Controls rendered using absolute positioning */}
       <WalkStatusControls

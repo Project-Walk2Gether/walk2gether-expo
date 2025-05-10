@@ -1,5 +1,4 @@
 import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
-import { useAuth } from "@/context/AuthContext";
 import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
 import { COLORS } from "@/styles/colors";
 import { getAndSyncPushToken } from "@/utils/getAndSyncPushToken";
@@ -12,7 +11,6 @@ const { height } = Dimensions.get("window");
 
 export default function NotificationPermissionsScreen() {
   const router = useRouter();
-  const { user } = useAuth();
   const { permissionStatus, requestPermissions } = useNotificationPermissions();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,8 +42,8 @@ export default function NotificationPermissionsScreen() {
             Stay Connected!
           </Text>
           <Text fontSize="$4" mb="$4" textAlign="center">
-            Enable notifications to get updates about walks, invitations, and
-            important community news.
+            Enable notifications to get stay informed about nearby walks! You
+            can manage this at any time in settings.
           </Text>
           {error && (
             <Text color="$red10" mb="$2" textAlign="center">
