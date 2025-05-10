@@ -1,8 +1,10 @@
 import { BrandGradient } from "@/components/UI";
+import InvitationQRCode from "@/components/InvitationQRCode";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
-import { Copy, Share2 } from "@tamagui/lucide-icons";
+import { Copy, ExternalLink, Share2 } from "@tamagui/lucide-icons";
 import * as Clipboard from "expo-clipboard";
+import { Link } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
@@ -20,8 +22,8 @@ export default function InviteFriendsScreen() {
   const insets = useSafeAreaInsets();
   const { userData } = useUserData();
   const [sharing, setSharing] = useState(false);
-
-  const invitationUrl = `https://projectwalk2gether.org/join?code=${userData?.friendInvitationCode}`;
+  const invitationCode = userData?.friendInvitationCode;
+  const invitationUrl = `https://projectwalk2gether.org/join?code=${invitationCode}`;
   const message = `Want to walk with me using the Walk2Gether app? Use this link to add me as a friend! \n\n${invitationUrl}`;
 
   const { showMessage } = useFlashMessage();
@@ -66,12 +68,7 @@ export default function InviteFriendsScreen() {
           <BrandGradient variant="subtle" style={{ flex: 1 }}>
             <StatusBar style="light" />
             <Toast topOffset={10} />
-            <View
-              flex={1}
-              paddingHorizontal={20}
-              paddingTop={insets.top + 10}
-              paddingBottom={insets.bottom + 20}
-            >
+            <View paddingHorizontal={20}>
               <Card
                 backgroundColor="white"
                 borderRadius="$3"
@@ -80,48 +77,34 @@ export default function InviteFriendsScreen() {
                 shadowRadius={4}
                 elevation={3}
                 marginVertical="$5"
-                flex={1}
               >
                 <YStack padding="$4" gap="$4">
-                  {/* Invitation Link section */}
-                  <YStack gap="$2">
-                    <Text fontSize="$4" fontWeight="500" color="#333">
-                      Invitation Link
-                    </Text>
-                    <XStack
-                      backgroundColor="#f5f5f5"
-                      borderRadius="$2"
-                      padding="$3"
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
-                      <Text
-                        fontSize="$3"
-                        color="#666"
-                        flex={1}
-                        numberOfLines={1}
-                        ellipsizeMode="middle"
-                      >
-                        {invitationUrl}
+                  {/* QR Code section */}
+                  <XStack ai="center" justifyContent="center">
+                    <View flex={1}>
+                      <Text fontSize="$4" fontWeight="500" color="#333" marginBottom="$2">
+                        QR Code
                       </Text>
-                      <Button
-                        size="$3"
-                        backgroundColor="#7C5F45"
-                        color="white"
-                        onPress={handleCopyMessage}
-                        marginLeft="$2"
-                        icon={<Copy size="$1" color="white" />}
-                      >
-                        Copy
-                      </Button>
-                    </XStack>
-                    <Text fontSize="$2.5" color="#666" marginTop="$1">
-                      Tap "Copy" to copy a personalized invitation message with
-                      your link. You can then share this message with friends
-                      via your preferred messaging app or social media platform.
-                    </Text>
-                  </YStack>
-
+                      <Text fontSize="$2.5" color="#666">
+                        Show this QR code to friends so they can scan it with their phone camera to join.
+                      </Text>
+                      <Link href="/qr-code" asChild>
+                        <Button
+                          size="$3"
+                          backgroundColor="#7C5F45"
+                          color="white"
+                          marginTop="$2"
+                          icon={<ExternalLink size="$1" color="white" />}
+                        >
+                          Expand
+                        </Button>
+                      </Link>
+                    </View>
+                    <View marginLeft="$4">
+                      <InvitationQRCode invitationCode={invitationCode} size={120} />
+                    </View>
+                  </XStack>
+                  
                   {/* Or divider */}
                   <XStack alignItems="center" marginVertical="$3">
                     <View height={1} backgroundColor="#ddd" flex={1} />
@@ -155,6 +138,7 @@ export default function InviteFriendsScreen() {
                     >
                       {sharing ? <Spinner color="white" /> : "Share Invitation"}
                     </Button>
+
                   </YStack>
                 </YStack>
               </Card>

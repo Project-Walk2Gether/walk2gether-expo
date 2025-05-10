@@ -89,7 +89,8 @@
     "react-native-uuid": "^2.0.3",
     "tamagui": "1.126.9",
     "walk2gether-shared": "github:Project-Walk2Gether/walk2gether-shared",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "expo-sharing": "~13.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

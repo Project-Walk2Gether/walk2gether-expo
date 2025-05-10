@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import { useLocation } from "./LocationContext";
 
 export interface WalkFormData {
@@ -17,6 +17,7 @@ export interface WalkFormData {
   invitedPhoneNumbers: string[] | null; // Phone numbers to send SMS invites
   nearbyUserIds: string[] | null; // Users within radius for neighborhood walks
   isNeighborhoodWalk: boolean;
+  invitationCode: string;
 }
 
 interface WalkFormContextType {
@@ -31,6 +32,17 @@ interface WalkFormContextType {
   totalSteps: number;
 }
 
+// Generate a random 6-character alphanumeric invitation code
+const generateInvitationCode = (): string => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    code += characters.charAt(randomIndex);
+  }
+  return code;
+};
+
 const initialFormData: WalkFormData = {
   walkType: null,
   date: null,
@@ -42,6 +54,7 @@ const initialFormData: WalkFormData = {
   invitedPhoneNumbers: null,
   nearbyUserIds: null,
   isNeighborhoodWalk: false,
+  invitationCode: generateInvitationCode(),
 };
 
 const WalkFormContext = createContext<WalkFormContextType | undefined>(
@@ -55,7 +68,9 @@ export interface WalkFormProviderProps {
 export const WalkFormProvider: React.FC<WalkFormProviderProps> = ({
   children,
 }) => {
-  const [formData, setFormData] = useState<WalkFormData>(initialFormData);
+  // Initialize form with a fresh invitation code on each form creation
+  const initializedFormData = { ...initialFormData, invitationCode: generateInvitationCode() };
+  const [formData, setFormData] = useState<WalkFormData>(initializedFormData);
   const [currentStep, setCurrentStep] = useState(0);
   const totalSteps = 6; // Type selection + 4 wizard steps
 
@@ -67,7 +82,8 @@ export const WalkFormProvider: React.FC<WalkFormProviderProps> = ({
   };
 
   const resetForm = () => {
-    setFormData(initialFormData);
+    // Generate a new invitation code when resetting the form
+    setFormData({ ...initialFormData, invitationCode: generateInvitationCode() });
     setCurrentStep(0);
   };
 

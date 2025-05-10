@@ -5,8 +5,8 @@ import PhoneForm from "@/components/Auth/Form/PhoneForm";
 import TokenSignInForm from "@/components/Auth/Form/TokenSignInForm";
 import { useAuth } from "@/context/AuthContext";
 import { useInvitationFlow } from "@/hooks/useInvitationFlow";
-import { determineUserRoute, getUserDisplayName } from "@/utils/navigation";
 import { COLORS } from "@/styles/colors";
+import { determineUserRoute, getUserDisplayName } from "@/utils/navigation";
 import { Check } from "@tamagui/lucide-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -53,7 +53,6 @@ export default function Auth() {
     authMode,
     setAuthMode,
     handleCreateFriendship,
-    getInvitationParams,
   } = useInvitationFlow();
 
   const handleVerificationCodeFormSubmit = async (
@@ -63,18 +62,18 @@ export default function Auth() {
       verificationId,
       values.verificationCode
     );
-    
+
     // If there was a friendship invitation and the user wants to accept it
     // Create friendship regardless of whether user has profile data
     if (params.referredByUid) {
       await handleCreateFriendship(userCredential.user.uid);
     }
-    
+
     // Determine the appropriate route based on user data
     const route = await determineUserRoute(userCredential.user.uid, {
-      referredByUid: params.referredByUid
+      referredByUid: params.referredByUid,
     });
-    
+
     // Show welcome message if going to the main app
     if (route === "/walks") {
       const displayName = await getUserDisplayName(userCredential.user.uid);
@@ -83,7 +82,7 @@ export default function Auth() {
         type: "success",
       });
     }
-    
+
     // Navigate to the appropriate route - handle both string and object route types
     // Using type assertion to avoid TypeScript complexities with expo-router
     router.replace(route as any);

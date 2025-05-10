@@ -1,5 +1,7 @@
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { useLocation } from "@/context/LocationContext";
+import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
 import {
@@ -25,8 +27,10 @@ export default function RequestToJoinScreen({
   walk,
 }: RequestToJoinScreenProps) {
   const navigation = useNavigation();
-
   const { user } = useAuth();
+  const { userData } = useUserData();
+
+  const { userLocation } = useLocation();
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
   const { doc: participantDoc } = useDoc<Participant>(
@@ -59,12 +63,12 @@ export default function RequestToJoinScreen({
 
       const participant: Participant = {
         userUid: user.uid,
-        displayName: user.displayName || "Anonymous",
-        photoURL: user.photoURL || null,
+        displayName: userData?.name || "Anonymous",
+        photoURL: userData?.profilePicUrl || null,
         approvedAt: null,
         lastLocation: {
-          latitude: 0,
-          longitude: 0,
+          latitude: userLocation?.coords.latitude || 0,
+          longitude: userLocation?.coords.longitude || 0,
           timestamp: Timestamp.now(),
         },
         route: null,

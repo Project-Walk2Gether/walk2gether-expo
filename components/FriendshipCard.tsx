@@ -81,8 +81,6 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
     : "";
 
   // Check if there are unread messages (we'll need to implement this later)
-  const unreadCount = 0; // This would come from a separate counter or calculation
-
   return (
     <Card
       padding="$4"
@@ -113,7 +111,7 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
               ? friendship.lastMessagePreview
               : "No messages yet"}
           </Text>
-          
+
           {/* Display total miles walked together */}
           {friendship.totalMilesWalked ? (
             <Text color="$green9" numberOfLines={1} fontWeight="500">
@@ -129,25 +127,9 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
               {lastMessageTime}
             </Text>
           )}
-
-          {unreadCount > 0 && (
-            <XStack
-              width={20}
-              height={20}
-              borderRadius={10}
-              backgroundColor={COLORS.primary}
-              alignItems="center"
-              justifyContent="center"
-              marginTop="$1"
-            >
-              <Text color="white" fontSize={12}>
-                {unreadCount}
-              </Text>
-            </XStack>
-          )}
         </YStack>
       </XStack>
-      
+
       {/* Invite on a walk button */}
       <Button
         mt="$3"
@@ -157,7 +139,7 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
           e.stopPropagation();
           router.push({
             pathname: "/(app)/(modals)/new-walk",
-            params: { friendId: friendId }
+            params: { friendId: friendId },
           });
         }}
       >
@@ -166,6 +148,5 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
     </Card>
   );
 };
-
 
 export default FriendshipCard;

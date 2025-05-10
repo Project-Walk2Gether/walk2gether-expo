@@ -1,21 +1,25 @@
 import { ContentCard } from "@/components/ContentCard";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { useUserData } from "@/context/UserDataContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
 import { useQuery } from "@/utils/firestore";
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import {
+  Copy,
+  Link,
   MapPin,
   MessageCircle,
-  UserPlus,
-  Users,
-  X,
+  Share2,
+  Users
 } from "@tamagui/lucide-icons";
+import * as Sharing from 'expo-sharing';
 import React, { useEffect, useRef, useState } from "react";
+import { Alert, Clipboard, Platform } from "react-native";
 import MapView from "react-native-maps";
-import { Button, Card, Input, Text, XStack, YStack } from "tamagui";
+import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
 import FriendsList from "../../FriendsList";
 import WizardWrapper from "./WizardWrapper";
@@ -25,41 +29,7 @@ interface InviteSelectionProps {
   onBack: () => void;
 }
 
-// PhoneNumberChip: pill-shaped chip for phone numbers
-const PhoneNumberChip: React.FC<{ number: string; onRemove: () => void }> = ({
-  number,
-  onRemove,
-}) => (
-  <XStack
-    alignItems="center"
-    backgroundColor="#f3f4f6"
-    borderRadius={9999}
-    paddingVertical={6}
-    paddingHorizontal={14}
-    marginVertical={2}
-    shadowColor="#000"
-    shadowOpacity={0.07}
-    shadowRadius={4}
-    shadowOffset={{ width: 0, height: 2 }}
-    gap={8}
-  >
-    <Text color="#222" fontSize={15}>
-      {number}
-    </Text>
-    <Button
-      size="$2"
-      circular
-      chromeless
-      onPress={onRemove}
-      aria-label="Remove phone number"
-      backgroundColor="transparent"
-      hoverStyle={{ backgroundColor: "#fee2e2" }}
-      pressStyle={{ backgroundColor: "#fecaca" }}
-    >
-      <X size={16} color="#ef4444" />
-    </Button>
-  </XStack>
-);
+
 
 export const InviteSelection: React.FC<InviteSelectionProps> = ({
   onContinue,
@@ -67,14 +37,12 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
 }) => {
   const { formData, updateFormData } = useWalkForm();
   const { user } = useAuth();
+  const { userData } = useUserData();
   const [selectedFriends, setSelectedFriends] = useState<string[]>(
     formData.invitedUserIds || []
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [phoneNumbers, setPhoneNumbers] = useState<string[]>(
-    formData.invitedPhoneNumbers || []
-  );
+  const [shareLink, setShareLink] = useState("");
   const mapRef = useRef<MapView>(null);
 
   // Query friendships for current user where deletedAt is null (not deleted)
@@ -109,33 +77,55 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
     });
   };
 
-  const addPhoneNumber = () => {
-    if (phoneNumber.trim() && !phoneNumbers.includes(phoneNumber.trim())) {
-      const updatedNumbers = [...phoneNumbers, phoneNumber.trim()];
-      setPhoneNumbers(updatedNumbers);
-      setPhoneNumber("");
-
-      // Store phone numbers separately in the form data
-      updateFormData({ invitedPhoneNumbers: updatedNumbers });
+  // Generate and share the invitation link
+  const getInvitationLink = () => {
+    if (!userData?.friendInvitationCode || !formData.invitationCode) return "";
+    
+    return `https://projectwalk2gether.org/join?code=${userData.friendInvitationCode}&walk=${formData.invitationCode}`;
+  };
+  
+  // Handle sharing the invitation link
+  const handleShareLink = async () => {
+    const link = getInvitationLink();
+    if (!link) {
+      Alert.alert("Error", "Unable to generate invitation link");
+      return;
+    }
+    
+    try {
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(link, {
+          dialogTitle: "Invite friends to walk",
+          mimeType: "text/plain",
+          UTI: "public.plain-text"
+        });
+      } else {
+        // Fallback for web or devices where Sharing is not available
+        Clipboard.setString(link);
+        Alert.alert("Link copied", "Invitation link copied to clipboard");
+      }
+    } catch (error) {
+      console.error("Error sharing link:", error);
+      Alert.alert("Error", "Could not share the invitation link");
     }
   };
-
-  const removePhoneNumber = (numberToRemove: string) => {
-    const updatedNumbers = phoneNumbers.filter((num) => num !== numberToRemove);
-    setPhoneNumbers(updatedNumbers);
-
-    // Update the invitedPhoneNumbers in form data
-    updateFormData({ invitedPhoneNumbers: updatedNumbers });
+  
+  // Copy link to clipboard
+  const copyLinkToClipboard = () => {
+    const link = getInvitationLink();
+    if (!link) {
+      Alert.alert("Error", "Unable to generate invitation link");
+      return;
+    }
+    
+    Clipboard.setString(link);
+    Alert.alert("Success", "Invitation link copied to clipboard");
   };
 
   const handleContinue = () => {
     // For neighborhood walks, always allow continuing
-    // For friend walks, ensure at least one friend or phone number is selected
-    if (
-      isNeighborhoodWalk ||
-      selectedFriends.length > 0 ||
-      phoneNumbers.length > 0
-    ) {
+    // For friend walks, ensure at least one friend is selected
+    if (isNeighborhoodWalk || selectedFriends.length > 0) {
       onContinue();
     }
   };
@@ -167,8 +157,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
         onBack={onBack}
         continueDisabled={
           !isNeighborhoodWalk &&
-          selectedFriends.length === 0 &&
-          phoneNumbers.length === 0
+          selectedFriends.length === 0
         }
         continueText="Next"
       >
@@ -218,64 +207,44 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                 </ContentCard>
               ) : null}
 
-              <ContentCard
-                title="Invite by phone number"
-                icon={<MessageCircle size={20} color={COLORS.textOnLight} />}
-                description="Add friends not yet on Walk2Gether by inviting them via text."
+                  <ContentCard
+                title="Invite friends"
+                icon={<Link size={20} color={COLORS.textOnLight} />}
+                description="Share an invitation link with friends to join your walk."
               >
-                <XStack gap="$2" alignItems="center">
-                  <Input
-                    placeholder="Enter phone number"
-                    value={phoneNumber}
-                    onChangeText={setPhoneNumber}
-                    keyboardType="phone-pad"
-                    backgroundColor="#fff"
-                    fontSize={16}
-                    flex={1}
-                    color={COLORS.text}
-                    size="$5"
-                    borderWidth={1}
-                    borderColor="#e5e7eb"
-                  />
-                  <Button
-                    backgroundColor={COLORS.action}
-                    color={COLORS.textOnDark}
-                    onPress={addPhoneNumber}
-                    disabled={!phoneNumber.trim()}
-                    circular
-                    size="$4"
-                    icon={<UserPlus size={20} color="#fff" />}
-                    aria-label="Add phone number"
-                    hoverStyle={{ backgroundColor: "#6d4c2b" }}
-                    pressStyle={{ backgroundColor: "#4b2e13" }}
-                  />
-                </XStack>
-
-                <Text fontSize={12} color="$gray10" marginTop="$2">
-                  We'll invite your friends by SMS. Make sure you have their
-                  permission to message them.
-                </Text>
-
-                {phoneNumbers.length > 0 && (
-                  <YStack gap="$2" marginTop="$2">
-                    <Text
-                      fontSize={14}
-                      color={COLORS.textOnLight}
-                      marginBottom={2}
+                <YStack gap="$3">
+                  <Text color={COLORS.textSecondary} fontSize={14}>
+                    Share this link with friends to invite them to your walk. They'll be able to join directly by clicking on it.
+                  </Text>
+                  
+                  <XStack gap="$3" justifyContent="center">
+                    <Button
+                      backgroundColor={COLORS.primary}
+                      color={COLORS.textOnDark}
+                      onPress={handleShareLink}
+                      size="$4"
+                      icon={<Share2 size={18} color="#fff" />}
+                      paddingHorizontal={16}
+                      borderRadius={8}
+                      hoverStyle={{ backgroundColor: "#6d4c2b" }}
+                      pressStyle={{ backgroundColor: "#4b2e13" }}
                     >
-                      Phone numbers to invite:
-                    </Text>
-                    <XStack flexWrap="wrap" gap={8}>
-                      {phoneNumbers.map((number, index) => (
-                        <PhoneNumberChip
-                          key={index}
-                          number={number}
-                          onRemove={() => removePhoneNumber(number)}
-                        />
-                      ))}
-                    </XStack>
-                  </YStack>
-                )}
+                      Share Link
+                    </Button>
+                    
+                    <Button
+                      backgroundColor={COLORS.subtle}
+                      color={COLORS.text}
+                      onPress={copyLinkToClipboard}
+                      size="$4"
+                      icon={<Copy size={18} color={COLORS.text} />}
+                      paddingHorizontal={16}
+                      borderRadius={8}
+                    >
+                      Copy Link
+                    </Button>
+                  </XStack>
+                </YStack>
               </ContentCard>
 
               <Text
@@ -287,10 +256,6 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
               >
                 {selectedFriends.length}{" "}
                 {selectedFriends.length === 1 ? "friend" : "friends"} selected
-                {phoneNumbers.length > 0 &&
-                  ` • ${phoneNumbers.length} phone ${
-                    phoneNumbers.length === 1 ? "number" : "numbers"
-                  }`}
               </Text>
             </YStack>
           )}

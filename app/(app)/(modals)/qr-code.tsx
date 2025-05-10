@@ -1,13 +1,12 @@
 import { useUserData } from "@/context/UserDataContext";
+import InvitationQRCode from "@/components/InvitationQRCode";
 import { Stack } from "expo-router";
 import React from "react";
-import QRCode from "react-native-qrcode-svg";
 import { Spinner, Text, YStack } from "tamagui";
 
 export default function QrCodeScreen() {
   const { userData, loading } = useUserData();
   const code = userData?.friendInvitationCode;
-  const url = code ? `https://projectwalk2gether.org/join?code=${code}` : "";
 
   if (loading) {
     return (
@@ -56,19 +55,7 @@ export default function QrCodeScreen() {
         >
           Show this QR code to invite friends
         </Text>
-        <QRCode value={url} size={260} backgroundColor="#fff" color="#5A4430" />
-        <Text mt={32} fontSize={16} color="#5A4430" textAlign="center">
-          Or share this link:
-        </Text>
-        <Text
-          mt={8}
-          fontSize={14}
-          color="#7C5F45"
-          textAlign="center"
-          selectable
-        >
-          {url}
-        </Text>
+        <InvitationQRCode invitationCode={code} size={260} showText={true} />
       </YStack>
     </>
   );
