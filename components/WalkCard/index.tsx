@@ -50,7 +50,9 @@ const WalkCard: React.FC<WalkCardProps> = ({
   );
 
   // Separate approved and pending participants
-  const approvedParticipants = participants.filter((p) => p.approvedAt);
+  const approvedParticipants = participants.filter(
+    (p) => p.approvedAt && p.userUid !== user?.uid
+  );
   const pendingParticipants = participants.filter(
     (p) => !p.approvedAt && p.userUid !== user?.uid
   );

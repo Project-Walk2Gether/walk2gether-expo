@@ -1,12 +1,13 @@
 import { useAuth } from "@/context/AuthContext";
+import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
 import { Handshake, Pin, Speech, Users } from "@tamagui/lucide-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
-import { Dimensions } from "react-native";
+import { ActivityIndicator, Dimensions } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Card, Text, View, XStack, YStack } from "tamagui";
+import { Card, Spinner, Text, View, XStack, YStack } from "tamagui";
 import WizardWrapper from "../WizardWrapper";
 import { findNearbyWalkers } from "./findNearbyWalkers";
 
@@ -47,20 +48,14 @@ export const NeighborhoodConfirmationScreen: React.FC<
 > = ({ onSubmit, onBack }) => {
   const { updateFormData } = useWalkForm();
   const { user } = useAuth();
-  const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
-  );
+  const { userLocation, loading: isLoadingLocation, error: locationError } = useLocation();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [nearbyWalkers, setNearbyWalkers] = useState(0);
+  const [nearbyWalkerIds, setNearbyWalkerIds] = useState<string[]>([]);
   const [isLoadingNearbyUsers, setIsLoadingNearbyUsers] = useState(false);
-
-  // Default location (central location if permissions are not granted)
-  const defaultLocation = {
-    latitude: 37.7749,
-    longitude: -122.4194,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  };
+  
+  // Track if we're ready to display the screen
+  const isLoading = isLoadingLocation || !userLocation;
 
   // Radius in meters
   const walkRadius = 1500; // 1.5 km radius
@@ -70,7 +65,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
     latitude: number;
     longitude: number;
   }) => {
-    await findNearbyWalkers({
+    const nearbyIds = await findNearbyWalkers({
       user,
       userLocation,
       radiusKm: NEARBY_USERS_RADIUS_KM,
@@ -78,48 +73,48 @@ export const NeighborhoodConfirmationScreen: React.FC<
       setNearbyWalkers,
       setIsLoadingNearbyUsers,
     });
+    
+    // Store the nearby walker IDs
+    setNearbyWalkerIds(nearbyIds);
+    
+    // Update the form data with nearby user IDs
+    updateFormData({
+      nearbyUserIds: nearbyIds
+    });
   };
 
   useEffect(() => {
-    (async () => {
-      try {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          setErrorMsg("Permission to access location was denied");
-          return;
-        }
+    if (userLocation && !isLoadingLocation) {
+      // Create a location object to match the format expected by the form
+      const locationData = {
+        latitude: userLocation.coords.latitude,
+        longitude: userLocation.coords.longitude,
+        name: "Current Location",
+        description: "Your current location",
+      };
 
-        let currentLocation = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-        setLocation(currentLocation);
+      // Update the form data with the user's current location
+      updateFormData({ location: locationData });
 
-        // Create a location object to match the format expected by the form
-        const locationData = {
-          latitude: currentLocation.coords.latitude,
-          longitude: currentLocation.coords.longitude,
-          name: "Current Location",
-          description: "Your current location",
-        };
+      // Find nearby walkers when location is available
+      handleFindNearbyWalkers({
+        latitude: userLocation.coords.latitude,
+        longitude: userLocation.coords.longitude,
+      });
+    } else if (locationError) {
+      setErrorMsg(locationError);
+    }
+  }, [userLocation, isLoadingLocation, locationError]);
 
-        // Update the form data with the user's current location
-        updateFormData({ location: locationData });
-
-        // Find nearby walkers
-        await handleFindNearbyWalkers({
-          latitude: currentLocation.coords.latitude,
-          longitude: currentLocation.coords.longitude,
-        });
-      } catch (error) {
-        console.error("Error getting location:", error);
-        setErrorMsg("Could not get your location");
-      }
-    })();
-  }, []);
+  // Handle submit - notification functionality will be handled server-side
+  const handleSubmit = () => {
+    // Continue with the normal submission - notifications are handled in Firebase Functions
+    onSubmit();
+  };
 
   return (
     <WizardWrapper
-      onContinue={onSubmit}
+      onContinue={handleSubmit}
       onBack={onBack}
       continueText="Start the walk!"
     >
@@ -130,63 +125,56 @@ export const NeighborhoodConfirmationScreen: React.FC<
             height={220}
             borderRadius={12}
             overflow="hidden"
-            backgroundColor="#f0f0f0"
+            backgroundColor="#eef2f3"
           >
-            {errorMsg ? (
+            {isLoading ? (
               <View
-                height={220}
-                width="100%"
+                flex={1}
                 justifyContent="center"
                 alignItems="center"
-                padding={20}
+                paddingHorizontal="$3"
               >
-                <Text color="#ff6b6b" fontSize={17} textAlign="center">
-                  {errorMsg}
+                <Spinner size="large" color={COLORS.action} />
+                <Text marginTop="$2" textAlign="center">
+                  Getting your location...
                 </Text>
-                <Text
-                  color="#555"
-                  fontSize={14}
-                  textAlign="center"
-                  marginTop="$2"
-                >
-                  We need your location to find nearby walkers
+              </View>
+            ) : errorMsg ? (
+              <View
+                flex={1}
+                justifyContent="center"
+                alignItems="center"
+                paddingHorizontal="$3"
+              >
+                <Text textAlign="center" color="red">
+                  {errorMsg}
                 </Text>
               </View>
             ) : (
               <MapView
                 provider={PROVIDER_GOOGLE}
-                style={{
-                  width: Dimensions.get("window").width - 32,
-                  height: 220,
-                }}
-                region={
-                  location
-                    ? {
-                        latitude: location.coords.latitude,
-                        longitude: location.coords.longitude,
-                        latitudeDelta: 0.015,
-                        longitudeDelta: 0.0121,
-                      }
-                    : defaultLocation
-                }
-                showsUserLocation
-                showsMyLocationButton
-                showsCompass
+                style={{ flex: 1 }}
+                initialRegion={userLocation ? {
+                  latitude: userLocation.coords.latitude,
+                  longitude: userLocation.coords.longitude,
+                  latitudeDelta: 0.02,
+                  longitudeDelta: 0.02,
+                } : undefined}
               >
-                {location && (
+                {userLocation && (
                   <>
                     <Marker
                       coordinate={{
-                        latitude: location.coords.latitude,
-                        longitude: location.coords.longitude,
+                        latitude: userLocation.coords.latitude,
+                        longitude: userLocation.coords.longitude,
                       }}
                       title="Your Location"
                       pinColor={COLORS.action}
                     />
                     <Circle
                       center={{
-                        latitude: location.coords.latitude,
-                        longitude: location.coords.longitude,
+                        latitude: userLocation.coords.latitude,
+                        longitude: userLocation.coords.longitude,
                       }}
                       radius={walkRadius}
                       strokeWidth={2}

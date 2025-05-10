@@ -15,6 +15,7 @@ export interface WalkFormData {
   invitees: string[] | null; // Keeping for backward compatibility
   invitedUserIds: string[] | null; // Specific friends to invite
   invitedPhoneNumbers: string[] | null; // Phone numbers to send SMS invites
+  nearbyUserIds: string[] | null; // Users within radius for neighborhood walks
   isNeighborhoodWalk: boolean;
 }
 
@@ -39,6 +40,7 @@ const initialFormData: WalkFormData = {
   invitees: null,
   invitedUserIds: null,
   invitedPhoneNumbers: null,
+  nearbyUserIds: null,
   isNeighborhoodWalk: false,
 };
 

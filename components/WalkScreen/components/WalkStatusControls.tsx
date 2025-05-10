@@ -194,7 +194,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
         // Don't show text when start walk slider is active
         return showSlider ? "" : "I've arrived";
       default:
-        return "I'm not on my way yet";
+        return "Tell others I'm on my way";
     }
   };
 
@@ -222,7 +222,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
   // Create menu items for the status menu
   const statusMenuItems: MenuItem[] = [
     {
-      label: "I'm not on my way yet",
+      label: "Not on my way yet",
       onPress: () => handleStatusChange("pending"),
       buttonProps: {
         backgroundColor: COLORS.primary,
@@ -230,7 +230,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
       },
     },
     {
-      label: "I'm on my way",
+      label: "On my way!",
       onPress: () => handleStatusChange("on-the-way"),
       buttonProps: {
         backgroundColor: "$green9",
@@ -238,7 +238,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
       icon: <Check size={16} color="white" />,
     },
     {
-      label: "I've arrived",
+      label: "Arrived",
       onPress: () => handleStatusChange("arrived"),
       buttonProps: {
         backgroundColor: "$blue9",
@@ -285,11 +285,6 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
             <Text textAlign="center" color="white" fontWeight="bold">
               {getStatusButtonText()}
             </Text>
-            {status === "pending" && (
-              <Text color="white" opacity={0.8} fontSize={12}>
-                (change)
-              </Text>
-            )}
           </XStack>
         </XStack>
 
@@ -385,7 +380,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
           title="Update your status"
           items={statusMenuItems}
           trigger={menuTrigger}
-          snapPoints={[35]}
+          snapPoints={[45]}
         />
 
         {/* Slide Action overlay */}

@@ -23,7 +23,7 @@ export default function Menu({
   items,
   color,
   trigger,
-  snapPoints = [40],
+  snapPoints = [45],
 }: Props) {
   const [open, setOpen] = useState(false);
 

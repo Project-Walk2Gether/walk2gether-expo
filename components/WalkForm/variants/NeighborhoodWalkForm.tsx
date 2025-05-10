@@ -19,7 +19,6 @@ export default function NeighborhoodWalkForm({
   onSubmit,
   submitButtonText,
   onCancel,
-  googleApiKey,
 }: NeighborhoodWalkFormProps) {
   const [showLocationResults, setShowLocationResults] = React.useState(false);
   return (

@@ -2,13 +2,14 @@ import { db } from "@/config/firebase";
 import { collection, getDocs } from "@react-native-firebase/firestore";
 
 /**
- * Finds the number of nearby walkers within a given radius.
+ * Finds nearby walkers within a given radius and returns their IDs.
  * @param user The current user object (with uid)
  * @param userLocation The location to search from ({ latitude, longitude })
  * @param radiusKm The search radius in kilometers
  * @param getDistanceInKm Function to calculate distance between two points (lat/lng)
  * @param setNearbyWalkers Callback to set the number of nearby walkers
  * @param setIsLoadingNearbyUsers Callback to set loading state
+ * @returns Array of user IDs who are within the specified radius
  */
 export async function findNearbyWalkers({
   user,
@@ -29,8 +30,11 @@ export async function findNearbyWalkers({
   ) => number;
   setNearbyWalkers: (n: number) => void;
   setIsLoadingNearbyUsers: (b: boolean) => void;
-}) {
-  if (!userLocation) return;
+}): Promise<string[]> {
+  if (!userLocation) {
+    setIsLoadingNearbyUsers(false);
+    return [];
+  }
 
   setIsLoadingNearbyUsers(true);
   try {
@@ -42,11 +46,13 @@ export async function findNearbyWalkers({
       console.log("No users found");
       setNearbyWalkers(0);
       setIsLoadingNearbyUsers(false);
-      return;
+      return [];
     }
 
     // Filter users by distance
     let nearbyUsersCount = 0;
+    const nearbyUserIds: string[] = [];
+    
     usersSnapshot.forEach((doc) => {
       // Skip the current user
       if (doc.id === user?.uid) return;
@@ -66,14 +72,17 @@ export async function findNearbyWalkers({
         // Count users within radius
         if (distance <= radiusKm) {
           nearbyUsersCount++;
+          nearbyUserIds.push(doc.id);
         }
       }
     });
 
     setNearbyWalkers(nearbyUsersCount);
     console.log(`Found ${nearbyUsersCount} users within ${radiusKm}km`);
+    return nearbyUserIds;
   } catch (error) {
     console.error("Error finding nearby users:", error);
+    return [];
   } finally {
     setIsLoadingNearbyUsers(false);
   }
