@@ -5,7 +5,14 @@ import { useQuery } from "@/utils/firestore";
 import { getDistanceToLocation } from "@/utils/locationUtils";
 import { getWalkTypeLabel } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
-import { Calendar, Hand, Pin, Timer, UserPlus, Users } from "@tamagui/lucide-icons";
+import {
+  Calendar,
+  Hand,
+  Pin,
+  Timer,
+  UserPlus,
+  Users,
+} from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -174,21 +181,6 @@ const WalkCard: React.FC<WalkCardProps> = ({
               </Text>
             </XStack>
           )}
-          {status !== "active" && status !== "past" && (
-            <XStack
-              backgroundColor="#2196f3"
-              paddingHorizontal={8}
-              paddingVertical={4}
-              borderRadius={4}
-              alignItems="center"
-              justifyContent="center"
-              ml={4}
-            >
-              <Text fontSize={12} color="white" fontWeight="500">
-                Upcoming
-              </Text>
-            </XStack>
-          )}
         </XStack>
         <XStack alignItems="center" gap={6}>
           <Timer size={16} color="#666" />
@@ -199,9 +191,10 @@ const WalkCard: React.FC<WalkCardProps> = ({
         {locationDisplay}
 
         {/* Actions footer */}
-        {avatarsToDisplay.length > 0 && (
-          <XStack alignItems="center" gap="$2">
-            <YStack gap={12}>
+        <XStack alignItems="center" gap="$2">
+          {isMine ? (
+            /* Show participants row only if current user is the walk owner */
+            <YStack gap={12} flex={1}>
               {/* Approved participant avatars */}
               <XStack alignItems="center" gap={8}>
                 <XStack alignItems="center" gap={4}>
@@ -221,7 +214,9 @@ const WalkCard: React.FC<WalkCardProps> = ({
                           borderColor="white"
                           borderWidth={2}
                         >
-                          <Avatar.Image src={participant.photoURL || undefined} />
+                          <Avatar.Image
+                            src={participant.photoURL || undefined}
+                          />
                           <Avatar.Fallback
                             justifyContent="center"
                             alignItems="center"
@@ -270,7 +265,7 @@ const WalkCard: React.FC<WalkCardProps> = ({
                   )}
                 </XStack>
               </XStack>
-              
+
               {/* Invited participants (pending) avatars */}
               {pendingParticipants.length > 0 && (
                 <XStack alignItems="center" gap={8}>
@@ -316,57 +311,58 @@ const WalkCard: React.FC<WalkCardProps> = ({
                   </XStack>
                 </XStack>
               )}
-            </YStack>
 
-            {/* Approval notification for walk owner */}
-            {isMine && status !== "past" && unapprovedCount > 0 ? (
-              <XStack flexShrink={1} alignItems="center" gap={8} py={4}>
-                <View
-                  backgroundColor="rgba(230, 126, 34, 0.15)"
-                  borderRadius={8}
-                  paddingHorizontal={10}
-                  paddingVertical={6}
-                  flex={1}
-                >
-                  <Text fontWeight="600" fontSize={13} color="#e67e22">
-                    {unapprovedCount}{" "}
-                    {unapprovedCount === 1 ? "person" : "people"} waiting for
-                    approval
-                  </Text>
-                </View>
-                <Button
-                  size="$2"
-                  backgroundColor="#e67e22"
-                  color="white"
-                  onPress={() =>
-                    router.push({
-                      pathname: "/walks/[id]",
-                      params: { id: walk.id, tab: "waiting-room" },
-                    })
-                  }
-                  borderRadius={8}
-                  px={12}
-                  py={4}
-                >
-                  <Text color="white" fontWeight="bold" fontSize={13}>
-                    See requests
-                  </Text>
-                </Button>
-              </XStack>
-            ) : null}
-            {isMine ? null : (
-              <Button
-                backgroundColor={COLORS.primary}
-                icon={<Hand color="white" />}
-                size="$3"
-              >
-                <Text fontSize={12} fontWeight="bold" color="white">
-                  Ask to join
-                </Text>
-              </Button>
-            )}
-          </XStack>
-        )}
+              {/* Approval notification for walk owner */}
+              {status !== "past" && unapprovedCount > 0 && (
+                <XStack flexShrink={1} alignItems="center" gap={8} py={4}>
+                  <View
+                    backgroundColor="rgba(230, 126, 34, 0.15)"
+                    borderRadius={8}
+                    paddingHorizontal={10}
+                    paddingVertical={6}
+                    flex={1}
+                  >
+                    <Text fontWeight="600" fontSize={13} color="#e67e22">
+                      {unapprovedCount}{" "}
+                      {unapprovedCount === 1 ? "person" : "people"} waiting for
+                      approval
+                    </Text>
+                  </View>
+                  <Button
+                    size="$2"
+                    backgroundColor="#e67e22"
+                    color="white"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/walks/[id]",
+                        params: { id: walk.id, tab: "waiting-room" },
+                      })
+                    }
+                    borderRadius={8}
+                    px={12}
+                    py={4}
+                  >
+                    <Text color="white" fontWeight="bold" fontSize={13}>
+                      See requests
+                    </Text>
+                  </Button>
+                </XStack>
+              )}
+            </YStack>
+          ) : (
+            /* Show 'Ask to join' button if current user is not the walk owner */
+            <Button
+              backgroundColor={COLORS.primary}
+              icon={<Hand color="white" />}
+              size="$3"
+              flex={1}
+            >
+              <Text fontSize={12} fontWeight="bold" color="white">
+                Ask to join
+              </Text>
+            </Button>
+          )}
+        </XStack>
       </YStack>
     </Card>
   );

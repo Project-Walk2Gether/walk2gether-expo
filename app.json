@@ -2,7 +2,7 @@
   "expo": {
     "name": "Walk2Gether",
     "slug": "walkmate",
-    "version": "1.0.30",
+    "version": "1.0.31",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -22,7 +22,7 @@
         "NSLocationWhenInUseUsageDescription": "Allow this app to access your location.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow this app to access your location when using the app to create walks in your local area.",
         "NSLocationAlwaysUsageDescription": "We need your location to track your walks even when the app is in the background.",
-        "UIBackgroundModes": ["location", "fetch"],
+        "UIBackgroundModes": ["location", "fetch", "remote-notification"],
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "This app uses the camera to take photos and videos for your walks, if you choose."
       },

@@ -108,7 +108,9 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
 
           {/* Show placeholder if no messages yet */}
           <Text color="$gray10" numberOfLines={1} opacity={0.8}>
-            {friendship.lastMessageAt ? "Last message..." : "No messages yet"}
+            {friendship.lastMessageAt
+              ? friendship.lastMessagePreview
+              : "No messages yet"}
           </Text>
         </YStack>
 

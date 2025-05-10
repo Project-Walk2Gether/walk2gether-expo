@@ -44,22 +44,22 @@ interface WalksProviderProps {
 export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
   const { user } = useAuth();
 
-  // Get the start of today for filtering upcoming walks
+  // Get current time for filtering active walks
   const now = new Date();
-  const oneHourAgo = addHours(now, -1);
 
-  // Create query for upcoming walks
+  // Create query for current and upcoming walks based on estimatedEndTime
   const currentWalksQuery = useMemo(() => {
     if (!user) return undefined;
 
+    // Get walks that haven't ended yet (estimatedEndTime > now)
     return query(
       collection(firestore_instance, "walks"),
       where("active", "==", false),
-      where("date", ">", oneHourAgo),
-      orderBy("date", "asc"),
+      where("estimatedEndTime", ">", now),
+      orderBy("estimatedEndTime", "asc"),
       limit(10)
     );
-  }, [user, oneHourAgo]);
+  }, [user, now]);
 
   // Use the useQuery hook to fetch walks
   const { docs: currentWalks, status: walksStatus } =

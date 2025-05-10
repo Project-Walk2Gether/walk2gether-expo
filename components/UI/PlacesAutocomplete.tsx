@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { ViewStyle } from "react-native";
 import {
   GooglePlacesAutocomplete,
@@ -12,19 +12,25 @@ export interface PlaceData {
   placeId: string;
   latitude: number;
   longitude: number;
+  description?: string;
 }
 
 interface PlacesAutocompleteProps {
+  // Core props
   value?: PlaceData | null;
   onSelect: (location: PlaceData) => void;
+  googleApiKey: string;
+  
+  // UI props
   placeholder?: string;
   label?: string;
   error?: string;
   touched?: boolean;
-  googleApiKey: string;
   containerStyle?: ViewStyle;
   withLabel?: boolean;
   required?: boolean;
+  textInputStyles?: any;
+  textInputProps?: any;
 }
 
 export const PlacesAutocomplete = React.forwardRef<
@@ -43,19 +49,28 @@ export const PlacesAutocomplete = React.forwardRef<
       containerStyle,
       withLabel,
       required = false,
+      textInputStyles,
+      textInputProps = {},
     },
     ref
   ) => {
-    // Set the input value to value.name on layout
-    const handleLayout = () => {
-      if (value?.name) {
-        console.log("setting name", { name: value.name });
-        ref?.current?.setAddressText(value.name);
+    // Set the input value when it changes
+    useEffect(() => {
+      if (value?.name && ref) {
+        // Need to use timeout to ensure ref is available
+        setTimeout(() => {
+          if (ref && 'current' in ref && ref.current) {
+            ref.current.setAddressText(value.name);
+          }
+        }, 0);
       }
-    };
+    }, [value, ref]);
 
+    // Extract props that are valid for YStack to avoid type errors
+    const { marginBottom, ...otherContainerStyles } = containerStyle || {};
+    
     return (
-      <YStack marginBottom="$5" {...containerStyle}>
+      <YStack marginBottom={marginBottom || "$5"} style={otherContainerStyles}>
         {withLabel && (
           <Text
             fontSize="$4"
@@ -67,7 +82,7 @@ export const PlacesAutocomplete = React.forwardRef<
             {required && <Text color="red"> *</Text>}
           </Text>
         )}
-        <View onLayout={handleLayout}>
+        <View>
           <GooglePlacesAutocomplete
             ref={ref}
             placeholder={placeholder}
@@ -75,26 +90,30 @@ export const PlacesAutocomplete = React.forwardRef<
             onPress={(data, details = null) => {
               if (details) {
                 onSelect({
-                  name: data.description,
-                  placeId: data.place_id,
+                  name: data.description || data.structured_formatting?.main_text || "Selected Location",
+                  placeId: data.place_id || data.id,
                   latitude: details.geometry.location.lat,
                   longitude: details.geometry.location.lng,
+                  description: data.description || details.formatted_address,
                 });
               }
             }}
             query={{
               key: googleApiKey,
+              language: "en",
             }}
             predefinedPlaces={
               value?.name
                 ? [
                     {
                       description: value.name,
-                      // Converting to the format expected by the component
+                      // Place_id is actually expected by the component internally
+                      // but TypeScript definition is incorrect
+                      place_id: value.placeId,
                       geometry: {
                         location: {
-                          latitude: value.latitude,
-                          longitude: value.longitude,
+                          lat: value.latitude,
+                          lng: value.longitude,
                         },
                       },
                     } as unknown as Place,
@@ -120,6 +139,7 @@ export const PlacesAutocomplete = React.forwardRef<
                 borderColor: "#ddd",
                 borderRadius: 8,
                 backgroundColor: "#f9f9f9",
+                ...(textInputStyles || {}),
               },
               predefinedPlacesDescription: {
                 color: "#1faadb",
@@ -134,6 +154,40 @@ export const PlacesAutocomplete = React.forwardRef<
                 zIndex: 10,
               },
             }}
+            // Bug fix: Explicitly set all required default props
+            textInputProps={textInputProps}
+            keyboardShouldPersistTaps="handled"
+            enablePoweredByContainer={false}
+            currentLocation={false}
+            currentLocationLabel="Current location"
+            debounce={0}
+            disableScroll={false}
+            enableHighAccuracyLocation={true}
+            filterReverseGeocodingByTypes={[]}
+            GooglePlacesDetailsQuery={{}}
+            GooglePlacesSearchQuery={{
+              rankby: "distance",
+              type: "restaurant",
+            }}
+            GoogleReverseGeocodingQuery={{}}
+            isRowScrollable={true}
+            minLength={0}
+            nearbyPlacesAPI="GooglePlacesSearch"
+            numberOfLines={1}
+            onFail={(e) => {
+              console.warn("Google Place Failed : ", e);
+            }}
+            onNotFound={() => {}}
+            onTimeout={() =>
+              console.warn("google places autocomplete: request timeout")
+            }
+            predefinedPlacesAlwaysVisible={false}
+            suppressDefaultStyles={false}
+            textInputHide={false}
+            timeout={20000}
+            autoFillOnNotFound={false}
+            isNewPlacesAPI={false}
+            fields="*"
           />
         </View>
         {error && touched && (

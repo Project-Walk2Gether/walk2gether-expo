@@ -2,12 +2,10 @@ import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
+import { PlacesAutocomplete } from "@/components/UI/PlacesAutocomplete";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
-import {
-  GooglePlacesAutocomplete,
-  GooglePlacesAutocompleteRef,
-} from "react-native-google-places-autocomplete";
+import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
 import MapView, { Marker } from "react-native-maps";
 import { Button, Text, View, XStack, YStack } from "tamagui";
 import WizardWrapper from "./WizardWrapper";
@@ -210,70 +208,29 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
     >
       <YStack gap="$4">
         <View zIndex={1}>
-          <GooglePlacesAutocomplete
+          <PlacesAutocomplete
             ref={googlePlacesRef}
-            predefinedPlaces={[]}
-            listHoverColor="#ececec"
-            listUnderlayColor="#c8c7cc"
-            listViewDisplayed="auto"
-            keepResultsAfterBlur={false}
-            textInputProps={{}}
             placeholder="Search for a location or long-press on map"
-            onPress={handleLocationSelect}
-            fetchDetails={true}
-            keyboardShouldPersistTaps="handled"
-            styles={{
-              textInput: {
-                height: 50,
-                borderRadius: 10,
-                paddingHorizontal: 15,
-                fontSize: 16,
+            onSelect={data => handleLocationSelect({
+              description: data.name,
+              structured_formatting: { main_text: data.name },
+              place_id: data.placeId
+            }, {
+              geometry: {
+                location: {
+                  lat: data.latitude,
+                  lng: data.longitude
+                }
               },
-              // listView: {
-              //   backgroundColor: "white",
-              //   borderRadius: 10,
-              //   marginTop: 5,
-              // },
+              formatted_address: data.description
+            })}
+            googleApiKey={GOOGLE_MAPS_API_KEY}
+            textInputStyles={{
+              height: 50,
+              borderRadius: 10,
+              paddingHorizontal: 15,
+              fontSize: 16,
             }}
-            query={{
-              key: GOOGLE_MAPS_API_KEY,
-              language: "en",
-            }}
-            enablePoweredByContainer={false}
-            autoFillOnNotFound={false}
-            currentLocation={false}
-            currentLocationLabel="Current location"
-            debounce={0}
-            disableScroll={false}
-            enableHighAccuracyLocation={true}
-            filterReverseGeocodingByTypes={[]}
-            GooglePlacesDetailsQuery={{}}
-            GooglePlacesSearchQuery={{
-              rankby: "distance",
-              type: "restaurant",
-            }}
-            GoogleReverseGeocodingQuery={{}}
-            isRowScrollable={true}
-            listHoverColor="#ececec"
-            listUnderlayColor="#c8c7cc"
-            listViewDisplayed="auto"
-            keepResultsAfterBlur={false}
-            minLength={0}
-            nearbyPlacesAPI="GooglePlacesSearch"
-            numberOfLines={1}
-            onFail={(e) => {
-              console.warn("Google Place Failed : ", e);
-            }}
-            onNotFound={() => {}}
-            onTimeout={() =>
-              console.warn("google places autocomplete: request timeout")
-            }
-            predefinedPlacesAlwaysVisible={false}
-            suppressDefaultStyles={false}
-            textInputHide={false}
-            timeout={20000}
-            isNewPlacesAPI={false}
-            fields="*"
           />
         </View>
 

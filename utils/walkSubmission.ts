@@ -9,6 +9,8 @@ import {
 import { Router } from "expo-router";
 import uuid from "react-native-uuid";
 import { Friendship, Participant, UserData, Walk } from "walk2gether-shared";
+import { addMinutes } from "date-fns";
+import { getEstimatedEndTimeTimestamp } from "./walkUtils";
 
 /**
  * Gets a list of unique user IDs from the user's friendships to share the walk with
@@ -97,6 +99,13 @@ export const createWalkFromForm = async ({
 
       // Sharing
       sharedWithUserUids: getSharedWithUserUids(userId, friendships),
+
+      // Calculate estimated end time (date + duration + 1 hour buffer)
+      estimatedEndTime: (() => {
+        // Add the duration plus a 1-hour buffer
+        const endTime = addMinutes(formData.date, formData.duration + 60);
+        return Timestamp.fromDate(endTime);
+      })(),
 
       // Additional required fields for Friends walk
       rounds: [],

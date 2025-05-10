@@ -1,4 +1,6 @@
 import { auth_instance } from "@/config/firebase";
+import { addMinutes } from "date-fns";
+import { Timestamp } from "@react-native-firebase/firestore";
 import { Walk } from "walk2gether-shared";
 
 export const isOwner = (walk: Walk) => {
@@ -27,6 +29,45 @@ export function isFuture(walk: Walk): boolean {
 }
 
 /**
+ * Calculate the estimated end time for a walk
+ * End time = start time + duration + 1 hour buffer
+ * 
+ * @param walk The walk to calculate end time for
+ * @param bufferMinutes Optional buffer in minutes (defaults to 60)
+ * @returns A Date object representing the estimated end time
+ */
+export function getEstimatedEndTime(walk: Walk, bufferMinutes: number = 60): Date {
+  const date = walk.date || walk.startedAt;
+  if (!date) {
+    return new Date(); // Fallback to current time if no date is available
+  }
+
+  const walkDate = date.toDate();
+  // Duration in minutes, with a default of 60 minutes if not specified
+  const durationMinutes = walk.durationMinutes || 60;
+  
+  // If there's already an estimatedEndTime, use that
+  if (walk.estimatedEndTime) {
+    return walk.estimatedEndTime.toDate();
+  }
+
+  // Otherwise calculate: start time + duration + buffer
+  return addMinutes(walkDate, durationMinutes + bufferMinutes);
+}
+
+/**
+ * Creates a Firestore Timestamp from a walk's estimated end time
+ * 
+ * @param walk The walk to generate the timestamp for
+ * @param bufferMinutes Optional buffer in minutes (defaults to 60)
+ * @returns A Firestore Timestamp for the estimated end time
+ */
+export function getEstimatedEndTimeTimestamp(walk: Walk, bufferMinutes: number = 60): Timestamp {
+  const endTime = getEstimatedEndTime(walk, bufferMinutes);
+  return Timestamp.fromDate(endTime);
+}
+
+/**
  * Check if a walk is active (currently happening)
  * A walk is considered active if it is either:
  * 1. Explicitly marked as active via the active flag, OR
@@ -40,13 +81,8 @@ export function isActive(walk: Walk): boolean {
   const walkDate = date.toDate();
   const now = new Date();
 
-  // Duration in minutes, with a default of 60 minutes if not specified
-  const durationMinutes = walk.durationMinutes || 60;
-
-  // Calculate the end time (walk start time + duration)
-  const walkEndTime = new Date(
-    walkDate.getTime() + durationMinutes * 60 * 1000
-  );
+  // Use the estimated end time helper function
+  const walkEndTime = getEstimatedEndTime(walk, 0); // No buffer for active check
 
   // Add 1 hour leeway on either side
   const leewayMs = 60 * 60 * 1000; // 1 hour in milliseconds

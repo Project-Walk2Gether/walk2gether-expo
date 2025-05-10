@@ -56,7 +56,6 @@ const SlideAction: React.FC<Props> = ({
         backgroundColor,
         borderRadius: 30,
         overflow: "hidden",
-        zIndex: 10,
         alignItems: "center",
         justifyContent: "center",
       }}

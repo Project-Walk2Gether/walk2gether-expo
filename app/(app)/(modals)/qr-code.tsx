@@ -7,7 +7,7 @@ import { Spinner, Text, YStack } from "tamagui";
 export default function QrCodeScreen() {
   const { userData, loading } = useUserData();
   const code = userData?.friendInvitationCode;
-  const url = code ? `https://projectget2gether.org/f/${code}` : "";
+  const url = code ? `https://projectwalk2gether.org/join?code=${code}` : "";
 
   if (loading) {
     return (
@@ -43,7 +43,9 @@ export default function QrCodeScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerBackTitle: "Profile" }}></Stack.Screen>
+      <Stack.Screen
+        options={{ title: "My QR Code", headerBackTitle: "Profile" }}
+      ></Stack.Screen>
       <YStack f={1} jc="center" ai="center" bg="#fff" px={24}>
         <Text
           fontSize={22}
