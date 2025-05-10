@@ -1,11 +1,18 @@
 import { Walk, WithId } from "walk2gether-shared";
 
-export const getWalkTypeLabel = (walkType: Walk["type"]) => {
+/**
+ * Returns a friendly label for a walk type
+ * @param walkType The type of walk
+ * @returns A human-readable label for the walk type
+ */
+export const getWalkTypeLabel = (walkType?: string): string => {
   switch (walkType) {
     case "friends":
-      return "Friend Walk";
+      return "Friend walk";
     case "neighborhood":
-      return "Neighborhood Walk";
+      return "Neighborhood walk";
+    case "meetup":
+      return "Meetup walk";
     default:
       return "Walk";
   }

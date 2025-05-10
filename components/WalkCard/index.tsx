@@ -3,7 +3,7 @@ import { useLocation } from "@/context/LocationContext";
 import { COLORS } from "@/styles/colors";
 import { useQuery } from "@/utils/firestore";
 import { getDistanceToLocation } from "@/utils/locationUtils";
-import { getWalkTypeLabel } from "@/utils/walkType";
+import { getWalkTitle, getWalkTypeLabel } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
 import {
   Calendar,
@@ -156,9 +156,7 @@ const WalkCard: React.FC<WalkCardProps> = ({
               ellipsizeMode="tail"
               flex={1}
             >
-              {isMine
-                ? "Your " + getWalkTypeLabel(walk.type)
-                : `${walk.organizerName}'s Friend walk`}
+              {getWalkTitle(walk, user?.uid)}
             </Text>
           </XStack>
         </XStack>

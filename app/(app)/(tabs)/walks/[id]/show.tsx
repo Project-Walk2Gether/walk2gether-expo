@@ -3,6 +3,7 @@ import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useDoc, useQuery } from "@/utils/firestore";
+import { getWalkTitle } from "@/utils/walkType";
 import {
   addDoc,
   collection,
@@ -127,7 +128,7 @@ export default function WalkScreen() {
     <>
       <Stack.Screen
         options={{
-          title: "Let's walk2gether!",
+          title: getWalkTitle(walk, user?.uid),
           headerLeft: () => <HeaderBackButton />,
           headerRight: () => <WalkMenu walk={walk} />,
         }}
