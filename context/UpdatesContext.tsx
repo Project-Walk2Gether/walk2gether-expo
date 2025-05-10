@@ -130,17 +130,6 @@ export const UpdatesProvider: React.FC<UpdatesProviderProps> = ({
       const update = await Updates.checkForUpdateAsync();
 
       setUpdateAvailable(update.isAvailable);
-
-      if (update.isAvailable) {
-        console.log("Update is available!");
-        if (!silent)
-          showMessage("Update available! Pull down to apply.", "success");
-        return true;
-      } else {
-        console.log("No updates available");
-        if (!silent) showMessage("No updates available", "info");
-        return false;
-      }
     } catch (error) {
       console.error("Error checking for update:", error);
       recordError(error, {
@@ -158,7 +147,7 @@ export const UpdatesProvider: React.FC<UpdatesProviderProps> = ({
   // Function to apply the update
   const applyUpdate = async (): Promise<void> => {
     if (__DEV__) {
-      showMessage("Updates are disabled in development mode", "info");
+      console.log("Updates are disabled in development mode", "info");
       return;
     }
 

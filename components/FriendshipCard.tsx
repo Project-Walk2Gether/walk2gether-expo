@@ -1,7 +1,8 @@
 import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
+import { router } from "expo-router";
 import React from "react";
-import { Card, Text, XStack, YStack } from "tamagui";
+import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
 import { UserAvatar } from "./UserAvatar";
 
@@ -112,6 +113,13 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
               ? friendship.lastMessagePreview
               : "No messages yet"}
           </Text>
+          
+          {/* Display total miles walked together */}
+          {friendship.totalMilesWalked ? (
+            <Text color="$green9" numberOfLines={1} fontWeight="500">
+              Walked 2gether: {friendship.totalMilesWalked.toFixed(1)} miles
+            </Text>
+          ) : null}
         </YStack>
 
         {/* Timestamp and unread count */}
@@ -139,8 +147,25 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
           )}
         </YStack>
       </XStack>
+      
+      {/* Invite on a walk button */}
+      <Button
+        mt="$3"
+        backgroundColor={COLORS.primary}
+        color="white"
+        onPress={(e) => {
+          e.stopPropagation();
+          router.push({
+            pathname: "/(app)/(modals)/new-walk",
+            params: { friendId: friendId }
+          });
+        }}
+      >
+        Invite on a walk
+      </Button>
     </Card>
   );
 };
+
 
 export default FriendshipCard;

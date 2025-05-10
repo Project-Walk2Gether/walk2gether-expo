@@ -30,11 +30,13 @@ import WalkAttachmentsCarousel from "../WalkAttachmentsCarousel";
 interface WalkCardProps {
   walk: WithId<Walk>;
   showAttachments?: boolean;
+  showActions?: boolean;
 }
 
 const WalkCard: React.FC<WalkCardProps> = ({
   walk,
   showAttachments = false,
+  showActions = false,
 }) => {
   const {
     coords,
@@ -134,7 +136,6 @@ const WalkCard: React.FC<WalkCardProps> = ({
         pb="$3"
         px="$3"
         pt="$2"
-        flex={1}
         pressStyle={{ scale: 0.98 }}
         onPress={handlePress}
       >
@@ -349,19 +350,21 @@ const WalkCard: React.FC<WalkCardProps> = ({
                 </XStack>
               )}
             </YStack>
-          ) : (
+          ) : showActions ? (
             /* Show 'Ask to join' button if current user is not the walk owner */
             <Button
               backgroundColor={COLORS.primary}
               icon={<Hand color="white" />}
               size="$3"
               flex={1}
+              mt="$2"
+              onPress={handlePress}
             >
               <Text fontSize={12} fontWeight="bold" color="white">
                 Ask to join
               </Text>
             </Button>
-          )}
+          ) : null}
         </XStack>
       </YStack>
     </Card>

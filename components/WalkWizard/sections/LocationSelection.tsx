@@ -1,8 +1,8 @@
+import { PlacesAutocomplete } from "@/components/UI/PlacesAutocomplete";
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
-import { PlacesAutocomplete } from "@/components/UI/PlacesAutocomplete";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
@@ -44,6 +44,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
 
   // Update region when coords change
   useEffect(() => {
+    console.log("Running", { coords, location: formData.location });
     if (coords && !formData.location) {
       setRegion({
         latitude: coords.latitude,
@@ -52,10 +53,11 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
         longitudeDelta: 0.01,
       });
     }
-  }, [coords, formData.location]);
+  }, [!!coords, !!formData.location]);
 
   // Update when coords from LocationContext changes
   useEffect(() => {
+    console.log("Coords", { coords });
     if (coords && !isReverseGeocoding) {
       reverseGeocode(coords.latitude, coords.longitude);
 
@@ -67,7 +69,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
         longitudeDelta: 0.01,
       });
     }
-  }, [coords]);
+  }, [!!coords]);
 
   const handleLocationSelect = (data: any, details: any) => {
     if (details && details.geometry) {
@@ -211,19 +213,24 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
           <PlacesAutocomplete
             ref={googlePlacesRef}
             placeholder="Search for a location or long-press on map"
-            onSelect={data => handleLocationSelect({
-              description: data.name,
-              structured_formatting: { main_text: data.name },
-              place_id: data.placeId
-            }, {
-              geometry: {
-                location: {
-                  lat: data.latitude,
-                  lng: data.longitude
+            onSelect={(data) =>
+              handleLocationSelect(
+                {
+                  description: data.name,
+                  structured_formatting: { main_text: data.name },
+                  place_id: data.placeId,
+                },
+                {
+                  geometry: {
+                    location: {
+                      lat: data.latitude,
+                      lng: data.longitude,
+                    },
+                  },
+                  formatted_address: data.description,
                 }
-              },
-              formatted_address: data.description
-            })}
+              )
+            }
             googleApiKey={GOOGLE_MAPS_API_KEY}
             textInputStyles={{
               height: 50,
@@ -249,8 +256,11 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
                 await getLocation();
                 // After getting the location, we need to call reverse geocode
                 if (coords) {
-                  const newLocation = await reverseGeocode(coords.latitude, coords.longitude);
-                  
+                  const newLocation = await reverseGeocode(
+                    coords.latitude,
+                    coords.longitude
+                  );
+
                   // Update the text input field with the resolved address
                   if (googlePlacesRef.current && newLocation) {
                     googlePlacesRef.current.setAddressText(

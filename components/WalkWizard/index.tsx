@@ -1,10 +1,10 @@
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
-import { useWalkForm } from "@/context/WalkFormContext";
+import { useWalkForm, WalkFormData } from "@/context/WalkFormContext";
 import { useWalks } from "@/context/WalksContext";
 import { createWalkFromForm } from "@/utils/walkSubmission";
-import { Stack, useRouter } from "expo-router";
-import { useCallback } from "react";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useCallback, useEffect } from "react";
 import HeaderBackButton from "../HeaderBackButton";
 import {
   DurationSelection,
@@ -17,12 +17,36 @@ import {
 } from "./sections";
 
 export function WalkWizard() {
-  const { formData, currentStep, goToNextStep, goToPreviousStep, goToStep } =
-    useWalkForm();
+  const {
+    formData,
+    currentStep,
+    goToNextStep,
+    goToPreviousStep,
+    goToStep,
+    setFormData,
+  } = useWalkForm();
   const router = useRouter();
   const { createWalk } = useWalks();
   const { user } = useAuth();
   const { userData } = useUserData();
+  const { friendId } = useLocalSearchParams<{ friendId: string }>();
+
+  // If a friendId is provided, set it in the form data and skip to time selection
+  useEffect(() => {
+    if (friendId) {
+      // Set the friend as an invited user and set the walk type
+      setFormData((prev: WalkFormData) => ({
+        ...prev,
+        invitedUserIds: friendId ? [friendId] : prev.invitedUserIds,
+        walkType: "friends",
+      }));
+
+      // Skip the first two steps (type selection and invite selection)
+      // Go directly to step 3 (index 2) which is time selection
+      console.log("Running");
+      goToStep(2);
+    }
+  }, [friendId]);
 
   const handleSubmit = useCallback(async () => {
     if (!user) return;
@@ -36,6 +60,8 @@ export function WalkWizard() {
     });
   }, [formData, createWalk, router, userData, user]);
 
+  // We don't need to do additional logic when we have a friendId since we set the walkType in the first useEffect above
+
   const handleBackPress = useCallback(() => {
     if (currentStep > 0) {
       goToPreviousStep();
@@ -45,34 +71,64 @@ export function WalkWizard() {
     }
   }, [currentStep, goToPreviousStep, router]);
 
+  // Define the step configuration
+  const wizardSteps = [
+    {
+      title: "What type of walk?",
+      Component: () => <TypeSelection onContinue={goToNextStep} />,
+    },
+    {
+      title: "Who should we invite?",
+      Component: () => (
+        <InviteSelection onContinue={goToNextStep} onBack={goToPreviousStep} />
+      ),
+    },
+    {
+      title: "When do you want to walk?",
+      Component: () => (
+        <TimeSelection onContinue={goToNextStep} onBack={goToPreviousStep} />
+      ),
+    },
+    {
+      title: "How long will this walk be?",
+      Component: () => (
+        <DurationSelection
+          onContinue={goToNextStep}
+          onBack={goToPreviousStep}
+        />
+      ),
+    },
+    {
+      title: "Where is the meetup point?",
+      Component: () => (
+        <LocationSelection
+          onContinue={goToNextStep}
+          onBack={goToPreviousStep}
+        />
+      ),
+    },
+    {
+      title: "Review & Submit",
+      Component: () => (
+        <ReviewScreen
+          onSubmit={handleSubmit}
+          onBack={goToPreviousStep}
+          onEdit={goToStep}
+        />
+      ),
+    },
+  ];
+
   // Get screen title based on current step
   const getScreenTitle = () => {
     if (formData.walkType === "neighborhood") {
-      switch (currentStep) {
-        case 0:
-          return "What type of walk?";
-        case 1:
-          return "Start a Neighborhood Walk";
-        default:
-          return "Start a Neighborhood Walk";
-      }
+      return currentStep === 0
+        ? "What type of walk?"
+        : "Start a Neighborhood Walk";
     } else {
-      switch (currentStep) {
-        case 0:
-          return "What type of walk?";
-        case 1:
-          return "When do you want to walk?";
-        case 2:
-          return "How long will this walk be?";
-        case 3:
-          return "Where is the meetup point?";
-        case 4:
-          return "Who should we invite?";
-        case 5:
-          return "Review & Submit";
-        default:
-          return "Create a Walk";
-      }
+      return currentStep < wizardSteps.length
+        ? wizardSteps[currentStep].title
+        : "Create a Walk";
     }
   };
 
@@ -100,45 +156,14 @@ export function WalkWizard() {
     }
 
     // Regular flow for other walk types
-    switch (currentStep) {
-      case 0:
-        return <TypeSelection onContinue={goToNextStep} />;
-      case 1:
-        return (
-          <TimeSelection onContinue={goToNextStep} onBack={goToPreviousStep} />
-        );
-      case 2:
-        return (
-          <DurationSelection
-            onContinue={goToNextStep}
-            onBack={goToPreviousStep}
-          />
-        );
-      case 3:
-        return (
-          <LocationSelection
-            onContinue={goToNextStep}
-            onBack={goToPreviousStep}
-          />
-        );
-      case 4:
-        return (
-          <InviteSelection
-            onContinue={goToNextStep}
-            onBack={goToPreviousStep}
-          />
-        );
-      case 5:
-        return (
-          <ReviewScreen
-            onSubmit={handleSubmit}
-            onBack={goToPreviousStep}
-            onEdit={goToStep}
-          />
-        );
-      default:
-        return <TypeSelection onContinue={goToNextStep} />;
+    if (currentStep >= 0 && currentStep < wizardSteps.length) {
+      const StepComponent = wizardSteps[currentStep].Component;
+      return <StepComponent />;
     }
+
+    // Default fallback
+    const DefaultComponent = wizardSteps[0].Component;
+    return <DefaultComponent />;
   };
 
   return (

@@ -3,9 +3,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { H1, ScrollView } from "tamagui";
 import { BrandGradient } from "./BrandGradient";
 
-interface ScreenProps {
-  title: React.ReactNode;
+interface Props {
+  title?: string;
   children: React.ReactNode;
+  useTopInsets?: boolean;
   gradientVariant?:
     | "modern"
     | "main"
@@ -19,9 +20,10 @@ interface ScreenProps {
   floatingAction?: React.ReactNode;
 }
 
-export const Screen: React.FC<ScreenProps> = ({
+export const Screen: React.FC<Props> = ({
   title,
   children,
+  useTopInsets,
   gradientVariant = "modern",
   titleColor = "black",
   renderAbsolute,
@@ -37,19 +39,21 @@ export const Screen: React.FC<ScreenProps> = ({
         width="100%"
         contentContainerStyle={{
           paddingBottom: floatingAction ? 80 : 40, // Extra padding if FAB is present
-          paddingTop: insets.top + 10,
+          paddingTop: useTopInsets ? insets.top + 10 : undefined,
           paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}
       >
-        <H1
-          fontSize={32}
-          fontWeight="bold"
-          marginBottom="$2"
-          color={titleColor}
-        >
-          {title}
-        </H1>
+        {title && (
+          <H1
+            fontSize={32}
+            fontWeight="bold"
+            marginBottom="$2"
+            color={titleColor}
+          >
+            {title}
+          </H1>
+        )}
         {children}
       </ScrollView>
       {floatingAction}

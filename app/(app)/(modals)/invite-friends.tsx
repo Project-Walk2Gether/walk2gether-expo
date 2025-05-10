@@ -3,7 +3,6 @@ import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
 import { Copy, Share2 } from "@tamagui/lucide-icons";
 import * as Clipboard from "expo-clipboard";
-import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
@@ -18,7 +17,6 @@ import Toast from "react-native-toast-message";
 import { Button, Card, Spinner, Text, View, XStack, YStack } from "tamagui";
 
 export default function InviteFriendsScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { userData } = useUserData();
   const [sharing, setSharing] = useState(false);

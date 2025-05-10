@@ -10,14 +10,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Card, Text, View, XStack, YStack } from "tamagui";
 import { Notification } from "walk2gether-shared";
 
-// Define NotificationType enum to match what's in shared lib
-enum NotificationType {
-  NEW_WALK = "NEW_WALK",
-  WALK_INVITE = "WALK_INVITE",
-  WALK_REMINDER = "WALK_REMINDER",
-  WALK_CANCELLED = "WALK_CANCELLED",
-  WALK_UPDATED = "WALK_UPDATED",
-}
+// Import NotificationType from shared library
+import { NotificationType } from "walk2gether-shared";
 
 const icon = require("../../assets/notification-icon.png");
 
@@ -53,7 +47,7 @@ export default function NotificationsScreen() {
 
     // Navigate based on notification type
     if (
-      notification.type === NotificationType.NEW_WALK &&
+      notification.type === 'NEW_WALK' &&
       notification.data &&
       "walkId" in notification.data
     ) {
@@ -61,13 +55,13 @@ export default function NotificationsScreen() {
     }
   };
 
-  const getNotificationIcon = (type: NotificationType) => {
+  const getNotificationIcon = (type: string) => {
     switch (type) {
-      case NotificationType.NEW_WALK:
+      case 'NEW_WALK':
         return icon;
-      case NotificationType.WALK_INVITE:
+      case 'WALK_INVITE':
         return icon;
-      case NotificationType.WALK_REMINDER:
+      case 'WALK_REMINDER':
         return icon;
       default:
         return icon;

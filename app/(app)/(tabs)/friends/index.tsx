@@ -48,6 +48,7 @@ export default function FriendsScreen() {
       <Screen
         title="My Friends"
         gradientVariant="outdoor"
+        useTopInsets
         renderAbsolute={
           <View>
             <Sun

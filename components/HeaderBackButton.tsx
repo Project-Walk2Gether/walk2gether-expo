@@ -4,8 +4,10 @@ import { Button } from "tamagui";
 
 export default function HeaderBackButton({
   onPress,
+  color = "#000",
 }: {
   onPress?: () => void;
+  color?: string;
 }) {
   const router = useRouter();
 
@@ -16,7 +18,7 @@ export default function HeaderBackButton({
       marginLeft={10}
       padding={0}
       circular
-      icon={<ChevronLeft size={24} color="#000" />}
+      icon={<ChevronLeft size={24} color={color} />}
     />
   );
 }

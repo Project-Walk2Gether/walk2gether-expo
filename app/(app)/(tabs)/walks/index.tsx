@@ -14,12 +14,13 @@ export default function WalksScreen() {
   const router = useRouter();
   const { activeWalks, upcomingWalks } = useWalks();
   const renderWalkItem = ({ item }: { item: WithId<Walk> }) => (
-    <WalkCard key={item.id} walk={item} />
+    <WalkCard key={item.id} walk={item} showActions />
   );
 
   return (
     <Screen
       title="Walks"
+      useTopInsets
       gradientVariant="modern"
       floatingAction={
         <FAB text="Start a Walk" onPress={() => router.push("/new-walk")} />

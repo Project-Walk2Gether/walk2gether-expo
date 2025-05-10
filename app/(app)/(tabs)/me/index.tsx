@@ -12,6 +12,7 @@ import { COLORS } from "@/styles/colors";
 import { appVersion } from "@/utils/version";
 import storage from "@react-native-firebase/storage";
 import {
+  Bell,
   Camera,
   Clock,
   LogOut,
@@ -170,6 +171,7 @@ export default function MeScreen() {
   return (
     <Screen
       title=""
+      useTopInsets
       gradientVariant="outdoor"
       renderAbsolute={
         <View>
@@ -292,6 +294,19 @@ export default function MeScreen() {
             </View>
             <Text fontSize={16} fontWeight="500" color={COLORS.text}>
               Edit Profile
+            </Text>
+          </YStack>
+        </TouchableOpacity>
+
+        <Separator borderColor="$gray5" />
+
+        <TouchableOpacity onPress={() => router.push("/me/notifications")}>
+          <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
+            <View mr="$3">
+              <Bell size={24} color={COLORS.primary} />
+            </View>
+            <Text fontSize={16} fontWeight="500" color={COLORS.text}>
+              Notification Settings
             </Text>
           </YStack>
         </TouchableOpacity>

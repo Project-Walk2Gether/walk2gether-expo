@@ -11,7 +11,7 @@ export default function HistoryTabScreen() {
   const walks = useSharedWalks();
 
   return (
-    <Screen title="Stories" gradientVariant="modern">
+    <Screen useTopInsets title="Stories" gradientVariant="modern">
       {walks.length > 0 ? (
         <FlatList
           data={walks}
@@ -26,7 +26,7 @@ export default function HistoryTabScreen() {
       ) : (
         <EmptyMessage
           message="No shared walks yet"
-          subtitle="See shared walks from friends and other community members"
+          subtitle="Add a photo to your walks to share them with your friends"
           icon={Book}
           iconSize={70}
           iconColor="#3E7CB9"

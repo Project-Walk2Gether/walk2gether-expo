@@ -3,11 +3,11 @@ import RequestToJoinWalkScreen from "@/components/RequestToJoinWalkScreen";
 import { useDoc } from "@/utils/firestore";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { Walk } from "walk2gether-shared";
+import { WithId, Walk } from "walk2gether-shared";
 
 export default function WalkRequestScreen() {
   const { id } = useLocalSearchParams();
-  const { doc: walk } = useDoc<Walk>(`walks/${id}`);
+  const { doc: walk } = useDoc<WithId<Walk>>(`walks/${id}`);
 
   if (!walk) return null;
 
@@ -15,7 +15,7 @@ export default function WalkRequestScreen() {
     <>
       <Stack.Screen
         options={{
-          title: "Request to join",
+          // Title is dynamically set in RequestToJoinWalkScreen
           headerLeft: () => <HeaderBackButton />,
         }}
       />

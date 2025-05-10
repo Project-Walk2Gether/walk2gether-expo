@@ -21,6 +21,7 @@ export interface WalkFormData {
 interface WalkFormContextType {
   formData: WalkFormData;
   updateFormData: (newData: Partial<WalkFormData>) => void;
+  setFormData: React.Dispatch<React.SetStateAction<WalkFormData>>;
   resetForm: () => void;
   currentStep: number;
   goToNextStep: () => void;
@@ -93,6 +94,7 @@ export const WalkFormProvider: React.FC<WalkFormProviderProps> = ({
       value={{
         formData,
         updateFormData,
+        setFormData,
         resetForm,
         currentStep,
         goToNextStep,

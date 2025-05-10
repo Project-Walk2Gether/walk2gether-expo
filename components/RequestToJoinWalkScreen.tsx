@@ -2,19 +2,30 @@ import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
-import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
-import { Calendar, Clock, MapPin, Timer } from "@tamagui/lucide-icons";
-import React, { useState } from "react";
-import { ActivityIndicator } from "react-native";
+import {
+  doc,
+  setDoc,
+  Timestamp,
+  updateDoc,
+} from "@react-native-firebase/firestore";
+import { useNavigation } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Card, SizableText, Text, XStack, YStack } from "tamagui";
-import { Participant, Walk } from "walk2gether-shared";
+import { Button, Card, Text, View, YStack } from "tamagui";
+import { Participant, Walk, WithId } from "walk2gether-shared";
+import { BrandGradient } from "./UI";
+import WalkCard from "./WalkCard";
 
-interface CheckInScreenProps {
-  walk: Walk;
+interface RequestToJoinScreenProps {
+  walk: WithId<Walk>;
 }
 
-export default function RequestToJoinScreen({ walk }: CheckInScreenProps) {
+export default function RequestToJoinScreen({
+  walk,
+}: RequestToJoinScreenProps) {
+  const navigation = useNavigation();
+
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
@@ -22,6 +33,17 @@ export default function RequestToJoinScreen({ walk }: CheckInScreenProps) {
     `walks/${walk.id}/participants/${user?.uid}`
   );
   const requestSent = !!participantDoc;
+  const requestCancelled = participantDoc?.cancelledAt !== undefined;
+  const isActivePending = requestSent && !requestCancelled;
+
+  // Set navigation header options
+  useEffect(() => {
+    navigation.setOptions({
+      title: isActivePending
+        ? "Request Sent!"
+        : `Request to join ${walk.organizerName}`,
+    });
+  }, [navigation, walk.organizerName, isActivePending]);
 
   const handleRequestToJoin = async () => {
     if (!user || !walk?.id) return;
@@ -45,6 +67,9 @@ export default function RequestToJoinScreen({ walk }: CheckInScreenProps) {
           longitude: 0,
           timestamp: Timestamp.now(),
         },
+        route: null,
+        status: "pending",
+        navigationMethod: "driving",
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
@@ -52,122 +77,128 @@ export default function RequestToJoinScreen({ walk }: CheckInScreenProps) {
       await setDoc(participantRef, participant, { merge: true });
     } catch (error) {
       console.error("Error requesting to join:", error);
-      // Show an error message
+      Alert.alert("Error", "Failed to send join request. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelRequest = async () => {
+    if (!user || !walk?.id || !participantDoc) return;
+
+    setLoading(true);
+    try {
+      const participantRef = doc(
+        firestore_instance,
+        `walks/${walk.id}/participants/${user.uid}`
+      );
+
+      await updateDoc(participantRef, {
+        cancelledAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        status: "pending",
+      });
+    } catch (error) {
+      console.error("Error cancelling join request:", error);
+      Alert.alert("Error", "Failed to cancel request. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <YStack f={1} bg="#fff" paddingBottom={insets.bottom} ai="center">
-      <Card
-        elevate
-        bordered
-        width="100%"
-        maxWidth={400}
-        p={0}
-        br={18}
-        bg="#fff"
-        shadowColor="#000"
-        shadowOpacity={0.08}
-        shadowRadius={12}
-        shadowOffset={{ width: 0, height: 2 }}
-        overflow="hidden"
-      >
-        <YStack space="$4" w="100%" ai="center" p="$5">
-          {requestSent ? (
-            <>
-              <SizableText size="$8" fontWeight="bold" textAlign="center">
-                Request Sent!
-              </SizableText>
-              <Text size="$4" textAlign="center" color="$gray11">
-                Your neighbor needs to approve your request to join.
-              </Text>
-              <Card bordered bg="#f5f5f5" p="$4" my="$3" br={14} w="100%">
-                <YStack gap="$1">
-                  <SizableText size="$6" fontWeight="600">
-                    Walk with {walk.organizerName}
-                  </SizableText>
-                  <Text size="$3" color="$gray11">
-                    Organized by {walk.organizerName}
-                  </Text>
-                  <Text size="$3" color="$gray11">
-                    {new Date(walk.date.toDate()).toLocaleString()} •{" "}
-                    {walk.durationMinutes} minutes
-                  </Text>
-                  <Text size="$3" color="$gray11" mt="$2">
-                    {walk.location.name}
-                  </Text>
-                </YStack>
-              </Card>
-            </>
-          ) : (
-            <>
-              <Text size="$4" textAlign="center" color="$gray11">
-                Send a request to your neighbor organizer to join this walk.
-              </Text>
-              <Card bordered bg="#f5f5f5" p="$4" my="$3" br={14} w="100%">
-                <YStack gap="$3">
-                  <SizableText size="$7" fontWeight="700">
-                    Walk with {walk.organizerName}
-                  </SizableText>
-                  <XStack gap="$6" alignItems="center" jc="space-between">
-                    <XStack alignItems="center" gap="$2">
-                      <Calendar size={20} />
-                      <Text fontSize={18} fontWeight="600">
-                        {walk.date.toDate().toLocaleDateString(undefined, {
-                          weekday: "short",
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </Text>
-                    </XStack>
-                    <XStack alignItems="center" gap="$2">
-                      <Clock size={20} />
-                      <Text fontSize={18} fontWeight="600">
-                        {walk.date.toDate().toLocaleTimeString(undefined, {
-                          hour: "numeric",
-                          minute: "2-digit",
-                        })}
-                      </Text>
-                    </XStack>
-                  </XStack>
-                  <XStack gap="$6" alignItems="center" jc="space-between">
-                    <XStack alignItems="center" gap="$2">
-                      <MapPin size={18} />
-                      <Text fontSize={16} color="$gray11">
-                        {walk.location?.name || "Current Location"}
-                      </Text>
-                    </XStack>
-                    <XStack alignItems="center" gap="$2">
-                      <Timer size={18} />
-                      <Text fontSize={16} color="$gray11">
-                        {walk.durationMinutes} min
-                      </Text>
-                    </XStack>
-                  </XStack>
-                </YStack>
-              </Card>
-              <Button
-                size="$5"
-                w="100%"
-                bg={COLORS.primary}
-                color="white"
-                onPress={handleRequestToJoin}
-                disabled={loading}
-                mt="$2"
-              >
-                {loading ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  "I'm Interested in Joining"
-                )}
-              </Button>
-            </>
-          )}
-        </YStack>
-      </Card>
-    </YStack>
+    <BrandGradient style={{ flex: 1 }} variant="vibrant">
+      <YStack p="$4" f={1} paddingBottom={insets.bottom} ai="center">
+        <Card
+          elevate
+          bordered
+          width="100%"
+          maxWidth={400}
+          p={0}
+          br={18}
+          bg="#fff"
+          shadowColor="#000"
+          shadowOpacity={0.08}
+          shadowRadius={12}
+          shadowOffset={{ width: 0, height: 2 }}
+          overflow="hidden"
+        >
+          <YStack gap="$4" ai="center" p="$5">
+            {isActivePending ? (
+              <>
+                <Text fontSize="$4" textAlign="center" color="$gray11">
+                  Your neighbor needs to approve your request to join.
+                </Text>
+                <WalkCard walk={walk} />
+
+                <Button
+                  size="$5"
+                  w="100%"
+                  bg="$red9"
+                  color="white"
+                  onPress={handleCancelRequest}
+                  disabled={loading}
+                  mt="$4"
+                  pressStyle={{ opacity: 0.8 }}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    "Cancel Request"
+                  )}
+                </Button>
+              </>
+            ) : requestCancelled ? (
+              <>
+                <Text fontSize="$4" textAlign="center" color="$gray11">
+                  You can send a new request if you'd like to join this walk.
+                </Text>
+                <WalkCard walk={walk} />
+
+                <Button
+                  size="$5"
+                  w="100%"
+                  bg={COLORS.primary}
+                  color="white"
+                  onPress={handleRequestToJoin}
+                  disabled={loading}
+                  mt="$4"
+                >
+                  {loading ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    "Send New Request"
+                  )}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Text fontSize="$4" textAlign="center" color="$gray11">
+                  Send a request to your neighbor organizer to join this walk.
+                </Text>
+                <View>
+                  <WalkCard walk={walk} />
+                </View>
+                <Button
+                  size="$5"
+                  w="100%"
+                  bg={COLORS.primary}
+                  color="white"
+                  onPress={handleRequestToJoin}
+                  disabled={loading}
+                  mt="$2"
+                >
+                  {loading ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    "I'm Interested in Joining"
+                  )}
+                </Button>
+              </>
+            )}
+          </YStack>
+        </Card>
+      </YStack>
+    </BrandGradient>
   );
 }
