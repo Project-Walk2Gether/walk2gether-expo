@@ -4,33 +4,24 @@ import { COLORS } from "@/styles/colors";
 import { getDistanceToLocation } from "@/utils/locationUtils";
 import { getWalkTitle } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
-import {
-  Calendar,
-  Hand,
-  Pin,
-  Timer,
-} from "@tamagui/lucide-icons";
+import { Calendar, Hand, Pin, Timer } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
-import {
-  Walk,
-  walkIsNeighborhoodWalk,
-  WithId,
-} from "walk2gether-shared";
+import { Walk, walkIsNeighborhoodWalk, WithId } from "walk2gether-shared";
 import { UserAvatar } from "../UserAvatar";
 import WalkAttachmentsCarousel from "../WalkAttachmentsCarousel";
 import { ParticipantsSection } from "./ParticipantsSection";
 
 // Props interface for WalkCard
-interface WalkCardProps {
+interface Props {
   walk: WithId<Walk>;
   showAttachments?: boolean;
   showActions?: boolean;
 }
 
-const WalkCard: React.FC<WalkCardProps> = ({
+const WalkCard: React.FC<Props> = ({
   walk,
   showAttachments = false,
   showActions = false,

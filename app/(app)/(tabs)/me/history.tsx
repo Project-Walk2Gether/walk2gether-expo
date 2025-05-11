@@ -3,36 +3,30 @@ import WalkCardFromId from "@/components/WalkCard/FromId";
 import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
 import { useQuery } from "@/utils/firestore";
-import firestore from "@react-native-firebase/firestore";
+import firestore, { Timestamp } from "@react-native-firebase/firestore";
 import React, { useState } from "react";
 import { ActivityIndicator, FlatList } from "react-native";
 import { Card, Text, YStack } from "tamagui";
-import { Participant } from "walk2gether-shared";
+import { Walk } from "walk2gether-shared";
 
 export default function WalkHistoryScreen() {
   const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
-  // Use the useQuery hook with a collectionGroup query to get all participant records
-  const { docs: participantDocs, status } = useQuery<Participant>(
+  // Query walks where user is invited and the walk has ended
+  const { docs: pastWalks, status } = useQuery<Walk>(
     user
       ? firestore()
-          .collectionGroup("participants")
-          .where("userUid", "==", user.uid)
-          .where("approvedAt", "!=", null)
-          .orderBy("approvedAt", "desc") // Sort by most recently approved first
+          .collection("walks")
+          .where("invitedUserIds", "array-contains", user.uid)
+          .where("estimatedEndTime", "<", Timestamp.now())
+          .orderBy("estimatedEndTime", "desc") // Sort by most recently ended first
       : undefined,
     [user?.uid]
   );
 
-  // Extract walkIds from the participant documents
-  const walkIds = participantDocs
-    .map((participant) => {
-      // The parent path will look like "walks/{walkId}/participants/{participantId}"
-      const walkRef = participant._ref.parent.parent;
-      return walkRef ? walkRef.id : null;
-    })
-    .filter((id): id is string => id !== null);
+  // Extract walkIds from the walk documents
+  const walkIds = pastWalks.map((walk) => walk.id);
 
   // Create a renderItem function that uses WalkCardFromId
   const renderWalkItem = ({ item }: { item: string }) => (
@@ -72,10 +66,10 @@ export default function WalkHistoryScreen() {
         <Card backgroundColor="white" padding="$4" borderRadius={12}>
           <YStack alignItems="center" gap="$2">
             <Text fontSize={18} fontWeight="500" textAlign="center">
-              You haven't participated in any walks yet
+              You haven't participated in any past walks yet
             </Text>
             <Text color="$gray9" textAlign="center">
-              When you join or create walks, they'll appear here.
+              When you join or create walks that end, they'll appear here.
             </Text>
           </YStack>
         </Card>

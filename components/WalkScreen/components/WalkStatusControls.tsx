@@ -374,7 +374,14 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
 
   // Otherwise show the regular menu
   return (
-    <YStack position="absolute" bottom={45} left={0} right={0} px="$4">
+    <YStack
+      zIndex={0}
+      position="absolute"
+      bottom={45}
+      left={0}
+      right={0}
+      px="$4"
+    >
       <YStack position="relative">
         <Menu
           title="Update your status"
@@ -391,7 +398,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
             left={0}
             right={0}
             bottom={0}
-            zIndex={10}
+            zIndex={1}
           >
             {showStartWalkSlider && (
               <SlideAction

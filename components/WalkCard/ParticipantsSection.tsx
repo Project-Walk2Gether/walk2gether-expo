@@ -1,10 +1,10 @@
-import React from "react";
-import { useRouter } from "expo-router";
-import { XStack, YStack, Text, Avatar, Button, View } from "tamagui";
-import { Users, UserPlus } from "@tamagui/lucide-icons";
-import { useQuery } from "@/utils/firestore";
 import { COLORS } from "@/styles/colors";
+import { useQuery } from "@/utils/firestore";
 import { getWalkStatus } from "@/utils/walkUtils";
+import { UserPlus, Users } from "@tamagui/lucide-icons";
+import { useRouter } from "expo-router";
+import React from "react";
+import { Avatar, Button, Text, View, XStack, YStack } from "tamagui";
 import { Participant, Walk, WithId } from "walk2gether-shared";
 
 interface Props {
@@ -12,7 +12,10 @@ interface Props {
   currentUserUid?: string;
 }
 
-export const ParticipantsSection: React.FC<Props> = ({ walk, currentUserUid }) => {
+export const ParticipantsSection: React.FC<Props> = ({
+  walk,
+  currentUserUid,
+}) => {
   const router = useRouter();
   const status = getWalkStatus(walk);
 
@@ -44,9 +47,6 @@ export const ParticipantsSection: React.FC<Props> = ({ walk, currentUserUid }) =
       <XStack alignItems="center" gap={8}>
         <XStack alignItems="center" gap={4}>
           <Users size={16} color="#666" />
-          <Text fontSize={14} fontWeight="600" color="$gray10">
-            Participants:
-          </Text>
         </XStack>
         <XStack justifyContent="flex-start" gap={-10} flex={1}>
           {avatarsToDisplay.length > 0 ? (
@@ -59,18 +59,14 @@ export const ParticipantsSection: React.FC<Props> = ({ walk, currentUserUid }) =
                   borderColor="white"
                   borderWidth={2}
                 >
-                  <Avatar.Image
-                    src={participant.photoURL || undefined}
-                  />
+                  <Avatar.Image src={participant.photoURL || undefined} />
                   <Avatar.Fallback
                     justifyContent="center"
                     alignItems="center"
                     backgroundColor={COLORS.primary}
                   >
                     <Text color="white">
-                      {(participant.displayName || "A")
-                        .charAt(0)
-                        .toUpperCase()}
+                      {(participant.displayName || "A").charAt(0).toUpperCase()}
                     </Text>
                   </Avatar.Fallback>
                 </Avatar>
@@ -93,18 +89,13 @@ export const ParticipantsSection: React.FC<Props> = ({ walk, currentUserUid }) =
                   >{`+${overflow}`}</Text>
                 </View>
               )}
-              <Text
-                fontSize={13}
-                color="$gray9"
-                ml={16}
-                alignSelf="center"
-              >
+              <Text fontSize={13} color="#666" ml={16} alignSelf="center">
                 {approvedCount}{" "}
                 {approvedCount === 1 ? "participant" : "participants"}
               </Text>
             </>
           ) : (
-            <Text fontSize={13} color="$gray9">
+            <Text fontSize={14} color="#666">
               No participants yet
             </Text>
           )}
@@ -137,19 +128,12 @@ export const ParticipantsSection: React.FC<Props> = ({ walk, currentUserUid }) =
                   backgroundColor={COLORS.primary}
                 >
                   <Text color="white">
-                    {(participant.displayName || "A")
-                      .charAt(0)
-                      .toUpperCase()}
+                    {(participant.displayName || "A").charAt(0).toUpperCase()}
                   </Text>
                 </Avatar.Fallback>
               </Avatar>
             ))}
-            <Text
-              fontSize={13}
-              color="$gray9"
-              ml={16}
-              alignSelf="center"
-            >
+            <Text fontSize={13} color="#666" ml={16} alignSelf="center">
               {pendingParticipants.length}{" "}
               {pendingParticipants.length === 1 ? "invited" : "invited"}
             </Text>
@@ -168,9 +152,8 @@ export const ParticipantsSection: React.FC<Props> = ({ walk, currentUserUid }) =
             flex={1}
           >
             <Text fontWeight="600" fontSize={13} color="#e67e22">
-              {unapprovedCount}{" "}
-              {unapprovedCount === 1 ? "person" : "people"} waiting for
-              approval
+              {unapprovedCount} {unapprovedCount === 1 ? "person" : "people"}{" "}
+              waiting for approval
             </Text>
           </View>
           <Button

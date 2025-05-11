@@ -4,7 +4,7 @@ import { useWalkForm, WalkFormData } from "@/context/WalkFormContext";
 import { useWalks } from "@/context/WalksContext";
 import { createWalkFromForm } from "@/utils/walkSubmission";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import Toast from "react-native-toast-message";
 import HeaderBackButton from "../HeaderBackButton";
 import {
@@ -16,6 +16,12 @@ import {
   TimeSelection,
   TypeSelection,
 } from "./sections";
+
+// Define the structure of a wizard step
+interface WizardStep {
+  title: string;
+  component: React.ComponentType<any>; // Using any here as we'll properly type when rendering
+}
 
 export function WalkWizard() {
   const {
@@ -71,53 +77,33 @@ export function WalkWizard() {
     }
   }, [currentStep, goToPreviousStep, router]);
 
-  // Define the step configuration
-  const wizardSteps = useRef([
+  // Define the step configuration - using useMemo to avoid recreating the array on each render
+  const wizardSteps = useMemo<WizardStep[]>(() => [
     {
       title: "What type of walk?",
-      Component: () => <TypeSelection onContinue={goToNextStep} />,
+      component: TypeSelection, // Only needs onContinue
     },
     {
       title: "Who should we invite?",
-      Component: () => (
-        <InviteSelection onContinue={goToNextStep} onBack={goToPreviousStep} />
-      ),
+      component: InviteSelection, // Needs onContinue and onBack
     },
     {
       title: "When do you want to walk?",
-      Component: () => (
-        <TimeSelection onContinue={goToNextStep} onBack={goToPreviousStep} />
-      ),
+      component: TimeSelection, // Needs onContinue and onBack
     },
     {
       title: "How long will this walk be?",
-      Component: () => (
-        <DurationSelection
-          onContinue={goToNextStep}
-          onBack={goToPreviousStep}
-        />
-      ),
+      component: DurationSelection, // Needs onContinue and onBack
     },
     {
       title: "Where is the meetup point?",
-      Component: () => (
-        <LocationSelection
-          onContinue={goToNextStep}
-          onBack={goToPreviousStep}
-        />
-      ),
+      component: LocationSelection, // Needs onContinue and onBack
     },
     {
       title: "Review & Submit",
-      Component: () => (
-        <ReviewScreen
-          onSubmit={handleSubmit}
-          onBack={goToPreviousStep}
-          onEdit={goToStep}
-        />
-      ),
+      component: ReviewScreen, // Needs onSubmit, onBack, and onEdit
     },
-  ]).current;
+  ], []);
   // Get screen title based on current step
   const getScreenTitle = () => {
     if (formData.walkType === "neighborhood") {
@@ -156,13 +142,36 @@ export function WalkWizard() {
 
     // Regular flow for other walk types
     if (currentStep >= 0 && currentStep < wizardSteps.length) {
-      const StepComponent = wizardSteps[currentStep].Component;
-      return <StepComponent />;
+      const StepComponent = wizardSteps[currentStep].component;
+      
+      // First step (Type Selection) only needs onContinue
+      if (currentStep === 0) {
+        return <StepComponent onContinue={goToNextStep} />;
+      }
+      
+      // Last step (Review Screen) needs onSubmit, onBack, and onEdit
+      if (currentStep === wizardSteps.length - 1) {
+        return (
+          <StepComponent
+            onSubmit={handleSubmit}
+            onBack={goToPreviousStep}
+            onEdit={goToStep}
+          />
+        );
+      }
+      
+      // Middle steps need onContinue and onBack
+      return (
+        <StepComponent
+          onContinue={goToNextStep}
+          onBack={goToPreviousStep}
+        />
+      );
     }
 
-    // Default fallback
-    const DefaultComponent = wizardSteps[0].Component;
-    return <DefaultComponent />;
+    // Default fallback - first component only needs onContinue
+    const DefaultComponent = wizardSteps[0].component;
+    return <DefaultComponent onContinue={goToNextStep} />;
   };
 
   return (

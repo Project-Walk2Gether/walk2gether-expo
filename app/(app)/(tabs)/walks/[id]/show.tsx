@@ -31,6 +31,7 @@ import ParticipantsList from "@/components/WalkScreen/components/ParticipantsLis
 import WalkStats from "@/components/WalkScreen/components/WalkStats";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
+import { getWalkStatus } from "@/utils/walkUtils";
 
 export default function WalkScreen() {
   const params = useLocalSearchParams();
@@ -53,12 +54,12 @@ export default function WalkScreen() {
   // Define snap points for the chat bottom sheet (30% and 100% of screen height)
   // Get collapsed height for calculations (30% of screen height)
   const collapsedHeight = 230;
-  const chatSnapPoints = useMemo(() => [collapsedHeight, "70%", "100%"], []);
+  const chatSnapPoints = useMemo(() => [collapsedHeight, "100%"], []);
 
   // Function to handle when message form takes focus
   const handleMessageFormFocus = useCallback(() => {
     // Fully expand the bottom sheet to the maximum height (100%)
-    chatBottomSheetRef.current?.snapToIndex(2);
+    chatBottomSheetRef.current?.expand();
 
     // Scroll to the bottom of the message list
     if (messageListRef.current) {
@@ -124,6 +125,8 @@ export default function WalkScreen() {
   if (!walk) return <FullScreenLoader />;
   if (!id) return <Text>Invalid walk ID</Text>;
 
+  const status = getWalkStatus(walk);
+
   return (
     <>
       <Stack.Screen
@@ -156,6 +159,7 @@ export default function WalkScreen() {
             }}
           >
             <ParticipantsList
+              status={status}
               participants={participants}
               currentUserId={user?.uid}
               onParticipantPress={handleParticipantPress}
@@ -190,7 +194,10 @@ export default function WalkScreen() {
             elevation: 5,
           }}
         >
-          <BottomSheetScrollView contentContainerStyle={{ paddingTop: 20 }}>
+          <BottomSheetScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingTop: 20, zIndex: 1000000 }}
+          >
             <View position="absolute" top={0} left={0} right={0} h={30}>
               <Text
                 textAlign="center"

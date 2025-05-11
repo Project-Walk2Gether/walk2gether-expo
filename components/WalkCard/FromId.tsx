@@ -1,5 +1,6 @@
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
+import { getWalkStatus } from "@/utils/walkUtils";
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
 import { Walk } from "walk2gether-shared";
@@ -20,10 +21,10 @@ export const WalkCardFromId: React.FC<WalkCardFromIdProps> = ({
 }) => {
   // Use the useDoc hook to fetch the walk data by path
   const walkPath = `walks/${walkId}`;
-  const { doc: walk, status } = useDoc<Walk>(walkPath);
+  const { doc: walk, status: walkStatus } = useDoc<Walk>(walkPath);
 
   // Show loading state while fetching data
-  if (status === "loading" || !walk) {
+  if (walkStatus === "loading") {
     return (
       <View
         style={{
@@ -38,8 +39,13 @@ export const WalkCardFromId: React.FC<WalkCardFromIdProps> = ({
     );
   }
 
+  if (!walk) return null;
+
+  const status = getWalkStatus(walk);
   // Render the walk card with the fetched data
-  return <WalkCard walk={walk} showAttachments={showAttachments} />;
+
+  if (status === "past")
+    return <WalkCard walk={walk} showAttachments={showAttachments} />;
 };
 
 export default WalkCardFromId;

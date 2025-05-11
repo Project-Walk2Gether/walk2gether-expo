@@ -1,4 +1,5 @@
 import { COLORS } from "@/styles/colors";
+import { getWalkStatus } from "@/utils/walkUtils";
 import {
   AlertCircle,
   Car,
@@ -11,12 +12,14 @@ import { Avatar, Text, XStack, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
 
 interface Props {
+  status: ReturnType<typeof getWalkStatus>;
   participants: ParticipantWithRoute[];
   currentUserId?: string;
   onParticipantPress?: (participant: ParticipantWithRoute) => void;
 }
 
 export default function ParticipantsList({
+  status,
   participants,
   currentUserId,
   onParticipantPress,
@@ -47,7 +50,8 @@ export default function ParticipantsList({
     const isRejected = !!item.rejectedAt;
 
     // Determine status display text and color
-    let statusText = "Not on the way yet";
+    let statusText =
+      status === "future" ? "Planning to go" : "Not on the way yet";
     let statusColor = "$gray11";
 
     if (isRejected) {

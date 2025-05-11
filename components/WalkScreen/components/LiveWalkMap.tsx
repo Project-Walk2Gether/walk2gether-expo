@@ -5,6 +5,7 @@ import { useLocationTracking } from "@/hooks/useLocationTracking";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
+import { getWalkStatus } from "@/utils/walkUtils";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
@@ -72,6 +73,8 @@ export default function LiveWalkMap({
   // Check if walk has started or ended
   const hasWalkStarted = Boolean(walk?.startedAt);
   const hasWalkEnded = Boolean(walk?.endedAt);
+
+  const status = walk ? getWalkStatus(walk) : "pending";
 
   // The user and walkId are now passed directly to the background task
   // through the useLocationTracking hook's startBackgroundLocationTracking function
@@ -241,56 +244,57 @@ export default function LiveWalkMap({
           />
         ) : null}
         {/* 2 & 3. Render all participants (current user and others) */}
-        {participants.map((p) => {
-          if (!p.lastLocation) return null;
+        {status === "active" &&
+          participants.map((p) => {
+            if (!p.lastLocation) return null;
 
-          // Check if this marker is for the current user
-          const isCurrentUser = p.id === user?.uid;
+            // Check if this marker is for the current user
+            const isCurrentUser = p.id === user?.uid;
 
-          return isCurrentUser ? (
-            // Blue dot for current user location
-            <Marker
-              tracksViewChanges={false}
-              key={p.id}
-              coordinate={{
-                latitude: p.lastLocation.latitude,
-                longitude: p.lastLocation.longitude,
-              }}
-              title={p.displayName || "You"}
-              description="Your current location"
-              anchor={{ x: 0.5, y: 0.5 }}
-            >
-              <View
-                style={{
-                  height: 24,
-                  width: 24,
-                  borderRadius: 12,
-                  backgroundColor: "#2196F3", // Blue color
-                  borderWidth: 3,
-                  borderColor: "white",
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
-                  elevation: 4,
+            return isCurrentUser ? (
+              // Blue dot for current user location
+              <Marker
+                tracksViewChanges={false}
+                key={p.id}
+                coordinate={{
+                  latitude: p.lastLocation.latitude,
+                  longitude: p.lastLocation.longitude,
                 }}
+                title={p.displayName || "You"}
+                description="Your current location"
+                anchor={{ x: 0.5, y: 0.5 }}
+              >
+                <View
+                  style={{
+                    height: 24,
+                    width: 24,
+                    borderRadius: 12,
+                    backgroundColor: "#2196F3", // Blue color
+                    borderWidth: 3,
+                    borderColor: "white",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 4,
+                    elevation: 4,
+                  }}
+                />
+              </Marker>
+            ) : (
+              // Regular pin marker for other participants
+              <Marker
+                key={p.id}
+                coordinate={{
+                  latitude: p.lastLocation.latitude,
+                  longitude: p.lastLocation.longitude,
+                }}
+                tracksViewChanges={false}
+                title={p.displayName || "Participant"}
+                description="Participant location"
+                pinColor="#2196F3"
               />
-            </Marker>
-          ) : (
-            // Regular pin marker for other participants
-            <Marker
-              key={p.id}
-              coordinate={{
-                latitude: p.lastLocation.latitude,
-                longitude: p.lastLocation.longitude,
-              }}
-              tracksViewChanges={false}
-              title={p.displayName || "Participant"}
-              description="Participant location"
-              pinColor="#2196F3"
-            />
-          );
-        })}
+            );
+          })}
 
         {/* Render the official walk route (from owner's tracked locations) */}
         {renderOfficialWalkRoute()}
@@ -325,20 +329,22 @@ export default function LiveWalkMap({
       )}
 
       {/* Controls rendered using absolute positioning */}
-      <WalkStatusControls
-        walkId={walkId}
-        userId={user?.uid}
-        initialStatus={userParticipant?.status || "pending"}
-        initialNavigationMethod={navigationMethod}
-        isOwner={isWalkOwner}
-        walkStarted={hasWalkStarted}
-        walkEnded={hasWalkEnded}
-        onNavigationMethodChange={(isDriving) =>
-          setNavigationMethod(isDriving ? "driving" : "walking")
-        }
-        onStartWalk={handleStartWalk}
-        onEndWalk={handleEndWalk}
-      />
+      {status === "active" && (
+        <WalkStatusControls
+          walkId={walkId}
+          userId={user?.uid}
+          initialStatus={userParticipant?.status || "pending"}
+          initialNavigationMethod={navigationMethod}
+          isOwner={isWalkOwner}
+          walkStarted={hasWalkStarted}
+          walkEnded={hasWalkEnded}
+          onNavigationMethodChange={(isDriving) =>
+            setNavigationMethod(isDriving ? "driving" : "walking")
+          }
+          onStartWalk={handleStartWalk}
+          onEndWalk={handleEndWalk}
+        />
+      )}
     </View>
   );
 }

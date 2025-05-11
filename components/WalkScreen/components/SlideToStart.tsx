@@ -48,13 +48,11 @@ const SlideAction: React.FC<Props> = ({
       onSlideStart={() => {}}
       onSlideEnd={() => {}}
       containerStyle={{
-        position: "absolute",
-        top: 5,
-        left: 5,
-        right: 5,
-        bottom: 5,
+        zIndex: -1,
         backgroundColor,
         borderRadius: 30,
+        height: "100%",
+        paddingHorizontal: 5,
         overflow: "hidden",
         alignItems: "center",
         justifyContent: "center",
