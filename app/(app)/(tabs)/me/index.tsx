@@ -1,12 +1,13 @@
 import Clouds from "@/components/Clouds";
 import Menu from "@/components/Menu";
 import Sun from "@/components/Sun";
-import { BrandGradient, Screen } from "@/components/UI";
+import { Screen } from "@/components/UI";
+import ActionRow from "@/components/UI/ActionRow";
 import { PlaceData } from "@/components/UI/PlacesAutocomplete";
-import UIDInfo from "@/components/UIDInfo";
 import { StatelessAvatar } from "@/components/UserAvatar";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useUpdates } from "@/context/UpdatesContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
 import { appVersion } from "@/utils/version";
@@ -15,20 +16,40 @@ import {
   Bell,
   Camera,
   Clock,
+  Download,
+  Fingerprint,
+  Info,
   LogOut,
   Pencil,
+  Phone,
   QrCode,
   Trash,
 } from "@tamagui/lucide-icons";
+import * as Clipboard from "expo-clipboard";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, TouchableOpacity } from "react-native";
-import { Card, H4, Separator, Text, View, YStack } from "tamagui";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator } from "react-native";
+import {
+  Button,
+  Card,
+  H4,
+  Separator,
+  Spinner,
+  Text,
+  View,
+  YStack,
+} from "tamagui";
 
 export default function MeScreen() {
   const { user: authUser, signOut } = useAuth();
   const { userData, loading: userDataLoading, updateUserData } = useUserData();
+  const {
+    isUpdateAvailable,
+    applyUpdate,
+    checkForUpdate,
+    isCheckingForUpdate,
+  } = useUpdates();
   const router = useRouter();
   const [name, setName] = useState("");
   const [location, setLocation] = useState<PlaceData | null>(null);
@@ -152,19 +173,31 @@ export default function MeScreen() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.replace("/");
+      // Router will handle navigation to auth screen
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
 
+  const handleCopyUID = async () => {
+    if (authUser?.uid) {
+      await Clipboard.setStringAsync(authUser.uid);
+      showMessage("User ID copied to clipboard", "success");
+    }
+  };
+
+  // Check for updates when the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      checkForUpdate();
+    }, [])
+  );
+
   if (userDataLoading) {
     return (
-      <BrandGradient variant="modern">
-        <YStack f={1} jc="center" ai="center" width="100%" height="100%">
-          <ActivityIndicator size="large" color={COLORS.action} />
-        </YStack>
-      </BrandGradient>
+      <Screen>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </Screen>
     );
   }
 
@@ -242,6 +275,7 @@ export default function MeScreen() {
           </Text>
         )}
       </YStack>
+
       {/* About Me Section */}
       <Card
         onPress={handleEditProfile}
@@ -261,74 +295,93 @@ export default function MeScreen() {
 
       {/* Actions Section */}
       <Card backgroundColor="white" mb="$3" borderRadius={16}>
-        <TouchableOpacity onPress={() => router.push("/qr-code")}>
-          <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-            <View mr="$3">
-              <QrCode size={24} color={COLORS.primary} />
-            </View>
-            <Text fontSize={16} fontWeight="500" color={COLORS.text}>
-              My QR Code
-            </Text>
-          </YStack>
-        </TouchableOpacity>
+        <ActionRow
+          icon={<QrCode />}
+          label="My QR Code"
+          onPress={() => router.push("/qr-code")}
+        />
 
         <Separator borderColor="$gray5" />
 
-        <TouchableOpacity onPress={() => router.push("/me/history")}>
-          <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-            <View mr="$3">
-              <Clock size={24} color={COLORS.primary} />
-            </View>
-            <Text fontSize={16} fontWeight="500" color={COLORS.text}>
-              My Walk History
-            </Text>
-          </YStack>
-        </TouchableOpacity>
+        <ActionRow
+          icon={<Clock />}
+          label="My Walk History"
+          onPress={() => router.push("/me/history")}
+        />
 
         <Separator borderColor="$gray5" />
 
-        <TouchableOpacity onPress={handleEditProfile}>
-          <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-            <View mr="$3">
-              <Pencil size={24} color={COLORS.primary} />
-            </View>
-            <Text fontSize={16} fontWeight="500" color={COLORS.text}>
-              Edit Profile
-            </Text>
-          </YStack>
-        </TouchableOpacity>
+        <ActionRow
+          icon={<Pencil />}
+          label="Edit Profile"
+          onPress={handleEditProfile}
+        />
 
         <Separator borderColor="$gray5" />
 
-        <TouchableOpacity onPress={() => router.push("/me/notifications")}>
-          <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-            <View mr="$3">
-              <Bell size={24} color={COLORS.primary} />
-            </View>
-            <Text fontSize={16} fontWeight="500" color={COLORS.text}>
-              Notification Settings
-            </Text>
-          </YStack>
-        </TouchableOpacity>
+        <ActionRow
+          icon={<Bell />}
+          label="Notification Settings"
+          onPress={() => router.push("/me/notifications")}
+        />
 
         <Separator borderColor="$gray5" />
 
-        <TouchableOpacity onPress={handleSignOut}>
-          <YStack px="$4" py="$3" flexDirection="row" alignItems="center">
-            <View mr="$3">
-              <LogOut size={24} color="#ff3b30" />
-            </View>
-            <Text fontSize={16} fontWeight="500" color="#ff3b30">
-              Sign Out
-            </Text>
-          </YStack>
-        </TouchableOpacity>
+        <ActionRow
+          icon={<Phone />}
+          title="Phone"
+          secondaryText={authUser?.phoneNumber || "Not provided"}
+        />
+
+        <Separator borderColor="$gray5" />
+
+        <ActionRow
+          icon={
+            isCheckingForUpdate ? (
+              <Spinner size="small" color={COLORS.primary} />
+            ) : (
+              <Info size={24} color={COLORS.textSecondary} />
+            )
+          }
+          title="Version"
+          secondaryText={appVersion}
+          action={
+            isUpdateAvailable && (
+              <Button
+                size="$2"
+                bg={COLORS.accent1}
+                onPress={applyUpdate}
+                icon={<Download size={16} />}
+              >
+                Update
+              </Button>
+            )
+          }
+        />
+
+        <Separator borderColor="$gray5" />
+
+        <ActionRow
+          icon={<Fingerprint size={24} color={COLORS.textSecondary} />}
+          title="User ID"
+          secondaryText={authUser?.uid || "Unknown"}
+          onPress={handleCopyUID}
+        />
+
+        <Separator borderColor="$gray5" />
       </Card>
 
-      {/* Version Info */}
-      {authUser?.uid && (
-        <UIDInfo uid={authUser.uid} version={`${appVersion}.patch`} />
-      )}
+      <YStack mt="$4" mb="$4">
+        <Button
+          size="$4"
+          theme="red"
+          icon={<LogOut />}
+          onPress={handleSignOut}
+          fontWeight="600"
+        >
+          Sign Out
+        </Button>
+      </YStack>
     </Screen>
   );
 }

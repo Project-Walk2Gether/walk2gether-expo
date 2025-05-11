@@ -16,12 +16,17 @@ export default function AppLayout() {
   // Sync push notification token whenever the authenticated layout mounts
   // and permissions are granted
   useEffect(() => {
+    writeLogIfEnabled({
+      message: "Syncing push token",
+      metadata: { user, permissionStatus },
+    });
+
     if (user && permissionStatus?.granted) {
       // Run silently in background without disrupting navigation
-      getAndSyncPushToken().catch((error) => {
+      getAndSyncPushToken(user).catch((error) => {
         writeLogIfEnabled({
           message: "Failed to sync push token",
-          metadata: { error },
+          metadata: { error, uid: user.uid },
         });
       });
     }

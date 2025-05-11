@@ -1,7 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
 import { Formik } from "formik";
 import { useCallback, useRef, useState } from "react";
-import { Alert } from "react-native";
 import PhoneInput from "react-native-phone-number-input";
 import { Text, View } from "tamagui";
 import * as yup from "yup";
@@ -22,6 +22,7 @@ interface Props {
 export default function PhoneForm({ onPhoneVerified }: Props) {
   const [loading, setLoading] = useState(false);
   const phoneInputRef = useRef<PhoneInput>(null);
+  const { showMessage } = useFlashMessage();
 
   const { sendPhoneVerificationCode } = useAuth();
 
@@ -31,8 +32,9 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
         setLoading(true);
         const id = await sendPhoneVerificationCode(values.formattedPhoneNumber);
         onPhoneVerified(id, values.formattedPhoneNumber);
-      } catch (error) {
-        Alert.alert("Error", "Failed to send verification code");
+      } catch (error: any) {
+        // TODO: we should type this error explicitly
+        showMessage(error.message, "error");
         console.error(error);
       } finally {
         setLoading(false);

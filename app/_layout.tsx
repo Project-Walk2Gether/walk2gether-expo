@@ -59,19 +59,26 @@ export const withTamagui = <P extends object>(Component: ComponentType<P>) => {
   );
 };
 
+// Higher-Order Component for FlashMessageProvider
+export const withFlashMessage = <P extends object>(Component: ComponentType<P>) => {
+  return (props: P) => (
+    <FlashMessageProvider>
+      <Component {...props} />
+    </FlashMessageProvider>
+  );
+};
+
 function RootLayout() {
   return (
     <LocationProvider>
-      <FlashMessageProvider>
-        <UpdatesProvider>
-          <UserDataProvider>
-            <AppContent />
-          </UserDataProvider>
-        </UpdatesProvider>
-      </FlashMessageProvider>
+      <UpdatesProvider>
+        <UserDataProvider>
+          <AppContent />
+        </UserDataProvider>
+      </UpdatesProvider>
     </LocationProvider>
   );
 }
 
 // Export the RootLayout wrapped with all providers
-export default withTamagui(withErrorBoundary(withAuthProvider(RootLayout)));
+export default withTamagui(withFlashMessage(withErrorBoundary(withAuthProvider(RootLayout))));

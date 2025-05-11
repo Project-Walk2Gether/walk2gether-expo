@@ -4,19 +4,18 @@ import * as Updates from "expo-updates";
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
 } from "react";
 import { AppState, AppStateStatus } from "react-native";
-import { useFlashMessage } from "./FlashMessageContext";
 
 interface UpdatesContextType {
   checkForUpdate: () => Promise<boolean>;
   isCheckingForUpdate: boolean;
-  updateAvailable: boolean;
+  isUpdateAvailable: boolean;
   applyUpdate: () => Promise<void>;
-  isApplyingUpdate: boolean;
 }
 
 const UpdatesContext = createContext<UpdatesContextType | undefined>(undefined);
@@ -37,35 +36,7 @@ export const UpdatesProvider: React.FC<UpdatesProviderProps> = ({
   children,
 }) => {
   const [isCheckingForUpdate, setIsCheckingForUpdate] = useState(false);
-  const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [isApplyingUpdate, setIsApplyingUpdate] = useState(false);
-  const { showMessage } = useFlashMessage();
-
-  // Check if the app was launched with an update
-  useEffect(() => {
-    const checkInitialUpdate = async () => {
-      try {
-        if (__DEV__) return;
-
-        console.log(`Checking for updates (current version: ${appVersion})`);
-        const updateStatus = await Updates.checkForUpdateAsync();
-        setUpdateAvailable(updateStatus.isAvailable);
-
-        if (updateStatus.isAvailable) {
-          console.log("Update available on launch");
-        }
-      } catch (error) {
-        console.error("Error checking for initial update:", error);
-        recordError(error, {
-          function: "checkInitialUpdate",
-          appVersion: appVersion || "unknown",
-          context: "UpdatesContext",
-        });
-      }
-    };
-
-    checkInitialUpdate();
-  }, []);
+  const [isUpdateAvailable, setUpdateAvailable] = useState(false);
 
   // Check for updates when app comes to foreground
   useEffect(() => {
@@ -81,7 +52,7 @@ export const UpdatesProvider: React.FC<UpdatesProviderProps> = ({
         const now = Date.now();
         if (now - lastCheckTime > MIN_CHECK_INTERVAL) {
           console.log("App foregrounded - checking for updates");
-          await checkForUpdate(true); // silent check
+          await checkForUpdate();
           lastCheckTime = now;
         }
       }
@@ -99,90 +70,47 @@ export const UpdatesProvider: React.FC<UpdatesProviderProps> = ({
     };
   }, []);
 
-  // Periodic background check for users who keep the app open for extended periods
-  useEffect(() => {
-    if (__DEV__) return;
-
-    // Check once every 4 hours if app remains open
-    const intervalId = setInterval(async () => {
-      // Only check if app is in foreground
-      if (AppState.currentState === "active") {
-        console.log("Performing periodic update check");
-        await checkForUpdate(true); // silent check
-      }
-    }, 4 * 60 * 60 * 1000); // 4 hours
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  // Function to check for updates
-  // silent parameter determines whether to show user-facing messages
-  const checkForUpdate = async (silent: boolean = false): Promise<boolean> => {
-    if (__DEV__) {
-      if (!silent)
-        showMessage("Updates are disabled in development mode", "info");
-      return false;
-    }
-
+  // Function to check for updates and download if available
+  const checkForUpdate = useCallback(async () => {
+    if (__DEV__) return false;
     try {
       setIsCheckingForUpdate(true);
       console.log(`Checking for updates (current version: ${appVersion})`);
       const update = await Updates.checkForUpdateAsync();
 
-      setUpdateAvailable(update.isAvailable);
+      if (update.isAvailable) {
+        // Download the update if available
+        console.log('Update available, downloading...');
+        await Updates.fetchUpdateAsync();
+        console.log('Update downloaded successfully');
+        setUpdateAvailable(true);
+        return true;
+      }
+      
+      return false;
     } catch (error) {
-      console.error("Error checking for update:", error);
+      console.error("Error checking for or downloading update:", error);
       recordError(error, {
         function: "checkForUpdate",
         appVersion: appVersion || "unknown",
         context: "UpdatesContext",
       });
-      if (!silent) showMessage("Failed to check for updates", "error");
       return false;
     } finally {
       setIsCheckingForUpdate(false);
     }
-  };
+  }, []);
 
   // Function to apply the update
-  const applyUpdate = async (): Promise<void> => {
-    if (__DEV__) {
-      console.log("Updates are disabled in development mode", "info");
-      return;
-    }
-
-    if (!updateAvailable) {
-      showMessage("No update available to apply", "info");
-      return;
-    }
-
-    try {
-      setIsApplyingUpdate(true);
-      showMessage("Downloading update...", "info");
-
-      // Fetch the update
-      await Updates.fetchUpdateAsync();
-
-      // Show a message before restarting
-      showMessage("Update downloaded! Restarting app...", "success");
-
-      // Give the message a moment to be seen
-      setTimeout(async () => {
-        await Updates.reloadAsync();
-      }, 1500);
-    } catch (error) {
-      console.error("Error applying update:", error);
-      showMessage("Failed to apply update", "error");
-      setIsApplyingUpdate(false);
-    }
+  const applyUpdate = async () => {
+    await Updates.reloadAsync();
   };
 
   const value = {
     checkForUpdate,
     isCheckingForUpdate,
-    updateAvailable,
+    isUpdateAvailable,
     applyUpdate,
-    isApplyingUpdate,
   };
 
   return (

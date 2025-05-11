@@ -1,4 +1,5 @@
 import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
+import { useAuth } from "@/context/AuthContext";
 import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
 import { COLORS } from "@/styles/colors";
 import { getAndSyncPushToken } from "@/utils/getAndSyncPushToken";
@@ -14,16 +15,16 @@ export default function NotificationPermissionsScreen() {
   const { permissionStatus, requestPermissions } = useNotificationPermissions();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+
   const goToNext = () => router.push("/walks");
 
   useEffect(() => {
     // When permissions are granted, get the push token and call our API
-    if (permissionStatus?.granted) {
-      setIsLoading(true);
-      getAndSyncPushToken()
+    if (permissionStatus?.granted && user) {
+      getAndSyncPushToken(user)
         .then(goToNext)
-        .catch((e) => setError(e.message))
-        .finally(() => setIsLoading(false));
+        .catch((e) => setError(e.message));
     }
   }, [permissionStatus]);
 

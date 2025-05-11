@@ -2,6 +2,7 @@ import HeaderBackButton from "@/components/HeaderBackButton";
 import { BrandGradient, Screen } from "@/components/UI";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
 import { useDoc } from "@/utils/firestore";
 import { Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -22,6 +23,7 @@ export default function NotificationsScreen() {
     status,
     updateDoc,
   } = useDoc<UserData>(`users/${user?.uid}`);
+  const { permissionStatus, requestPermissions } = useNotificationPermissions();
   const loading = status === "loading";
   const [preferences, setPreferences] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
@@ -33,8 +35,8 @@ export default function NotificationsScreen() {
 
       // Initialize all preferences from labels with defaults
       Object.keys(notificationPreferenceLabels).forEach((key) => {
-        // Default to true if not set
-        userPrefs[key] = userData.notificationPreferences?.[key] ?? true;
+        // Default to false if not set
+        userPrefs[key] = userData.notificationPreferences?.[key] ?? false;
       });
 
       setPreferences(userPrefs);
@@ -47,17 +49,30 @@ export default function NotificationsScreen() {
 
     try {
       setSaving(true);
+      
+      // If we're enabling a notification, check permissions
+      const enabling = !preferences[key];
+      
+      // If enabling and permissions aren't granted, request them
+      if (enabling && (!permissionStatus || !permissionStatus.granted)) {
+        const permissionGranted = await requestPermissions();
+        
+        if (!permissionGranted) {
+          showMessage("Notifications permission is required", "info");
+          return; // Don't proceed if permission was denied
+        }
+      }
 
       // Update local state immediately for responsive UI
       const newPreferences = {
         ...preferences,
-        [key]: !preferences[key],
+        [key]: enabling,
       };
       setPreferences(newPreferences);
 
       // Use updateDoc from the useDoc hook
       await updateDoc({
-        [`notificationPreferences.${key}`]: !preferences[key],
+        [`notificationPreferences.${key}`]: enabling,
       });
 
       showMessage("Notification preference updated", "success");
@@ -77,7 +92,9 @@ export default function NotificationsScreen() {
     key: string,
     info: NotificationPreferenceInfo
   ) => {
-    const value = preferences[key] ?? true;
+    const value = preferences[key];
+
+    console.log({ info: info.label, value });
 
     return (
       <Card key={key} backgroundColor="white" mb="$3" borderRadius={16}>
@@ -95,13 +112,18 @@ export default function NotificationsScreen() {
               {info.description}
             </Text>
           </YStack>
-          <Switch
-            checked={value}
-            onCheckedChange={() => togglePreference(key)}
-            size="$4"
-          >
-            <Switch.Thumb animation="quick" />
-          </Switch>
+          <YStack alignItems="center">
+            <Switch
+              checked={value}
+              onCheckedChange={() => togglePreference(key)}
+              size="$4"
+            >
+              <Switch.Thumb animation="quick" />
+            </Switch>
+            <Text fontSize={12} color={value ? "$green10" : "$gray9"} mt="$1">
+              {value ? "On" : "Off"}
+            </Text>
+          </YStack>
         </XStack>
       </Card>
     );
@@ -113,7 +135,6 @@ export default function NotificationsScreen() {
         <Stack.Screen
           options={{
             title: "Notification Settings",
-            headerLeft: () => <HeaderBackButton color="white" />,
           }}
         />
         <YStack f={1} justifyContent="center" alignItems="center">
@@ -129,7 +150,7 @@ export default function NotificationsScreen() {
         <Stack.Screen
           options={{
             title: "Notification Settings",
-            headerLeft: () => <HeaderBackButton />,
+            headerLeft: () => <HeaderBackButton color="white" />,
           }}
         />
 

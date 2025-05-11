@@ -1,5 +1,6 @@
 import { ActionButton } from "@/components/ActionButton";
 import { auth_instance, crashlytics_instance } from "@/config/firebase";
+import { useFlashMessage, type MessageType } from "@/context/FlashMessageContext";
 import { COLORS } from "@/styles/colors";
 import { writeLogIfEnabled } from "@/utils/logging";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,7 +8,6 @@ import { recordError } from "@react-native-firebase/crashlytics";
 import { isDevice } from "expo-device";
 import * as Updates from "expo-updates";
 import React from "react";
-import { showMessage } from "react-native-flash-message";
 import { Card, H3, Paragraph, Separator, Text, XStack, YStack } from "tamagui";
 import { ErrorContext } from "./ErrorContext";
 
@@ -18,7 +18,7 @@ interface State {
   error: false | Error;
 }
 
-export class ErrorBoundary extends React.Component<Props, State> {
+export class ErrorBoundary extends React.Component<Props & { showMessage?: (message: string, type?: MessageType) => void }, State> {
   state: { error: false | Error } = {
     error: false,
   };
@@ -30,7 +30,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
   // This is the "soft" way to handle errors. We render a flash message, and log details.
   catchError(error: Error, extraContext: any) {
     console.error({ error, trace: error.stack });
-    showMessage({ message: error.message, type: "danger" });
+    if (this.props.showMessage) {
+      this.props.showMessage(error.message, "error");
+    }
     writeLogIfEnabled({
       message: `ERROR: ${error.message}`,
       metadata: { error, ...extraContext },
@@ -45,10 +47,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
     if (isDevice) {
       Updates.reloadAsync();
     } else {
-      showMessage({
-        message: "Developer: reload using ctrl+cmd+Z",
-        type: "danger",
-      });
+      if (this.props.showMessage) {
+        this.props.showMessage("Developer: reload using ctrl+cmd+Z", "error");
+      }
     }
   };
 
@@ -146,15 +147,21 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 }
 
+// Create a wrapper that uses the hook and passes it to ErrorBoundary
+const ErrorBoundaryWithFlashMessage: React.FC<Props> = (props) => {
+  const { showMessage } = useFlashMessage();
+  return <ErrorBoundary showMessage={showMessage} {...props} />;
+};
+
 // Export a Higher-Order Component to wrap components with ErrorBoundary
 export function withErrorBoundary<P extends React.JSX.IntrinsicAttributes>(
   Component: React.ComponentType<P>
 ) {
   return (props: P) => (
-    <ErrorBoundary>
+    <ErrorBoundaryWithFlashMessage>
       <Component {...props} />
-    </ErrorBoundary>
+    </ErrorBoundaryWithFlashMessage>
   );
 }
 
-export default ErrorBoundary;
+export default ErrorBoundaryWithFlashMessage;

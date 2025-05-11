@@ -1,6 +1,6 @@
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
-import { doc, Timestamp, updateDoc } from "@react-native-firebase/firestore";
+import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { modelName } from "expo-device";
 import * as Notifications from "expo-notifications";
 import { useEffect, useRef, useState } from "react";
@@ -23,11 +23,6 @@ Notifications.setNotificationHandler({
   }),
 });
 
-function handleRegistrationError(errorMessage: string) {
-  alert(errorMessage);
-  throw new Error(errorMessage);
-}
-
 export function useNotificationPermissions() {
   const { user } = useAuth();
   const [permissionStatus, setPermissionStatus] =
@@ -37,8 +32,8 @@ export function useNotificationPermissions() {
   const [notification, setNotification] = useState<
     Notifications.Notification | undefined
   >(undefined);
-  const notificationListener = useRef<Notifications.EventSubscription>();
-  const responseListener = useRef<Notifications.EventSubscription>();
+  const notificationListener = useRef<Notifications.EventSubscription>(null);
+  const responseListener = useRef<Notifications.EventSubscription>(null);
 
   useEffect(() => {
     notificationListener.current =
@@ -78,15 +73,19 @@ export function useNotificationPermissions() {
 
     try {
       const userRef = doc(firestore_instance, `users/${user.uid}`);
-      await updateDoc(userRef, {
-        expoPushToken: token,
-        deviceInfo: {
-          platform: Platform.OS,
-          model: modelName,
-          osVersion: Platform.Version,
-          lastUpdated: Timestamp.now(),
+      await setDoc(
+        userRef,
+        {
+          expoPushToken: token,
+          deviceInfo: {
+            platform: Platform.OS,
+            model: modelName,
+            osVersion: Platform.Version,
+            lastUpdated: Timestamp.now(),
+          },
         },
-      });
+        { merge: true }
+      );
       console.log("Push token saved to Firebase");
     } catch (error) {
       console.error("Error saving push token to Firebase:", error);

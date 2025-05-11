@@ -1,8 +1,8 @@
-import React, { createContext, ReactNode, useContext } from "react";
+import { ReactNode, createContext, useContext } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
+import Toast from "@/components/UI/Toast";
 
-type MessageType = "success" | "error" | "info";
+export type MessageType = "success" | "error" | "info";
 
 interface FlashMessageContextType {
   showMessage: (

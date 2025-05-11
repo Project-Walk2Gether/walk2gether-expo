@@ -3,7 +3,11 @@ import AnimatedLogo from "@/components/AnimatedLogo/index";
 import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
 import PhoneForm from "@/components/Auth/Form/PhoneForm";
 import TokenSignInForm from "@/components/Auth/Form/TokenSignInForm";
+import VerificationCodeForm, {
+  VerificationSchema,
+} from "@/components/Auth/Form/VerificationCodeForm";
 import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useInvitationFlow } from "@/hooks/useInvitationFlow";
 import { COLORS } from "@/styles/colors";
 import { determineUserRoute, getUserDisplayName } from "@/utils/navigation";
@@ -11,7 +15,6 @@ import { Check } from "@tamagui/lucide-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Dimensions } from "react-native";
-import { showMessage } from "react-native-flash-message";
 import {
   Avatar,
   Button,
@@ -25,9 +28,6 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import VerificationCodeForm, {
-  VerificationSchema,
-} from "../components/Auth/Form/VerificationCodeForm";
 
 const { width } = Dimensions.get("window");
 const logoWidth = width * 0.7;
@@ -40,6 +40,7 @@ export default function Auth() {
     referredByUid?: string;
   }>();
   const { signInWithPhoneCredential } = useAuth();
+  const { showMessage } = useFlashMessage();
   const [verificationId, setVerificationId] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
@@ -77,10 +78,7 @@ export default function Auth() {
     // Show welcome message if going to the main app
     if (route === "/walks") {
       const displayName = await getUserDisplayName(userCredential.user.uid);
-      showMessage({
-        message: `Welcome back, ${displayName}!`,
-        type: "success",
-      });
+      showMessage(`Welcome back, ${displayName}!`, "success");
     }
 
     // Navigate to the appropriate route - handle both string and object route types
@@ -90,6 +88,7 @@ export default function Auth() {
 
   return (
     <AuthScenicLayout
+      isAnimated={true}
       showLogo={
         <YStack mb="$6" width="100%" alignItems="center">
           <Text
@@ -101,7 +100,7 @@ export default function Auth() {
           </Text>
           <AnimatedLogo width={logoWidth} />
           <Spacer h="$1" />
-          <Slogan delay={4500} />
+          <Slogan delay={5000} />
         </YStack>
       }
       scroll
@@ -137,10 +136,9 @@ export default function Auth() {
               textAlign="center"
               marginBottom="$2"
             >
-              Enter confirmation code
+              Verify Your Phone
             </Text>
           ) : authMode === "invitation" && inviterData ? (
-            // Profile picture and title in an XStack
             <XStack
               gap="$2"
               justifyContent="center"
@@ -250,6 +248,31 @@ export default function Auth() {
               />
             )}
           </View>
+
+          <YStack mt="$3" alignItems="center" gap="$2">
+            <Text fontSize="$1" color="$gray10" textAlign="center">
+              By continuing, you agree to our
+            </Text>
+            <XStack alignItems="center" gap="$2">
+              <Button
+                size="$2"
+                theme="blue"
+                onPress={() => router.push("/auth/terms")}
+              >
+                Terms of Service
+              </Button>
+              <Text fontSize="$1" color="$gray10">
+                and
+              </Text>
+              <Button
+                size="$2"
+                theme="blue"
+                onPress={() => router.push("/auth/privacy")}
+              >
+                Privacy Policy
+              </Button>
+            </XStack>
+          </YStack>
         </Card>
       </YStack>
     </AuthScenicLayout>

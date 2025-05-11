@@ -1,11 +1,14 @@
+import { useUpdates } from "@/context/UpdatesContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
-import { Footprints, Image, User, Users } from "@tamagui/lucide-icons";
+import { Bell, Footprints, User, Users } from "@tamagui/lucide-icons";
 import { Redirect, Tabs } from "expo-router";
 import React from "react";
+import { View } from "tamagui";
 
 export default function TabLayout() {
   const { userData, loading: userDataLoading } = useUserData();
+  const { isUpdateAvailable } = useUpdates();
 
   if (!userDataLoading && !userData) {
     return <Redirect href="/onboarding/complete-your-profile" />;
@@ -39,13 +42,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="stories"
-        options={{
-          title: "Stories",
-          tabBarIcon: ({ color, size }) => <Image size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="friends"
         options={{
           title: "Friends",
@@ -58,7 +54,28 @@ export default function TabLayout() {
         options={{
           title: "Me",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <View position="relative">
+              <User size={size} color={color} />
+              {isUpdateAvailable && (
+                <View
+                  position="absolute"
+                  top={-5}
+                  right={-10}
+                  width={18}
+                  height={18}
+                  borderRadius={9}
+                  backgroundColor={COLORS.accent1}
+                  justifyContent="center"
+                  alignItems="center"
+                  borderWidth={1}
+                  borderColor="white"
+                >
+                  <Bell size={12} color="white" />
+                </View>
+              )}
+            </View>
+          ),
         }}
       />
     </Tabs>

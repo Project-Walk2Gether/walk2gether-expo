@@ -9,7 +9,7 @@ export default function MeLayout() {
         headerStyle: {
           backgroundColor: COLORS.primary,
         },
-        headerTintColor: "#fff",
+        headerTintColor: COLORS.textOnDark,
         headerTitleStyle: {
           fontWeight: "bold",
         },

@@ -1,5 +1,5 @@
 import { Screen } from "@/components/UI";
-import WalkCardFromId from "@/components/WalkCard/FromId";
+import WalkCard from "@/components/WalkCard";
 import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
 import { useQuery } from "@/utils/firestore";
@@ -28,11 +28,6 @@ export default function WalkHistoryScreen() {
   // Extract walkIds from the walk documents
   const walkIds = pastWalks.map((walk) => walk.id);
 
-  // Create a renderItem function that uses WalkCardFromId
-  const renderWalkItem = ({ item }: { item: string }) => (
-    <WalkCardFromId walkId={item} />
-  );
-
   if (status === "loading") {
     return (
       <Screen title="My Walk History">
@@ -54,26 +49,28 @@ export default function WalkHistoryScreen() {
   }
 
   return (
-    <Screen title="My Walk History">
-      {walkIds.length > 0 ? (
-        <FlatList
-          data={walkIds}
-          renderItem={renderWalkItem}
-          keyExtractor={(item) => item}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
-      ) : (
-        <Card backgroundColor="white" padding="$4" borderRadius={12}>
-          <YStack alignItems="center" gap="$2">
-            <Text fontSize={18} fontWeight="500" textAlign="center">
-              You haven't participated in any past walks yet
-            </Text>
-            <Text color="$gray9" textAlign="center">
-              When you join or create walks that end, they'll appear here.
-            </Text>
-          </YStack>
-        </Card>
-      )}
+    <Screen>
+      <YStack pt="$4">
+        {walkIds.length > 0 ? (
+          <FlatList
+            data={pastWalks}
+            renderItem={({ item }) => <WalkCard walk={item} />}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        ) : (
+          <Card backgroundColor="white" padding="$4" borderRadius={12}>
+            <YStack alignItems="center" gap="$2">
+              <Text fontSize={18} fontWeight="500" textAlign="center">
+                You haven't participated in any walks yet
+              </Text>
+              <Text color="$gray9" textAlign="center">
+                When you join or create walks that end, they'll appear here.
+              </Text>
+            </YStack>
+          </Card>
+        )}
+      </YStack>
     </Screen>
   );
 }

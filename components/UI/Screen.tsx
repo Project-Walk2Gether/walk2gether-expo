@@ -1,23 +1,19 @@
 import React from "react";
+import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { H1, ScrollView } from "tamagui";
-import { BrandGradient } from "./BrandGradient";
+import { BrandGradient, BrandGradientProps } from "./BrandGradient";
 
 interface Props {
   title?: string;
   children: React.ReactNode;
   useTopInsets?: boolean;
-  gradientVariant?:
-    | "modern"
-    | "main"
-    | "natural"
-    | "earthy"
-    | "vibrant"
-    | "subtle"
-    | "outdoor";
+  gradientVariant?: BrandGradientProps["variant"];
   titleColor?: string;
   renderAbsolute?: React.ReactNode;
   floatingAction?: React.ReactNode;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 export const Screen: React.FC<Props> = ({
@@ -28,6 +24,8 @@ export const Screen: React.FC<Props> = ({
   titleColor = "black",
   renderAbsolute,
   floatingAction,
+  onRefresh,
+  refreshing = false,
 }) => {
   const insets = useSafeAreaInsets();
 
@@ -43,6 +41,14 @@ export const Screen: React.FC<Props> = ({
           paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          ) : undefined
+        }
       >
         {title && (
           <H1

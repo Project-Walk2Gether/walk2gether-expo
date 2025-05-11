@@ -6,10 +6,10 @@ import Two from "./Two";
 import Walk from "./Walk";
 import { logoColor } from "./color";
 
-const PULSE_DURATION = 250;
-const PULSE_SCALE = 1.2;
-const PULSE_DELAY = 180;
-const STARTING_DELAY = 1500;
+const PULSE_DURATION = 200;
+const PULSE_SCALE = 1.3;
+const PULSE_DELAY = 100;
+const STARTING_DELAY = 2500;
 
 // Use actual viewBox widths for each SVG
 const walkViewBoxWidth = 218.4;
@@ -38,34 +38,63 @@ export default function AnimatedLogo({ width = 168 }: { width?: number }) {
   const twoScale = useRef(new Animated.Value(1)).current;
   const getherScale = useRef(new Animated.Value(1)).current;
 
-  // Helper to animate scale up and down
-  const pulse = (animatedValue: Animated.Value, delay: number) =>
+  const walkRotate = useRef(new Animated.Value(0)).current;
+  const twoRotate = useRef(new Animated.Value(0)).current;
+  const getherRotate = useRef(new Animated.Value(0)).current;
+
+  const spinPop = (
+    scale: Animated.Value,
+    rotate: Animated.Value,
+    delay: number
+  ) =>
     Animated.sequence([
       Animated.delay(delay),
-      Animated.timing(animatedValue, {
-        toValue: PULSE_SCALE,
-        duration: PULSE_DURATION,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
-      }),
-      Animated.timing(animatedValue, {
-        toValue: 1,
-        duration: PULSE_DURATION,
-        easing: Easing.in(Easing.ease),
-        useNativeDriver: true,
-      }),
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(scale, {
+            toValue: PULSE_SCALE,
+            duration: PULSE_DURATION,
+            easing: Easing.bounce,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scale, {
+            toValue: 1,
+            duration: PULSE_DURATION,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(rotate, {
+            toValue: 1,
+            duration: PULSE_DURATION,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(rotate, {
+            toValue: -1,
+            duration: PULSE_DURATION,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(rotate, {
+            toValue: 0,
+            duration: PULSE_DURATION,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
+      ]),
     ]);
 
-  // Play the pulse animation sequence once
-  // Animation runner, called from useEffect
   const runAnimation = () => {
     Animated.sequence([
-      pulse(walkScale, 0),
+      spinPop(walkScale, walkRotate, 0),
       Animated.delay(PULSE_DELAY),
-      pulse(twoScale, 0),
+      spinPop(twoScale, twoRotate, 0),
       Animated.delay(PULSE_DELAY),
       Animated.parallel([
-        pulse(getherScale, 0),
+        spinPop(getherScale, getherRotate, 0),
         Animated.timing(underlineProgress, {
           toValue: 1,
           duration: 500,
@@ -107,6 +136,19 @@ export default function AnimatedLogo({ width = 168 }: { width?: number }) {
   const twoWidth = width * twoFraction;
   const getherWidth = width * getherFraction;
 
+  const walkSpin = walkRotate.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: ["-20deg", "0deg", "10deg"], // strong left, soft right
+  });
+  const twoSpin = twoRotate.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: ["10deg", "0deg", "-15deg"], // reversed direction
+  });
+  const getherSpin = getherRotate.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: ["-5deg", "0deg", "10deg"], // asymmetrical wobble
+  });
+
   return (
     <XStack
       alignItems="center"
@@ -118,15 +160,22 @@ export default function AnimatedLogo({ width = 168 }: { width?: number }) {
       }}
       position="relative"
     >
-      <Animated.View style={{ transform: [{ scale: walkScale }] }}>
+      <Animated.View
+        style={{ transform: [{ scale: walkScale }, { rotate: walkSpin }] }}
+      >
         <Walk width={walkWidth} height={height} />
       </Animated.View>
-      <Animated.View style={{ transform: [{ scale: twoScale }] }}>
+      <Animated.View
+        style={{ transform: [{ scale: twoScale }, { rotate: twoSpin }] }}
+      >
         <Two width={twoWidth} height={height} />
       </Animated.View>
-      <Animated.View style={{ transform: [{ scale: getherScale }] }}>
+      <Animated.View
+        style={{ transform: [{ scale: getherScale }, { rotate: getherSpin }] }}
+      >
         <Gether width={getherWidth} height={height} />
       </Animated.View>
+
       {/* Animated Underline */}
       <Animated.View
         style={{

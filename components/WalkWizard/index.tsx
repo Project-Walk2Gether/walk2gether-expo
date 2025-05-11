@@ -5,7 +5,6 @@ import { useWalks } from "@/context/WalksContext";
 import { createWalkFromForm } from "@/utils/walkSubmission";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo } from "react";
-import Toast from "react-native-toast-message";
 import HeaderBackButton from "../HeaderBackButton";
 import {
   DurationSelection,
@@ -78,32 +77,35 @@ export function WalkWizard() {
   }, [currentStep, goToPreviousStep, router]);
 
   // Define the step configuration - using useMemo to avoid recreating the array on each render
-  const wizardSteps = useMemo<WizardStep[]>(() => [
-    {
-      title: "What type of walk?",
-      component: TypeSelection, // Only needs onContinue
-    },
-    {
-      title: "Who should we invite?",
-      component: InviteSelection, // Needs onContinue and onBack
-    },
-    {
-      title: "When do you want to walk?",
-      component: TimeSelection, // Needs onContinue and onBack
-    },
-    {
-      title: "How long will this walk be?",
-      component: DurationSelection, // Needs onContinue and onBack
-    },
-    {
-      title: "Where is the meetup point?",
-      component: LocationSelection, // Needs onContinue and onBack
-    },
-    {
-      title: "Review & Submit",
-      component: ReviewScreen, // Needs onSubmit, onBack, and onEdit
-    },
-  ], []);
+  const wizardSteps = useMemo<WizardStep[]>(
+    () => [
+      {
+        title: "What type of walk?",
+        component: TypeSelection, // Only needs onContinue
+      },
+      {
+        title: "Who should we invite?",
+        component: InviteSelection, // Needs onContinue and onBack
+      },
+      {
+        title: "When do you want to walk?",
+        component: TimeSelection, // Needs onContinue and onBack
+      },
+      {
+        title: "How long will this walk be?",
+        component: DurationSelection, // Needs onContinue and onBack
+      },
+      {
+        title: "Where is the meetup point?",
+        component: LocationSelection, // Needs onContinue and onBack
+      },
+      {
+        title: "Review & Submit",
+        component: ReviewScreen, // Needs onSubmit, onBack, and onEdit
+      },
+    ],
+    []
+  );
   // Get screen title based on current step
   const getScreenTitle = () => {
     if (formData.walkType === "neighborhood") {
@@ -143,12 +145,12 @@ export function WalkWizard() {
     // Regular flow for other walk types
     if (currentStep >= 0 && currentStep < wizardSteps.length) {
       const StepComponent = wizardSteps[currentStep].component;
-      
+
       // First step (Type Selection) only needs onContinue
       if (currentStep === 0) {
         return <StepComponent onContinue={goToNextStep} />;
       }
-      
+
       // Last step (Review Screen) needs onSubmit, onBack, and onEdit
       if (currentStep === wizardSteps.length - 1) {
         return (
@@ -159,13 +161,10 @@ export function WalkWizard() {
           />
         );
       }
-      
+
       // Middle steps need onContinue and onBack
       return (
-        <StepComponent
-          onContinue={goToNextStep}
-          onBack={goToPreviousStep}
-        />
+        <StepComponent onContinue={goToNextStep} onBack={goToPreviousStep} />
       );
     }
 
@@ -182,7 +181,7 @@ export function WalkWizard() {
           headerLeft: () => <HeaderBackButton onPress={handleBackPress} />,
         }}
       />
-      <Toast />
+
       {renderStep()}
     </>
   );

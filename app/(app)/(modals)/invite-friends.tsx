@@ -1,10 +1,11 @@
-import { BrandGradient } from "@/components/UI";
+import HeaderCloseButton from "@/components/HeaderCloseButton";
 import InvitationQRCode from "@/components/InvitationQRCode";
+import { BrandGradient } from "@/components/UI";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
-import { Copy, ExternalLink, Share2 } from "@tamagui/lucide-icons";
+import { ExternalLink, Share2 } from "@tamagui/lucide-icons";
 import * as Clipboard from "expo-clipboard";
-import { Link } from "expo-router";
+import { Link, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
@@ -15,7 +16,6 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
 import { Button, Card, Spinner, Text, View, XStack, YStack } from "tamagui";
 
 export default function InviteFriendsScreen() {
@@ -60,6 +60,7 @@ export default function InviteFriendsScreen() {
 
   return (
     <>
+      <Stack.Screen options={{ headerRight: () => <HeaderCloseButton /> }} />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -67,7 +68,6 @@ export default function InviteFriendsScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <BrandGradient variant="subtle" style={{ flex: 1 }}>
             <StatusBar style="light" />
-            <Toast topOffset={10} />
             <View paddingHorizontal={20}>
               <Card
                 backgroundColor="white"
@@ -82,29 +82,36 @@ export default function InviteFriendsScreen() {
                   {/* QR Code section */}
                   <XStack ai="center" justifyContent="center">
                     <View flex={1}>
-                      <Text fontSize="$4" fontWeight="500" color="#333" marginBottom="$2">
+                      <Text
+                        fontSize="$4"
+                        fontWeight="500"
+                        color="#333"
+                        marginBottom="$2"
+                      >
                         QR Code
                       </Text>
                       <Text fontSize="$2.5" color="#666">
-                        Show this QR code to friends so they can scan it with their phone camera to join.
+                        Show this QR code to friends so they can scan it with
+                        their phone camera to join.
                       </Text>
                       <Link href="/qr-code" asChild>
                         <Button
                           size="$3"
-                          backgroundColor="#7C5F45"
-                          color="white"
                           marginTop="$2"
-                          icon={<ExternalLink size="$1" color="white" />}
+                          icon={<ExternalLink size="$1" />}
                         >
                           Expand
                         </Button>
                       </Link>
                     </View>
                     <View marginLeft="$4">
-                      <InvitationQRCode invitationCode={invitationCode} size={120} />
+                      <InvitationQRCode
+                        invitationCode={invitationCode}
+                        size={120}
+                      />
                     </View>
                   </XStack>
-                  
+
                   {/* Or divider */}
                   <XStack alignItems="center" marginVertical="$3">
                     <View height={1} backgroundColor="#ddd" flex={1} />
@@ -138,7 +145,6 @@ export default function InviteFriendsScreen() {
                     >
                       {sharing ? <Spinner color="white" /> : "Share Invitation"}
                     </Button>
-
                   </YStack>
                 </YStack>
               </Card>

@@ -1,13 +1,14 @@
 import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
 import { determineUserRoute, getUserDisplayName, RouteResult } from "@/utils/navigation";
 import { Redirect } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { showMessage } from "react-native-flash-message";
 import { ActivityIndicator } from "react-native";
 import { YStack } from "tamagui";
 
 export default function IndexScreen() {
   const { user, loading, claims } = useAuth();
+  const { showMessage } = useFlashMessage();
   const [redirectTo, setRedirectTo] = useState<RouteResult | null>(null);
 
   // Handle navigation logic once user is authenticated
@@ -24,10 +25,7 @@ export default function IndexScreen() {
       // Show welcome message if going to main app
       if (route === "/walks") {
         const displayName = await getUserDisplayName(user.uid);
-        showMessage({
-          message: `Welcome, ${displayName}!`,
-          type: "success"
-        });
+        showMessage(`Welcome, ${displayName}!`, "success");
       }
       
       // Store the route for redirect

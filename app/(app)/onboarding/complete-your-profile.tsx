@@ -35,6 +35,7 @@ export default function CompleteYourProfile() {
   if (!user) return <Redirect href="/auth" />;
 
   const handleSubmit = async (values: any) => {
+    console.log("Submitting");
     try {
       setLoading(true);
 

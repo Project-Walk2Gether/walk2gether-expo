@@ -12,7 +12,6 @@ const ONBOARDING_SCREENS = [
 // Types for the referral information
 type ReferralInfo = {
   referredByUid?: string;
-  acceptFriendship?: boolean;
 };
 
 // Create the context with navigation functions
@@ -58,6 +57,8 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const goToNextScreen = () => {
     const currentIndex = getCurrentScreenIndex();
+    console.log("Current index:", currentIndex);
+    console.log("Onboarding screens:", ONBOARDING_SCREENS);
     if (currentIndex < ONBOARDING_SCREENS.length - 1) {
       const nextScreen = ONBOARDING_SCREENS[currentIndex + 1];
       router.push(nextScreen as any);

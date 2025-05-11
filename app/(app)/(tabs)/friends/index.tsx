@@ -1,8 +1,6 @@
-import Clouds from "@/components/Clouds";
 import { EmptyMessage } from "@/components/EmptyMessage";
 import FAB from "@/components/FAB";
 import FriendshipCard from "@/components/FriendshipCard";
-import Sun from "@/components/Sun";
 import { Screen } from "@/components/UI";
 import { useAuth } from "@/context/AuthContext";
 import { useFriends } from "@/context/FriendsContext";
@@ -47,24 +45,8 @@ export default function FriendsScreen() {
       <StatusBar style="dark" />
       <Screen
         title="My Friends"
-        gradientVariant="outdoor"
+        gradientVariant="modern"
         useTopInsets
-        renderAbsolute={
-          <View>
-            <Sun
-              style={{ position: "absolute", top: 20, right: -10, bottom: 20 }}
-            />
-            <Clouds
-              style={{
-                position: "absolute",
-                top: -80,
-                left: 0,
-                right: 0,
-                bottom: 0,
-              }}
-            />
-          </View>
-        }
         floatingAction={
           <FAB
             text="Invite a friend"
@@ -76,10 +58,10 @@ export default function FriendsScreen() {
           {friendships.length === 0 ? (
             <EmptyMessage
               message="No Friends Yet"
-              subtitle="Add friends to chat and invite them to walks!"
+              subtitle="Add friends to chat and invite on walks!"
               icon={Users}
               iconSize={70}
-              iconColor="#333"
+              iconColor="#7C5F45"
             />
           ) : (
             friendships.map((friendship) => (

@@ -1,4 +1,5 @@
 import { auth_instance } from "@/config/firebase";
+import { useFlashMessage } from "@/context/FlashMessageContext";
 import firebase from "@react-native-firebase/app";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import React, {
@@ -9,7 +10,6 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { showMessage } from "react-native-flash-message";
 
 interface AuthContextType {
   user: FirebaseAuthTypes.User | null;
@@ -20,7 +20,7 @@ interface AuthContextType {
   // Phone auth methods
   sendPhoneVerificationCode: (phoneNumber: string) => Promise<string>;
   verifyPhoneCode: (verificationId: string, code: string) => Promise<void>;
-  claims: null | { permissionsSet: boolean };
+  claims: null | Record<string, any>;
   signInWithPhoneCredential: (
     verificationId: string,
     code: string
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [claims, setClaims] = useState<null | Record<string, any>>(null);
-  const [hasTokenBeenVerified, setHasTokenBeenVerified] = useState(false);
+  const { showMessage } = useFlashMessage();
 
   // Function to validate the user's token and get custom claims
   const verifyToken = async (firebaseUser?: FirebaseAuthTypes.User) => {
@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       // Get the ID token result which contains custom claims
       const idTokenResult = await firebaseUser?.getIdTokenResult();
-      setHasTokenBeenVerified(true);
       setClaims(idTokenResult?.claims || null);
     } catch (error) {
       signOut();
@@ -78,12 +77,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return token;
     } catch (error) {
       console.error("Error refreshing token:", error);
-      showMessage({
-        message: "Error refreshing authentication",
-        description: "Please sign out and sign in again",
-        type: "danger",
-        duration: 4000,
-      });
+      showMessage("Please sign out and sign in again", "error");
       return undefined;
     }
   };
@@ -92,20 +86,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signOut = async () => {
     try {
       await auth_instance.signOut();
-      showMessage({
-        message: "Success",
-        description: "Signed out successfully!",
-        type: "success",
-        duration: 3000,
-      });
+      showMessage("Signed out successfully!", "success");
     } catch (error) {
       console.error("Error signing out:", error);
-      showMessage({
-        message: "Error",
-        description: "Failed to sign out",
-        type: "danger",
-        duration: 4000,
-      });
+      showMessage("Failed to sign out", "error");
       throw error;
     }
   };
@@ -116,12 +100,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       async (firebaseUser: FirebaseAuthTypes.User | null) => {
         if (firebaseUser) {
           setUser(firebaseUser);
-          try {
-            // Validate token once when user is loaded
-            await verifyToken(firebaseUser);
-          } catch (error) {
-            console.error("Error validating token:", error);
-          }
         } else {
           setUser(null);
           setClaims(null);
@@ -142,12 +120,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const confirmation = await auth_instance.signInWithPhoneNumber(
         phoneNumber
       );
-      showMessage({
-        message: "Success",
-        description: "Verification code sent to your phone",
-        type: "success",
-        duration: 3000,
-      });
+      showMessage("Verification code sent to your phone", "success");
       return confirmation.verificationId || "";
     } catch (error: any) {
       console.error("Error sending verification code:", error);
@@ -155,16 +128,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error.code === "auth/invalid-phone-number") {
         errorMessage = "Invalid phone number format";
-      } else if (error.code === "auth/quota-exceeded") {
+      } else if (
+        error.code === "auth/quota-exceeded" ||
+        error.code === "auth/too-many-requests"
+      ) {
         errorMessage = "Too many requests. Try again later";
       }
 
-      showMessage({
-        message: "Error",
-        description: errorMessage,
-        type: "danger",
-        duration: 4000,
-      });
       throw error;
     }
   };
@@ -189,12 +159,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         errorMessage = "Verification code has expired";
       }
 
-      showMessage({
-        message: "Error",
-        description: errorMessage,
-        type: "danger",
-        duration: 4000,
-      });
+      showMessage(errorMessage, "error");
       throw error;
     }
   };
@@ -220,12 +185,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         errorMessage = "Invalid verification code";
       }
 
-      showMessage({
-        message: "Error",
-        description: errorMessage,
-        type: "danger",
-        duration: 4000,
-      });
+      showMessage(errorMessage, "error");
       throw error;
     }
   };
@@ -235,12 +195,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   ): Promise<FirebaseAuthTypes.UserCredential> => {
     try {
       const userCredential = await auth_instance.signInWithCustomToken(token);
-      showMessage({
-        message: "Success",
-        description: "Signed in successfully!",
-        type: "success",
-        duration: 3000,
-      });
+      showMessage("Signed in successfully!", "success");
       return userCredential;
     } catch (error: any) {
       console.error("Error signing in with token:", error);
@@ -252,12 +207,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         errorMessage = "Token was issued for a different project";
       }
 
-      showMessage({
-        message: "Error",
-        description: errorMessage,
-        type: "danger",
-        duration: 4000,
-      });
+      showMessage(errorMessage, "error");
       throw error;
     }
   };

@@ -24,17 +24,6 @@ const UIDInfo: React.FC<UIDInfoProps> = ({ uid, version }) => {
       <Text
         fontSize={12}
         opacity={0.7}
-        onPress={handleCopy}
-        pressStyle={{ opacity: 0.5 }}
-        style={{ textAlign: "center" }}
-        mb="$2"
-      >
-        Version: {version}
-      </Text>
-
-      <Text
-        fontSize={12}
-        opacity={0.7}
         selectable
         onPress={handleCopy}
         pressStyle={{ opacity: 0.5 }}

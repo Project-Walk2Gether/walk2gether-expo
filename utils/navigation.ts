@@ -1,4 +1,5 @@
 import { firestore_instance } from "@/config/firebase";
+import { UserData } from "walk2gether-shared";
 
 // Type for route result
 export type RouteResult =
@@ -17,7 +18,6 @@ export const determineUserRoute = async (
   userId: string,
   options?: {
     referredByUid?: string;
-    acceptFriendship?: boolean;
     claims?: Record<string, any>;
   }
 ): Promise<RouteResult> => {
@@ -38,7 +38,6 @@ export const determineUserRoute = async (
         pathname: "/onboarding/complete-your-profile",
         params: {
           referredByUid: options.referredByUid,
-          acceptFriendship: options.acceptFriendship ? "true" : "false",
         },
       };
     } else {
@@ -58,10 +57,10 @@ export const getUserDisplayName = async (userId: string): Promise<string> => {
   try {
     const userDocRef = firestore_instance.collection("users").doc(userId);
     const userDoc = await userDocRef.get();
-    const userData = userDoc.data();
-    return userData?.displayName || "User";
+    const userData = userDoc.data() as UserData;
+    return userData?.name || "friend";
   } catch (error) {
     console.error("Error fetching user display name:", error);
-    return "User";
+    return "friend";
   }
 };

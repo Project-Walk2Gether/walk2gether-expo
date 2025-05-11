@@ -43,23 +43,6 @@ export const GRADIENTS = {
     BRAND_COLORS.lightGreen,
   ],
 
-  // New natural gradient based on the logo colors
-  natural: [BRAND_COLORS.brownLight, BRAND_COLORS.greenLight],
-
-  // Earthy gradient
-  earthy: [
-    BRAND_COLORS.brownDark,
-    BRAND_COLORS.brownLight,
-    BRAND_COLORS.greenLight,
-  ],
-
-  // Vibrant green
-  vibrant: [
-    BRAND_COLORS.greenDark,
-    BRAND_COLORS.greenLight,
-    BRAND_COLORS.lightGreen,
-  ],
-
   // Subtle modern gradient (light beige to soft green)
   subtle: [BRAND_COLORS.beigeLight, BRAND_COLORS.greenPale],
 

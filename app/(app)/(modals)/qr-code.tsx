@@ -1,12 +1,15 @@
-import { useUserData } from "@/context/UserDataContext";
+import HeaderCloseButton from "@/components/HeaderCloseButton";
 import InvitationQRCode from "@/components/InvitationQRCode";
+import { useUserData } from "@/context/UserDataContext";
 import { Stack } from "expo-router";
 import React from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Spinner, Text, YStack } from "tamagui";
 
 export default function QrCodeScreen() {
   const { userData, loading } = useUserData();
   const code = userData?.friendInvitationCode;
+  const insets = useSafeAreaInsets();
 
   if (loading) {
     return (
@@ -43,9 +46,20 @@ export default function QrCodeScreen() {
   return (
     <>
       <Stack.Screen
-        options={{ title: "My QR Code", headerBackTitle: "Profile" }}
+        options={{
+          title: "My QR Code",
+          headerBackTitle: "Profile",
+          headerRight: () => <HeaderCloseButton />,
+        }}
       ></Stack.Screen>
-      <YStack f={1} jc="center" ai="center" bg="#fff" px={24}>
+      <YStack
+        pb={insets.bottom}
+        f={1}
+        jc="center"
+        ai="center"
+        bg="#fff"
+        px={24}
+      >
         <Text
           fontSize={22}
           fontWeight="700"
@@ -55,6 +69,7 @@ export default function QrCodeScreen() {
         >
           Show this QR code to invite friends
         </Text>
+
         <InvitationQRCode invitationCode={code} size={260} showText={true} />
       </YStack>
     </>

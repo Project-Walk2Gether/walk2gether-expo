@@ -1,6 +1,7 @@
 import LottieView from "lottie-react-native";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
+  Animated,
   Dimensions,
   Image,
   KeyboardAvoidingView,
@@ -22,6 +23,7 @@ export interface AuthScenicLayoutProps {
   contentContainerStyle?: any;
   showSun?: boolean;
   showTree?: boolean;
+  isAnimated?: boolean;
 }
 
 const { width } = Dimensions.get("screen");
@@ -35,17 +37,74 @@ export default function AuthScenicLayout({
   contentContainerStyle = {},
   showSun = true,
   showTree = true,
+  isAnimated = false,
 }: AuthScenicLayoutProps) {
   const insets = useSafeAreaInsets();
+  const sunAnimation = useRef(new Animated.Value(-100)).current;
+  const cloudsAnimation = useRef(new Animated.Value(-200)).current;
+  const cloudsOpacity = useRef(new Animated.Value(0)).current;
+
+  // Run animations when component mounts if isAnimated is true
+  useEffect(() => {
+    if (isAnimated) {
+      // Animate sun from left
+      Animated.timing(sunAnimation, {
+        toValue: 0,
+        duration: 1200,
+        delay: 500,
+        useNativeDriver: true,
+      }).start();
+
+      // Animate clouds from top with parallel animations for position and opacity
+      Animated.parallel([
+        Animated.timing(cloudsAnimation, {
+          toValue: 0,
+          duration: 1600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(cloudsOpacity, {
+          toValue: 1,
+          duration: 1600,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isAnimated, sunAnimation, cloudsAnimation, cloudsOpacity]);
 
   const ScrollOrView = scroll ? ScrollView : View;
 
   return (
     <BrandGradient variant="outdoor" style={{ flex: 1 }}>
       {showSun && (
-        <Sun style={{ position: "absolute", left: 0, top: 20, zIndex: 1 }} />
+        <Animated.View
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 20,
+            zIndex: 1,
+            transform: [{ translateX: isAnimated ? sunAnimation : 0 }],
+          }}
+        >
+          <Sun />
+        </Animated.View>
       )}
-      <Clouds style={{ position: "absolute", top: -80, left: 0, zIndex: 1 }} />
+
+      {/* Animated clouds only when animation is enabled */}
+
+      <Animated.View
+        style={{
+          position: "absolute",
+          top: -80,
+          width,
+          left: 0,
+          zIndex: 1,
+          opacity: cloudsOpacity,
+          transform: [{ translateY: cloudsAnimation }],
+        }}
+      >
+        <Clouds />
+      </Animated.View>
+
       <Birds />
 
       <BottomRow />
