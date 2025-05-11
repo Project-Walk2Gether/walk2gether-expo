@@ -4,7 +4,7 @@ import { useWalkForm, WalkFormData } from "@/context/WalkFormContext";
 import { useWalks } from "@/context/WalksContext";
 import { createWalkFromForm } from "@/utils/walkSubmission";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import Toast from "react-native-toast-message";
 import HeaderBackButton from "../HeaderBackButton";
 import {
@@ -44,7 +44,6 @@ export function WalkWizard() {
 
       // Skip the first two steps (type selection and invite selection)
       // Go directly to step 3 (index 2) which is time selection
-      console.log("Running", { friendId });
       goToStep(2);
     }
   }, [friendId]);
@@ -73,7 +72,7 @@ export function WalkWizard() {
   }, [currentStep, goToPreviousStep, router]);
 
   // Define the step configuration
-  const wizardSteps = [
+  const wizardSteps = useRef([
     {
       title: "What type of walk?",
       Component: () => <TypeSelection onContinue={goToNextStep} />,
@@ -118,8 +117,7 @@ export function WalkWizard() {
         />
       ),
     },
-  ];
-
+  ]).current;
   // Get screen title based on current step
   const getScreenTitle = () => {
     if (formData.walkType === "neighborhood") {
@@ -166,8 +164,6 @@ export function WalkWizard() {
     const DefaultComponent = wizardSteps[0].Component;
     return <DefaultComponent />;
   };
-
-  console.log("rendering parent");
 
   return (
     <>

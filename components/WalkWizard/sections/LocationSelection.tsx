@@ -3,6 +3,7 @@ import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
+import useChangeEffect from "@/utils/useChangeEffect";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
@@ -26,8 +27,6 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
     loading: locationLoading,
     error: locationError,
   } = useLocation();
-
-  console.log({ locationLoading });
   const [location, setLocation] = useState(formData.location || null);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [longPressActive, setLongPressActive] = useState(false);
@@ -44,7 +43,6 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
 
   // Update region when coords change
   useEffect(() => {
-    console.log("Running", { coords: !!coords, location: !!formData.location });
     if (coords && !formData.location) {
       setRegion({
         latitude: coords.latitude,
@@ -56,7 +54,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   }, [coords, formData.location]);
 
   // Update when coords from LocationContext changes
-  useEffect(() => {
+  useChangeEffect(() => {
     if (coords && !isReverseGeocoding) {
       reverseGeocode(coords.latitude, coords.longitude);
 
@@ -240,12 +238,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
           />
         </View>
 
-        <XStack
-          marginTop={10}
-          marginBottom={12}
-          space="$2"
-          justifyContent="center"
-        >
+        <XStack space="$2" justifyContent="center">
           <Button
             backgroundColor={COLORS.primary}
             color="white"

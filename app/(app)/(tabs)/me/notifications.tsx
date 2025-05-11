@@ -99,7 +99,9 @@ export default function NotificationsScreen() {
             checked={value}
             onCheckedChange={() => togglePreference(key)}
             size="$4"
-          />
+          >
+            <Switch.Thumb animation="quick" />
+          </Switch>
         </XStack>
       </Card>
     );

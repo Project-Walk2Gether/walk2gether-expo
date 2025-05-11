@@ -6,11 +6,10 @@ import {
   doc,
   setDoc,
 } from "@react-native-firebase/firestore";
+import { addMinutes } from "date-fns";
 import { Router } from "expo-router";
 import uuid from "react-native-uuid";
 import { Friendship, Participant, UserData, Walk } from "walk2gether-shared";
-import { addMinutes } from "date-fns";
-import { getEstimatedEndTimeTimestamp } from "./walkUtils";
 
 /**
  * Gets a list of unique user IDs from the user's friendships to share the walk with
@@ -94,7 +93,7 @@ export const createWalkFromForm = async ({
 
       // Invitation details
       invitationCode: invitationCode,
-      invitedUserIds: formData.invitedUserIds || [],
+      invitedUserIds: [...(formData.invitedUserIds || []), userId],
       invitedPhoneNumbers: formData.invitedPhoneNumbers || [],
 
       // Sharing
