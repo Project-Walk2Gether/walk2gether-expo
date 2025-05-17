@@ -2,11 +2,11 @@ import { db } from "@/config/firebase";
 import { useDoc } from "@/utils/firestore";
 import { doc, setDoc } from "@react-native-firebase/firestore";
 import React, { createContext, ReactNode, useContext } from "react";
-import { UserData } from "walk2gether-shared";
+import { UserData, WithId } from "walk2gether-shared";
 import { useAuth } from "./AuthContext";
 
 interface UserDataContextType {
-  userData: UserData | null;
+  userData: WithId<UserData> | null;
   loading: boolean;
   updateUserData: (data: Partial<UserData>) => Promise<void>;
   setUserData: (data: Partial<UserData>) => Promise<void>;
@@ -32,7 +32,7 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({
   children,
 }) => {
   const { user: firebaseUser } = useAuth();
-  const { doc: userData, status } = useDoc(
+  const { doc: userData, status } = useDoc<UserData>(
     firebaseUser ? "users/" + firebaseUser!.uid : undefined
   );
 

@@ -3,168 +3,100 @@ import { WalkFormData } from "@/context/WalkFormContext";
 import {
   FirebaseFirestoreTypes,
   Timestamp,
+  addDoc,
+  collection,
   doc,
   setDoc,
 } from "@react-native-firebase/firestore";
 import { addMinutes } from "date-fns";
-import { Router } from "expo-router";
 import uuid from "react-native-uuid";
-import { Friendship, Participant, UserData, Walk } from "walk2gether-shared";
-
-/**
- * Gets a list of unique user IDs from the user's friendships to share the walk with
- *
- * @param userId The current user's ID
- * @param formData The walk form data
- * @param friendships List of user's friendships
- * @returns Array of unique user IDs from friendships, excluding the current user
- */
-const getSharedWithUserUids = (
-  userId: string,
-  friendships: Friendship[] = []
-): string[] => {
-  // Extract all user IDs from friendships
-  const friendUids = friendships.flatMap((friendship) => friendship.uids);
-
-  // Filter out the current user and create a unique list
-  const uniqueFriendUids = [
-    ...new Set(friendUids.filter((uid) => uid !== userId)),
-  ];
-
-  return uniqueFriendUids;
-};
+import { Participant, UserData, Walk, WithId } from "walk2gether-shared";
 
 interface CreateWalkParams {
   formData: WalkFormData;
-  userData: UserData | null;
-  userId: string;
-  createWalk: (
-    walkData: Walk
-  ) => Promise<FirebaseFirestoreTypes.DocumentReference<Walk>>;
-  router: Router;
-  friendships?: Friendship[];
+  userData: WithId<UserData>;
 }
 
-/**
- * Creates a new walk based on form data and handles post-submission actions
- *
- * @param params Object containing all necessary data and functions to create a walk
- * @returns Promise that resolves when the walk is created and post-submission actions are complete
- */
-export const createWalkFromForm = async ({
+export async function createWalkFromForm({
   formData,
   userData,
-  userId,
-  createWalk,
-  router,
-  friendships = [],
-}: CreateWalkParams): Promise<void> => {
-  if (!formData.date || !formData.location || !formData.duration) {
-    console.error("Missing required form data");
-    return;
-  }
-
+}: CreateWalkParams): Promise<void | FirebaseFirestoreTypes.DocumentReference<Walk>> {
   try {
     // Generate a unique invitation code
     const invitationCode = uuid.v4().toString().slice(0, 8);
 
-    // Create location object from form data
-    const locationData = {
-      name: formData.location.name,
-      placeId: "", // Default empty string for placeId
-      latitude: formData.location.latitude,
-      longitude: formData.location.longitude,
-    };
+    if (
+      !formData.date ||
+      formData.durationMinutes === undefined ||
+      !formData.startLocation
+    ) {
+      throw new Error(
+        "Missing required walk data: date, durationMinutes, or startLocation"
+      );
+    }
+
+    const estimatedEndTime = addMinutes(
+      formData.date.toDate(),
+      formData.durationMinutes
+    );
+    const estimatedEndTimeWithBuffer = addMinutes(estimatedEndTime, 60);
 
     // Create complete walk payload with all required fields from the Walk type
-    const walkPayload = {
-      // Basic walk properties
+    const walkPayload: Partial<Walk> = {
       active: false,
-      date: Timestamp.fromDate(formData.date),
-      durationMinutes: formData.duration,
+      date: formData.date,
+      durationMinutes: formData.durationMinutes,
       organizerName: userData?.name || "",
-      createdByUid: userId,
-      type: formData.walkType as any,
+      createdByUid: userData.id,
+      type: formData.type,
 
       // Location data - For friends walk, both start and current are the same initially
-      startLocation: locationData,
-      currentLocation: locationData,
-      location: locationData, // This is used in UI for display purposes
+      startLocation: formData.startLocation,
+      currentLocation: formData.startLocation,
 
       // Invitation details
       invitationCode: invitationCode,
-      invitedUserIds: [...(formData.invitedUserIds || []), userId],
+      invitedUserIds: [...(formData.invitedUserIds || []), userData.id],
       invitedPhoneNumbers: formData.invitedPhoneNumbers || [],
 
-      // Sharing
-      sharedWithUserUids: getSharedWithUserUids(userId, friendships),
+      estimatedEndTime: Timestamp.fromDate(estimatedEndTime),
+      estimatedEndTimeWithBuffer: Timestamp.fromDate(
+        estimatedEndTimeWithBuffer
+      ),
+    };
 
-      // Calculate estimated end time (date + duration + 1 hour buffer)
-      estimatedEndTime: (() => {
-        // Add the duration plus a 1-hour buffer
-        const endTime = addMinutes(formData.date, formData.duration + 60);
-        return Timestamp.fromDate(endTime);
-      })(),
+    const walksRef = collection(
+      firestore_instance,
+      "walks"
+    ) as FirebaseFirestoreTypes.CollectionReference<Walk>;
 
-      // Additional required fields for Friends walk
-      rounds: [],
-    } as unknown as Walk; // Cast to unknown first to resolve type mismatch
-
-    // Create the walk
-    const walkDocRef = await createWalk(walkPayload);
-    const walkId = walkDocRef.id;
+    const walkDocRef = await addDoc<Walk>(walksRef, walkPayload);
 
     // Add the user as an approved participant
-    try {
-      const participantRef = doc(
-        firestore_instance,
-        `walks/${walkId}/participants/${userId}`
-      );
+    const walkId = walkDocRef.id;
+    const userId = userData.id;
+    const participantRef = doc(
+      firestore_instance,
+      `walks/${walkId}/participants/${userId}`
+    );
 
-      const participant: Participant = {
-        userUid: userId,
-        displayName: userData?.name || "Anonymous",
-        photoURL: userData?.profilePicUrl || null,
-        approvedAt: Timestamp.now(), // Auto-approve the walk creator
-        status: "pending", // Set initial status to arrived
-        navigationMethod: "walking", // Default navigation method
-        lastLocation: {
-          latitude: formData.location.latitude,
-          longitude: formData.location.longitude,
-          timestamp: Timestamp.now(),
-        },
-        route: null,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      };
-      await setDoc(participantRef, participant);
+    const participant: Participant = {
+      userUid: userId,
+      displayName: userData?.name || "Anonymous",
+      photoURL: userData?.profilePicUrl || null,
+      approvedAt: Timestamp.now(), // Auto-approve the walk creator
+      status: "pending", // Set initial status to pending
+      navigationMethod: "walking", // Default navigation method
+      route: null,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    };
 
-      console.log("Created participant record for walk creator");
-    } catch (error) {
-      console.error("Error creating participant record:", error);
-    }
+    await setDoc(participantRef, participant);
 
-    // If there are phone numbers to invite, send SMS invitations
-    const phoneNumbers = formData.invitedPhoneNumbers || [];
-    if (phoneNumbers.length > 0) {
-      try {
-        console.log("Sending SMS invitations to:", phoneNumbers);
-        // This would typically call a Cloud Function to send SMS invites
-        // We'll implement this functionality on the backend
-      } catch (error) {
-        console.error("Error sending SMS invitations:", error);
-      }
-    }
-
-    // Immediately redirect to home screen after creating a walk
-    router.back();
-
-    // Show confetti animation after a delay once the screen is closed
-    setTimeout(() => {
-      // showConfetti(0);
-    }, 600);
+    return walkDocRef;
   } catch (error) {
     console.error("Error creating walk:", error);
     // TODO: Show error message
   }
-};
+}

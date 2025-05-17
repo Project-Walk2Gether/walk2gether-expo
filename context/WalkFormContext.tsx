@@ -1,28 +1,11 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { useLocation } from "./LocationContext";
+import React, { createContext, useContext, useState } from "react";
+import { Walk } from "walk2gether-shared";
 
-export interface WalkFormData {
-  walkType: "friends" | "meetup" | "neighborhood" | null;
-  date: Date | null;
-  time: Date | null;
-  location: {
-    name: string;
-    description: string;
-    latitude: number;
-    longitude: number;
-  } | null;
-  duration: number | null;
-  invitees: string[] | null; // Keeping for backward compatibility
-  invitedUserIds: string[] | null; // Specific friends to invite
-  invitedPhoneNumbers: string[] | null; // Phone numbers to send SMS invites
-  nearbyUserIds: string[] | null; // Users within radius for neighborhood walks
-  isNeighborhoodWalk: boolean;
-  invitationCode: string;
-}
+export type WalkFormData = Partial<Walk>;
 
 interface WalkFormContextType {
   formData: WalkFormData;
-  updateFormData: (newData: Partial<WalkFormData>) => void;
+  updateFormData: (newData: Partial<Walk>) => void;
   setFormData: React.Dispatch<React.SetStateAction<WalkFormData>>;
   resetForm: () => void;
   currentStep: number;
@@ -34,8 +17,8 @@ interface WalkFormContextType {
 
 // Generate a random 6-character alphanumeric invitation code
 const generateInvitationCode = (): string => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
   for (let i = 0; i < 6; i++) {
     const randomIndex = Math.floor(Math.random() * characters.length);
     code += characters.charAt(randomIndex);
@@ -43,17 +26,8 @@ const generateInvitationCode = (): string => {
   return code;
 };
 
-const initialFormData: WalkFormData = {
-  walkType: null,
-  date: null,
-  time: null,
-  location: null,
-  duration: 30, // Default duration in minutes
-  invitees: null,
-  invitedUserIds: null,
-  invitedPhoneNumbers: null,
-  nearbyUserIds: null,
-  isNeighborhoodWalk: false,
+const initialFormData: WalkFormContextType["formData"] = {
+  durationMinutes: 30, // Default duration in minutes
   invitationCode: generateInvitationCode(),
 };
 
@@ -61,15 +35,16 @@ const WalkFormContext = createContext<WalkFormContextType | undefined>(
   undefined
 );
 
-export interface WalkFormProviderProps {
+export interface Props {
   children: React.ReactNode;
 }
 
-export const WalkFormProvider: React.FC<WalkFormProviderProps> = ({
-  children,
-}) => {
+export const WalkFormProvider: React.FC<Props> = ({ children }) => {
   // Initialize form with a fresh invitation code on each form creation
-  const initializedFormData = { ...initialFormData, invitationCode: generateInvitationCode() };
+  const initializedFormData = {
+    ...initialFormData,
+    invitationCode: generateInvitationCode(),
+  };
   const [formData, setFormData] = useState<WalkFormData>(initializedFormData);
   const [currentStep, setCurrentStep] = useState(0);
   const totalSteps = 6; // Type selection + 4 wizard steps
@@ -83,7 +58,10 @@ export const WalkFormProvider: React.FC<WalkFormProviderProps> = ({
 
   const resetForm = () => {
     // Generate a new invitation code when resetting the form
-    setFormData({ ...initialFormData, invitationCode: generateInvitationCode() });
+    setFormData({
+      ...initialFormData,
+      invitationCode: generateInvitationCode(),
+    });
     setCurrentStep(0);
   };
 
@@ -137,7 +115,7 @@ export const useWalkForm = (): WalkFormContextType => {
 // Higher-Order Component (HOC) that wraps a component with the WalkFormProvider
 export const WithWalkFormProvider = <P extends object>(
   Component: React.ComponentType<P>
-): React.FC<P & Partial<WalkFormProviderProps>> => {
+): React.FC<P & Partial<Props>> => {
   return (props) => {
     const { ...componentProps } = props;
 

@@ -1,6 +1,7 @@
 import { useWalkForm } from "@/context/WalkFormContext";
 import React from "react";
 import { YStack } from "tamagui";
+import { Walk } from "walk2gether-shared";
 import WalkTypeCard from "../../WalkTypeCard";
 import WizardWrapper from "./WizardWrapper";
 
@@ -11,12 +12,9 @@ interface TypeSelectionProps {
 export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue }) => {
   const { formData, updateFormData } = useWalkForm();
 
-  const setSelectedWalkType = (
-    type: "friends" | "meetup" | "neighborhood" | null
-  ) => {
+  const setSelectedWalkType = (type: Walk["type"]) => {
     updateFormData({
-      walkType: type,
-      isNeighborhoodWalk: type === "neighborhood",
+      type: type,
     });
 
     // Automatically proceed when a type is selected
@@ -28,7 +26,7 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue }) => {
   return (
     <WizardWrapper
       onContinue={onContinue}
-      continueDisabled={!formData.walkType}
+      continueDisabled={!formData.type}
       continueText="Continue"
       backText=""
     >
@@ -39,8 +37,8 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue }) => {
           icon="people-outline"
           color="#5A67F2"
           backgroundColor="#E7E9FE"
-          description="Walk with a friend"
-          selected={formData.walkType === "friends"}
+          description="Schedule a walk with a friend in the future"
+          selected={formData.type === "friends"}
           onSelect={setSelectedWalkType}
         />
         {/*
@@ -51,7 +49,7 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue }) => {
           color="#FF6A55"
           backgroundColor="#FFE9E5"
           description="Walk with a group of friends"
-          selected={formData.walkType === "meetup"}
+          selected={formData.type === "meetup"}
           onSelect={setSelectedWalkType}
         /> */}
 
@@ -61,8 +59,8 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue }) => {
           icon="home-outline"
           color="#47C97E"
           backgroundColor="#E4F6ED"
-          description="Walk right now, and see if your neighbors can join"
-          selected={formData.walkType === "neighborhood"}
+          description="Start a walk in your neighborhood now"
+          selected={formData.type === "neighborhood"}
           onSelect={setSelectedWalkType}
         />
       </YStack>

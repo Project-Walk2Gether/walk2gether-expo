@@ -2,10 +2,11 @@ import { COLORS } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Card, Text, View, XStack, YStack } from "tamagui";
+import { Walk } from "walk2gether-shared";
 
-type WalkType = "friends" | "meetup" | "neighborhood" | null;
+type WalkType = Walk["type"];
 
-interface WalkTypeCardProps {
+interface Props {
   type: WalkType;
   title: string;
   description: string;
@@ -32,7 +33,7 @@ export default function WalkTypeCard({
   backgroundColor,
   selected,
   onSelect,
-}: WalkTypeCardProps) {
+}: Props) {
   return (
     <Card
       animation="bouncy"

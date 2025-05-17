@@ -1,36 +1,14 @@
 import { useAuth } from "@/context/AuthContext";
 import { FriendsProvider } from "@/context/FriendsContext";
+import { NotificationsProvider } from "@/context/NotificationsContext";
 import { WalksProvider } from "@/context/WalksContext";
-import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
-import { getAndSyncPushToken } from "@/utils/getAndSyncPushToken";
-import { writeLogIfEnabled } from "@/utils/logging";
 import { Redirect, Stack } from "expo-router";
-import React, { useEffect } from "react";
+import React from "react";
 import { ActivityIndicator } from "react-native";
 import { YStack } from "tamagui";
 
 export default function AppLayout() {
   const { user, loading } = useAuth();
-  const { permissionStatus } = useNotificationPermissions();
-
-  // Sync push notification token whenever the authenticated layout mounts
-  // and permissions are granted
-  useEffect(() => {
-    writeLogIfEnabled({
-      message: "Syncing push token",
-      metadata: { user, permissionStatus },
-    });
-
-    if (user && permissionStatus?.granted) {
-      // Run silently in background without disrupting navigation
-      getAndSyncPushToken(user).catch((error) => {
-        writeLogIfEnabled({
-          message: "Failed to sync push token",
-          metadata: { error, uid: user.uid },
-        });
-      });
-    }
-  }, [user, permissionStatus]);
 
   if (!user) {
     return <Redirect href="/auth" />;
@@ -51,13 +29,15 @@ export default function AppLayout() {
   }
 
   return (
-    <WalksProvider>
-      <FriendsProvider>
-        <Stack initialRouteName="(tabs)" screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="(modals)" options={{ presentation: "modal" }} />
-        </Stack>
-      </FriendsProvider>
-    </WalksProvider>
+    <NotificationsProvider>
+      <WalksProvider>
+        <FriendsProvider>
+          <Stack initialRouteName="(tabs)" screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="(modals)" options={{ presentation: "modal" }} />
+          </Stack>
+        </FriendsProvider>
+      </WalksProvider>
+    </NotificationsProvider>
   );
 }

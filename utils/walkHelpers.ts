@@ -2,11 +2,11 @@ import { Walk, WithId } from "walk2gether-shared";
 
 /**
  * Returns a friendly label for a walk type
- * @param walkType The type of walk
+ * @param type The type of walk
  * @returns A human-readable label for the walk type
  */
-export const getWalkTypeLabel = (walkType?: string): string => {
-  switch (walkType) {
+export const getWalkTypeLabel = (type?: string): string => {
+  switch (type) {
     case "friends":
       return "Friend walk";
     case "neighborhood":
@@ -30,7 +30,7 @@ export const getWalkTitle = (
 ): string => {
   // Check if the walk belongs to the current user
   const isMine = walk.createdByUid === currentUserId;
-  
+
   if (isMine) {
     return `Your ${getWalkTypeLabel(walk.type)}`;
   } else {

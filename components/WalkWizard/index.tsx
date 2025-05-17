@@ -1,14 +1,14 @@
 import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useWalkForm, WalkFormData } from "@/context/WalkFormContext";
-import { useWalks } from "@/context/WalksContext";
 import { createWalkFromForm } from "@/utils/walkSubmission";
+import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo } from "react";
 import HeaderBackButton from "../HeaderBackButton";
 import {
   DurationSelection,
-  InviteSelection,
   LocationSelection,
   NeighborhoodConfirmationScreen,
   ReviewScreen,
@@ -32,10 +32,10 @@ export function WalkWizard() {
     setFormData,
   } = useWalkForm();
   const router = useRouter();
-  const { createWalk } = useWalks();
   const { user } = useAuth();
   const { userData } = useUserData();
   const { friendId } = useLocalSearchParams<{ friendId: string }>();
+  const { showMessage } = useFlashMessage();
 
   // If a friendId is provided, set it in the form data and skip to time selection
   useEffect(() => {
@@ -44,7 +44,7 @@ export function WalkWizard() {
       setFormData((prev: WalkFormData) => ({
         ...prev,
         invitedUserIds: friendId ? [friendId] : prev.invitedUserIds,
-        walkType: "friends",
+        type: "friends",
       }));
 
       // Skip the first two steps (type selection and invite selection)
@@ -54,18 +54,21 @@ export function WalkWizard() {
   }, [friendId]);
 
   const handleSubmit = useCallback(async () => {
-    if (!user) return;
+    if (!userData) {
+      showMessage("User data not found", "error");
+      return;
+    }
 
-    await createWalkFromForm({
+    const walkDoc = await createWalkFromForm({
       formData,
       userData,
-      userId: user.uid,
-      createWalk,
-      router,
     });
-  }, [formData, createWalk, router, userData, user]);
 
-  // We don't need to do additional logic when we have a friendId since we set the walkType in the first useEffect above
+    if (!walkDoc) return;
+
+    // Now, if the walk is starting soon (in the next 1hr), navigate to the walk
+    router.replace(`/walks/${walkDoc.id}`);
+  }, [formData, router, userData, user]);
 
   const handleBackPress = useCallback(() => {
     if (currentStep > 0) {
@@ -80,12 +83,8 @@ export function WalkWizard() {
   const wizardSteps = useMemo<WizardStep[]>(
     () => [
       {
-        title: "What type of walk?",
+        title: "Please select type of walk",
         component: TypeSelection, // Only needs onContinue
-      },
-      {
-        title: "Who should we invite?",
-        component: InviteSelection, // Needs onContinue and onBack
       },
       {
         title: "When do you want to walk?",
@@ -108,7 +107,7 @@ export function WalkWizard() {
   );
   // Get screen title based on current step
   const getScreenTitle = () => {
-    if (formData.walkType === "neighborhood") {
+    if (formData.type === "neighborhood") {
       return currentStep === 0
         ? "What type of walk?"
         : "Start a Neighborhood Walk";
@@ -122,16 +121,16 @@ export function WalkWizard() {
   // Render the appropriate step based on currentStep
   const renderStep = () => {
     // Special flow for neighborhood walks
-    if (formData.walkType === "neighborhood" && currentStep > 0) {
+    if (formData.type === "neighborhood" && currentStep > 0) {
       // For neighborhood walks, set default values to simplify the experience
       if (!formData.date) {
         // Default date to now for neighborhood walks
-        formData.date = new Date();
+        formData.date = Timestamp.now();
       }
 
-      if (!formData.duration) {
+      if (!formData.durationMinutes) {
         // Default duration to 30 minutes
-        formData.duration = 30;
+        formData.durationMinutes = 30;
       }
 
       return (

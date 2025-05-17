@@ -21,17 +21,16 @@ import FullScreenLoader from "@/components/FullScreenLoader";
 import HeaderBackButton from "@/components/HeaderBackButton";
 import WalkMenu from "@/components/WalkMenu";
 import LiveWalkMap from "@/components/WalkScreen/components/LiveWalkMap";
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { LinearGradient } from "expo-linear-gradient";
-import { KeyboardAvoidingView } from "react-native";
-import { Text, View, YStack } from "tamagui";
-import { Message, ParticipantWithRoute, Walk } from "walk2gether-shared";
-
 import ParticipantsList from "@/components/WalkScreen/components/ParticipantsList";
 import WalkStats from "@/components/WalkScreen/components/WalkStats";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
 import { getWalkStatus } from "@/utils/walkUtils";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { LinearGradient } from "expo-linear-gradient";
+import { KeyboardAvoidingView } from "react-native";
+import { Text, View, YStack } from "tamagui";
+import { Message, ParticipantWithRoute, Walk } from "walk2gether-shared";
 
 export default function WalkScreen() {
   const params = useLocalSearchParams();

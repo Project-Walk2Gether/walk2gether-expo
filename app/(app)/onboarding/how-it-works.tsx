@@ -41,7 +41,8 @@ export default function HowItWorks() {
                   Nonprofit Mission
                 </Text>
                 <Text fontSize={14} opacity={0.9}>
-                  Reconnect people through 1:1 walking
+                  This app is developed by a nonprofit foundation to foster
+                  connection through walking together
                 </Text>
               </YStack>
             </XStack>
@@ -60,7 +61,7 @@ export default function HowItWorks() {
                   Location Sharing
                 </Text>
                 <Text fontSize={14} opacity={0.9}>
-                  Only used to enhance your walking experience
+                  Only used to facilitate walks and track miles walked together
                 </Text>
               </YStack>
             </XStack>

@@ -1,18 +1,17 @@
 import { ContentCard } from "@/components/ContentCard";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
 import { useQuery } from "@/utils/firestore";
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
-import { useFlashMessage } from "@/context/FlashMessageContext";
-import { Copy, Link, MapPin, Share2, Users } from "@tamagui/lucide-icons";
+import { Link, MapPin, Share2, Users } from "@tamagui/lucide-icons";
 import * as Sharing from "expo-sharing";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { Clipboard } from "react-native";
-import MapView from "react-native-maps";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
 import FriendsList from "../../FriendsList";
@@ -35,9 +34,6 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
     formData.invitedUserIds || []
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const [shareLink, setShareLink] = useState("");
-  const mapRef = useRef<MapView>(null);
-
   // Query friendships for current user where deletedAt is null (not deleted)
   const friendshipsQuery = user?.uid
     ? query(
@@ -47,14 +43,12 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
       )
     : undefined;
 
-  const { docs: friendships, status } = useQuery<Friendship>(friendshipsQuery);
-  const loadingFriends = status === "loading";
+  const { docs: friendships } = useQuery<Friendship>(friendshipsQuery);
 
   // Determine if user has any friends
   const hasFriends = friendships && friendships.length > 0;
-
-  const isNeighborhoodWalk = formData.walkType === "neighborhood";
-  const isFriendsWalk = formData.walkType === "friends";
+  const isNeighborhoodWalk = formData.type === "neighborhood";
+  const isFriendsWalk = formData.type === "friends";
 
   const handleFriendToggle = (friendId: string) => {
     setSelectedFriends((prev) => {
@@ -104,40 +98,9 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
     }
   };
 
-  // Copy link to clipboard
-  const copyLinkToClipboard = () => {
-    const link = getInvitationLink();
-    if (!link) {
-      showMessage("Unable to generate invitation link", "error");
-      return;
-    }
-
-    Clipboard.setString(link);
-    showMessage("Invitation link copied to clipboard", "success");
-  };
-
   const handleContinue = () => {
-    // For neighborhood walks, always allow continuing
-    // For friend walks, ensure at least one friend is selected
-    if (isNeighborhoodWalk || selectedFriends.length > 0) {
-      onContinue();
-    }
+    onContinue();
   };
-
-  // Update the map when showing the neighborhood view
-  useEffect(() => {
-    if (isNeighborhoodWalk && formData.location && mapRef.current) {
-      mapRef.current.animateToRegion(
-        {
-          latitude: formData.location.latitude,
-          longitude: formData.location.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        },
-        500
-      );
-    }
-  }, [isNeighborhoodWalk, formData.location]);
 
   return (
     <LinearGradient
@@ -149,7 +112,6 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
       <WizardWrapper
         onContinue={handleContinue}
         onBack={onBack}
-        continueDisabled={!isNeighborhoodWalk && selectedFriends.length === 0}
         continueText="Next"
       >
         <YStack flex={1} gap="$4" paddingHorizontal="$2" paddingVertical="$4">
@@ -172,9 +134,9 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                   </Text>
                 </XStack>
                 <Text fontSize={16} color={COLORS.text} lineHeight={22}>
-                  We'll invite users within a 1-mile radius of your location to
-                  join your walk. This is a great way to meet neighbors and make
-                  new walking buddies!
+                  We'll invite users within a 1/2 mile radius of your location
+                  to join your walk. This is a great way to meet neighbors and
+                  make new walking buddies!
                 </Text>
               </Card>
             </YStack>
@@ -201,37 +163,21 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
               <ContentCard
                 title="Invite friends"
                 icon={<Link size={20} color={COLORS.textOnLight} />}
-                description="Share an invitation link with friends to join your walk."
+                description="Share an invitation link with friends to join your walk. Send it in a message in your favourite messaging app!"
               >
-                <YStack gap="$3">
-                  <XStack gap="$3" justifyContent="center">
-                    <Button
-                      backgroundColor={COLORS.primary}
-                      color={COLORS.textOnDark}
-                      onPress={handleShareLink}
-                      size="$4"
-                      icon={<Share2 size={18} color="#fff" />}
-                      paddingHorizontal={16}
-                      borderRadius={8}
-                      hoverStyle={{ backgroundColor: "#6d4c2b" }}
-                      pressStyle={{ backgroundColor: "#4b2e13" }}
-                    >
-                      Share Link
-                    </Button>
-
-                    <Button
-                      backgroundColor={COLORS.subtle}
-                      color={COLORS.text}
-                      onPress={copyLinkToClipboard}
-                      size="$4"
-                      icon={<Copy size={18} color={COLORS.text} />}
-                      paddingHorizontal={16}
-                      borderRadius={8}
-                    >
-                      Copy Link
-                    </Button>
-                  </XStack>
-                </YStack>
+                <Button
+                  backgroundColor={COLORS.primary}
+                  color={COLORS.textOnDark}
+                  onPress={handleShareLink}
+                  size="$4"
+                  icon={<Share2 size={18} color="#fff" />}
+                  paddingHorizontal={16}
+                  borderRadius={8}
+                  hoverStyle={{ backgroundColor: "#6d4c2b" }}
+                  pressStyle={{ backgroundColor: "#4b2e13" }}
+                >
+                  Share Link
+                </Button>
               </ContentCard>
 
               <Text

@@ -1,9 +1,9 @@
-import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
+import { useNotifications } from "@/context/NotificationsContext";
 import React from "react";
 import { Button, Card, Text, View, YStack } from "tamagui";
 
 export default function NotificationPermissionCard() {
-  const { requestPermissions } = useNotificationPermissions();
+  const { requestPermissions } = useNotifications();
   return (
     <View width="100%" marginBottom="$5">
       <Card

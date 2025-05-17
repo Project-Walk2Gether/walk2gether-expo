@@ -1,13 +1,11 @@
 import { firestore_instance } from "@/config/firebase";
 import { useQuery } from "@/utils/firestore";
 import {
-  addDoc,
   collection,
   FirebaseFirestoreTypes,
   limit,
   orderBy,
   query,
-  Timestamp,
   where,
 } from "@react-native-firebase/firestore";
 import "firebase/compat/firestore";
@@ -93,37 +91,6 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     [currentWalks]
   );
 
-  // We've replaced this useEffect with useQuery hooks above
-
-  const createWalk = async (walkData: Walk) => {
-    if (!user) {
-      throw new Error("You must be an admin to create a walk");
-    }
-
-    try {
-      const walksRef = collection(
-        firestore_instance,
-        "walks"
-      ) as FirebaseFirestoreTypes.CollectionReference<Walk>;
-
-      // Create the walk document
-      const newWalk: Walk = {
-        ...walkData,
-        active: false,
-        createdByUid: user!.uid,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      };
-
-      const walkRef = await addDoc<Walk>(walksRef, newWalk);
-      console.log("Walk created successfully:", walkRef.id);
-      return walkRef; // Return the ID
-    } catch (error) {
-      console.error("Error creating walk:", error);
-      throw error;
-    }
-  };
-
   // Add getWalkById function to find a walk by its ID
   const getWalkById = (walkId: string): Walk | undefined => {
     return currentWalks.find((walk) => walk.id === walkId);
@@ -135,7 +102,6 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
         upcomingWalks,
         activeWalks,
         walksLoading,
-        createWalk,
         currentWalk,
         getWalkById,
       }}

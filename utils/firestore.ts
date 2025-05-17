@@ -46,7 +46,7 @@ export function useDoc<T extends FirebaseFirestoreTypes.DocumentData>(
           setDoc({
             ...data,
             id: doc.id,
-            _ref: docRef as DocumentReferenceLike<T>,
+            _ref: docRef as unknown as DocumentReferenceLike<T>,
           });
         setStatus("success");
       },

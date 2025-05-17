@@ -1,6 +1,31 @@
 // Utility functions for geolocation
 
 /**
+ * Converts a radius in meters to appropriate map region values (latitudeDelta and longitudeDelta).
+ * This is useful for setting the initial region of a MapView based on a desired radius.
+ * 
+ * @param lat Latitude of the center point (in degrees)
+ * @param lon Longitude of the center point (in degrees)
+ * @param radiusInMeters Radius in meters around the center point
+ * @returns An object with latitude, longitude, latitudeDelta, and longitudeDelta for MapView
+ */
+export function getRegionForRadius(lat: number, lon: number, radiusInMeters: number) {
+  // Calculate latitude delta - 1 degree of latitude is approximately 111,320 meters
+  const latDelta = (radiusInMeters * 2.5) / 111320;
+  
+  // Calculate longitude delta - this varies based on latitude
+  // The formula is: 1 degree of longitude = cos(latitude) * 111320 meters
+  const longDelta = (radiusInMeters * 2.5) / (111320 * Math.cos(lat * (Math.PI / 180)));
+  
+  return {
+    latitude: lat,
+    longitude: lon,
+    latitudeDelta: latDelta,
+    longitudeDelta: longDelta,
+  };
+}
+
+/**
  * Returns the distance between two lat/lng points in meters using the Haversine formula.
  * @param lat1 Latitude of point 1
  * @param lon1 Longitude of point 1

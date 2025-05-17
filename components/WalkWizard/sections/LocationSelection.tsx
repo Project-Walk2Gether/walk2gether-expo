@@ -3,6 +3,7 @@ import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
+import { reverseGeocode } from "@/utils/locationUtils";
 import useChangeEffect from "@/utils/useChangeEffect";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
@@ -27,36 +28,27 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
     loading: locationLoading,
     error: locationError,
   } = useLocation();
-  const [location, setLocation] = useState(formData.location || null);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [longPressActive, setLongPressActive] = useState(false);
   const mapRef = useRef<MapView>(null);
   const googlePlacesRef = useRef<GooglePlacesAutocompleteRef>(null);
 
-  // Set initial region based on saved location, context coords, or default
-  const [region, setRegion] = useState({
-    latitude: formData.location?.latitude || coords?.latitude || 37.78825,
-    longitude: formData.location?.longitude || coords?.longitude || -122.4324,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-  });
-
-  // Update region when coords change
   useEffect(() => {
-    if (coords && !formData.location) {
-      setRegion({
+    if (coords && !formData.startLocation) {
+      const newLocation = {
+        name: "Selected Location",
+        description: `Location at ${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`,
         latitude: coords.latitude,
         longitude: coords.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
-    }
-  }, [coords, formData.location]);
+      };
 
-  // Update when coords from LocationContext changes
+      updateFormData({ startLocation: newLocation });
+    }
+  }, [coords, formData.startLocation, updateFormData]);
+
   useChangeEffect(() => {
     if (coords && !isReverseGeocoding) {
-      reverseGeocode(coords.latitude, coords.longitude);
+      handleReverseGeocode(coords.latitude, coords.longitude);
 
       // Animate map to selected location
       mapRef.current?.animateToRegion({
@@ -71,14 +63,12 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   const handleLocationSelect = (data: any, details: any) => {
     if (details && details.geometry) {
       const newLocation = {
-        name: data.structured_formatting?.main_text || "Selected Location",
-        description: data.description || details.formatted_address || "",
+        name: data.description || data.structured_formatting?.main_text || details.formatted_address || "Selected Location",
         latitude: details.geometry.location.lat,
         longitude: details.geometry.location.lng,
       };
 
-      setLocation(newLocation);
-      updateFormData({ location: newLocation });
+      updateFormData({ startLocation: newLocation });
 
       // Animate map to selected location
       mapRef.current?.animateToRegion({
@@ -90,76 +80,22 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
     }
   };
 
-  // Function to reverse geocode a coordinate to get address information
-  const reverseGeocode = async (latitude: number, longitude: number) => {
+  // Use the imported reverseGeocode function with error handling
+  const handleReverseGeocode = async (latitude: number, longitude: number) => {
     setIsReverseGeocoding(true);
     try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`
-      );
-      const data = await response.json();
-
-      if (data.status === "OK" && data.results && data.results.length > 0) {
-        const addressResult = data.results[0];
-        const addressComponents = addressResult.address_components;
-
-        // Extract locality (city) and route (street) if available
-        let locality = "";
-        let route = "";
-
-        for (const component of addressComponents) {
-          if (component.types.includes("locality")) {
-            locality = component.long_name;
-          }
-          if (component.types.includes("route")) {
-            route = component.long_name;
-          }
-        }
-
-        // Create a name from the components or use a default
-        const name = route || locality || "Selected Location";
-
-        const newLocation = {
-          name,
-          description:
-            addressResult.formatted_address ||
-            `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-          latitude,
-          longitude,
-        };
-
-        setLocation(newLocation);
-        updateFormData({ location: newLocation });
-        return newLocation;
-      } else {
-        // Handle geocoding error
-        const newLocation = {
-          name: "Selected Location",
-          description: `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(
-            6
-          )}`,
-          latitude,
-          longitude,
-        };
-
-        setLocation(newLocation);
-        updateFormData({ location: newLocation });
-        return newLocation;
-      }
+      const newLocation = await reverseGeocode(latitude, longitude);
+      updateFormData({ startLocation: newLocation });
+      return newLocation;
     } catch (error) {
       console.error("Error during reverse geocoding:", error);
       // Fallback to coordinate-based location
       const newLocation = {
-        name: "Selected Location",
-        description: `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(
-          6
-        )}`,
+        name: `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
         latitude,
         longitude,
       };
-
-      setLocation(newLocation);
-      updateFormData({ location: newLocation });
+      updateFormData({ startLocation: newLocation });
       return newLocation;
     } finally {
       setIsReverseGeocoding(false);
@@ -172,7 +108,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
     setLongPressActive(true);
 
     const { coordinate } = event.nativeEvent;
-    const newLocation = await reverseGeocode(
+    const newLocation = await handleReverseGeocode(
       coordinate.latitude,
       coordinate.longitude
     );
@@ -184,9 +120,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
       console.log("Setting", { ref: googlePlacesRef.current });
       // googlePlacesRef.current.clear();
       // Then set the text input value with the resolved address
-      googlePlacesRef.current.setAddressText(
-        newLocation.description || newLocation.name
-      );
+      googlePlacesRef.current.setAddressText(newLocation.name);
     }
 
     // Reset the long press indicator
@@ -194,7 +128,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   };
 
   const handleContinue = () => {
-    if (location) {
+    if (formData.startLocation) {
       onContinue();
     }
   };
@@ -203,7 +137,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
     <WizardWrapper
       onContinue={handleContinue}
       onBack={onBack}
-      continueDisabled={!location}
+      continueDisabled={!formData.startLocation}
     >
       <YStack gap="$4">
         <View zIndex={1}>
@@ -248,16 +182,14 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
                 await getLocation();
                 // After getting the location, we need to call reverse geocode
                 if (coords) {
-                  const newLocation = await reverseGeocode(
+                  const newLocation = await handleReverseGeocode(
                     coords.latitude,
                     coords.longitude
                   );
 
                   // Update the text input field with the resolved address
                   if (googlePlacesRef.current && newLocation) {
-                    googlePlacesRef.current.setAddressText(
-                      newLocation.description || newLocation.name
-                    );
+                    googlePlacesRef.current.setAddressText(newLocation.name);
                   }
                 }
               } finally {
@@ -283,17 +215,22 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
           <MapView
             ref={mapRef}
             style={{ width: "100%", height: "100%" }}
-            initialRegion={region}
+            initialRegion={{
+              latitude: formData.startLocation?.latitude || 37.78825,
+              longitude: formData.startLocation?.longitude || -122.4324,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}
             onLongPress={handleMapLongPress}
           >
-            {location && (
+            {formData.startLocation && (
               <Marker
                 coordinate={{
-                  latitude: location.latitude,
-                  longitude: location.longitude,
+                  latitude: formData.startLocation.latitude,
+                  longitude: formData.startLocation.longitude,
                 }}
-                title={location.name}
-                description={location.description}
+                title={formData.startLocation.name}
+                description={formData.startLocation.name}
               />
             )}
           </MapView>

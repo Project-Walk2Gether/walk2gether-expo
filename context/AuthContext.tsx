@@ -1,5 +1,6 @@
 import { auth_instance } from "@/config/firebase";
 import { useFlashMessage } from "@/context/FlashMessageContext";
+import { getUserDisplayName } from "@/utils/navigation";
 import firebase from "@react-native-firebase/app";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import React, {
@@ -176,6 +177,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const userCredential = await auth_instance.signInWithCredential(
         credential
       );
+      const displayName = await getUserDisplayName(userCredential.user.uid);
+      showMessage(`Welcome, ${displayName}!`, "success");
       return userCredential;
     } catch (error: any) {
       console.error("Error signing in with phone:", error);

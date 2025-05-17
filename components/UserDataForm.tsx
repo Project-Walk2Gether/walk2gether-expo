@@ -100,7 +100,7 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
         <Input
           value={aboutMe}
           onChangeText={setAboutMe}
-          placeholder="Tell us about yourself"
+          placeholder="Tell others a little about yourself"
           multiline
           width="100%"
           borderColor={COLORS.primary}

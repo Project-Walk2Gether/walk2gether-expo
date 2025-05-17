@@ -1,7 +1,7 @@
 import { Walk, WithId } from "walk2gether-shared";
 
-export const getWalkTypeLabel = (walkType: Walk["type"]) => {
-  switch (walkType) {
+export const getWalkTypeLabel = (type: Walk["type"]) => {
+  switch (type) {
     case "friends":
       return "Friend Walk";
     case "neighborhood":
@@ -23,7 +23,7 @@ export const getWalkTitle = (
 ): string => {
   // Check if the walk belongs to the current user
   const isMine = walk.createdByUid === currentUserId;
-  
+
   if (isMine) {
     return `Your ${getWalkTypeLabel(walk.type)}`;
   } else {

@@ -2,10 +2,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
+import { getRegionForRadius } from "@/utils/geo";
 import { Handshake, Pin, Speech, Users } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Card, Spinner, Text, View, XStack, YStack } from "tamagui";
+import { Card, H4, Spinner, Text, View, XStack, YStack } from "tamagui";
 import WizardWrapper from "../WizardWrapper";
 import { findNearbyWalkers } from "./findNearbyWalkers";
 
@@ -16,30 +17,8 @@ interface NeighborhoodConfirmationProps {
   onBack: () => void;
 }
 
-// Maximum radius in kilometers for finding nearby walkers
-const NEARBY_USERS_RADIUS_KM = 5;
-
-/**
- * Calculates the distance between two geo points using the haversine formula
- */
-const getDistanceInKm = (
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-): number => {
-  const R = 6371; // Earth's radius in km
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-};
+// Radius in meters
+const walkRadius = 700;
 
 export const NeighborhoodConfirmationScreen: React.FC<
   NeighborhoodConfirmationProps
@@ -53,14 +32,10 @@ export const NeighborhoodConfirmationScreen: React.FC<
   } = useLocation();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [nearbyWalkers, setNearbyWalkers] = useState(0);
-  const [nearbyWalkerIds, setNearbyWalkerIds] = useState<string[]>([]);
   const [isLoadingNearbyUsers, setIsLoadingNearbyUsers] = useState(false);
 
   // Track if we're ready to display the screen
   const isLoading = isLoadingLocation || !userLocation;
-
-  // Radius in meters
-  const walkRadius = 1500; // 1.5 km radius
 
   // Function to find nearby users within the radius
   const handleFindNearbyWalkers = async (userLocation: {
@@ -70,14 +45,10 @@ export const NeighborhoodConfirmationScreen: React.FC<
     const nearbyIds = await findNearbyWalkers({
       user,
       userLocation,
-      radiusKm: NEARBY_USERS_RADIUS_KM,
-      getDistanceInKm,
+      radiusKm: walkRadius / 1000,
       setNearbyWalkers,
       setIsLoadingNearbyUsers,
     });
-
-    // Store the nearby walker IDs
-    setNearbyWalkerIds(nearbyIds);
 
     // Update the form data with nearby user IDs
     updateFormData({
@@ -96,7 +67,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
       };
 
       // Update the form data with the user's current location
-      updateFormData({ location: locationData });
+      updateFormData({ startLocation: locationData });
 
       // Find nearby walkers when location is available
       handleFindNearbyWalkers({
@@ -108,17 +79,11 @@ export const NeighborhoodConfirmationScreen: React.FC<
     }
   }, [userLocation, isLoadingLocation, locationError]);
 
-  // Handle submit - notification functionality will be handled server-side
-  const handleSubmit = () => {
-    // Continue with the normal submission - notifications are handled in Firebase Functions
-    onSubmit();
-  };
-
   return (
     <WizardWrapper
-      onContinue={handleSubmit}
+      onContinue={onSubmit}
       onBack={onBack}
-      continueText="Start the walk!"
+      continueText="I am all set!"
     >
       <YStack gap="$4">
         <YStack justifyContent="flex-start" gap="$4">
@@ -158,12 +123,11 @@ export const NeighborhoodConfirmationScreen: React.FC<
                 style={{ flex: 1 }}
                 initialRegion={
                   userLocation
-                    ? {
-                        latitude: userLocation.coords.latitude,
-                        longitude: userLocation.coords.longitude,
-                        latitudeDelta: 0.02,
-                        longitudeDelta: 0.02,
-                      }
+                    ? getRegionForRadius(
+                        userLocation.coords.latitude,
+                        userLocation.coords.longitude,
+                        walkRadius
+                      )
                     : undefined
                 }
               >
@@ -210,7 +174,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
                       "Walk2Gether member",
                       nearbyWalkers,
                       true
-                    )} in the area`}
+                    )} in your neighborhood`}
               </Text>
             </XStack>
           </View>
@@ -221,14 +185,9 @@ export const NeighborhoodConfirmationScreen: React.FC<
             padding="$4"
             marginBottom="$2"
           >
-            <Text
-              fontSize={16}
-              fontWeight="600"
-              color={COLORS.text}
-              marginBottom="$3"
-            >
-              How it works:
-            </Text>
+            <H4 textAlign="center" marginBottom="$2">
+              How it works
+            </H4>
 
             <YStack gap="$4">
               <XStack gap="$3" alignItems="center">
@@ -243,7 +202,8 @@ export const NeighborhoodConfirmationScreen: React.FC<
                   <Speech size={19} color="white" />
                 </View>
                 <Text flexShrink={1} fontSize={17} color="#333">
-                  Announce the walk to your neighbors!
+                  Start a walk in your neighborhood and nearby Walk2Gether
+                  members will be notified.
                 </Text>
               </XStack>
 
@@ -259,7 +219,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
                   <Pin size={19} color="white" />
                 </View>
                 <Text flexShrink={1} fontSize={17} color="#333">
-                  Neighbors can request to join within the next 20 minutes.
+                  Neighbors have 20 minutes to request to join your walk.
                 </Text>
               </XStack>
 
@@ -275,8 +235,8 @@ export const NeighborhoodConfirmationScreen: React.FC<
                   <Handshake size={19} color="white" />
                 </View>
                 <Text flexShrink={1} fontSize={17} color="#333">
-                  If you accept, your live location will be shared so you can
-                  meet up and walk2gether!
+                  If you accept, you'll share live locations to meet up and
+                  walk2gether!
                 </Text>
               </XStack>
             </YStack>

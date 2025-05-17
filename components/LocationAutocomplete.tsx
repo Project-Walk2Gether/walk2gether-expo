@@ -1,21 +1,22 @@
+import {
+  PlaceData,
+  PlacesAutocomplete,
+} from "@/components/UI/PlacesAutocomplete";
+import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { COLORS } from "@/styles/colors";
 import { ArrowLeft } from "@tamagui/lucide-icons";
 import React, { useRef } from "react";
 import { Keyboard } from "react-native";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
-import { PlacesAutocomplete, PlaceData } from "@/components/UI/PlacesAutocomplete";
-import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { Button, Text, YStack } from "tamagui";
 
 interface LocationAutocompleteProps {
   value: any;
   setFieldValue: (field: string, value: any) => void;
-  showLocationResults: boolean;
-  setShowLocationResults: (show: boolean) => void;
   touched: any;
   errors: any;
   placeholder?: string;
-  onCancel: () => void;
+  onCancel?: () => void;
   includeChooseAnotherWayButton?: boolean;
 }
 
@@ -24,8 +25,6 @@ const LocationAutocomplete: React.FC<
 > = ({
   value,
   setFieldValue,
-  showLocationResults,
-  setShowLocationResults,
   touched,
   onCancel,
   errors,
@@ -35,13 +34,15 @@ const LocationAutocomplete: React.FC<
   const placesAutocompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
 
   // Create a reference to the current location data if it exists
-  const placeDataValue = value ? {
-    name: value.name || '',
-    placeId: value.placeId || '',
-    latitude: value.latitude || 0,
-    longitude: value.longitude || 0,
-    description: value.name || '',
-  } : null;
+  const placeDataValue = value
+    ? {
+        name: value.name || "",
+        placeId: value.placeId || "",
+        latitude: value.latitude || 0,
+        longitude: value.longitude || 0,
+        description: value.name || "",
+      }
+    : null;
 
   // Custom styles for the text input
   const textInputStyles = {
@@ -57,11 +58,6 @@ const LocationAutocomplete: React.FC<
     borderWidth: 1,
   };
 
-  // Handle focus event
-  const handleFocus = () => {
-    setShowLocationResults(true);
-  };
-
   // Handle selection of a place
   const handlePlaceSelect = (placeData: PlaceData) => {
     const locationData = {
@@ -70,12 +66,14 @@ const LocationAutocomplete: React.FC<
       latitude: placeData.latitude,
       longitude: placeData.longitude,
     };
-    
+
     setFieldValue("location", locationData);
-    setShowLocationResults(false);
-    
+
     setTimeout(() => {
-      if (placesAutocompleteRef.current && 'setAddressText' in placesAutocompleteRef.current) {
+      if (
+        placesAutocompleteRef.current &&
+        "setAddressText" in placesAutocompleteRef.current
+      ) {
         placesAutocompleteRef.current.setAddressText(placeData.name);
         Keyboard.dismiss();
       }
@@ -92,15 +90,7 @@ const LocationAutocomplete: React.FC<
         googleApiKey={GOOGLE_MAPS_API_KEY}
         textInputStyles={textInputStyles}
         textInputProps={{
-          onFocus: handleFocus,
           autoComplete: "off",
-          onBlur: () => {
-            setTimeout(() => {
-              if (value) {
-                setShowLocationResults(false);
-              }
-            }, 200);
-          },
         }}
       />
       {touched.location && errors.location && (
@@ -116,13 +106,11 @@ const LocationAutocomplete: React.FC<
           borderRadius={8}
           fontWeight="600"
           fontSize="$4"
-          py="$2"
           color="$gray12"
           icon={ArrowLeft}
           onPress={() => {
             setFieldValue("location", null);
-            setShowLocationResults(false);
-            onCancel();
+            onCancel?.();
           }}
         >
           Choose another way
@@ -136,12 +124,10 @@ const LocationAutocomplete: React.FC<
           borderRadius={8}
           fontWeight="600"
           fontSize="$4"
-          py="$2"
           color="$gray12"
           icon={ArrowLeft}
           onPress={() => {
-            onCancel();
-            setShowLocationResults(false);
+            onCancel?.();
           }}
         >
           Choose another way

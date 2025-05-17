@@ -22,10 +22,10 @@ export default function WalkForm({
   googleApiKey,
 }: Props) {
   // Determine which form to show based on walk type
-  const walkType = (initialValues.type as WalkType) || "neighborhood";
+  const type = (initialValues.type as WalkType) || "neighborhood";
 
   // Route to the appropriate form based on walk type
-  switch (walkType) {
+  switch (type) {
     case "friends":
       return (
         <FriendsWalkForm

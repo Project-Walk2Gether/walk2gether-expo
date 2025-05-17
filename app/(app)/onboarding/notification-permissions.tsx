@@ -1,30 +1,27 @@
 import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
-import { useAuth } from "@/context/AuthContext";
-import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
+import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useNotifications } from "@/context/NotificationsContext";
 import { COLORS } from "@/styles/colors";
-import { getAndSyncPushToken } from "@/utils/getAndSyncPushToken";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
-import { Button, Card, Spinner, Text, XStack, YStack } from "tamagui";
+import { Button, Card, Dialog, Spinner, Text, XStack, YStack } from "tamagui";
 
 const { height } = Dimensions.get("window");
 
 export default function NotificationPermissionsScreen() {
   const router = useRouter();
-  const { permissionStatus, requestPermissions } = useNotificationPermissions();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { permissionStatus, requestPermissions, loading, error } =
+    useNotifications();
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const { showMessage } = useFlashMessage();
 
   const goToNext = () => router.push("/walks");
 
   useEffect(() => {
-    // When permissions are granted, get the push token and call our API
-    if (permissionStatus?.granted && user) {
-      getAndSyncPushToken(user)
-        .then(goToNext)
-        .catch((e) => setError(e.message));
+    // When permissions are granted, token is automatically synced via the context
+    if (permissionStatus?.granted) {
+      goToNext();
     }
   }, [permissionStatus]);
 
@@ -44,7 +41,7 @@ export default function NotificationPermissionsScreen() {
           </Text>
           <Text fontSize="$4" mb="$4" textAlign="center">
             Enable notifications to get stay informed about nearby walks! You
-            can manage this at any time in settings.
+            can manage your notifications at any time in settings.
           </Text>
           {error && (
             <Text color="$red10" mb="$2" textAlign="center">
@@ -61,9 +58,9 @@ export default function NotificationPermissionsScreen() {
             mb="$2"
             py="$2.5"
             onPress={requestPermissions}
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? (
+            {loading ? (
               <XStack gap="$2" ai="center">
                 <Spinner color="white" size="small" />
                 <Text color="white" fontWeight="bold">
@@ -83,14 +80,81 @@ export default function NotificationPermissionsScreen() {
             color={COLORS.primary}
             fontWeight="500"
             borderWidth={0}
-            onPress={goToNext}
-            disabled={isLoading}
-            opacity={isLoading ? 0.5 : 1}
+            onPress={() => setShowConfirmation(true)}
+            disabled={loading}
+            opacity={loading ? 0.5 : 1}
           >
             Skip for now
           </Button>
         </XStack>
       </YStack>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={showConfirmation}
+        onOpenChange={(open) => {
+          setShowConfirmation(open);
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay
+            key="overlay"
+            animation="quick"
+            opacity={0.5}
+            enterStyle={{ opacity: 0 }}
+            exitStyle={{ opacity: 0 }}
+          />
+          <Dialog.Content
+            bordered
+            elevate
+            key="content"
+            animation={[
+              "quick",
+              {
+                opacity: {
+                  overshootClamping: true,
+                },
+              },
+            ]}
+            enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
+            exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
+            paddingVertical="$4"
+            paddingHorizontal="$4"
+            mx="$4"
+          >
+            <Dialog.Title fontSize={18}>Skip Notifications?</Dialog.Title>
+            <Dialog.Description size="$4" marginTop="$2" marginBottom="$4">
+              Are you sure you want to skip notifications? You won't be notified
+              of any new walks in your area, even from your friends.
+            </Dialog.Description>
+
+            <YStack gap="$3">
+              <Button
+                backgroundColor={COLORS.primary}
+                color="white"
+                onPress={goToNext}
+                borderRadius="$4"
+                padding="$2.5"
+              >
+                Yes, skip for now
+              </Button>
+              <Button
+                borderColor={COLORS.subtle}
+                color={COLORS.text}
+                onPress={() => {
+                  setShowConfirmation(false);
+                  requestPermissions();
+                }}
+                variant="outlined"
+                borderRadius="$4"
+                padding="$2.5"
+              >
+                No, enable notifications
+              </Button>
+            </YStack>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog>
     </AuthScenicLayout>
   );
 }

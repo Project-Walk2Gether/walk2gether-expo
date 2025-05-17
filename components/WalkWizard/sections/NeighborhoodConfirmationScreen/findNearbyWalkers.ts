@@ -1,12 +1,12 @@
 import { db } from "@/config/firebase";
 import { collection, getDocs } from "@react-native-firebase/firestore";
+import { getDistanceInKm } from "walk2gether-shared";
 
 /**
  * Finds nearby walkers within a given radius and returns their IDs.
  * @param user The current user object (with uid)
  * @param userLocation The location to search from ({ latitude, longitude })
  * @param radiusKm The search radius in kilometers
- * @param getDistanceInKm Function to calculate distance between two points (lat/lng)
  * @param setNearbyWalkers Callback to set the number of nearby walkers
  * @param setIsLoadingNearbyUsers Callback to set loading state
  * @returns Array of user IDs who are within the specified radius
@@ -15,19 +15,12 @@ export async function findNearbyWalkers({
   user,
   userLocation,
   radiusKm,
-  getDistanceInKm,
   setNearbyWalkers,
   setIsLoadingNearbyUsers,
 }: {
   user: { uid: string } | null;
   userLocation: { latitude: number; longitude: number };
   radiusKm: number;
-  getDistanceInKm: (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ) => number;
   setNearbyWalkers: (n: number) => void;
   setIsLoadingNearbyUsers: (b: boolean) => void;
 }): Promise<string[]> {

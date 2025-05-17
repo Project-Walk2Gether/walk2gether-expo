@@ -20,7 +20,6 @@ export default function NeighborhoodWalkForm({
   submitButtonText,
   onCancel,
 }: NeighborhoodWalkFormProps) {
-  const [showLocationResults, setShowLocationResults] = React.useState(false);
   return (
     <FormProvider
       initialValues={initialValues}
@@ -33,13 +32,10 @@ export default function NeighborhoodWalkForm({
         return (
           <YStack gap="$4">
             <LocationAutocomplete
-              value={values.location}
+              value={values.startLocation}
               setFieldValue={setFieldValue}
-              showLocationResults={showLocationResults}
-              setShowLocationResults={setShowLocationResults}
               touched={touched}
               errors={errors}
-              styles={{}}
               placeholder="Enter a location for your walk"
             />
             <DateTimeField

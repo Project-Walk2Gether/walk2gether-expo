@@ -1,6 +1,10 @@
 import { useLocation } from "@/context/LocationContext";
 import * as Location from "expo-location";
 import { useEffect } from "react";
+import { useDoc } from "@/utils/firestore";
+// Using FirebaseFirestoreTypes directly instead of a custom Walk type
+import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
+import { WithId } from "walk2gether-shared";
 
 /**
  * Result type for the useLocationTracking hook
@@ -19,7 +23,7 @@ type LocationTrackingResult = {
 /**
  * Hook to manage location tracking functionality for walks
  * This is a thin wrapper around LocationContext that provides walk-specific tracking
- * 
+ *
  * @param walkId The ID of the walk to track location for
  * @param userId The ID of the user
  */
@@ -28,16 +32,19 @@ export function useLocationTracking(
   userId: string
 ): LocationTrackingResult {
   // Access the global location context
-  const { 
+  const {
     userLocation,
     locationPermission,
     backgroundLocationPermission,
     locationTracking,
     activeWalkId,
-    startWalkTracking, 
+    startWalkTracking,
     stopWalkTracking,
-    updateLocation: updateLocationInContext
+    updateLocation: updateLocationInContext,
   } = useLocation();
+
+  // Fetch the walk data to get the estimatedEndTimeWithBuffer
+  const { doc: walk } = useDoc<FirebaseFirestoreTypes.DocumentData>(`walks/${walkId}`);
 
   // Start tracking when walk and user IDs are available
   useEffect(() => {
@@ -57,7 +64,13 @@ export function useLocationTracking(
   // Start location tracking for this walk
   const startTracking = async () => {
     if (!walkId || !userId) return;
-    await startWalkTracking(walkId, userId);
+    
+    // Get the estimatedEndTimeWithBuffer from the walk data
+    // If it exists, it's a Firebase Timestamp that needs to be converted to a JS Date
+    const endTimeWithBuffer = walk?.estimatedEndTimeWithBuffer;
+    const endTime = endTimeWithBuffer ? endTimeWithBuffer.toDate() : undefined;
+    
+    await startWalkTracking(walkId, userId, endTime);
   };
 
   // Stop location tracking
@@ -69,7 +82,6 @@ export function useLocationTracking(
   const updateLocation = async (location: Location.LocationObject) => {
     await updateLocationInContext(location);
   };
-
 
   return {
     userLocation,

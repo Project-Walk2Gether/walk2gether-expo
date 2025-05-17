@@ -14,9 +14,8 @@ import {
 import { Redirect } from "expo-router";
 import { Formik } from "formik";
 import React, { useRef, useState } from "react";
-import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Card, Input, ScrollView, Text, XStack, YStack } from "tamagui";
+import { Button, Card, Input, ScrollView, Text, YStack } from "tamagui";
 import { userDataSchema } from "walk2gether-shared";
 import { useOnboarding } from "./_layout";
 
@@ -27,7 +26,6 @@ export default function CompleteYourProfile() {
   const { goToNextScreen, referralInfo } = useOnboarding();
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
-  const [showLocationResults, setShowLocationResults] = useState(false);
   const [locationMode, setLocationMode] = useState<"none" | "auto" | "manual">(
     "none"
   );
@@ -35,7 +33,6 @@ export default function CompleteYourProfile() {
   if (!user) return <Redirect href="/auth" />;
 
   const handleSubmit = async (values: any) => {
-    console.log("Submitting");
     try {
       setLoading(true);
 
@@ -60,6 +57,8 @@ export default function CompleteYourProfile() {
       setLoading(false);
     }
   };
+
+  console.log({ loading });
 
   if (!user) return <Redirect href="/auth" />;
 
@@ -164,10 +163,10 @@ export default function CompleteYourProfile() {
                       mb="$2"
                       color={COLORS.primary}
                     >
-                      Home Location
+                      Home Address
                     </Text>
                     {locationMode === "none" && (
-                      <XStack gap="$3" jc="center" width="100%">
+                      <>
                         <Button
                           size="$4"
                           backgroundColor="$blue9"
@@ -177,7 +176,7 @@ export default function CompleteYourProfile() {
                           f={1}
                           icon={<MapPin size={20} style={{ marginRight: 8 }} />}
                         >
-                          Share
+                          Use my location
                         </Button>
                         <Button
                           size="$4"
@@ -193,7 +192,7 @@ export default function CompleteYourProfile() {
                         >
                           Enter manually
                         </Button>
-                      </XStack>
+                      </>
                     )}
                     {locationMode === "auto" && (
                       <YStack space="$2" ai="center" width="100%">
@@ -212,14 +211,10 @@ export default function CompleteYourProfile() {
                       <LocationAutocomplete
                         value={values.location}
                         setFieldValue={setFieldValue}
-                        showLocationResults={showLocationResults}
-                        setShowLocationResults={setShowLocationResults}
                         touched={touched}
                         errors={errors}
-                        styles={styles}
                         includeChooseAnotherWayButton
                         onCancel={() => {
-                          console.log("Cancelling");
                           setLocationMode("none");
                         }}
                       />
@@ -227,6 +222,7 @@ export default function CompleteYourProfile() {
                   </YStack>
                   <ActionButton
                     onPress={() => handleSubmit()}
+                    loading={loading}
                     disabled={!values.name || !values.location}
                     iconAfter={<ArrowRight />}
                     label="Get started"
@@ -240,38 +236,3 @@ export default function CompleteYourProfile() {
     </>
   );
 }
-
-// StyleSheet definition for Google Places Autocomplete (these can't be done with Tamagui)
-const styles = StyleSheet.create({
-  placesInputContainer: {
-    borderWidth: 0,
-  },
-  placesInput: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
-  },
-  inputError: {
-    borderColor: "red",
-    borderWidth: 1,
-  },
-  placesList: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    backgroundColor: "white",
-    marginTop: 5,
-    zIndex: 1000,
-  },
-  placesRow: {
-    padding: 13,
-    height: 50,
-  },
-  placesDescription: {
-    fontSize: 14,
-  },
-});

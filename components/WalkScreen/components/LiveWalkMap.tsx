@@ -76,9 +76,6 @@ export default function LiveWalkMap({
 
   const status = walk ? getWalkStatus(walk) : "pending";
 
-  // The user and walkId are now passed directly to the background task
-  // through the useLocationTracking hook's startBackgroundLocationTracking function
-
   // Update parent component when navigation method changes
   useEffect(() => {
     onNavigationMethodChange?.(navigationMethod);
