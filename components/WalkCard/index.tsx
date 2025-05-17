@@ -1,15 +1,28 @@
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { COLORS } from "@/styles/colors";
+import { useDoc } from "@/utils/firestore";
 import { getDistanceToLocation } from "@/utils/locationUtils";
 import { getWalkTitle } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
-import { Calendar, Hand, Pin, Timer } from "@tamagui/lucide-icons";
+import {
+  Calendar,
+  CheckCircle,
+  Clock,
+  Hand,
+  Pin,
+  Timer,
+} from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
-import { Walk, walkIsNeighborhoodWalk, WithId } from "walk2gether-shared";
+import {
+  Participant,
+  Walk,
+  walkIsNeighborhoodWalk,
+  WithId,
+} from "walk2gether-shared";
 import { UserAvatar } from "../UserAvatar";
 import WalkAttachmentsCarousel from "../WalkAttachmentsCarousel";
 import WalkMenu from "../WalkMenu";
@@ -38,6 +51,21 @@ const WalkCard: React.FC<Props> = ({
   const isMine = user?.uid === walk.createdByUid;
   const status = getWalkStatus(walk);
   const router = useRouter();
+
+  // Get the participant document for the current user (if they exist as a participant)
+  const { doc: participantDoc } = useDoc<Participant>(
+    user?.uid ? `walks/${walk.id}/participants/${user.uid}` : undefined
+  );
+
+  // Determine the request status of the current user
+  const hasRequested = !!participantDoc;
+  const isApproved =
+    participantDoc?.approvedAt !== null &&
+    participantDoc?.approvedAt !== undefined;
+  const isCancelled =
+    participantDoc?.cancelledAt !== null &&
+    participantDoc?.cancelledAt !== undefined;
+  const isPending = hasRequested && !isApproved && !isCancelled;
   // Calculate the distance and prepare the location display text
   const locationDisplay = (() => {
     if (walkIsNeighborhoodWalk(walk)) return null;
@@ -162,19 +190,64 @@ const WalkCard: React.FC<Props> = ({
             /* Show participants row only if current user is the walk owner */
             <ParticipantsSection walk={walk} currentUserUid={user?.uid} />
           ) : showActions ? (
-            /* Show 'Ask to join' button if current user is not the walk owner */
-            <Button
-              backgroundColor={COLORS.primary}
-              icon={<Hand color="white" />}
-              size="$3"
-              flex={1}
-              mt="$2"
-              onPress={onPress}
-            >
-              <Text fontSize={12} fontWeight="bold" color="white">
-                Ask to join
-              </Text>
-            </Button>
+            /* Request status or Join button */
+            <>
+              {/* If user has requested to join and it's approved */}
+              {isApproved && (
+                <XStack
+                  backgroundColor="$green4"
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                  alignItems="center"
+                  gap="$1"
+                  mt="$2"
+                  flex={1}
+                >
+                  <CheckCircle size={16} color="$green9" />
+                  <Text fontSize={12} fontWeight="600" color="$green9">
+                    Request accepted!
+                  </Text>
+                </XStack>
+              )}
+
+              {/* If user has requested to join and it's pending */}
+              {isPending && (
+                <XStack
+                  backgroundColor="$yellow8"
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                  alignItems="center"
+                  gap="$2"
+                  mt="$2"
+                  flex={1}
+                >
+                  <Clock size={16} />
+                  <Text fontSize={12} fontWeight="600">
+                    You requested to join
+                  </Text>
+                </XStack>
+              )}
+
+              {/* Show join button if user hasn't requested or request was cancelled/rejected */}
+              {(!hasRequested || isCancelled) &&
+                walkIsNeighborhoodWalk(walk) &&
+                status !== "past" && (
+                  <Button
+                    backgroundColor={COLORS.primary}
+                    size="$3"
+                    flex={1}
+                    mt="$2"
+                    onPress={onPress}
+                    icon={<Hand color="white" />}
+                  >
+                    <Text fontSize={12} fontWeight="bold" color="white">
+                      Ask to join
+                    </Text>
+                  </Button>
+                )}
+            </>
           ) : null}
         </XStack>
       </YStack>

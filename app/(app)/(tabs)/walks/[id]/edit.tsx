@@ -1,3 +1,4 @@
+import CopyableIdField from "@/components/CopyableIdField";
 import FullScreenLoader from "@/components/FullScreenLoader";
 import WalkForm from "@/components/WalkForm";
 import { db } from "@/config/firebase";
@@ -48,6 +49,9 @@ export default function EditWalkScreen() {
       p="$5"
       keyboardShouldPersistTaps="handled"
     >
+      {/* Copyable Walk ID field */}
+      <CopyableIdField id={walk.id} label="Walk ID" />
+      
       <WalkForm
         initialValues={walk}
         onSubmit={handleSubmit}

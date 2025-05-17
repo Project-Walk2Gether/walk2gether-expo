@@ -2,7 +2,13 @@ import { useAuth } from "@/context/AuthContext";
 import { useMenu } from "@/context/MenuContext";
 import { COLORS } from "@/styles/colors";
 import { getDirectionsUrl } from "@/utils/routeUtils";
-import { Edit3, Map, MoreVertical, Trash, UserPlus } from "@tamagui/lucide-icons";
+import {
+  Edit3,
+  Map,
+  MoreVertical,
+  Trash,
+  UserPlus,
+} from "@tamagui/lucide-icons";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
@@ -72,7 +78,15 @@ export default function WalkMenu({
         theme: "red",
       },
     ]);
-  }, [walk.id, showMenu, router, onOpenMaps, openDirections, onDelete, hasLocation]);
+  }, [
+    walk.id,
+    showMenu,
+    router,
+    onOpenMaps,
+    openDirections,
+    onDelete,
+    hasLocation,
+  ]);
 
   return (
     <Button
