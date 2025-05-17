@@ -12,25 +12,18 @@ interface TypeSelectionProps {
 export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue }) => {
   const { formData, updateFormData } = useWalkForm();
 
+  // When a type is selected, update the form data and proceed
   const setSelectedWalkType = (type: Walk["type"]) => {
-    updateFormData({
-      type: type,
-    });
-
-    // Automatically proceed when a type is selected
-    if (type) {
-      onContinue();
-    }
+    updateFormData({ type });
+    onContinue();
   };
 
   return (
     <WizardWrapper
       onContinue={onContinue}
-      continueDisabled={!formData.type}
-      continueText="Continue"
-      backText=""
+      hideFooter={true}
     >
-      <YStack gap="$4">
+      <YStack gap="$4" paddingBottom="$4">
         <WalkTypeCard
           type="friends"
           title="Friend Walk"
@@ -41,18 +34,6 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue }) => {
           selected={formData.type === "friends"}
           onSelect={setSelectedWalkType}
         />
-        {/*
-        <WalkTypeCard
-          type="meetup"
-          title="Friend Group"
-          icon="people"
-          color="#FF6A55"
-          backgroundColor="#FFE9E5"
-          description="Walk with a group of friends"
-          selected={formData.type === "meetup"}
-          onSelect={setSelectedWalkType}
-        /> */}
-
         <WalkTypeCard
           type="neighborhood"
           title="Neighborhood Walk"

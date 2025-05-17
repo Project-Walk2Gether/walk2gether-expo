@@ -1,15 +1,19 @@
 import { PlacesAutocomplete } from "@/components/UI/PlacesAutocomplete";
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
+import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
+import { getRegionForRadius } from "@/utils/geo";
 import { reverseGeocode } from "@/utils/locationUtils";
 import useChangeEffect from "@/utils/useChangeEffect";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Text, View, XStack, YStack } from "tamagui";
+import { findNearbyWalkers } from "./NeighborhoodConfirmationScreen/findNearbyWalkers";
+import NearbyWalkersInfo from "./NeighborhoodConfirmationScreen/NearbyWalkersInfo";
 import WizardWrapper from "./WizardWrapper";
 
 interface LocationSelectionProps {
@@ -22,6 +26,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   onBack,
 }) => {
   const { formData, updateFormData } = useWalkForm();
+  const { user } = useAuth();
   const {
     refresh: getLocation,
     coords,
@@ -30,6 +35,8 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   } = useLocation();
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [longPressActive, setLongPressActive] = useState(false);
+  const [nearbyWalkers, setNearbyWalkers] = useState(0);
+  const [isLoadingNearbyUsers, setIsLoadingNearbyUsers] = useState(false);
   const mapRef = useRef<MapView>(null);
   const googlePlacesRef = useRef<GooglePlacesAutocompleteRef>(null);
 
@@ -127,6 +134,27 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
     setLongPressActive(false);
   };
 
+  // Radius in meters for neighborhood walks
+  const walkRadius = 700;
+
+  // Find nearby walkers when the location is selected and it's a neighborhood walk
+  useEffect(() => {
+    if (formData.type === "neighborhood" && formData.startLocation && user) {
+      const userLocation = {
+        latitude: formData.startLocation.latitude,
+        longitude: formData.startLocation.longitude,
+      };
+      
+      findNearbyWalkers({
+        user,
+        userLocation,
+        radiusKm: walkRadius / 1000,
+        setNearbyWalkers,
+        setIsLoadingNearbyUsers,
+      });
+    }
+  }, [formData.startLocation, formData.type, user]);
+
   const handleContinue = () => {
     if (formData.startLocation) {
       onContinue();
@@ -214,30 +242,73 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
         >
           <MapView
             ref={mapRef}
+            provider={PROVIDER_GOOGLE}
             style={{ width: "100%", height: "100%" }}
-            initialRegion={{
-              latitude: formData.startLocation?.latitude || 37.78825,
-              longitude: formData.startLocation?.longitude || -122.4324,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
+            initialRegion={
+              formData.startLocation
+                ? formData.type === "neighborhood"
+                  ? getRegionForRadius(
+                      formData.startLocation.latitude,
+                      formData.startLocation.longitude,
+                      walkRadius
+                    )
+                  : {
+                      latitude: formData.startLocation.latitude,
+                      longitude: formData.startLocation.longitude,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    }
+                : {
+                    latitude: 37.78825,
+                    longitude: -122.4324,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }
+            }
             onLongPress={handleMapLongPress}
           >
             {formData.startLocation && (
-              <Marker
-                coordinate={{
-                  latitude: formData.startLocation.latitude,
-                  longitude: formData.startLocation.longitude,
-                }}
-                title={formData.startLocation.name}
-                description={formData.startLocation.name}
-              />
+              <>
+                <Marker
+                  coordinate={{
+                    latitude: formData.startLocation.latitude,
+                    longitude: formData.startLocation.longitude,
+                  }}
+                  title={formData.startLocation.name}
+                  description={formData.startLocation.name}
+                  pinColor={COLORS.action}
+                />
+                
+                {/* Show circle radius for neighborhood walks */}
+                {formData.type === "neighborhood" && (
+                  <Circle
+                    center={{
+                      latitude: formData.startLocation.latitude,
+                      longitude: formData.startLocation.longitude,
+                    }}
+                    radius={walkRadius}
+                    strokeWidth={2}
+                    strokeColor={COLORS.action + "80"}
+                    fillColor={COLORS.action + "20"}
+                  />
+                )}
+              </>
             )}
           </MapView>
 
           <Text color="white" fontSize={14} fontWeight="500" textAlign="center">
             Tap and hold on the map to choose a location
           </Text>
+          
+          {/* Display nearby walkers info for neighborhood walks */}
+          {formData.type === "neighborhood" && formData.startLocation && (
+            <View position="absolute" bottom={10} left={10} right={10}>
+              <NearbyWalkersInfo
+                nearbyWalkers={nearbyWalkers}
+                isLoadingNearbyUsers={isLoadingNearbyUsers}
+              />
+            </View>
+          )}
 
           {(isReverseGeocoding || longPressActive || locationLoading) && (
             <View
