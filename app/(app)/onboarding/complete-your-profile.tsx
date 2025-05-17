@@ -3,14 +3,11 @@ import { ActionButton } from "@/components/ActionButton";
 import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
 import AutoDetectLocation from "@/components/AutoDetectLocation";
 import LocationAutocomplete from "@/components/LocationAutocomplete";
+import LocationButton from "@/components/UI/LocationButton";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
-import {
-  ArrowRight,
-  Keyboard as KeyboardIcon,
-  MapPin,
-} from "@tamagui/lucide-icons";
+import { ArrowRight, Keyboard as KeyboardIcon } from "@tamagui/lucide-icons";
 import { Redirect } from "expo-router";
 import { Formik } from "formik";
 import React, { useRef, useState } from "react";
@@ -167,17 +164,10 @@ export default function CompleteYourProfile() {
                     </Text>
                     {locationMode === "none" && (
                       <>
-                        <Button
-                          size="$4"
-                          backgroundColor="$blue9"
-                          color="white"
-                          bg={COLORS.primary}
+                        <LocationButton
                           onPress={() => setLocationMode("auto")}
                           f={1}
-                          icon={<MapPin size={20} style={{ marginRight: 8 }} />}
-                        >
-                          Use my location
-                        </Button>
+                        />
                         <Button
                           size="$4"
                           variant="outlined"

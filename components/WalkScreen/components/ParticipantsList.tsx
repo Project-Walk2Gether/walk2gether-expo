@@ -150,6 +150,22 @@ export default function ParticipantsList({
               {statusText}
             </Text>
           </XStack>
+          
+          {/* Introduction text if available */}
+          {item.introduction && (
+            <Text 
+              fontSize="$1"
+              color="$gray10"
+              fontStyle="italic"
+              mt="$1"
+              maxWidth="100%"
+              flexShrink={1}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              "{item.introduction}"
+            </Text>
+          )}
         </YStack>
       </XStack>
     );

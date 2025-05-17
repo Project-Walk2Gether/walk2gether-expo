@@ -22,9 +22,10 @@ export const NearbyWalkersInfo: React.FC<Props> = ({
       borderRadius={10}
       alignItems="center"
       gap="$2"
+      width="100%"
     >
       <Users size={18} color="white" />
-      <Text fontSize={14} fontWeight="600" color="white">
+      <Text fontSize={14} fontWeight="600" color="white" flexShrink={1}>
         {isLoadingNearbyUsers
           ? "Finding walkers..."
           : `${pluralize(

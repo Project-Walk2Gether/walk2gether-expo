@@ -3,33 +3,25 @@ import { collection, getDocs } from "@react-native-firebase/firestore";
 import { getDistanceInKm } from "walk2gether-shared";
 
 /**
- * Finds nearby walkers within a given radius and returns their IDs.
+ * Finds nearby walkers within a given radius.
  * @param user The current user object (with uid)
  * @param userLocation The location to search from ({ latitude, longitude })
  * @param radiusKm The search radius in kilometers
- * @param setNearbyWalkers Callback to set the number of nearby walkers
- * @param setIsLoadingNearbyUsers Callback to set loading state
- * @returns Array of user IDs who are within the specified radius
+ * @returns Object containing nearby user IDs and count of nearby walkers
  */
 export async function findNearbyWalkers({
   user,
   userLocation,
   radiusKm,
-  setNearbyWalkers,
-  setIsLoadingNearbyUsers,
 }: {
   user: { uid: string } | null;
   userLocation: { latitude: number; longitude: number };
   radiusKm: number;
-  setNearbyWalkers: (n: number) => void;
-  setIsLoadingNearbyUsers: (b: boolean) => void;
-}): Promise<string[]> {
+}): Promise<{ nearbyUserIds: string[]; nearbyUsersCount: number }> {
   if (!userLocation) {
-    setIsLoadingNearbyUsers(false);
-    return [];
+    return { nearbyUserIds: [], nearbyUsersCount: 0 };
   }
 
-  setIsLoadingNearbyUsers(true);
   try {
     // Query users from Firestore who have location data
     const usersRef = collection(db, "users");
@@ -37,9 +29,7 @@ export async function findNearbyWalkers({
 
     if (usersSnapshot.empty) {
       console.log("No users found");
-      setNearbyWalkers(0);
-      setIsLoadingNearbyUsers(false);
-      return [];
+      return { nearbyUserIds: [], nearbyUsersCount: 0 };
     }
 
     // Filter users by distance
@@ -70,13 +60,10 @@ export async function findNearbyWalkers({
       }
     });
 
-    setNearbyWalkers(nearbyUsersCount);
     console.log(`Found ${nearbyUsersCount} users within ${radiusKm}km`);
-    return nearbyUserIds;
+    return { nearbyUserIds, nearbyUsersCount };
   } catch (error) {
     console.error("Error finding nearby users:", error);
-    return [];
-  } finally {
-    setIsLoadingNearbyUsers(false);
+    return { nearbyUserIds: [], nearbyUsersCount: 0 };
   }
 }

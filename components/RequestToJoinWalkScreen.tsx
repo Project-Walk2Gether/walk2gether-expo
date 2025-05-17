@@ -10,11 +10,12 @@ import {
   Timestamp,
   updateDoc,
 } from "@react-native-firebase/firestore";
+import { Check } from "@tamagui/lucide-icons";
 import { useNavigation } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Card, Text, View, YStack } from "tamagui";
+import { Button, Card, Checkbox, Input, Label, Text, View, XStack, YStack } from "tamagui";
 import { Participant, Walk, WithId } from "walk2gether-shared";
 import { BrandGradient } from "./UI";
 import WalkCard from "./WalkCard";
@@ -28,11 +29,14 @@ export default function RequestToJoinScreen({
 }: RequestToJoinScreenProps) {
   const navigation = useNavigation();
   const { user } = useAuth();
-  const { userData } = useUserData();
+  const { userData, updateUserData } = useUserData();
 
   const { userLocation } = useLocation();
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
+  const [introduction, setIntroduction] = useState("");
+  const [saveToProfile, setSaveToProfile] = useState(false);
+  
   const { doc: participantDoc } = useDoc<Participant>(
     `walks/${walk.id}/participants/${user?.uid}`
   );
@@ -72,13 +76,35 @@ export default function RequestToJoinScreen({
           timestamp: Timestamp.now(),
         },
         route: null,
+        introduction: introduction.trim(), // Add the introduction
         status: "pending",
         navigationMethod: "driving",
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
 
+      // Save participant document
       await setDoc(participantRef, participant, { merge: true });
+      
+      // If user chose to save introduction to profile, update user data
+      if (saveToProfile && introduction.trim() && userData) {
+        try {
+          const userRef = doc(firestore_instance, `users/${user.uid}`);
+          await updateDoc(userRef, {
+            introduction: introduction.trim(),
+            updatedAt: Timestamp.now()
+          });
+          
+          // Update local user data context
+          updateUserData({
+            ...userData,
+            introduction: introduction.trim()
+          });
+        } catch (error) {
+          console.error("Error saving introduction to profile:", error);
+          // We don't want to fail the whole request if this part fails
+        }
+      }
     } catch (error) {
       console.error("Error requesting to join:", error);
       Alert.alert("Error", "Failed to send join request. Please try again.");
@@ -111,7 +137,7 @@ export default function RequestToJoinScreen({
   };
 
   return (
-    <BrandGradient style={{ flex: 1 }} variant="vibrant">
+    <BrandGradient style={{ flex: 1 }} variant="modern">
       <YStack p="$4" f={1} paddingBottom={insets.bottom} ai="center">
         <Card
           elevate
@@ -183,6 +209,40 @@ export default function RequestToJoinScreen({
                 <View>
                   <WalkCard walk={walk} />
                 </View>
+                
+                <YStack gap="$2" w="100%" mt="$2">
+                  <Label htmlFor="introduction" fontSize="$3" color="$gray11">
+                    Introduce Yourself (optional)
+                  </Label>
+                  <Input
+                    id="introduction"
+                    size="$4"
+                    placeholder="Hi, I'm excited to join this walk..."
+                    value={introduction}
+                    onChangeText={setIntroduction}
+                    multiline
+                    numberOfLines={3}
+                    autoCorrect
+                    textAlignVertical="top"
+                  />
+                  
+                  <XStack alignItems="center" gap="$2" marginTop="$1">
+                    <Checkbox
+                      id="save-to-profile"
+                      size="$4"
+                      checked={saveToProfile}
+                      onCheckedChange={(checked) => setSaveToProfile(!!checked)}
+                    >
+                      <Checkbox.Indicator>
+                        <Check />
+                      </Checkbox.Indicator>
+                    </Checkbox>
+                    <Label htmlFor="save-to-profile" fontSize="$2" color="$gray11">
+                      Save to my profile for future walks
+                    </Label>
+                  </XStack>
+                </YStack>
+                
                 <Button
                   size="$5"
                   w="100%"
@@ -190,7 +250,7 @@ export default function RequestToJoinScreen({
                   color="white"
                   onPress={handleRequestToJoin}
                   disabled={loading}
-                  mt="$2"
+                  mt="$4"
                 >
                   {loading ? (
                     <ActivityIndicator color="white" />

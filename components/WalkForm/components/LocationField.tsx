@@ -56,7 +56,7 @@ export default function LocationField({
 
   return (
     <>
-      <YStack>
+      <YStack marginBottom="$5">
         <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">
           Location
         </H4>

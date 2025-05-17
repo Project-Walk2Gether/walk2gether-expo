@@ -30,6 +30,9 @@ export async function createWalkFromForm({
       formData.durationMinutes === undefined ||
       !formData.startLocation
     ) {
+      console.error(
+        "Missing required walk data: date, durationMinutes, or startLocation"
+      );
       throw new Error(
         "Missing required walk data: date, durationMinutes, or startLocation"
       );
@@ -42,7 +45,7 @@ export async function createWalkFromForm({
     const estimatedEndTimeWithBuffer = addMinutes(estimatedEndTime, 60);
 
     // Create complete walk payload with all required fields from the Walk type
-    const walkPayload: Partial<Walk> = {
+    const walkPayload = {
       active: false,
       date: formData.date,
       durationMinutes: formData.durationMinutes,
@@ -70,7 +73,9 @@ export async function createWalkFromForm({
       "walks"
     ) as FirebaseFirestoreTypes.CollectionReference<Walk>;
 
+    console.log("PRE ADDING WALK");
     const walkDocRef = await addDoc<Walk>(walksRef, walkPayload);
+    console.log("POST ADDING WALK");
 
     // Add the user as an approved participant
     const walkId = walkDocRef.id;
@@ -79,6 +84,8 @@ export async function createWalkFromForm({
       firestore_instance,
       `walks/${walkId}/participants/${userId}`
     );
+
+    console.log({ participantRef });
 
     const participant: Participant = {
       userUid: userId,
@@ -91,6 +98,8 @@ export async function createWalkFromForm({
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     };
+
+    console.log({ participant });
 
     await setDoc(participantRef, participant);
 

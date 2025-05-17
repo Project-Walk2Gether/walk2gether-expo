@@ -1,13 +1,14 @@
 import { useAuth } from "@/context/AuthContext";
+import { useMenu } from "@/context/MenuContext";
 import { COLORS } from "@/styles/colors";
 import { getDirectionsUrl } from "@/utils/routeUtils";
-import { Edit3, Map, Trash } from "@tamagui/lucide-icons";
+import { Edit3, Map, MoreVertical, Trash, UserPlus } from "@tamagui/lucide-icons";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import { Alert } from "react-native";
+import { Button } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
-import Menu, { MenuItem } from "../Menu";
 
 interface Props {
   walk: WithId<Walk>;
@@ -22,6 +23,7 @@ export default function WalkMenu({
 }: Props) {
   const router = useRouter();
   const { user } = useAuth();
+  const { showMenu } = useMenu();
 
   const onDelete = useCallback(() => {
     walk._ref.delete();
@@ -40,44 +42,45 @@ export default function WalkMenu({
     }
   }, [walk.id, user]);
 
-  // Prepare menu items
-  const menuItems: MenuItem[] = [
-    {
-      label: "Edit Walk",
-      icon: <Edit3 size="$1" color={COLORS.primary} />,
-      onPress: () => router.push(`/walks/${walk.id}/edit`),
-      buttonProps: {
-        backgroundColor: COLORS.background,
-        color: COLORS.primary,
-        borderWidth: 1,
-        borderColor: COLORS.primary,
+  const handleShowMenu = useCallback(() => {
+    showMenu("Walk Options", [
+      {
+        label: "Edit Walk",
+        icon: <Edit3 size="$1" color={COLORS.primary} />,
+        onPress: () => router.push(`/walks/${walk.id}/edit`),
       },
-    },
-    // Conditionally add the Open in Maps option
-    ...(hasLocation
-      ? [
-          {
-            label: "Open in Maps",
-            icon: <Map size="$1" color={COLORS.primary} />,
-            onPress: onOpenMaps || openDirections,
-            buttonProps: {
-              backgroundColor: COLORS.background,
-              color: COLORS.primary,
-              borderWidth: 1,
-              borderColor: COLORS.primary,
+      // Add Invite Friends option
+      {
+        label: "Invite Friends",
+        icon: <UserPlus size="$1" color={COLORS.primary} />,
+        onPress: () => router.push(`/walks/${walk.id}/invite`),
+      },
+      // Conditionally add the Open in Maps option
+      ...(hasLocation
+        ? [
+            {
+              label: "Open in Maps",
+              icon: <Map size="$1" color={COLORS.primary} />,
+              onPress: onOpenMaps || openDirections,
             },
-          },
-        ]
-      : []),
-    {
-      label: "Cancel Walk",
-      icon: <Trash size="$1" />,
-      onPress: onDelete,
-      buttonProps: {
+          ]
+        : []),
+      {
+        label: "Cancel Walk",
+        icon: <Trash size="$1" />,
+        onPress: onDelete,
         theme: "red",
       },
-    },
-  ];
+    ]);
+  }, [walk.id, showMenu, router, onOpenMaps, openDirections, onDelete, hasLocation]);
 
-  return <Menu color="black" title="Walk Options" items={menuItems} />;
+  return (
+    <Button
+      size="$2"
+      circular
+      chromeless
+      onPress={handleShowMenu}
+      icon={<MoreVertical size="$1" color="black" />}
+    />
+  );
 }

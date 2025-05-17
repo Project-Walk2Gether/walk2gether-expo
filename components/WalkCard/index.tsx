@@ -12,6 +12,7 @@ import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { Walk, walkIsNeighborhoodWalk, WithId } from "walk2gether-shared";
 import { UserAvatar } from "../UserAvatar";
 import WalkAttachmentsCarousel from "../WalkAttachmentsCarousel";
+import WalkMenu from "../WalkMenu";
 import { ParticipantsSection } from "./ParticipantsSection";
 
 // Props interface for WalkCard
@@ -19,12 +20,14 @@ interface Props {
   walk: WithId<Walk>;
   showAttachments?: boolean;
   showActions?: boolean;
+  onPress?: () => void;
 }
 
 const WalkCard: React.FC<Props> = ({
   walk,
   showAttachments = false,
   showActions = false,
+  onPress,
 }) => {
   const {
     coords,
@@ -35,11 +38,6 @@ const WalkCard: React.FC<Props> = ({
   const isMine = user?.uid === walk.createdByUid;
   const status = getWalkStatus(walk);
   const router = useRouter();
-  const handlePress = () => {
-    // If user is the walk owner, always go to walk details
-    router.push({ pathname: `/walks/[id]`, params: { id: walk.id } });
-  };
-
   // Calculate the distance and prepare the location display text
   const locationDisplay = (() => {
     if (walkIsNeighborhoodWalk(walk)) return null;
@@ -107,14 +105,10 @@ const WalkCard: React.FC<Props> = ({
         px="$3"
         pt="$2"
         pressStyle={{ scale: 0.98 }}
-        onPress={handlePress}
+        onPress={onPress}
       >
-        <XStack
-          alignItems="center"
-          justifyContent="space-between"
-          flexShrink={0}
-        >
-          <XStack alignItems="center" gap={8}>
+        <XStack alignItems="center" justifyContent="space-between">
+          <XStack alignItems="center" gap={8} flex={1}>
             <UserAvatar uid={walk.createdByUid} size={32} />
             <Text
               fontSize={18}
@@ -127,6 +121,9 @@ const WalkCard: React.FC<Props> = ({
               {getWalkTitle(walk, user?.uid)}
             </Text>
           </XStack>
+
+          {/* Simple menu button that triggers the global menu context */}
+          {isMine && <WalkMenu walk={walk} />}
         </XStack>
 
         <XStack alignItems="center" gap={6} justifyContent="space-between">
@@ -172,7 +169,7 @@ const WalkCard: React.FC<Props> = ({
               size="$3"
               flex={1}
               mt="$2"
-              onPress={handlePress}
+              onPress={onPress}
             >
               <Text fontSize={12} fontWeight="bold" color="white">
                 Ask to join

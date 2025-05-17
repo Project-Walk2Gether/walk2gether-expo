@@ -5,7 +5,7 @@ import { UserPlus, Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Avatar, Button, Text, View, XStack, YStack } from "tamagui";
-import { Participant, Walk, WithId } from "walk2gether-shared";
+import { Participant, Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
 
 interface Props {
   walk: WithId<Walk>;
@@ -96,7 +96,9 @@ export const ParticipantsSection: React.FC<Props> = ({
             </>
           ) : (
             <Text fontSize={14} color="#666">
-              No participants yet
+              {walkIsFriendsWalk(walk) 
+                ? "Just you so far" 
+                : "No neighbors joined yet"}
             </Text>
           )}
         </XStack>

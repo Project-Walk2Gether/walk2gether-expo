@@ -1,3 +1,4 @@
+import LocationButton from "@/components/UI/LocationButton";
 import { PlacesAutocomplete } from "@/components/UI/PlacesAutocomplete";
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { useAuth } from "@/context/AuthContext";
@@ -6,25 +7,21 @@ import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
 import { getRegionForRadius } from "@/utils/geo";
 import { reverseGeocode } from "@/utils/locationUtils";
-import useChangeEffect from "@/utils/useChangeEffect";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Button, Text, View, XStack, YStack } from "tamagui";
+import { Text, View, YStack } from "tamagui";
 import { findNearbyWalkers } from "./NeighborhoodConfirmationScreen/findNearbyWalkers";
 import NearbyWalkersInfo from "./NeighborhoodConfirmationScreen/NearbyWalkersInfo";
 import WizardWrapper from "./WizardWrapper";
 
-interface LocationSelectionProps {
+interface Props {
   onContinue: () => void;
   onBack: () => void;
 }
 
-export const LocationSelection: React.FC<LocationSelectionProps> = ({
-  onContinue,
-  onBack,
-}) => {
+export const LocationSelection: React.FC<Props> = ({ onContinue, onBack }) => {
   const { formData, updateFormData } = useWalkForm();
   const { user } = useAuth();
   const {
@@ -37,40 +34,31 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
   const [longPressActive, setLongPressActive] = useState(false);
   const [nearbyWalkers, setNearbyWalkers] = useState(0);
   const [isLoadingNearbyUsers, setIsLoadingNearbyUsers] = useState(false);
+  const [pendingLocationRequest, setPendingLocationRequest] = useState(false);
   const mapRef = useRef<MapView>(null);
   const googlePlacesRef = useRef<GooglePlacesAutocompleteRef>(null);
 
+  // Listen for coordinate changes when a location request is pending
   useEffect(() => {
-    if (coords && !formData.startLocation) {
-      const newLocation = {
-        name: "Selected Location",
-        description: `Location at ${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`,
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-      };
-
-      updateFormData({ startLocation: newLocation });
+    if (pendingLocationRequest && coords) {
+      // We have new coordinates from a location request, process them
+      handleLocationCoordinates(
+        coords.latitude,
+        coords.longitude,
+        setIsReverseGeocoding
+      );
+      // Reset the pending flag
+      setPendingLocationRequest(false);
     }
-  }, [coords, formData.startLocation, updateFormData]);
-
-  useChangeEffect(() => {
-    if (coords && !isReverseGeocoding) {
-      handleReverseGeocode(coords.latitude, coords.longitude);
-
-      // Animate map to selected location
-      mapRef.current?.animateToRegion({
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
-    }
-  }, [coords]);
-
+  }, [coords, pendingLocationRequest]);
   const handleLocationSelect = (data: any, details: any) => {
     if (details && details.geometry) {
       const newLocation = {
-        name: data.description || data.structured_formatting?.main_text || details.formatted_address || "Selected Location",
+        name:
+          data.description ||
+          data.structured_formatting?.main_text ||
+          details.formatted_address ||
+          "Selected Location",
         latitude: details.geometry.location.lat,
         longitude: details.geometry.location.lng,
       };
@@ -109,29 +97,62 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
     }
   };
 
-  // Handle long press on map
-  const handleMapLongPress = async (event: any) => {
-    // Provide visual feedback that long press is detected
-    setLongPressActive(true);
-
-    const { coordinate } = event.nativeEvent;
-    const newLocation = await handleReverseGeocode(
-      coordinate.latitude,
-      coordinate.longitude
-    );
-
-    // Update the text in Google Places Autocomplete input
-    if (googlePlacesRef.current && newLocation) {
-      // Clear the input first to ensure proper update
-
-      console.log("Setting", { ref: googlePlacesRef.current });
-      // googlePlacesRef.current.clear();
-      // Then set the text input value with the resolved address
-      googlePlacesRef.current.setAddressText(newLocation.name);
+  /**
+   * Handle location selection from any source (map long press or current location)
+   * This unified function handles:
+   * 1. Reverse geocoding the coordinates
+   * 2. Updating the form data
+   * 3. Animating the map
+   * 4. Setting the GooglePlaces text input
+   */
+  const handleLocationCoordinates = async (
+    latitude: number,
+    longitude: number,
+    indicatorState?: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    if (indicatorState) {
+      indicatorState(true); // Set the appropriate loading indicator
     }
 
-    // Reset the long press indicator
-    setLongPressActive(false);
+    try {
+      // Reverse geocode and update form data
+      const newLocation = await handleReverseGeocode(latitude, longitude);
+
+      // Small delay before animating map to give time for state updates
+      setTimeout(() => {
+        // Animate map to selected location - this often forces marker re-renders
+        mapRef.current?.animateToRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+      }, 50);
+
+      // Update the text in Google Places Autocomplete input
+      if (googlePlacesRef.current && newLocation) {
+        googlePlacesRef.current.setAddressText(newLocation.name);
+      }
+
+      return newLocation;
+    } catch (error) {
+      console.error("Error handling location coordinates:", error);
+      return null;
+    } finally {
+      if (indicatorState) {
+        indicatorState(false); // Reset the loading indicator
+      }
+    }
+  };
+
+  // Handle long press on map
+  const handleMapLongPress = async (event: any) => {
+    const { coordinate } = event.nativeEvent;
+    await handleLocationCoordinates(
+      coordinate.latitude,
+      coordinate.longitude,
+      setLongPressActive
+    );
   };
 
   // Radius in meters for neighborhood walks
@@ -139,27 +160,47 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
 
   // Find nearby walkers when the location is selected and it's a neighborhood walk
   useEffect(() => {
-    if (formData.type === "neighborhood" && formData.startLocation && user) {
-      const userLocation = {
-        latitude: formData.startLocation.latitude,
-        longitude: formData.startLocation.longitude,
-      };
-      
-      findNearbyWalkers({
-        user,
-        userLocation,
-        radiusKm: walkRadius / 1000,
-        setNearbyWalkers,
-        setIsLoadingNearbyUsers,
-      });
-    }
-  }, [formData.startLocation, formData.type, user]);
+    const fetchNearbyWalkers = async () => {
+      if (formData.type === "neighborhood" && formData.startLocation && user) {
+        setIsLoadingNearbyUsers(true);
+
+        const userLocation = {
+          latitude: formData.startLocation.latitude,
+          longitude: formData.startLocation.longitude,
+        };
+
+        try {
+          const result = await findNearbyWalkers({
+            user,
+            userLocation,
+            radiusKm: walkRadius / 1000,
+          });
+
+          setNearbyWalkers(result.nearbyUsersCount);
+
+          // Store the userIds in formData if needed
+          if (result.nearbyUserIds.length > 0) {
+            updateFormData({ invitedUserIds: result.nearbyUserIds });
+          }
+        } catch (error) {
+          console.error("Error finding nearby walkers:", error);
+          setNearbyWalkers(0);
+        } finally {
+          setIsLoadingNearbyUsers(false);
+        }
+      }
+    };
+
+    fetchNearbyWalkers();
+  }, [formData.startLocation, formData.type, user, walkRadius]);
 
   const handleContinue = () => {
     if (formData.startLocation) {
       onContinue();
     }
   };
+
+  console.log({ startLocation: formData.startLocation });
 
   return (
     <WizardWrapper
@@ -192,7 +233,6 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
             }
             googleApiKey={GOOGLE_MAPS_API_KEY}
             textInputStyles={{
-              height: 50,
               borderRadius: 10,
               paddingHorizontal: 15,
               fontSize: 16,
@@ -200,38 +240,41 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
           />
         </View>
 
-        <XStack space="$2" justifyContent="center">
-          <Button
-            backgroundColor={COLORS.primary}
-            color="white"
-            onPress={async () => {
-              setIsReverseGeocoding(true);
-              try {
-                await getLocation();
-                // After getting the location, we need to call reverse geocode
-                if (coords) {
-                  const newLocation = await handleReverseGeocode(
-                    coords.latitude,
-                    coords.longitude
-                  );
+        <LocationButton
+          onPress={async () => {
+            setIsReverseGeocoding(true);
 
-                  // Update the text input field with the resolved address
-                  if (googlePlacesRef.current && newLocation) {
-                    googlePlacesRef.current.setAddressText(newLocation.name);
-                  }
-                }
-              } finally {
-                setIsReverseGeocoding(false);
+            try {
+              // Set the flag to indicate we're waiting for location coordinates
+              setPendingLocationRequest(true);
+
+              // Call getLocation to update the location context
+              await getLocation();
+
+              // The useEffect will handle the coordinates when they are updated
+              // This approach properly uses React's state management instead of setTimeout
+
+              // If we already have coords and getLocation didn't trigger an update,
+              // manually handle them (fallback)
+              if (coords && pendingLocationRequest) {
+                handleLocationCoordinates(
+                  coords.latitude,
+                  coords.longitude,
+                  setIsReverseGeocoding
+                );
+                setPendingLocationRequest(false);
               }
-            }}
-            pressStyle={{ opacity: 0.8 }}
-            disabled={locationLoading || isReverseGeocoding}
-          >
-            {locationLoading
-              ? "Getting location..."
-              : "Use my current location"}
-          </Button>
-        </XStack>
+            } catch (error) {
+              console.error("Error getting current location:", error);
+              setIsReverseGeocoding(false);
+              setPendingLocationRequest(false);
+            }
+          }}
+          disabled={locationLoading || isReverseGeocoding}
+          loading={
+            locationLoading || isReverseGeocoding || pendingLocationRequest
+          }
+        />
 
         <View
           flex={1}
@@ -243,6 +286,7 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
           <MapView
             ref={mapRef}
             provider={PROVIDER_GOOGLE}
+            key={formData.startLocation?.latitude}
             style={{ width: "100%", height: "100%" }}
             initialRegion={
               formData.startLocation
@@ -277,8 +321,8 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
                   title={formData.startLocation.name}
                   description={formData.startLocation.name}
                   pinColor={COLORS.action}
+                  tracksViewChanges={true} // Performance improvement
                 />
-                
                 {/* Show circle radius for neighborhood walks */}
                 {formData.type === "neighborhood" && (
                   <Circle
@@ -299,10 +343,16 @@ export const LocationSelection: React.FC<LocationSelectionProps> = ({
           <Text color="white" fontSize={14} fontWeight="500" textAlign="center">
             Tap and hold on the map to choose a location
           </Text>
-          
+
           {/* Display nearby walkers info for neighborhood walks */}
           {formData.type === "neighborhood" && formData.startLocation && (
-            <View position="absolute" bottom={10} left={10} right={10}>
+            <View
+              position="absolute"
+              bottom={10}
+              left={10}
+              right={10}
+              alignItems="center"
+            >
               <NearbyWalkersInfo
                 nearbyWalkers={nearbyWalkers}
                 isLoadingNearbyUsers={isLoadingNearbyUsers}
