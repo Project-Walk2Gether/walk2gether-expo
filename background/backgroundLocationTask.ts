@@ -3,6 +3,7 @@ import * as BackgroundFetch from "expo-background-fetch";
 import * as ExpoLocation from "expo-location";
 import * as TaskManager from "expo-task-manager";
 import { writeLogIfEnabled } from "../utils/logging";
+import { auth_instance } from "@/config/firebase";
 
 // Define a task name for background location tracking
 export const LOCATION_TRACKING_TASK = "background-location-tracking";
@@ -182,9 +183,20 @@ export const stopBackgroundLocationTracking = async () => {
   console.log("Is task registered before stopping?", isRegistered);
 
   if (isRegistered) {
-    await ExpoLocation.stopLocationUpdatesAsync(LOCATION_TRACKING_TASK);
-    console.log("Background tracking stopped successfully");
-    return true;
+    try {
+      await ExpoLocation.stopLocationUpdatesAsync(LOCATION_TRACKING_TASK);
+      console.log("Background tracking stopped successfully");
+      return true;
+    } catch (error: any) {
+      // Silently swallow E_TASK_NOT_FOUND errors
+      if (error?.message?.includes('E_TASK_NOT_FOUND')) {
+        console.log("Task was registered but not found when stopping - this is normal");
+        return true;
+      }
+      // Re-throw other errors
+      console.error("Error stopping background location task:", error);
+      throw error;
+    }
   }
   console.log("No background tracking task found to stop");
   return false;
