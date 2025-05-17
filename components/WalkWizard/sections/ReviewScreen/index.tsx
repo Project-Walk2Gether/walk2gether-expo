@@ -1,9 +1,9 @@
 import { useWalkForm } from "@/context/WalkFormContext";
-import { COLORS } from "@/styles/colors";
 import { Calendar, Clock, MapPin, Users } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React from "react";
 import { Card, Separator, Text, YStack } from "tamagui";
+import NeighborhoodWalkHowItWorksSection from "../NeighborhoodConfirmationScreen/NeighborhoodWalkHowItWorksSection";
 import WizardWrapper from "../WizardWrapper";
 import ReviewItem from "./ReviewItem";
 
@@ -78,68 +78,78 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
                   <Text fontSize={18} color="$gray12" numberOfLines={1}>
                     {formData.startLocation?.name || "Not set"}
                   </Text>
+                  {formData.type === "neighborhood" && (
+                    <Text fontSize={14} color="$gray11" numberOfLines={2}>
+                      {formData.invitedUserIds && formData.invitedUserIds.length > 0
+                        ? `${pluralize("Walk2Gether member", formData.invitedUserIds.length, true)} will be notified`
+                        : "No members found in this area"}
+                    </Text>
+                  )}
                 </YStack>
               }
               onEdit={() => onEdit(3)}
             />
 
-            <Separator />
+            {/* Only show Participants row for friend walks */}
+            {formData.type !== "neighborhood" && (
+              <>
+                <Separator />
+                <ReviewItem
+                  icon={Users}
+                  title="Participants"
+                  content={
+                    <YStack>
+                      <Text fontSize={18} color="$gray12">
+                        {(() => {
+                          const invitedFriendsCount = (
+                            formData.invitedUserIds || []
+                          ).length;
+                          const invitedPhoneCount = (
+                            formData.invitedPhoneNumbers || []
+                          ).length;
+                          const totalInvited =
+                            invitedFriendsCount + invitedPhoneCount;
 
-            <ReviewItem
-              icon={Users}
-              title="Participants"
-              content={
-                formData.isNeighborhoodWalk ? (
-                  <Text fontSize={18} color="$gray12">
-                    Open to entire neighborhood
-                  </Text>
-                ) : (
-                  <YStack>
-                    <Text fontSize={18} color="$gray12">
-                      {(() => {
-                        const invitedFriendsCount = (
-                          formData.invitedUserIds || []
-                        ).length;
-                        const invitedPhoneCount = (
-                          formData.invitedPhoneNumbers || []
-                        ).length;
-                        const totalInvited =
-                          invitedFriendsCount + invitedPhoneCount;
-
-                        if (totalInvited === 0) {
-                          return "No one invited yet";
-                        } else {
-                          return `${pluralize(
-                            "person",
-                            totalInvited,
-                            true
-                          )} invited`;
-                        }
-                      })()}
-                    </Text>
-                    {(formData.invitedUserIds?.length || 0) > 0 &&
-                      (formData.invitedPhoneNumbers?.length || 0) > 0 && (
-                        <Text fontSize={14} color="$gray11">
-                          {pluralize(
-                            "friend",
-                            formData.invitedUserIds?.length || 0,
-                            true
-                          )}{" "}
-                          •{" "}
-                          {pluralize(
-                            "phone number",
-                            formData.invitedPhoneNumbers?.length || 0,
-                            true
-                          )}
-                        </Text>
-                      )}
-                  </YStack>
-                )
-              }
-              onEdit={() => onEdit(4)}
-            />
+                          if (totalInvited === 0) {
+                            return "No one invited yet";
+                          } else {
+                            return `${pluralize(
+                              "person",
+                              totalInvited,
+                              true
+                            )} invited`;
+                          }
+                        })()}
+                      </Text>
+                      {(formData.invitedUserIds?.length || 0) > 0 &&
+                        (formData.invitedPhoneNumbers?.length || 0) > 0 && (
+                          <Text fontSize={14} color="$gray11">
+                            {pluralize(
+                              "friend",
+                              formData.invitedUserIds?.length || 0,
+                              true
+                            )}{" "}
+                            •{" "}
+                            {pluralize(
+                              "phone number",
+                              formData.invitedPhoneNumbers?.length || 0,
+                              true
+                            )}
+                          </Text>
+                        )}
+                    </YStack>
+                  }
+                  onEdit={() => onEdit(4)}
+                />
+              </>
+            )}
           </YStack>
         </Card>
+
+        {/* Render the how it works section for neighborhood walks */}
+        {formData.type === "neighborhood" && (
+          <NeighborhoodWalkHowItWorksSection />
+        )}
       </YStack>
     </WizardWrapper>
   );

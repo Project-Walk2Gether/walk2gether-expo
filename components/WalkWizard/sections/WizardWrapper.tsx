@@ -12,6 +12,7 @@ interface WizardWrapperProps {
   continueDisabled?: boolean;
   continueText?: string;
   backText?: string;
+  hideFooter?: boolean;
 }
 
 export const WizardWrapper: React.FC<WizardWrapperProps> = ({
@@ -21,6 +22,7 @@ export const WizardWrapper: React.FC<WizardWrapperProps> = ({
   continueDisabled = false,
   continueText = "Continue",
   backText = "Back",
+  hideFooter = false,
 }) => {
   const insets = useSafeAreaInsets();
 
@@ -40,18 +42,19 @@ export const WizardWrapper: React.FC<WizardWrapperProps> = ({
       </RNScrollView>
 
       {/* Fixed Footer with Buttons */}
-      <View
-        position="absolute"
-        bottom={0}
-        left={0}
-        right={0}
-        backgroundColor="rgba(0, 0, 0, 0.05)"
-        paddingHorizontal={16}
-        paddingBottom={Math.max(insets.bottom, 16)}
-        paddingTop={16}
-        borderTopLeftRadius={16}
-        borderTopRightRadius={16}
-      >
+      {!hideFooter && (
+        <View
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          backgroundColor="rgba(0, 0, 0, 0.05)"
+          paddingHorizontal={16}
+          paddingBottom={Math.max(insets.bottom, 16)}
+          paddingTop={16}
+          borderTopLeftRadius={16}
+          borderTopRightRadius={16}
+        >
         <XStack gap="$4" justifyContent="space-between">
           {onBack ? (
             <Button
@@ -76,6 +79,7 @@ export const WizardWrapper: React.FC<WizardWrapperProps> = ({
           </Button>
         </XStack>
       </View>
+      )}
     </BrandGradient>
   );
 };

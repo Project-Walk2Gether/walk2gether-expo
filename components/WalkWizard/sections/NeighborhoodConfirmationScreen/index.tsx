@@ -1,16 +1,12 @@
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
-import { COLORS } from "@/styles/colors";
-import { getRegionForRadius } from "@/utils/geo";
-import { Handshake, Pin, Speech, Users } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
-import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Card, H4, Spinner, Text, View, XStack, YStack } from "tamagui";
+import { YStack } from "tamagui";
 import WizardWrapper from "../WizardWrapper";
 import { findNearbyWalkers } from "./findNearbyWalkers";
-
-const pluralize = require("pluralize");
+import NearbyMembersMap from "./NearbyMembersMap";
+import NeighborhoodWalkHowItWorksSection from "./NeighborhoodWalkHowItWorksSection";
 
 interface NeighborhoodConfirmationProps {
   onSubmit: () => void;
@@ -87,175 +83,15 @@ export const NeighborhoodConfirmationScreen: React.FC<
     >
       <YStack gap="$4">
         <YStack justifyContent="flex-start" gap="$4">
-          {/* Map View */}
-          <View
-            height={220}
-            borderRadius={12}
-            overflow="hidden"
-            backgroundColor="#eef2f3"
-          >
-            {isLoading ? (
-              <View
-                flex={1}
-                justifyContent="center"
-                alignItems="center"
-                paddingHorizontal="$3"
-              >
-                <Spinner size="large" color={COLORS.action} />
-                <Text marginTop="$2" textAlign="center">
-                  Getting your location...
-                </Text>
-              </View>
-            ) : errorMsg ? (
-              <View
-                flex={1}
-                justifyContent="center"
-                alignItems="center"
-                paddingHorizontal="$3"
-              >
-                <Text textAlign="center" color="red">
-                  {errorMsg}
-                </Text>
-              </View>
-            ) : (
-              <MapView
-                provider={PROVIDER_GOOGLE}
-                style={{ flex: 1 }}
-                initialRegion={
-                  userLocation
-                    ? getRegionForRadius(
-                        userLocation.coords.latitude,
-                        userLocation.coords.longitude,
-                        walkRadius
-                      )
-                    : undefined
-                }
-              >
-                {userLocation && (
-                  <>
-                    <Marker
-                      coordinate={{
-                        latitude: userLocation.coords.latitude,
-                        longitude: userLocation.coords.longitude,
-                      }}
-                      title="Your Location"
-                      pinColor={COLORS.action}
-                    />
-                    <Circle
-                      center={{
-                        latitude: userLocation.coords.latitude,
-                        longitude: userLocation.coords.longitude,
-                      }}
-                      radius={walkRadius}
-                      strokeWidth={2}
-                      strokeColor={COLORS.action + "80"}
-                      fillColor={COLORS.action + "20"}
-                    />
-                  </>
-                )}
-              </MapView>
-            )}
-          </View>
+          {/* Map with nearby members */}
+          <NearbyMembersMap 
+            walkRadius={walkRadius}
+            nearbyWalkers={nearbyWalkers}
+            isLoadingNearbyUsers={isLoadingNearbyUsers}
+          />
 
-          <View>
-            <XStack
-              backgroundColor={COLORS.action}
-              paddingHorizontal="$3"
-              paddingVertical="$2"
-              borderRadius={10}
-              alignItems="center"
-              gap="$2"
-            >
-              <Users size={18} color="white" />
-              <Text fontSize={14} fontWeight="600" color="white">
-                {isLoadingNearbyUsers
-                  ? "Finding walkers..."
-                  : `${pluralize(
-                      "Walk2Gether member",
-                      nearbyWalkers,
-                      true
-                    )} in your neighborhood`}
-              </Text>
-            </XStack>
-          </View>
-
-          <Card
-            backgroundColor="white"
-            borderRadius={12}
-            padding="$4"
-            marginBottom="$2"
-          >
-            <H4 textAlign="center" marginBottom="$2">
-              How it works
-            </H4>
-
-            <YStack gap="$4">
-              <XStack gap="$3" alignItems="center">
-                <View
-                  backgroundColor={COLORS.action}
-                  width={32}
-                  height={32}
-                  borderRadius={16}
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Speech size={19} color="white" />
-                </View>
-                <Text flexShrink={1} fontSize={17} color="#333">
-                  Start a walk in your neighborhood and nearby Walk2Gether
-                  members will be notified.
-                </Text>
-              </XStack>
-
-              <XStack gap="$3" alignItems="center">
-                <View
-                  backgroundColor={COLORS.action}
-                  width={32}
-                  height={32}
-                  borderRadius={16}
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Pin size={19} color="white" />
-                </View>
-                <Text flexShrink={1} fontSize={17} color="#333">
-                  Neighbors have 20 minutes to request to join your walk.
-                </Text>
-              </XStack>
-
-              <XStack gap="$3" alignItems="center">
-                <View
-                  backgroundColor={COLORS.action}
-                  width={32}
-                  height={32}
-                  borderRadius={16}
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Handshake size={19} color="white" />
-                </View>
-                <Text flexShrink={1} fontSize={17} color="#333">
-                  If you accept, you'll share live locations to meet up and
-                  walk2gether!
-                </Text>
-              </XStack>
-            </YStack>
-          </Card>
-
-          {/* <View style={styles.card}>
-            <Text
-              fontSize={16}
-              fontWeight="600"
-              color={COLORS.text}
-              marginBottom="$2"
-            >
-              Ready to walk?
-            </Text>
-            <Text fontSize={14} color="#555">
-              Your walk will begin right now. Other neighbors can see your
-              location and join you on your walk.
-            </Text>
-          </View> */}
+          {/* How it works section */}
+          <NeighborhoodWalkHowItWorksSection />
         </YStack>
       </YStack>
     </WizardWrapper>

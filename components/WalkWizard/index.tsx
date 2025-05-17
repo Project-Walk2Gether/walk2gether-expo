@@ -10,7 +10,6 @@ import HeaderBackButton from "../HeaderBackButton";
 import {
   DurationSelection,
   LocationSelection,
-  NeighborhoodConfirmationScreen,
   ReviewScreen,
   TimeSelection,
   TypeSelection,
@@ -80,12 +79,33 @@ export function WalkWizard() {
   }, [currentStep, goToPreviousStep, router]);
 
   // Define the step configuration - using useMemo to avoid recreating the array on each render
-  const wizardSteps = useMemo<WizardStep[]>(
-    () => [
+  const wizardSteps = useMemo<WizardStep[]>(() => {
+    // First step is always type selection
+    const baseSteps = [
       {
         title: "Please select type of walk",
         component: TypeSelection, // Only needs onContinue
       },
+    ];
+
+    // If this is a neighborhood walk, use a simplified flow
+    if (formData.type === "neighborhood") {
+      return [
+        ...baseSteps,
+        {
+          title: "Where is the meetup point?",
+          component: LocationSelection, // Needs onContinue and onBack
+        },
+        {
+          title: "Review & Submit",
+          component: ReviewScreen, // Needs onSubmit, onBack, and onEdit
+        },
+      ];
+    }
+
+    // For friend walks, use the full flow
+    return [
+      ...baseSteps,
       {
         title: "When do you want to walk?",
         component: TimeSelection, // Needs onContinue and onBack
@@ -102,46 +122,47 @@ export function WalkWizard() {
         title: "Review & Submit",
         component: ReviewScreen, // Needs onSubmit, onBack, and onEdit
       },
-    ],
-    []
-  );
+    ];
+  }, [formData.type]);
   // Get screen title based on current step
   const getScreenTitle = () => {
-    if (formData.type === "neighborhood") {
-      return currentStep === 0
-        ? "What type of walk?"
-        : "Start a Neighborhood Walk";
-    } else {
-      return currentStep < wizardSteps.length
-        ? wizardSteps[currentStep].title
-        : "Create a Walk";
+    // Special case for step 0 (type selection)
+    if (currentStep === 0) {
+      return "What type of walk?";
     }
+
+    // Return the title from wizardSteps if available
+    if (currentStep < wizardSteps.length) {
+      return wizardSteps[currentStep].title;
+    }
+
+    // Fallback
+    return "Create a Walk";
   };
+
+  // Set default values for neighborhood walks
+  useEffect(() => {
+    if (formData.type === "neighborhood") {
+      // Default date to now for neighborhood walks if not set
+      if (!formData.date) {
+        setFormData((prev) => ({
+          ...prev,
+          date: Timestamp.now(),
+        }));
+      }
+
+      // Default duration to 30 minutes if not set
+      if (!formData.durationMinutes) {
+        setFormData((prev) => ({
+          ...prev,
+          durationMinutes: 30,
+        }));
+      }
+    }
+  }, [formData.type]);
 
   // Render the appropriate step based on currentStep
   const renderStep = () => {
-    // Special flow for neighborhood walks
-    if (formData.type === "neighborhood" && currentStep > 0) {
-      // For neighborhood walks, set default values to simplify the experience
-      if (!formData.date) {
-        // Default date to now for neighborhood walks
-        formData.date = Timestamp.now();
-      }
-
-      if (!formData.durationMinutes) {
-        // Default duration to 30 minutes
-        formData.durationMinutes = 30;
-      }
-
-      return (
-        <NeighborhoodConfirmationScreen
-          onSubmit={handleSubmit}
-          onBack={goToPreviousStep}
-        />
-      );
-    }
-
-    // Regular flow for other walk types
     if (currentStep >= 0 && currentStep < wizardSteps.length) {
       const StepComponent = wizardSteps[currentStep].component;
 
@@ -167,7 +188,7 @@ export function WalkWizard() {
       );
     }
 
-    // Default fallback - first component only needs onContinue
+    // Default fallback
     const DefaultComponent = wizardSteps[0].component;
     return <DefaultComponent onContinue={goToNextStep} />;
   };
