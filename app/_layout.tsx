@@ -2,6 +2,7 @@ import { withErrorBoundary } from "@/components/ErrorBoundary";
 import { withAuthProvider } from "@/context/AuthContext";
 import { FlashMessageProvider } from "@/context/FlashMessageContext";
 import { LocationProvider } from "@/context/LocationContext";
+import { MenuProvider } from "@/context/MenuContext";
 import { UpdatesProvider } from "@/context/UpdatesContext";
 import { UserDataProvider } from "@/context/UserDataContext";
 import { useAppStateUpdates } from "@/hooks/useAppStateUpdates";
@@ -73,7 +74,9 @@ function RootLayout() {
     <LocationProvider>
       <UpdatesProvider>
         <UserDataProvider>
-          <AppContent />
+          <MenuProvider>
+            <AppContent />
+          </MenuProvider>
         </UserDataProvider>
       </UpdatesProvider>
     </LocationProvider>

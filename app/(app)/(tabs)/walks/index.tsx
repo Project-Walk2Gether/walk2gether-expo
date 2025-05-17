@@ -10,7 +10,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { Text, View } from "tamagui";
-import { Walk, WithId } from "walk2gether-shared";
+import { Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
 
 export default function WalksScreen() {
   const router = useRouter();
@@ -33,8 +33,36 @@ export default function WalksScreen() {
     syncNotifications();
   }, [upcomingWalks, permissionStatus?.granted]);
 
+  // Custom handler for walk card navigation
+  const handleWalkPress = (walk: WithId<Walk>) => {
+    if (walkIsFriendsWalk(walk)) {
+      // For friends walks, check if participants exist
+      const hasParticipants =
+        walk.invitedUserIds && walk.invitedUserIds.length > 1; // More than just the creator
+
+      if (hasParticipants) {
+        // Friends walk with participants - go to show screen
+        router.push({ pathname: `/walks/[id]`, params: { id: walk.id } });
+      } else {
+        // Friends walk with no participants - go to invite screen
+        router.push({
+          pathname: `/walks/[id]/invite`,
+          params: { id: walk.id },
+        });
+      }
+    } else {
+      // Not a friends walk (neighborhood walk) - go to walk details
+      router.push({ pathname: `/walks/[id]`, params: { id: walk.id } });
+    }
+  };
+
   const renderWalkItem = ({ item }: { item: WithId<Walk> }) => (
-    <WalkCard key={item.id} walk={item} showActions />
+    <WalkCard
+      key={item.id}
+      walk={item}
+      showActions
+      onPress={() => handleWalkPress(item)}
+    />
   );
 
   return (

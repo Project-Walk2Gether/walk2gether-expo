@@ -10,7 +10,7 @@ import { Keyboard } from "react-native";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
 import { Button, Text, YStack } from "tamagui";
 
-interface LocationAutocompleteProps {
+interface Props {
   value: any;
   setFieldValue: (field: string, value: any) => void;
   touched: any;
@@ -20,9 +20,7 @@ interface LocationAutocompleteProps {
   includeChooseAnotherWayButton?: boolean;
 }
 
-const LocationAutocomplete: React.FC<
-  Omit<LocationAutocompleteProps, "styles">
-> = ({
+const LocationAutocomplete: React.FC<Omit<Props, "styles">> = ({
   value,
   setFieldValue,
   touched,
@@ -81,7 +79,7 @@ const LocationAutocomplete: React.FC<
   };
 
   return (
-    <YStack space="$2">
+    <YStack space="$2" marginBottom="$5">
       <PlacesAutocomplete
         ref={placesAutocompleteRef}
         placeholder={placeholder}

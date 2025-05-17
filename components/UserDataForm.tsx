@@ -81,7 +81,7 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
           fontSize={18}
         />
       </YStack>
-      <YStack width="100%" gap="$2">
+      <YStack width="100%" gap="$2" marginBottom="$5">
         <Text fontWeight="500" fontSize="$4">
           Location
         </Text>

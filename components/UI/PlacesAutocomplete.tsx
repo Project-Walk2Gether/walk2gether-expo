@@ -1,11 +1,11 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import { ViewStyle } from "react-native";
 import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
   Place,
 } from "react-native-google-places-autocomplete";
-import { Text, View, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 
 export interface PlaceData {
   name: string;
@@ -15,12 +15,12 @@ export interface PlaceData {
   description?: string;
 }
 
-interface PlacesAutocompleteProps {
+interface Props {
   // Core props
   value?: PlaceData | null;
   onSelect: (location: PlaceData) => void;
   googleApiKey: string;
-  
+
   // UI props
   placeholder?: string;
   label?: string;
@@ -35,7 +35,7 @@ interface PlacesAutocompleteProps {
 
 export const PlacesAutocomplete = React.forwardRef<
   GooglePlacesAutocompleteRef,
-  PlacesAutocompleteProps
+  Props
 >(
   (
     {
@@ -59,18 +59,15 @@ export const PlacesAutocomplete = React.forwardRef<
       if (value?.name && ref) {
         // Need to use timeout to ensure ref is available
         setTimeout(() => {
-          if (ref && 'current' in ref && ref.current) {
+          if (ref && "current" in ref && ref.current) {
             ref.current.setAddressText(value.name);
           }
         }, 0);
       }
     }, [value, ref]);
 
-    // Extract props that are valid for YStack to avoid type errors
-    const { marginBottom, ...otherContainerStyles } = containerStyle || {};
-    
     return (
-      <YStack marginBottom={marginBottom || "$5"} style={otherContainerStyles}>
+      <YStack style={containerStyle || {}}>
         {withLabel && (
           <Text
             fontSize="$4"
@@ -82,114 +79,116 @@ export const PlacesAutocomplete = React.forwardRef<
             {required && <Text color="red"> *</Text>}
           </Text>
         )}
-        <View>
-          <GooglePlacesAutocomplete
-            ref={ref}
-            placeholder={placeholder}
-            fetchDetails={true}
-            onPress={(data, details = null) => {
-              if (details) {
-                onSelect({
-                  name: data.description || data.structured_formatting?.main_text || "Selected Location",
-                  placeId: data.place_id || data.id,
-                  latitude: details.geometry.location.lat,
-                  longitude: details.geometry.location.lng,
-                  description: data.description || details.formatted_address,
-                });
-              }
-            }}
-            query={{
-              key: googleApiKey,
-              language: "en",
-            }}
-            predefinedPlaces={
-              value?.name
-                ? [
-                    {
-                      description: value.name,
-                      // Place_id is actually expected by the component internally
-                      // but TypeScript definition is incorrect
-                      place_id: value.placeId,
-                      geometry: {
-                        location: {
-                          lat: value.latitude,
-                          lng: value.longitude,
-                        },
+        <GooglePlacesAutocomplete
+          ref={ref}
+          placeholder={placeholder}
+          fetchDetails={true}
+          onPress={(data, details = null) => {
+            if (details) {
+              onSelect({
+                name:
+                  data.description ||
+                  data.structured_formatting?.main_text ||
+                  "Selected Location",
+                placeId: data.place_id || data.id,
+                latitude: details.geometry.location.lat,
+                longitude: details.geometry.location.lng,
+                description: data.description || details.formatted_address,
+              });
+            }
+          }}
+          query={{
+            key: googleApiKey,
+            language: "en",
+          }}
+          predefinedPlaces={
+            value?.name
+              ? [
+                  {
+                    description: value.name,
+                    // Place_id is actually expected by the component internally
+                    // but TypeScript definition is incorrect
+                    place_id: value.placeId,
+                    geometry: {
+                      location: {
+                        lat: value.latitude,
+                        lng: value.longitude,
                       },
-                    } as unknown as Place,
-                  ]
-                : []
-            }
-            styles={{
-              container: {
-                flex: 0,
-              },
-              textInputContainer: {
-                backgroundColor: "rgba(0,0,0,0)",
-                borderTopWidth: 0,
-                borderBottomWidth: 0,
-              },
-              textInput: {
-                marginLeft: 0,
-                marginRight: 0,
-                height: 45,
-                color: "#5d5d5d",
-                fontSize: 16,
-                borderWidth: 1,
-                borderColor: "#ddd",
-                borderRadius: 8,
-                backgroundColor: "#f9f9f9",
-                ...(textInputStyles || {}),
-              },
-              predefinedPlacesDescription: {
-                color: "#1faadb",
-              },
-              listView: {
-                backgroundColor: "white",
-                borderRadius: 8,
-                marginTop: 5,
-                zIndex: 10,
-              },
-              row: {
-                zIndex: 10,
-              },
-            }}
-            // Bug fix: Explicitly set all required default props
-            textInputProps={textInputProps}
-            keyboardShouldPersistTaps="handled"
-            enablePoweredByContainer={false}
-            currentLocation={false}
-            currentLocationLabel="Current location"
-            debounce={0}
-            disableScroll={false}
-            enableHighAccuracyLocation={true}
-            filterReverseGeocodingByTypes={[]}
-            GooglePlacesDetailsQuery={{}}
-            GooglePlacesSearchQuery={{
-              rankby: "distance",
-              type: "restaurant",
-            }}
-            GoogleReverseGeocodingQuery={{}}
-            isRowScrollable={true}
-            minLength={0}
-            nearbyPlacesAPI="GooglePlacesSearch"
-            numberOfLines={1}
-            onFail={(e) => {
-              console.warn("Google Place Failed : ", e);
-            }}
-            onNotFound={() => {}}
-            onTimeout={() =>
-              console.warn("google places autocomplete: request timeout")
-            }
-            predefinedPlacesAlwaysVisible={false}
-            suppressDefaultStyles={false}
-            textInputHide={false}
-            timeout={20000}
-            autoFillOnNotFound={false}
-            isNewPlacesAPI={false}
-            fields="*"
-          />
-        </View>
+                    },
+                  } as unknown as Place,
+                ]
+              : []
+          }
+          styles={{
+            container: {
+              flex: 0,
+            },
+            textInputContainer: {
+              backgroundColor: "rgba(0,0,0,0)",
+              borderTopWidth: 0,
+              borderBottomWidth: 0,
+            },
+            textInput: {
+              marginLeft: 0,
+              marginRight: 0,
+              height: 45,
+              color: "#5d5d5d",
+              fontSize: 16,
+              borderWidth: 1,
+              borderColor: "#ddd",
+              borderRadius: 8,
+              backgroundColor: "#f9f9f9",
+              ...(textInputStyles || {}),
+            },
+            predefinedPlacesDescription: {
+              color: "#1faadb",
+            },
+            listView: {
+              backgroundColor: "white",
+              borderRadius: 8,
+              marginTop: 5,
+              zIndex: 10,
+            },
+            row: {
+              zIndex: 10,
+            },
+          }}
+          // Bug fix: Explicitly set all required default props
+          textInputProps={textInputProps}
+          keyboardShouldPersistTaps="handled"
+          enablePoweredByContainer={false}
+          currentLocation={false}
+          currentLocationLabel="Current location"
+          debounce={0}
+          disableScroll={false}
+          enableHighAccuracyLocation={true}
+          filterReverseGeocodingByTypes={[]}
+          GooglePlacesDetailsQuery={{}}
+          GooglePlacesSearchQuery={{
+            rankby: "distance",
+            type: "restaurant",
+          }}
+          GoogleReverseGeocodingQuery={{}}
+          isRowScrollable={true}
+          minLength={0}
+          nearbyPlacesAPI="GooglePlacesSearch"
+          numberOfLines={1}
+          onFail={(e) => {
+            console.warn("Google Place Failed : ", e);
+          }}
+          onNotFound={() => {}}
+          onTimeout={() =>
+            console.warn("google places autocomplete: request timeout")
+          }
+          predefinedPlacesAlwaysVisible={false}
+          suppressDefaultStyles={false}
+          textInputHide={false}
+          timeout={20000}
+          autoFillOnNotFound={false}
+          isNewPlacesAPI={false}
+          fields="*"
+        />
+
         {error && touched && (
           <Text color="red" fontSize="$2" marginTop="$1">
             {error}

@@ -25,16 +25,18 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
     // Create a new timestamp preserving the current time
     const currentTime = formData.date?.toDate() || new Date();
     selectedDate.setHours(currentTime.getHours(), currentTime.getMinutes());
-    
+
     updateFormData({ date: Timestamp.fromDate(selectedDate) });
   };
+
+  console.log({ date: formData.date });
 
   const handleTimeChange = (_: any, selectedTime?: Date) => {
     if (selectedTime) {
       // Create a new date with current date but updated time
       const currentDate = formData.date?.toDate() || new Date();
       currentDate.setHours(selectedTime.getHours(), selectedTime.getMinutes());
-      
+
       updateFormData({ date: Timestamp.fromDate(currentDate) });
     }
   };
@@ -43,7 +45,7 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
   const handleNowOption = () => {
     if (timeOption === "now") {
       updateFormData({
-        date: Timestamp.now()
+        date: Timestamp.now(),
       });
     }
     setTimeOption("now");
@@ -53,7 +55,7 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
     // If 'now' is selected, update to current time one more time before continuing
     if (timeOption === "now") {
       updateFormData({
-        date: Timestamp.now()
+        date: Timestamp.now(),
       });
     }
     onContinue();
@@ -123,10 +125,16 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
               <View borderRadius={10} overflow="hidden" backgroundColor="white">
                 <Calendar
                   onDayPress={handleDateChange}
-                  current={(formData.date?.toDate() || new Date()).toISOString().split("T")[0]}
+                  current={
+                    (formData.date?.toDate() || new Date())
+                      .toISOString()
+                      .split("T")[0]
+                  }
                   minDate={new Date().toISOString().split("T")[0]}
                   markedDates={{
-                    [(formData.date?.toDate() || new Date()).toISOString().split("T")[0]]: {
+                    [(formData.date?.toDate() || new Date())
+                      .toISOString()
+                      .split("T")[0]]: {
                       selected: true,
                       selectedColor: COLORS.action,
                     },

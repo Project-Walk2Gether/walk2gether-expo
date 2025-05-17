@@ -3,6 +3,7 @@ import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useWalkForm, WalkFormData } from "@/context/WalkFormContext";
 import { createWalkFromForm } from "@/utils/walkSubmission";
+import { useQuoteOfTheDay } from "@/utils/quotes";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo } from "react";
@@ -52,6 +53,9 @@ export function WalkWizard() {
     }
   }, [friendId]);
 
+  // Get the quote advancement function
+  const { advanceToNextQuote } = useQuoteOfTheDay();
+
   const handleSubmit = useCallback(async () => {
     if (!userData) {
       showMessage("User data not found", "error");
@@ -64,10 +68,18 @@ export function WalkWizard() {
     });
 
     if (!walkDoc) return;
+    
+    // Advance to the next quote when a walk is successfully created
+    advanceToNextQuote();
 
-    // Now, if the walk is starting soon (in the next 1hr), navigate to the walk
-    router.replace(`/walks/${walkDoc.id}`);
-  }, [formData, router, userData, user]);
+    // For friend walks, navigate to the invite screen after creation
+    if (formData.type === "friends") {
+      router.replace(`/walks/${walkDoc.id}/invite`);
+    } else {
+      // For other walk types, navigate to the main walk page
+      router.replace(`/walks/${walkDoc.id}`);
+    }
+  }, [formData, router, userData, user, advanceToNextQuote]);
 
   const handleBackPress = useCallback(() => {
     if (currentStep > 0) {

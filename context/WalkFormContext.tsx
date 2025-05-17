@@ -1,7 +1,13 @@
-import React, { createContext, useContext, useState } from "react";
+import { Timestamp } from "@react-native-firebase/firestore";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { Walk } from "walk2gether-shared";
 
 export type WalkFormData = Partial<Walk>;
+
+// Define a type for form errors with the same shape as the form data
+export type WalkFormErrors = {
+  [K in keyof WalkFormData]?: string;
+};
 
 interface WalkFormContextType {
   formData: WalkFormData;
@@ -13,6 +19,9 @@ interface WalkFormContextType {
   goToPreviousStep: () => void;
   goToStep: (step: number) => void;
   totalSteps: number;
+  errors: WalkFormErrors;
+  validateForm: () => boolean;
+  isValid: boolean;
 }
 
 // Generate a random 6-character alphanumeric invitation code
@@ -43,10 +52,13 @@ export const WalkFormProvider: React.FC<Props> = ({ children }) => {
   // Initialize form with a fresh invitation code on each form creation
   const initializedFormData = {
     ...initialFormData,
+    date: Timestamp.now(),
     invitationCode: generateInvitationCode(),
   };
   const [formData, setFormData] = useState<WalkFormData>(initializedFormData);
   const [currentStep, setCurrentStep] = useState(0);
+  const [errors, setErrors] = useState<WalkFormErrors>({});
+  const [isValid, setIsValid] = useState(true);
   const totalSteps = 6; // Type selection + 4 wizard steps
 
   const updateFormData = (newData: Partial<WalkFormData>) => {
@@ -83,7 +95,40 @@ export const WalkFormProvider: React.FC<Props> = ({ children }) => {
     }
   };
 
-  // Location handling is now managed by LocationContext
+  // Form validation logic
+  const validateForm = (): boolean => {
+    const newErrors: WalkFormErrors = {};
+    
+    // Required fields validation
+    if (!formData.date) {
+      newErrors.date = "Date and time are required";
+    }
+    
+    if (!formData.durationMinutes) {
+      newErrors.durationMinutes = "Duration is required";
+    }
+    
+    if (!formData.startLocation) {
+      newErrors.startLocation = "Starting location is required";
+    }
+    
+    if (formData.type === "neighborhood" && (!formData.invitedUserIds || formData.invitedUserIds.length === 0)) {
+      newErrors.invitedUserIds = "No nearby walkers found in this neighborhood";
+    }
+
+    // Set the errors state
+    setErrors(newErrors);
+    
+    // Form is valid if there are no errors
+    const valid = Object.keys(newErrors).length === 0;
+    setIsValid(valid);
+    return valid;
+  };
+
+  // Validate form whenever formData changes
+  useEffect(() => {
+    validateForm();
+  }, [formData]);
 
   return (
     <WalkFormContext.Provider
@@ -97,6 +142,9 @@ export const WalkFormProvider: React.FC<Props> = ({ children }) => {
         goToPreviousStep,
         goToStep,
         totalSteps,
+        errors,
+        validateForm,
+        isValid,
       }}
     >
       {children}
