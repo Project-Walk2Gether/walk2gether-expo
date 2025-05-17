@@ -1,11 +1,34 @@
 import { useAuth } from "@/context/AuthContext";
 import { FriendsProvider } from "@/context/FriendsContext";
 import { NotificationsProvider } from "@/context/NotificationsContext";
-import { WalksProvider } from "@/context/WalksContext";
+import { useWalks, WalksProvider } from "@/context/WalksContext";
+import { syncBackgroundLocationTracking } from "@/utils/locationSyncTask";
 import { Redirect, Stack } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { YStack } from "tamagui";
+
+function MainAppLayout() {
+  const { user } = useAuth();
+  const { activeWalks } = useWalks();
+
+  // Sync background location tracking with active walks
+  useEffect(() => {
+    const runSyncTask = async () => {
+      await syncBackgroundLocationTracking(activeWalks.length);
+    };
+
+    // Run the sync task when component mounts and when active walks change
+    runSyncTask();
+  }, [activeWalks]);
+
+  return (
+    <Stack initialRouteName="(tabs)" screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(modals)" options={{ presentation: "modal" }} />
+    </Stack>
+  );
+}
 
 export default function AppLayout() {
   const { user, loading } = useAuth();
@@ -32,10 +55,7 @@ export default function AppLayout() {
     <NotificationsProvider>
       <WalksProvider>
         <FriendsProvider>
-          <Stack initialRouteName="(tabs)" screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="(modals)" options={{ presentation: "modal" }} />
-          </Stack>
+          <MainAppLayout />
         </FriendsProvider>
       </WalksProvider>
     </NotificationsProvider>

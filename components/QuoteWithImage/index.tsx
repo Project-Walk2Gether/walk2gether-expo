@@ -8,7 +8,7 @@ interface Props {
   imageSize?: number;
 }
 
-export default function QuoteWithImage({ imageSize = 120 }: Props) {
+export default function QuoteWithImage({ imageSize = 200 }: Props) {
   // Fetch the quote using our custom hook
   const { quote } = useQuoteOfTheDay();
   // Animation state
