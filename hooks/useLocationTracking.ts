@@ -1,10 +1,11 @@
 import { useLocation } from "@/context/LocationContext";
 import * as Location from "expo-location";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDoc } from "@/utils/firestore";
 // Using FirebaseFirestoreTypes directly instead of a custom Walk type
 import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
 import { WithId } from "walk2gether-shared";
+import { writeLogIfEnabled } from "@/utils/logging";
 
 /**
  * Result type for the useLocationTracking hook
@@ -46,6 +47,9 @@ export function useLocationTracking(
   // Fetch the walk data to get the estimatedEndTimeWithBuffer
   const { doc: walk } = useDoc<FirebaseFirestoreTypes.DocumentData>(`walks/${walkId}`);
 
+  // Keep track of whether we've already stopped tracking due to endedAt
+  const endedAtDetected = useRef(false);
+
   // Start tracking when walk and user IDs are available
   useEffect(() => {
     if (walkId && userId) {
@@ -61,16 +65,32 @@ export function useLocationTracking(
     };
   }, [walkId, userId]);
 
+  // Monitor the walk's endedAt property and stop tracking when it's set
+  useEffect(() => {
+    if (!walk || endedAtDetected.current) return;
+
+    // Check if endedAt has been set on the walk
+    if (walk.endedAt) {
+      endedAtDetected.current = true;
+      writeLogIfEnabled({
+        message: `Stopping location tracking because walk ${walkId} has ended at ${walk.endedAt.toDate()}`
+      });
+      
+      console.log(`Walk ${walkId} has ended, stopping location tracking...`);
+      stopTracking();
+    }
+  }, [walk]);
+
   // Start location tracking for this walk
   const startTracking = async () => {
-    if (!walkId || !userId) return;
+    if (!walkId) return;
     
     // Get the estimatedEndTimeWithBuffer from the walk data
     // If it exists, it's a Firebase Timestamp that needs to be converted to a JS Date
     const endTimeWithBuffer = walk?.estimatedEndTimeWithBuffer;
     const endTime = endTimeWithBuffer ? endTimeWithBuffer.toDate() : undefined;
     
-    await startWalkTracking(walkId, userId, endTime);
+    await startWalkTracking(walkId, endTime);
   };
 
   // Stop location tracking

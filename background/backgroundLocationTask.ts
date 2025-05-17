@@ -3,6 +3,7 @@ import * as BackgroundFetch from "expo-background-fetch";
 import * as ExpoLocation from "expo-location";
 import * as TaskManager from "expo-task-manager";
 import { writeLogIfEnabled } from "../utils/logging";
+import { auth_instance } from "@/config/firebase";
 
 // Define a task name for background location tracking
 export const LOCATION_TRACKING_TASK = "background-location-tracking";

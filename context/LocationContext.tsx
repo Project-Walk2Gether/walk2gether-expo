@@ -8,6 +8,7 @@ import {
   stopBackgroundLocationTracking,
 } from "@/background/backgroundLocationTask";
 import { writeLogIfEnabled } from "@/utils/logging";
+import { auth_instance } from "@/config/firebase";
 
 interface LocationContextValue {
   // Basic location data
@@ -26,9 +27,8 @@ interface LocationContextValue {
   
   // Walk tracking
   activeWalkId?: string;
-  activeUserId?: string;
   locationTracking: boolean;
-  startWalkTracking: (walkId: string, userId: string, estimatedEndTimeWithBuffer?: Date) => Promise<boolean>;
+  startWalkTracking: (walkId: string, estimatedEndTimeWithBuffer?: Date) => Promise<boolean>;
   stopWalkTracking: () => Promise<void>;
   updateLocation: (location: Location.LocationObject) => Promise<void>;
 }
@@ -67,7 +67,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Walk tracking state
   const [activeWalkId, setActiveWalkId] = useState<string>();
-  const [activeUserId, setActiveUserId] = useState<string>();
   const [locationTracking, setLocationTracking] = useState(false);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
 
@@ -171,7 +170,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       // If we're actively tracking a walk, update the location there too
-      if (activeWalkId && activeUserId && locationTracking) {
+      if (activeWalkId && locationTracking && auth_instance.currentUser?.uid) {
         await updateLocation(loc);
       }
     } catch (e: any) {
@@ -182,16 +181,21 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   // Start tracking location for a specific walk
-  const startWalkTracking = async (walkId: string, userId: string, estimatedEndTimeWithBuffer?: Date) => {
-    if (!walkId || !userId) {
-      console.error("Cannot start tracking without walkId and userId");
+  const startWalkTracking = async (walkId: string, estimatedEndTimeWithBuffer?: Date) => {
+    if (!walkId) {
+      console.error("Cannot start tracking without walkId");
+      return false;
+    }
+    
+    const userId = auth_instance.currentUser?.uid;
+    if (!userId) {
+      console.error("Cannot start tracking without authenticated user");
       return false;
     }
 
     try {
-      // Store the active walk and user
+      // Store the active walk
       setActiveWalkId(walkId);
-      setActiveUserId(userId);
 
       // Make sure we have permissions
       const { foreground, background } = await requestPermissions();
@@ -265,7 +269,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       // Reset state
       setLocationTracking(false);
       setActiveWalkId(undefined);
-      setActiveUserId(undefined);
     } catch (e) {
       console.error("Error stopping walk tracking:", e);
     }
@@ -273,10 +276,13 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Update location in Firebase
   const updateLocation = async (location: Location.LocationObject) => {
-    if (!activeWalkId || !activeUserId) return;
+    if (!activeWalkId) return;
+    
+    const userId = auth_instance.currentUser?.uid;
+    if (!userId) return;
 
     try {
-      await locationService.updateLocation(activeWalkId, activeUserId, location);
+      await locationService.updateLocation(activeWalkId, userId, location);
     } catch (e) {
       console.error("Error updating location in Firebase:", e);
     }
@@ -292,7 +298,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
         locationPermission,
         backgroundLocationPermission,
         activeWalkId,
-        activeUserId,
         locationTracking,
         refresh: getLocation,
         requestPermissions,
