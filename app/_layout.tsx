@@ -6,6 +6,7 @@ import { MenuProvider } from "@/context/MenuContext";
 import { UpdatesProvider } from "@/context/UpdatesContext";
 import { UserDataProvider } from "@/context/UserDataContext";
 import { useAppStateUpdates } from "@/hooks/useAppStateUpdates";
+import { configureNotifications } from "@/utils/notifications";
 import { Stack } from "expo-router";
 import React, { ComponentType } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -17,6 +18,9 @@ import "react-native-get-random-values";
 
 // https://github.com/FaridSafi/react-native-google-places-autocomplete#more-examples
 (navigator as any).geolocation = require("@react-native-community/geolocation");
+
+// Configure notifications at the app initialization
+configureNotifications();
 
 function AppContent() {
   // Use our custom hook to handle app state updates

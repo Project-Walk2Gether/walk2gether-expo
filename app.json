@@ -112,7 +112,7 @@
         "projectId": "7b384d5a-3e2e-4c79-895f-30255a67819a"
       },
       "googleMapsApiKey": "AIzaSyAjnbays5Hi7wYTj9PLljDDFJzZq3Dh3z8",
-      "emulatorsEnabledInDev": true
+      "emulatorsEnabledInDev": false
     },
     "owner": "michaeldawson"
   }
