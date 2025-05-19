@@ -4,6 +4,11 @@ import { StyleProp, ViewStyle } from "react-native";
 
 // Colors extracted from the Walk2Gether logo
 export const BRAND_COLORS = {
+  // Red gradient colors for delete/warning screens
+  redLight: "#FDEDED",
+  redMedium: "#F87171",
+  redDark: "#DC2626",
+  redDeep: "#991B1B",
   // Brown/beige colors from logo
   brownDark: "#372923", // Dark brown from figure
   brownLight: "#C0A78E", // Light beige/tan from background
@@ -36,6 +41,12 @@ export const BRAND_COLORS = {
 
 // Predefined gradient combinations
 export const GRADIENTS = {
+  // Danger/Warning gradient (for delete screens)
+  danger: [
+    BRAND_COLORS.redLight,
+    BRAND_COLORS.redMedium,
+    BRAND_COLORS.redDark,
+  ],
   // Main gradient based on current implementation
   main: [
     BRAND_COLORS.tealBlue,
