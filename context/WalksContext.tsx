@@ -51,7 +51,6 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     // Get walks that haven't ended yet (estimatedEndTime > now)
     return query(
       collection(firestore_instance, "walks"),
-      where("active", "==", false),
       where("estimatedEndTime", ">", now),
       where("invitedUserIds", "array-contains", user.uid),
       orderBy("estimatedEndTime", "asc"),

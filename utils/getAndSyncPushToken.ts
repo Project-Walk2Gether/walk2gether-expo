@@ -25,7 +25,7 @@ export async function getAndSyncPushToken(user: FirebaseAuthTypes.User) {
         setDoc(
           userDoc,
           {
-            pushToken: token,
+            expoPushToken: token,
           },
           { merge: true }
         );

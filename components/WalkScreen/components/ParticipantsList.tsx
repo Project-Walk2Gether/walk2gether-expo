@@ -27,8 +27,8 @@ export default function ParticipantsList({
   // Sort participants: current user first, then by status (arrived, on-the-way, pending)
   const sortedParticipants = [...participants].sort((a, b) => {
     // Current user first
-    if (a.id === currentUserId) return -1;
-    if (b.id === currentUserId) return 1;
+    if (a.id === currentUserId) return 1;
+    if (b.id === currentUserId) return -1;
 
     // Then by status: arrived first
     if (a.status === "arrived" && b.status !== "arrived") return -1;
@@ -150,10 +150,10 @@ export default function ParticipantsList({
               {statusText}
             </Text>
           </XStack>
-          
+
           {/* Introduction text if available */}
           {item.introduction && (
-            <Text 
+            <Text
               fontSize="$1"
               color="$gray10"
               fontStyle="italic"

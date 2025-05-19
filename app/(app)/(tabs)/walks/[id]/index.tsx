@@ -37,12 +37,12 @@ export default function WalkRouter() {
   // Determine the appropriate destination based on permissions
   if (
     user?.uid === walk.createdByUid ||
-    (participant && participant.approvedAt)
+    (participant && participant.approvedAt && !participant.rejectedAt)
   ) {
     // Walk owner or approved participant - show the walk details
     return <Redirect href={`/walks/${id}/show`} />;
   } else {
-    // Participant with pending request or non-participant - show request page
+    // Participant with pending/rejected request or non-participant - show request page
     return <Redirect href={`/walks/${id}/request`} />;
   }
 }

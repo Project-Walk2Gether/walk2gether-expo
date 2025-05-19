@@ -109,9 +109,12 @@ export const NotificationsProvider: React.FC<Props> = ({ children }) => {
   // Save token to Firebase when available and user is authenticated
   useEffect(() => {
     if (user && expoPushToken) {
-      console.log("User and expoPushToken available, saving to Firebase", {
-        uid: user.uid,
-        tokenLength: expoPushToken.length,
+      writeLogIfEnabled({
+        message: "User and expoPushToken available, saving to Firebase",
+        metadata: {
+          uid: user.uid,
+          tokenLength: expoPushToken.length,
+        },
       });
       saveTokenToFirebase(expoPushToken);
     }
@@ -124,22 +127,13 @@ export const NotificationsProvider: React.FC<Props> = ({ children }) => {
 
   // Save token to Firebase
   const saveTokenToFirebase = async (token: string | null) => {
-    if (!user || !token) {
-      console.log("Cannot save token - missing user or token", {
-        hasUser: !!user,
-        hasToken: !!token,
-      });
-      return;
-    }
-
+    if (!user) return;
     try {
       console.log(`Saving push token for user ${user.uid}`);
       const userRef = doc(firestore_instance, `users/${user.uid}`);
       await setDoc(
         userRef,
         {
-          // Use both property names to ensure compatibility
-          pushToken: token,
           expoPushToken: token,
           deviceInfo: {
             platform: Platform.OS,
@@ -251,6 +245,7 @@ export const NotificationsProvider: React.FC<Props> = ({ children }) => {
         permissionStatus,
         expoPushToken,
         loading,
+        error,
         requestPermissions,
         checkPermissions,
       }}

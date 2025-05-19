@@ -2,8 +2,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useWalkForm, WalkFormData } from "@/context/WalkFormContext";
-import { createWalkFromForm } from "@/utils/walkSubmission";
 import { useQuoteOfTheDay } from "@/utils/quotes";
+import { createWalkFromForm } from "@/utils/walkSubmission";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo } from "react";
@@ -68,12 +68,12 @@ export function WalkWizard() {
     });
 
     if (!walkDoc) return;
-    
+
     // Advance to the next quote when a walk is successfully created
     advanceToNextQuote();
 
     // For friend walks, navigate to the invite screen after creation
-    if (formData.type === "friends") {
+    if (formData.type === "friends" && !formData.invitedUserIds?.length) {
       router.replace(`/walks/${walkDoc.id}/invite`);
     } else {
       // For other walk types, navigate to the main walk page
@@ -107,6 +107,10 @@ export function WalkWizard() {
         {
           title: "Where is the meetup point?",
           component: LocationSelection, // Needs onContinue and onBack
+        },
+        {
+          title: "How long will this walk be?",
+          component: DurationSelection, // Needs onContinue and onBack
         },
         {
           title: "Review & Submit",

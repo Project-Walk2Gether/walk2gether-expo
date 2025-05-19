@@ -50,7 +50,10 @@ export function useDoc<T extends FirebaseFirestoreTypes.DocumentData>(
           });
         setStatus("success");
       },
-      (error) => console.error("Error fetching doc " + logLabel, error)
+      (error) => {
+        setError(error);
+        console.error("Error fetching doc " + logLabel, error);
+      }
     );
 
     return unsubscribe;

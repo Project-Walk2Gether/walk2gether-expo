@@ -34,6 +34,7 @@ interface Props {
   showAttachments?: boolean;
   showActions?: boolean;
   onPress?: () => void;
+  hideInviteOption?: boolean;
 }
 
 const WalkCard: React.FC<Props> = ({
@@ -41,6 +42,7 @@ const WalkCard: React.FC<Props> = ({
   showAttachments = false,
   showActions = false,
   onPress,
+  hideInviteOption = false,
 }) => {
   const {
     coords,
@@ -65,7 +67,10 @@ const WalkCard: React.FC<Props> = ({
   const isCancelled =
     participantDoc?.cancelledAt !== null &&
     participantDoc?.cancelledAt !== undefined;
-  const isPending = hasRequested && !isApproved && !isCancelled;
+  const isRejected =
+    participantDoc?.rejectedAt !== null &&
+    participantDoc?.rejectedAt !== undefined;
+  const isPending = hasRequested && !isApproved && !isCancelled && !isRejected;
   // Calculate the distance and prepare the location display text
   const locationDisplay = (() => {
     if (walkIsNeighborhoodWalk(walk)) return null;
@@ -151,7 +156,7 @@ const WalkCard: React.FC<Props> = ({
           </XStack>
 
           {/* Simple menu button that triggers the global menu context */}
-          {isMine && <WalkMenu walk={walk} />}
+          {isMine && <WalkMenu walk={walk} hideInviteOption={hideInviteOption} />}
         </XStack>
 
         <XStack alignItems="center" gap={6} justifyContent="space-between">
@@ -210,6 +215,24 @@ const WalkCard: React.FC<Props> = ({
                   </Text>
                 </XStack>
               )}
+              
+              {/* If user has requested to join and it's rejected */}
+              {isRejected && (
+                <XStack
+                  backgroundColor="$gray4"
+                  paddingHorizontal="$3"
+                  paddingVertical="$2"
+                  borderRadius="$3"
+                  alignItems="center"
+                  gap="$1"
+                  mt="$2"
+                  flex={1}
+                >
+                  <Text fontSize={12} fontWeight="600" color="$gray9">
+                    Your request wasn't accepted this time
+                  </Text>
+                </XStack>
+              )}
 
               {/* If user has requested to join and it's pending */}
               {isPending && (
@@ -231,7 +254,7 @@ const WalkCard: React.FC<Props> = ({
               )}
 
               {/* Show join button if user hasn't requested or request was cancelled/rejected */}
-              {(!hasRequested || isCancelled) &&
+              {(!hasRequested || isCancelled || isRejected) &&
                 walkIsNeighborhoodWalk(walk) &&
                 status !== "past" && (
                   <Button
