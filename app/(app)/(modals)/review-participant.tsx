@@ -2,6 +2,7 @@ import { firestore_instance } from "@/config/firebase";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
 import {
+  deleteField,
   doc,
   serverTimestamp,
   updateDoc,
@@ -75,6 +76,7 @@ export default function ReviewParticipantScreen() {
       );
       await updateDoc(participantRef, {
         rejectedAt: serverTimestamp(),
+        approvedAt: deleteField(),
         status: "rejected",
       });
       router.back();
@@ -132,6 +134,18 @@ export default function ReviewParticipantScreen() {
                 : "Walking"}
             </Text>
           </XStack>
+
+          {/* Show introduction if available */}
+          {participant.introduction && (
+            <YStack space="$2" backgroundColor="$gray3" padding="$3" borderRadius="$3" width="100%" maxWidth={400}>
+              <Text fontSize="$2" fontWeight="500" color="$gray11">
+                Introduction:
+              </Text>
+              <Text fontSize="$3" color="$gray12" fontStyle="italic">
+                "{participant.introduction}"
+              </Text>
+            </YStack>
+          )}
 
           {/* Friend count could be shown here if available in userData */}
         </YStack>

@@ -147,7 +147,7 @@ export default function WalkScreen() {
             </View>
           )}
           <LinearGradient
-            colors={["rgba(0,0,0,0.5)", "transparent"]}
+            colors={["rgba(0,0,0,0.9)", "rgba(0,0,0,0.7)"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
             style={{

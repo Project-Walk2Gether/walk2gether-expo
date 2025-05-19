@@ -1,7 +1,7 @@
 import { db } from "@/config/firebase";
 import { useDoc } from "@/utils/firestore";
 import { doc, setDoc } from "@react-native-firebase/firestore";
-import React, { createContext, ReactNode, useContext } from "react";
+import React, { createContext, ReactNode, useContext, useEffect } from "react";
 import { UserData, WithId } from "walk2gether-shared";
 import { useAuth } from "./AuthContext";
 
@@ -31,10 +31,23 @@ interface UserDataProviderProps {
 export const UserDataProvider: React.FC<UserDataProviderProps> = ({
   children,
 }) => {
-  const { user: firebaseUser } = useAuth();
-  const { doc: userData, status } = useDoc<UserData>(
-    firebaseUser ? "users/" + firebaseUser!.uid : undefined
-  );
+  const { user: firebaseUser, signOut } = useAuth();
+  const {
+    doc: userData,
+    status,
+    error,
+  } = useDoc<UserData>(firebaseUser ? "users/" + firebaseUser!.uid : undefined);
+
+  useEffect(() => {
+    if (error && error.code === "firestore/permission-denied") {
+      console.log(
+        "Permission denied error fetching user data, signing out user"
+      );
+      signOut();
+    } else if (error) {
+      console.error("Error fetching user data:", error);
+    }
+  }, [error]);
 
   const updateUserData = async (data: Partial<UserData>) => {
     if (!firebaseUser) {

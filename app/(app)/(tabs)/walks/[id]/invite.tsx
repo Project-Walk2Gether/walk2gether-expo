@@ -162,6 +162,7 @@ export default function InviteScreen() {
                 walk={walk}
                 showAttachments={false}
                 showActions={false}
+                hideInviteOption={true} /* Hide Invite option when on the invite screen */
                 onPress={undefined} /* Explicitly disable navigation */
               />
             )}

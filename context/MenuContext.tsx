@@ -1,6 +1,17 @@
-import { MoreVertical } from "@tamagui/lucide-icons";
-import React, { createContext, useContext, useState } from "react";
-import { Button, Sheet, Text, YStack } from "tamagui";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { StyleSheet } from "react-native";
+import { Button, Text, YStack } from "tamagui";
 
 // Define the MenuItem type
 export interface MenuItem {
@@ -56,27 +67,60 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // Create refs for the bottom sheet
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  // Memoize the snap points
+  const snapPoints = useMemo(() => ["50%"], []);
+
+  // Callbacks for sheet actions
+  const handleSheetChanges = useCallback((index: number) => {
+    if (index === -1) {
+      setIsOpen(false);
+    }
+  }, []);
+
+  // Backdrop component for the bottom sheet
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+      />
+    ),
+    []
+  );
+
+  console.log({ isOpen });
+
+  // Effect to handle opening and closing the sheet
+  React.useEffect(() => {
+    if (isOpen) {
+      bottomSheetRef.current?.expand();
+    } else {
+      bottomSheetRef.current?.close();
+    }
+  }, [isOpen]);
+
   return (
     <MenuContext.Provider value={{ showMenu }}>
       {children}
 
-      {/* The Sheet component that displays the menu */}
-      <Sheet
-        modal
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        snapPoints={[45]}
-        position={0}
-        dismissOnSnapToBottom
-        animation="quick"
+      {/* The BottomSheet component that displays the menu */}
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={-1}
+        snapPoints={snapPoints}
+        enablePanDownToClose
+        enableDynamicSizing
+        backdropComponent={renderBackdrop}
+        onChange={handleSheetChanges}
+        handleIndicatorStyle={styles.indicator}
+        backgroundStyle={styles.bottomSheetBackground}
       >
-        <Sheet.Overlay
-          animation="lazy"
-          enterStyle={{ opacity: 0 }}
-          exitStyle={{ opacity: 0 }}
-        />
-        <Sheet.Frame padding="$4" gap="$4">
-          <Sheet.Handle />
+        <BottomSheetScrollView contentContainerStyle={styles.scrollContent}>
           <Text fontSize="$6" fontWeight="600" textAlign="center">
             {menuTitle}
           </Text>
@@ -97,8 +141,24 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({
               </Button>
             ))}
           </YStack>
-        </Sheet.Frame>
-      </Sheet>
+        </BottomSheetScrollView>
+      </BottomSheet>
     </MenuContext.Provider>
   );
 };
+
+// Styles for the bottom sheet
+const styles = StyleSheet.create({
+  bottomSheetBackground: {
+    backgroundColor: "white",
+  },
+  indicator: {
+    backgroundColor: "#CDCDCD",
+    width: 40,
+    height: 4,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 24,
+  },
+});

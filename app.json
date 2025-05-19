@@ -2,7 +2,7 @@
   "expo": {
     "name": "Walk2Gether",
     "slug": "walkmate",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -25,6 +25,7 @@
         "UIBackgroundModes": ["location", "fetch", "remote-notification"],
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "This app uses the camera to take photos and videos for your walks, if you choose.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to select photos for your walks.",
         "CFBundleURLTypes": [
           {
             "CFBundleURLSchemes": [
@@ -111,7 +112,7 @@
         "projectId": "7b384d5a-3e2e-4c79-895f-30255a67819a"
       },
       "googleMapsApiKey": "AIzaSyAjnbays5Hi7wYTj9PLljDDFJzZq3Dh3z8",
-      "emulatorsEnabledInDev": true
+      "emulatorsEnabledInDev": false
     },
     "owner": "michaeldawson"
   }

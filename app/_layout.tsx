@@ -23,31 +23,29 @@ function AppContent() {
   useAppStateUpdates();
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen
-          name="(app)"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="join"
-          options={{
-            headerShown: false,
-            animation: "none",
-          }}
-        />
-        <Stack.Screen
-          name="auth"
-          options={{
-            headerShown: false,
-            animation: "none",
-          }}
-        />
-      </Stack>
-    </GestureHandlerRootView>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen
+        name="(app)"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="join"
+        options={{
+          headerShown: false,
+          animation: "none",
+        }}
+      />
+      <Stack.Screen
+        name="auth"
+        options={{
+          headerShown: false,
+          animation: "none",
+        }}
+      />
+    </Stack>
   );
 }
 
@@ -61,7 +59,9 @@ export const withTamagui = <P extends object>(Component: ComponentType<P>) => {
 };
 
 // Higher-Order Component for FlashMessageProvider
-export const withFlashMessage = <P extends object>(Component: ComponentType<P>) => {
+export const withFlashMessage = <P extends object>(
+  Component: ComponentType<P>
+) => {
   return (props: P) => (
     <FlashMessageProvider>
       <Component {...props} />
@@ -71,17 +71,21 @@ export const withFlashMessage = <P extends object>(Component: ComponentType<P>) 
 
 function RootLayout() {
   return (
-    <LocationProvider>
-      <UpdatesProvider>
-        <UserDataProvider>
-          <MenuProvider>
-            <AppContent />
-          </MenuProvider>
-        </UserDataProvider>
-      </UpdatesProvider>
-    </LocationProvider>
+    <GestureHandlerRootView>
+      <LocationProvider>
+        <UpdatesProvider>
+          <UserDataProvider>
+            <MenuProvider>
+              <AppContent />
+            </MenuProvider>
+          </UserDataProvider>
+        </UpdatesProvider>
+      </LocationProvider>
+    </GestureHandlerRootView>
   );
 }
 
 // Export the RootLayout wrapped with all providers
-export default withTamagui(withFlashMessage(withErrorBoundary(withAuthProvider(RootLayout))));
+export default withTamagui(
+  withFlashMessage(withErrorBoundary(withAuthProvider(RootLayout)))
+);

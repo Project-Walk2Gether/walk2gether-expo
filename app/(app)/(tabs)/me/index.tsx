@@ -17,7 +17,6 @@ import {
   Camera,
   Clock,
   Download,
-  Fingerprint,
   Info,
   LogOut,
   Pencil,
@@ -25,7 +24,6 @@ import {
   QrCode,
   Trash,
 } from "@tamagui/lucide-icons";
-import * as Clipboard from "expo-clipboard";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -179,13 +177,6 @@ export default function MeScreen() {
     }
   };
 
-  const handleCopyUID = async () => {
-    if (authUser?.uid) {
-      await Clipboard.setStringAsync(authUser.uid);
-      showMessage("User ID copied to clipboard", "success");
-    }
-  };
-
   // Check for updates when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
@@ -269,11 +260,6 @@ export default function MeScreen() {
         <H4 mt="$3" mb="$1" fontSize={26} fontWeight="bold">
           {name || "Your Name"}
         </H4>
-        {location && (
-          <Text fontSize={16} opacity={0.9} mb="$2">
-            {location.name}
-          </Text>
-        )}
       </YStack>
 
       {/* About Me Section */}
@@ -284,9 +270,11 @@ export default function MeScreen() {
         borderRadius={16}
       >
         <YStack px="$4" py="$3">
-          <Text fontSize={16} fontWeight="600" color={COLORS.text} mb="$2">
-            About Me
-          </Text>
+          {location && (
+            <Text fontSize={16} opacity={0.9} mb="$2">
+              {location.name}
+            </Text>
+          )}
           <Text fontSize={16} color={COLORS.text} opacity={aboutMe ? 1 : 0.7}>
             {aboutMe || "Add some details about yourself..."}
           </Text>
@@ -357,15 +345,6 @@ export default function MeScreen() {
               </Button>
             )
           }
-        />
-
-        <Separator borderColor="$gray5" />
-
-        <ActionRow
-          icon={<Fingerprint size={24} color={COLORS.textSecondary} />}
-          title="User ID"
-          secondaryText={authUser?.uid || "Unknown"}
-          onPress={handleCopyUID}
         />
 
         <Separator borderColor="$gray5" />

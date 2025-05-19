@@ -1,5 +1,6 @@
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { useFriends } from "@/context/FriendsContext";
 import { useLocation } from "@/context/LocationContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
@@ -42,8 +43,8 @@ export default function RequestToJoinScreen({
   const navigation = useNavigation();
   const { user } = useAuth();
   const { userData, updateUserData } = useUserData();
-
   const { userLocation } = useLocation();
+  const { friendships } = useFriends();
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
   const [introduction, setIntroduction] = useState("");
@@ -56,14 +57,21 @@ export default function RequestToJoinScreen({
   const requestCancelled = participantDoc?.cancelledAt !== undefined;
   const isActivePending = requestSent && !requestCancelled;
 
+  // Check if user is friends with the walk organizer
+  const isFriendWithOrganizer = friendships.some(friendship => {
+    return friendship.uids.includes(walk.createdByUid);
+  });
+
   // Set navigation header options
   useEffect(() => {
     navigation.setOptions({
       title: isActivePending
         ? "Request Sent!"
+        : isFriendWithOrganizer
+        ? `Join ${walk.organizerName}'s walk`
         : `Request to join ${walk.organizerName}`,
     });
-  }, [navigation, walk.organizerName, isActivePending]);
+  }, [navigation, walk.organizerName, isActivePending, isFriendWithOrganizer]);
 
   const handleRequestToJoin = async () => {
     if (!user || !walk?.id) return;
@@ -77,13 +85,11 @@ export default function RequestToJoinScreen({
         `walks/${walk.id}/participants/${participantId}`
       );
 
-      console.log("HERE");
-
       const participant: Participant = {
         userUid: user.uid,
         displayName: userData?.name || "Anonymous",
         photoURL: userData?.profilePicUrl || null,
-        approvedAt: null,
+        approvedAt: isFriendWithOrganizer ? Timestamp.now() : null,
         lastLocation: {
           latitude: userLocation?.coords.latitude || 0,
           longitude: userLocation?.coords.longitude || 0,
@@ -205,7 +211,9 @@ export default function RequestToJoinScreen({
               ) : (
                 <>
                   <Text fontSize="$4" textAlign="center" color="$gray11">
-                    Send a request to your neighbor organizer to join this walk.
+                    {isFriendWithOrganizer 
+                      ? "You can join this walk immediately since you're friends with the organizer."
+                      : "Send a request to your neighbor organizer to join this walk."}
                   </Text>
                   <View>
                     <WalkCard walk={walk} />
@@ -262,7 +270,7 @@ export default function RequestToJoinScreen({
                     {loading ? (
                       <ActivityIndicator color="white" />
                     ) : (
-                      "I'm Interested in Joining"
+                      isFriendWithOrganizer ? "Join This Walk" : "I'm Interested in Joining"
                     )}
                   </Button>
                 </>
