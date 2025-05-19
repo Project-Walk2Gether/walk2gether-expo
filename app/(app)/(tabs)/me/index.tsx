@@ -13,6 +13,7 @@ import { COLORS } from "@/styles/colors";
 import { appVersion } from "@/utils/version";
 import storage from "@react-native-firebase/storage";
 import {
+  AlertTriangle,
   Bell,
   Camera,
   Clock,
@@ -345,6 +346,14 @@ export default function MeScreen() {
               </Button>
             )
           }
+        />
+
+        <Separator borderColor="$gray5" />
+
+        <ActionRow
+          icon={<AlertTriangle size={24} color="#DC2626" opacity={0.8} />}
+          label="Delete My Account"
+          onPress={() => router.push("/me/delete-account")}
         />
 
         <Separator borderColor="$gray5" />
