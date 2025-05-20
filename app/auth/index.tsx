@@ -156,7 +156,7 @@ export default function Auth() {
                   </Button>
                 </YStack>
               ) : inviterData ? (
-                <YStack gap="$2">
+                <YStack ai="center" gap="$2" p="$4">
                   <Text fontSize={16} color="#666" textAlign="center">
                     Create an account to connect and start walking together.
                   </Text>
@@ -210,7 +210,7 @@ export default function Auth() {
             )}
           </View>
 
-          <YStack mt="$3" alignItems="center" gap="$2">
+          <YStack alignItems="center" gap="$2">
             <Text mb="$2" fontSize="$1" color="$gray10" textAlign="center">
               By continuing, you agree to our
             </Text>

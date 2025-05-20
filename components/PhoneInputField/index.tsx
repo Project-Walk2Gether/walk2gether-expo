@@ -57,8 +57,7 @@ export const PhoneInputField = forwardRef<PhoneInput, Props>((props, ref) => {
           onChangeFormattedText={onChangeFormattedText}
           containerStyle={{
             width: "100%",
-            padding: 0,
-            margin: 0,
+            paddingLeft: 10,
             height: 48,
             borderWidth: 0, // Remove the internal borders since we have one on the container
             backgroundColor: COLORS.background,
