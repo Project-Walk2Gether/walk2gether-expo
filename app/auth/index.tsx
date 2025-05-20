@@ -98,7 +98,7 @@ export default function Auth() {
             PROJECT
           </Text>
           <AnimatedLogo width={logoWidth} />
-          <Slogan delay={10} />
+          <Slogan delay={5000} />
         </YStack>
       }
       scroll
