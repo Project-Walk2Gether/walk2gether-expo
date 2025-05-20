@@ -2,6 +2,8 @@
 import { ActionButton } from "@/components/ActionButton";
 import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
 import AutoDetectLocation from "@/components/AutoDetectLocation";
+import { FormControl } from "@/components/FormControl";
+import { FormInput } from "@/components/FormInput";
 import LocationAutocomplete from "@/components/LocationAutocomplete";
 import LocationButton from "@/components/UI/LocationButton";
 import { useAuth } from "@/context/AuthContext";
@@ -12,7 +14,7 @@ import { Redirect } from "expo-router";
 import { Formik } from "formik";
 import React, { useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Card, Input, ScrollView, Text, YStack } from "tamagui";
+import { Button, Card, ScrollView, Text, YStack } from "tamagui";
 import { userDataSchema } from "walk2gether-shared";
 import { useOnboarding } from "./_layout";
 
@@ -122,94 +124,71 @@ export default function CompleteYourProfile() {
                     Complete your profile
                   </Text>
 
-                  <Text fontWeight="bold" fontSize="$4" color={COLORS.primary}>
-                    Your Full Name
-                  </Text>
-                  <Input
+                  <FormInput
+                    label="Your Full Name"
                     placeholder="E.g. John Smith"
                     value={values.name}
+                    required
                     onChangeText={(text) => setFieldValue("name", text)}
-                    width="100%"
-                    borderColor={
-                      touched.name && errors.name
-                        ? COLORS.error
-                        : COLORS.primary
-                    }
-                    backgroundColor={COLORS.background}
-                    color={COLORS.text}
-                    borderRadius={10}
-                    px={16}
-                    py={12}
-                    fontSize={18}
+                    error={errors.name}
+                    touched={touched.name}
                   />
-                  {touched.name && errors.name && (
-                    <Text color="$red10" fontSize="$2" alignSelf="flex-start">
-                      {errors.name}
-                    </Text>
-                  )}
-
-                  {touched.name && errors.name && (
-                    <Text color="$red10" fontSize="$2" alignSelf="flex-start">
-                      {errors.name}
-                    </Text>
-                  )}
-                  <YStack width="100%" gap="$2">
-                    <Text
-                      fontWeight="bold"
-                      fontSize="$4"
-                      mb="$2"
-                      color={COLORS.primary}
-                    >
-                      Home Address
-                    </Text>
-                    {locationMode === "none" && (
-                      <>
-                        <LocationButton
-                          onPress={() => setLocationMode("auto")}
-                          f={1}
-                        />
-                        <Button
-                          size="$4"
-                          variant="outlined"
-                          onPress={() => setLocationMode("manual")}
-                          f={2}
-                          icon={
-                            <KeyboardIcon
-                              size={20}
-                              style={{ marginRight: 8 }}
-                            />
-                          }
-                        >
-                          Enter manually
-                        </Button>
-                      </>
-                    )}
-                    {locationMode === "auto" && (
-                      <YStack space="$2" ai="center" width="100%">
-                        <AutoDetectLocation
-                          values={values}
+                  <FormControl
+                    label="Home Address"
+                    error={errors.location}
+                    touched={touched.location}
+                    required
+                  >
+                    <YStack width="100%" gap="$2">
+                      {locationMode === "none" && (
+                        <>
+                          <LocationButton
+                            onPress={() => setLocationMode("auto")}
+                            f={1}
+                          />
+                          <Button
+                            size="$4"
+                            variant="outlined"
+                            onPress={() => setLocationMode("manual")}
+                            f={2}
+                            icon={
+                              <KeyboardIcon
+                                size={20}
+                                style={{ marginRight: 8 }}
+                              />
+                            }
+                          >
+                            Enter manually
+                          </Button>
+                        </>
+                      )}
+                      {locationMode === "auto" && (
+                        <YStack space="$2" ai="center" width="100%">
+                          <AutoDetectLocation
+                            values={values}
+                            setFieldValue={setFieldValue}
+                            setLocationMode={setLocationMode}
+                            clearLocation={() => {
+                              setFieldValue("location", null);
+                              setLocationMode("none");
+                            }}
+                          />
+                        </YStack>
+                      )}
+                      {locationMode === "manual" && (
+                        <LocationAutocomplete
+                          value={values.location}
                           setFieldValue={setFieldValue}
-                          setLocationMode={setLocationMode}
-                          clearLocation={() => {
-                            setFieldValue("location", null);
+                          touched={touched}
+                          errors={errors}
+                          includeChooseAnotherWayButton
+                          onCancel={() => {
                             setLocationMode("none");
                           }}
                         />
-                      </YStack>
-                    )}
-                    {locationMode === "manual" && (
-                      <LocationAutocomplete
-                        value={values.location}
-                        setFieldValue={setFieldValue}
-                        touched={touched}
-                        errors={errors}
-                        includeChooseAnotherWayButton
-                        onCancel={() => {
-                          setLocationMode("none");
-                        }}
-                      />
-                    )}
-                  </YStack>
+                      )}
+                    </YStack>
+                  </FormControl>
                   <ActionButton
                     onPress={() => handleSubmit()}
                     loading={loading}

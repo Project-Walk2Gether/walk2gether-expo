@@ -51,7 +51,7 @@ export default function AuthScenicLayout({
       Animated.timing(sunAnimation, {
         toValue: 0,
         duration: 1200,
-        delay: 500,
+        delay: 1000,
         useNativeDriver: true,
       }).start();
 
