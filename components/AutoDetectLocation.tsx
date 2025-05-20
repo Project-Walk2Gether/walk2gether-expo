@@ -1,5 +1,5 @@
-import { X as XIcon, MapPin } from "@tamagui/lucide-icons";
 import { useLocation } from "@/context/LocationContext";
+import { MapPin, X as XIcon } from "@tamagui/lucide-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Text, XStack, YStack } from "tamagui";
@@ -21,20 +21,32 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
   clearLocation,
   expectedWaitTime = 5000,
 }) => {
-  const { locationPermission } = useLocation();
+  const { locationPermission, requestForegroundPermissions } = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<number | undefined>(undefined);
   const locationFound = useRef(false);
+
   useEffect(() => {
     let cancelled = false;
     async function detectLocation() {
       // Only proceed if location permission is granted
       if (!locationPermission) {
-        setError("Location permission not granted");
-        return;
+        // Request only foreground permissions instead of showing error
+        try {
+          const permissionGranted = await requestForegroundPermissions();
+          if (!permissionGranted) {
+            // User denied permission, clear location
+            if (clearLocation) clearLocation();
+            return;
+          }
+        } catch (error) {
+          // Handle any errors during permission request
+          if (clearLocation) clearLocation();
+          return;
+        }
       }
-      
+
       setLoading(true);
       setProgress(0);
       setError(null);
@@ -129,11 +141,9 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
         }
       }
     }
-    if (!values.location && locationPermission) {
+    // Always try to detect location if we don't have one yet
+    if (!values.location) {
       detectLocation();
-    } else if (!locationPermission && !values.location) {
-      // Don't show loading UI, prompt user to set location permissions
-      setError("Location permission required");
     }
     return () => {
       cancelled = true;
@@ -160,22 +170,24 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
     }
 
     if (error) {
-      if (error === "Location permission required" || error === "Location permission not granted") {
-        return (
-          <XStack width="100%" alignItems="center" justifyContent="space-between">
-            <Text color="$red10">{error}</Text>
-            <Button
-              size="$3"
-              backgroundColor="$blue9"
-              onPress={() => setLocationMode("manual")}
-              icon={<MapPin size={16} color="white" />}
-            >
-              Enter manually
-            </Button>
-          </XStack>
-        );
-      }
-      return <Text color="$red10">{error}</Text>;
+      // Show error with manual entry option
+      return (
+        <XStack
+          width="100%"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Text color="$red10">{error}</Text>
+          <Button
+            size="$3"
+            backgroundColor="$blue9"
+            onPress={() => setLocationMode("manual")}
+            icon={<MapPin size={16} color="white" />}
+          >
+            Enter manually
+          </Button>
+        </XStack>
+      );
     }
 
     if (values.location)

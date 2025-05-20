@@ -1,7 +1,10 @@
 import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
+import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useOnboarding } from "@/context/OnboardingContext";
+import { useDoc } from "@/utils/firestore";
 import { COLORS } from "@/styles/colors";
+import { serverTimestamp } from "@react-native-firebase/firestore";
 import { Info } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
@@ -11,16 +14,35 @@ const { height } = Dimensions.get("window");
 
 export default function NotificationPermissionsScreen() {
   const { goToNextScreen } = useOnboarding();
-  const { permissionStatus, requestPermissions, loading, error } =
-    useNotifications();
+  const { user } = useAuth();
+  const { permissionStatus, requestPermissions, loading, error } = useNotifications();
+  const { doc: userData, updateDoc: updateUserData } = useDoc(
+    user ? `users/${user.uid}` : undefined
+  );
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
-    // When permissions are granted, token is automatically synced via the context
+    // When permissions are granted, mark as complete and continue
     if (permissionStatus?.granted) {
-      goToNextScreen();
+      completePermissionsSetup();
     }
   }, [permissionStatus]);
+  
+  // Mark permissions as completed and continue to next screen
+  const completePermissionsSetup = async () => {
+    if (!user) return;
+
+    try {
+      // Update the user data to mark this step as complete
+      await updateUserData({
+        notificationsPermissionsSetAt: serverTimestamp(),
+      });
+      // Then go to the next screen in the flow
+      goToNextScreen();
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
+  };
 
   return (
     <AuthScenicLayout scroll={false}>

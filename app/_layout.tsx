@@ -10,7 +10,6 @@ import { TamaguiProvider } from "tamagui";
 import "../config/emulators";
 import { tamaguiConfig } from "../tamagui.config";
 
-import { OnboardingProvider } from "@/context/OnboardingContext";
 import { UpdatesProvider } from "@/context/UpdatesContext";
 import "react-native-get-random-values";
 
@@ -75,9 +74,7 @@ function RootLayout() {
   return (
     <GestureHandlerRootView>
       <UpdatesProvider>
-        <OnboardingProvider>
-          <AppContent />
-        </OnboardingProvider>
+        <AppContent />
       </UpdatesProvider>
     </GestureHandlerRootView>
   );

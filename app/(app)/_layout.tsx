@@ -3,6 +3,7 @@ import { FriendsProvider } from "@/context/FriendsContext";
 import { LocationProvider } from "@/context/LocationContext";
 import { MenuProvider } from "@/context/MenuContext";
 import { NotificationsProvider } from "@/context/NotificationsContext";
+import { OnboardingProvider } from "@/context/OnboardingContext";
 import { UserDataProvider } from "@/context/UserDataContext";
 import { useWalks, WalksProvider } from "@/context/WalksContext";
 import { syncBackgroundLocationTracking } from "@/utils/locationSyncTask";
@@ -49,18 +50,20 @@ export default function AppLayout() {
   }
 
   return (
-    <LocationProvider>
-      <UserDataProvider>
-        <MenuProvider>
-          <NotificationsProvider>
-            <WalksProvider>
-              <FriendsProvider>
-                <MainAppLayout />
-              </FriendsProvider>
-            </WalksProvider>
-          </NotificationsProvider>
-        </MenuProvider>
-      </UserDataProvider>
-    </LocationProvider>
+    <NotificationsProvider>
+      <OnboardingProvider>
+        <LocationProvider>
+          <UserDataProvider>
+            <MenuProvider>
+              <WalksProvider>
+                <FriendsProvider>
+                  <MainAppLayout />
+                </FriendsProvider>
+              </WalksProvider>
+            </MenuProvider>
+          </UserDataProvider>
+        </LocationProvider>
+      </OnboardingProvider>
+    </NotificationsProvider>
   );
 }
