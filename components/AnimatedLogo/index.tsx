@@ -26,7 +26,7 @@ const getherFraction = getherViewBoxWidth / totalViewBoxWidth;
 const height = 44;
 
 // Underline thickness and offset
-const underlineHeight = 2;
+const underlineHeight = 4;
 const underlineOffset = 20;
 
 export default function AnimatedLogo({ width = 168 }: { width?: number }) {

@@ -1,9 +1,10 @@
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
+import { PhoneInputField } from "@/components/PhoneInputField";
 import { Formik } from "formik";
 import { useCallback, useRef, useState } from "react";
 import PhoneInput from "react-native-phone-number-input";
-import { Text, View } from "tamagui";
+import { View } from "tamagui";
 import * as yup from "yup";
 import { ActionButton } from "../../ActionButton";
 
@@ -55,47 +56,17 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
       {({ handleChange, handleSubmit, values, errors, touched, isValid }) => (
         <>
           <View width="100%">
-            <PhoneInput
+            <PhoneInputField
               ref={phoneInputRef}
               defaultValue={values.phoneNumber}
               defaultCode="US"
               layout="first"
               onChangeText={handleChange("phoneNumber")}
               onChangeFormattedText={handleChange("formattedPhoneNumber")}
-              containerStyle={{
-                width: "100%",
-                padding: 0,
-                margin: 0,
-              }}
-              flagButtonStyle={{
-                padding: 0,
-                width: "auto",
-              }}
-              textContainerStyle={{
-                paddingLeft: 10,
-                paddingRight: 0,
-                borderRadius: 10,
-                paddingVertical: 8,
-                backgroundColor: "transparent",
-                flex: 1,
-              }}
-              textInputStyle={{
-                height: 50,
-                marginLeft: 10,
-                borderBottomColor: "#ddd",
-                borderBottomWidth: 1,
-                paddingHorizontal: 15,
-                fontSize: 16,
-              }}
-              codeTextStyle={{
-                color: "#000",
-              }}
+              error={errors.phoneNumber}
+              touched={touched.phoneNumber}
+              label="Phone Number"
             />
-            {touched.phoneNumber && errors.phoneNumber && (
-              <Text color="red" fontSize={12} marginTop={2}>
-                {errors.phoneNumber}
-              </Text>
-            )}
           </View>
           <ActionButton
             label="Send Code"
