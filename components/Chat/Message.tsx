@@ -9,7 +9,7 @@ import {
 import { Image, Text, XStack, YStack } from "tamagui";
 import { Attachment, Message as MessageType } from "walk2gether-shared";
 
-interface MessageProps {
+interface Props {
   message: MessageType;
   currentUserId: string;
   onLongPress: (message: MessageType) => void;
@@ -69,7 +69,7 @@ export default function Message({
   message,
   currentUserId,
   onLongPress,
-}: MessageProps) {
+}: Props) {
   const isMe = message.senderId === currentUserId;
   const hasAttachments = message.attachments && message.attachments.length > 0;
   const hasText = message.message && message.message.trim().length > 0;

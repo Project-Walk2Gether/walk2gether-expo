@@ -204,23 +204,21 @@ export const NotificationsProvider: React.FC<Props> = ({ children }) => {
 
   // Register for push notifications
   const registerForPushNotificationsAsync = async () => {
+    // Check all possible paths for project ID
+    const projectId = Constants.expoConfig!.extra!.eas!.projectId;
+
+    console.log({ projectId });
+
     if (!isDevice) {
       console.warn("Using simulator - push notifications won't work");
       return null;
     }
 
     try {
-      // Check all possible paths for project ID
-      const projectId =
-        Constants?.expoConfig?.extra?.eas?.projectId ??
-        Constants?.easConfig?.projectId;
-
       if (!projectId) {
         console.warn("No project ID found for push notifications");
         return null;
       }
-
-      console.log("Getting push token with projectId:", projectId);
 
       // Get the Expo push token
       const token = await Notifications.getExpoPushTokenAsync({
@@ -231,9 +229,24 @@ export const NotificationsProvider: React.FC<Props> = ({ children }) => {
       return token.data;
     } catch (error) {
       console.error("Error getting push token:", error);
+
+      // Prepare enhanced error details for better debugging
+      const errorObj = error as Error;
+      const errorDetails = {
+        error,
+        message: errorObj.message || 'Unknown error message',
+        name: errorObj.name || 'Unknown error type',
+        stack: errorObj.stack || 'No stack trace available',
+        projectId: projectId || 'Not provided',
+        isDevice,
+        timestamp: new Date().toISOString()
+      };
+
+      console.log('Detailed error information:', JSON.stringify(errorDetails, null, 2));
+
       writeLogIfEnabled({
         message: "Error getting push token",
-        metadata: { error },
+        metadata: errorDetails,
       });
       return null;
     }

@@ -1,11 +1,12 @@
 import { FriendshipChat } from "@/components/Chat/FriendshipChat";
 import Menu from "@/components/Menu";
+import { StatefulAvatarWithFullScreen } from "@/components/UserAvatar/StatefulAvatarWithFullScreen";
 import { useAuth } from "@/context/AuthContext";
 import { useDoc } from "@/utils/firestore";
 import { ArrowLeft, UserMinus } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { Button, Spinner, Text, YStack } from "tamagui";
+import { Button, Spinner, Text, XStack, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
 
 export default function ChatDetailScreen() {
@@ -26,18 +27,21 @@ export default function ChatDetailScreen() {
   // Set up the screen header
   // Find the friend's data from the friendship document
   const getFriendData = () => {
-    if (!friendship || !user?.uid) return null;
+    if (!friendship || !user?.uid) return { data: null, id: null };
 
     // Find the ID of the user that isn't the current user
     const friendId = friendship.uids.find((uid) => uid !== user.uid);
 
     // Get friend data from the denormalized friendship document
-    return friendId && friendship.userDataByUid
-      ? friendship.userDataByUid[friendId]
-      : null;
+    return {
+      data: friendId && friendship.userDataByUid
+        ? friendship.userDataByUid[friendId]
+        : null,
+      id: friendId || null
+    };
   };
 
-  const friendData = getFriendData();
+  const { data: friendData, id: friendId } = getFriendData();
   const friendName = params.friendName || friendData?.name || "Chat";
 
   // Check if friendship has been deleted, and if so, navigate back
@@ -74,9 +78,18 @@ export default function ChatDetailScreen() {
         />
       ),
       headerTitle: () => (
-        <Text fontWeight="bold" fontSize="$5">
-          {friendName}
-        </Text>
+        <XStack alignItems="center" space="$2">
+          {/* Display friend's avatar with full screen capability */}
+          {friendId && (
+            <StatefulAvatarWithFullScreen
+              uid={friendId}
+              size={36}
+            />
+          )}
+          <Text fontWeight="bold" fontSize="$5">
+            {friendName}
+          </Text>
+        </XStack>
       ),
       headerRight: () => (
         <Menu
@@ -114,7 +127,10 @@ export default function ChatDetailScreen() {
           </Text>
         </YStack>
       ) : friendship ? (
-        <FriendshipChat friendship={friendship} />
+        <>
+          <FriendshipChat friendship={friendship} />
+          {/* Invite on a walk button */}
+        </>
       ) : (
         <YStack
           flex={1}
