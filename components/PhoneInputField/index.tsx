@@ -41,7 +41,12 @@ export const PhoneInputField = forwardRef<PhoneInput, Props>((props, ref) => {
       label={label}
       required={required}
     >
-      <View>
+      <View
+        borderWidth={1}
+        borderColor={touched && error ? COLORS.error : COLORS.primary}
+        borderRadius={10}
+        overflow="hidden"
+      >
         {/* @ts-ignore-line - bug in the library */}
         <PhoneInput
           ref={phoneInputRef}
@@ -54,26 +59,27 @@ export const PhoneInputField = forwardRef<PhoneInput, Props>((props, ref) => {
             width: "100%",
             padding: 0,
             margin: 0,
+            height: 48,
+            borderWidth: 0, // Remove the internal borders since we have one on the container
+            backgroundColor: COLORS.background,
           }}
           flagButtonStyle={{
             padding: 0,
             width: "auto",
           }}
           textContainerStyle={{
-            paddingLeft: 10,
             paddingRight: 0,
-            borderRadius: 10,
-            paddingVertical: 8,
-            backgroundColor: "transparent",
-            flex: 1,
+            paddingVertical: 0,
+            backgroundColor: COLORS.background,
           }}
           textInputStyle={{
-            height: 40,
+            height: 50,
             marginLeft: 10,
-            borderBottomColor: COLORS.primary,
-            borderBottomWidth: 1,
-            paddingHorizontal: 15,
+            borderBottomWidth: 0,
+            paddingHorizontal: 16,
+            paddingVertical: 0,
             fontSize: 16,
+            color: COLORS.text,
           }}
           codeTextStyle={{
             color: COLORS.text,
