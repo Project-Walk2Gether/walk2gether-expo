@@ -4,7 +4,7 @@ import { InfoRow } from "@/components/InfoRow";
 import { Heart, MapPin, Shield } from "@tamagui/lucide-icons";
 import React from "react";
 import { H1, Text, YStack } from "tamagui";
-import { useOnboarding } from "./_layout";
+import { useOnboarding } from "@/context/OnboardingContext";
 
 export default function HowItWorks() {
   const { goToNextScreen } = useOnboarding();

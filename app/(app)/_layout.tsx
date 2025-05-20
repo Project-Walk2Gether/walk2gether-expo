@@ -1,6 +1,9 @@
 import { useAuth } from "@/context/AuthContext";
 import { FriendsProvider } from "@/context/FriendsContext";
+import { LocationProvider } from "@/context/LocationContext";
+import { MenuProvider } from "@/context/MenuContext";
 import { NotificationsProvider } from "@/context/NotificationsContext";
+import { UserDataProvider } from "@/context/UserDataContext";
 import { useWalks, WalksProvider } from "@/context/WalksContext";
 import { syncBackgroundLocationTracking } from "@/utils/locationSyncTask";
 import { Redirect, Stack } from "expo-router";
@@ -9,17 +12,11 @@ import { ActivityIndicator } from "react-native";
 import { YStack } from "tamagui";
 
 function MainAppLayout() {
-  const { user } = useAuth();
   const { activeWalks } = useWalks();
 
   // Sync background location tracking with active walks
   useEffect(() => {
-    const runSyncTask = async () => {
-      await syncBackgroundLocationTracking(activeWalks.length);
-    };
-
-    // Run the sync task when component mounts and when active walks change
-    runSyncTask();
+    syncBackgroundLocationTracking(activeWalks.length);
   }, [activeWalks]);
 
   return (
@@ -52,12 +49,18 @@ export default function AppLayout() {
   }
 
   return (
-    <NotificationsProvider>
-      <WalksProvider>
-        <FriendsProvider>
-          <MainAppLayout />
-        </FriendsProvider>
-      </WalksProvider>
-    </NotificationsProvider>
+    <LocationProvider>
+      <UserDataProvider>
+        <MenuProvider>
+          <NotificationsProvider>
+            <WalksProvider>
+              <FriendsProvider>
+                <MainAppLayout />
+              </FriendsProvider>
+            </WalksProvider>
+          </NotificationsProvider>
+        </MenuProvider>
+      </UserDataProvider>
+    </LocationProvider>
   );
 }

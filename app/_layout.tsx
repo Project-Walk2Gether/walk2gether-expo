@@ -1,10 +1,6 @@
 import { withErrorBoundary } from "@/components/ErrorBoundary";
 import { withAuthProvider } from "@/context/AuthContext";
 import { FlashMessageProvider } from "@/context/FlashMessageContext";
-import { LocationProvider } from "@/context/LocationContext";
-import { MenuProvider } from "@/context/MenuContext";
-import { UpdatesProvider } from "@/context/UpdatesContext";
-import { UserDataProvider } from "@/context/UserDataContext";
 import { useAppStateUpdates } from "@/hooks/useAppStateUpdates";
 import { configureNotifications } from "@/utils/notifications";
 import { Stack } from "expo-router";
@@ -14,6 +10,8 @@ import { TamaguiProvider } from "tamagui";
 import "../config/emulators";
 import { tamaguiConfig } from "../tamagui.config";
 
+import { OnboardingProvider } from "@/context/OnboardingContext";
+import { UpdatesProvider } from "@/context/UpdatesContext";
 import "react-native-get-random-values";
 
 // https://github.com/FaridSafi/react-native-google-places-autocomplete#more-examples
@@ -76,15 +74,11 @@ export const withFlashMessage = <P extends object>(
 function RootLayout() {
   return (
     <GestureHandlerRootView>
-      <LocationProvider>
-        <UpdatesProvider>
-          <UserDataProvider>
-            <MenuProvider>
-              <AppContent />
-            </MenuProvider>
-          </UserDataProvider>
-        </UpdatesProvider>
-      </LocationProvider>
+      <UpdatesProvider>
+        <OnboardingProvider>
+          <AppContent />
+        </OnboardingProvider>
+      </UpdatesProvider>
     </GestureHandlerRootView>
   );
 }
