@@ -7,6 +7,8 @@ import { TouchableOpacity } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { Card, Text, View, XStack, YStack } from "tamagui";
 import WizardWrapper from "./WizardWrapper";
+import useChangeEffect from "@/utils/useChangeEffect";
+import { combineDateAndTime } from "@/utils/timezone";
 
 interface TimeSelectionProps {
   onContinue: () => void;
@@ -20,22 +22,35 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
   const { formData, updateFormData } = useWalkForm();
   const [timeOption, setTimeOption] = useState<"now" | "future">("future");
 
-  const handleDateChange = (day: any) => {
-    const selectedDate = new Date(day.timestamp);
-    // Create a new timestamp preserving the current time
-    const currentTime = formData.date?.toDate() || new Date();
-    selectedDate.setHours(currentTime.getHours(), currentTime.getMinutes());
+  // Local state for date and time (date-only and time-only)
+  const initialDate = formData.date?.toDate() || new Date();
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    new Date(initialDate.getFullYear(), initialDate.getMonth(), initialDate.getDate())
+  );
+  const [selectedTime, setSelectedTime] = useState<Date>(
+    new Date(1970, 0, 1, initialDate.getHours(), initialDate.getMinutes(), 0, 0)
+  );
 
-    updateFormData({ date: Timestamp.fromDate(selectedDate) });
+  // Update formData.date (Firestore Timestamp) whenever date or time changes
+  useChangeEffect(
+    ([prevDate, prevTime]) => {
+      if (timeOption === "future") {
+        const combined = combineDateAndTime(selectedDate, selectedTime);
+        updateFormData({ date: Timestamp.fromDate(combined) });
+      }
+    },
+    [selectedDate, selectedTime, timeOption]
+  );
+
+  // Date picker only updates selectedDate
+  const handleDateChange = (day: any) => {
+    setSelectedDate(new Date(day.timestamp));
   };
 
-  const handleTimeChange = (_: any, selectedTime?: Date) => {
-    if (selectedTime) {
-      // Create a new date with current date but updated time
-      const currentDate = formData.date?.toDate() || new Date();
-      currentDate.setHours(selectedTime.getHours(), selectedTime.getMinutes());
-
-      updateFormData({ date: Timestamp.fromDate(currentDate) });
+  // Time picker only updates selectedTime
+  const handleTimeChange = (_: any, selectedTimeValue?: Date) => {
+    if (selectedTimeValue) {
+      setSelectedTime(selectedTimeValue);
     }
   };
 
@@ -43,17 +58,16 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
   const handleNowOption = () => {
     if (timeOption === "now") {
       updateFormData({
-        date: Timestamp.now(),
+        date: Timestamp.fromDate(new Date()),
       });
     }
     setTimeOption("now");
   };
 
   const handleContinue = () => {
-    // If 'now' is selected, update to current time one more time before continuing
     if (timeOption === "now") {
       updateFormData({
-        date: Timestamp.now(),
+        date: Timestamp.fromDate(new Date()),
       });
     }
     onContinue();
@@ -123,16 +137,10 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
               <View borderRadius={10} overflow="hidden" backgroundColor="white">
                 <Calendar
                   onDayPress={handleDateChange}
-                  current={
-                    (formData.date?.toDate() || new Date())
-                      .toISOString()
-                      .split("T")[0]
-                  }
+                  current={selectedDate.toISOString().split("T")[0]}
                   minDate={new Date().toISOString().split("T")[0]}
                   markedDates={{
-                    [(formData.date?.toDate() || new Date())
-                      .toISOString()
-                      .split("T")[0]]: {
+                    [selectedDate.toISOString().split("T")[0]]: {
                       selected: true,
                       selectedColor: COLORS.action,
                     },
@@ -157,7 +165,7 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
                 overflow="hidden"
               >
                 <DateTimePicker
-                  value={formData.date?.toDate() || new Date()}
+                  value={selectedTime}
                   mode="time"
                   display="spinner"
                   onChange={handleTimeChange}
