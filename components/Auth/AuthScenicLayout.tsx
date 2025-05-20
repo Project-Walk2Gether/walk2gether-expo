@@ -42,7 +42,7 @@ export default function AuthScenicLayout({
   const insets = useSafeAreaInsets();
   const sunAnimation = useRef(new Animated.Value(-100)).current;
   const cloudsAnimation = useRef(new Animated.Value(-200)).current;
-  const cloudsOpacity = useRef(new Animated.Value(0)).current;
+  const cloudsOpacity = useRef(new Animated.Value(isAnimated ? 0 : 1)).current;
 
   // Run animations when component mounts if isAnimated is true
   useEffect(() => {
@@ -90,7 +90,6 @@ export default function AuthScenicLayout({
       )}
 
       {/* Animated clouds only when animation is enabled */}
-
       <Animated.View
         style={{
           position: "absolute",
