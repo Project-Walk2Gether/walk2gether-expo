@@ -1,10 +1,9 @@
+import { PhoneInputField } from "@/components/PhoneInputField";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
-import { PhoneInputField } from "@/components/PhoneInputField";
 import { Formik } from "formik";
 import { useCallback, useRef, useState } from "react";
 import PhoneInput from "react-native-phone-number-input";
-import { View } from "tamagui";
 import * as yup from "yup";
 import { ActionButton } from "../../ActionButton";
 
@@ -55,19 +54,17 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
     >
       {({ handleChange, handleSubmit, values, errors, touched, isValid }) => (
         <>
-          <View width="100%">
-            <PhoneInputField
-              ref={phoneInputRef}
-              defaultValue={values.phoneNumber}
-              defaultCode="US"
-              layout="first"
-              onChangeText={handleChange("phoneNumber")}
-              onChangeFormattedText={handleChange("formattedPhoneNumber")}
-              error={errors.phoneNumber}
-              touched={touched.phoneNumber}
-              label="Phone Number"
-            />
-          </View>
+          <PhoneInputField
+            ref={phoneInputRef}
+            defaultValue={values.phoneNumber}
+            defaultCode="US"
+            layout="first"
+            onChangeText={handleChange("phoneNumber")}
+            onChangeFormattedText={handleChange("formattedPhoneNumber")}
+            error={errors.phoneNumber}
+            touched={touched.phoneNumber}
+            label="Phone Number"
+          />
           <ActionButton
             label="Send Code"
             onPress={handleSubmit}

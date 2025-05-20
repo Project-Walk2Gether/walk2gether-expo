@@ -1,9 +1,12 @@
+import { ActionButton } from "@/components/ActionButton";
+import { FormControl } from "@/components/FormControl";
+import { FormInput } from "@/components/FormInput";
+import { COLORS } from "@/styles/colors";
 import { Pencil } from "@tamagui/lucide-icons";
 import { Formik } from "formik";
 import { useState } from "react";
-import { Button, Input, Text, XStack, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 import * as yup from "yup";
-import { ActionButton } from "../../ActionButton";
 
 const verificationSchema = yup.object().shape({
   verificationCode: yup.string().required("Verification code is required"),
@@ -50,28 +53,23 @@ export default function VerificationCodeForm({
         isValid,
       }) => (
         <>
-          <YStack width="100%" marginBottom="$2">
-            <XStack ai="center" jc="space-between">
-              <Text color="$gray10" fontSize="$3" textAlign="center">
-                Sent to {phoneNumber}
-              </Text>
-              <Button
-                backgroundColor="transparent"
-                width="auto"
-                height={40}
-                marginBottom="$1"
-                justifyContent="center"
-                alignItems="center"
-                pressStyle={{ opacity: 0.7 }}
+          <FormControl
+            label={`Sent to ${phoneNumber}`}
+            error={errors.verificationCode}
+            touched={touched.verificationCode}
+            action={
+              <Text
+                color={COLORS.primary}
+                fontSize="$3"
+                fontWeight="500"
                 onPress={goBack}
-                icon={<Pencil />}
+                pressStyle={{ opacity: 0.7 }}
               >
                 Change
-              </Button>
-            </XStack>
-          </YStack>
-          <YStack width="100%" marginBottom="$3">
-            <Input
+              </Text>
+            }
+          >
+            <FormInput
               placeholder="Enter verification code"
               value={values.verificationCode}
               onChangeText={handleChange("verificationCode")}
@@ -80,23 +78,11 @@ export default function VerificationCodeForm({
               placeholderTextColor="#999"
               autoFocus
               height={50}
-              borderWidth={1}
-              borderColor={
-                touched.verificationCode && errors.verificationCode
-                  ? "$red10"
-                  : "#ddd"
-              }
-              borderRadius="$3"
-              paddingHorizontal="$4"
               fontSize="$4"
-              backgroundColor="#f9f9f9"
+              error={errors.verificationCode}
+              touched={touched.verificationCode}
             />
-            {touched.verificationCode && errors.verificationCode && (
-              <Text color="$red10" fontSize="$2" marginTop="$1">
-                {errors.verificationCode}
-              </Text>
-            )}
-          </YStack>
+          </FormControl>
 
           <ActionButton
             onPress={handleSubmit}

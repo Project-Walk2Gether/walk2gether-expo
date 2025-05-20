@@ -1,7 +1,7 @@
 import { Slogan } from "@/components/AnimatedLogo/Slogan";
 import AnimatedLogo from "@/components/AnimatedLogo/index";
-import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
 import { AuthCard } from "@/components/Auth/AuthCard";
+import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
 import PhoneForm from "@/components/Auth/Form/PhoneForm";
 import TokenSignInForm from "@/components/Auth/Form/TokenSignInForm";
 import VerificationCodeForm, {
@@ -19,10 +19,8 @@ import { Dimensions } from "react-native";
 import {
   Avatar,
   Button,
-  Card,
   Checkbox,
   Label,
-  Spacer,
   Spinner,
   Text,
   View,
@@ -91,7 +89,7 @@ export default function Auth() {
     <AuthScenicLayout
       isAnimated={true}
       showLogo={
-        <YStack mb="$6" width="100%" alignItems="center">
+        <YStack gap="$2" mb="$2" width="100%" alignItems="center">
           <Text
             color="rgb(182, 219, 99)"
             fontWeight="bold"
@@ -100,8 +98,7 @@ export default function Auth() {
             PROJECT
           </Text>
           <AnimatedLogo width={logoWidth} />
-          <Spacer h="$1" />
-          <Slogan delay={5000} />
+          <Slogan delay={10} />
         </YStack>
       }
       scroll
@@ -115,11 +112,7 @@ export default function Auth() {
             ) : verificationId ? (
               "Verify Your Phone"
             ) : authMode === "invitation" && inviterData ? (
-              <XStack
-                gap="$2"
-                justifyContent="center"
-                alignItems="center"
-              >
+              <XStack gap="$2" justifyContent="center" alignItems="center">
                 <Avatar circular size="$5">
                   {inviterData.profilePicUrl ? (
                     <Avatar.Image src={inviterData.profilePicUrl} />
@@ -138,8 +131,8 @@ export default function Auth() {
             ) : (
               "Get Started"
             )
-          }>
-
+          }
+        >
           <View mb="$1">
             {authMode === "token" ? (
               <TokenSignInForm
@@ -163,7 +156,7 @@ export default function Auth() {
                   </Button>
                 </YStack>
               ) : inviterData ? (
-                <YStack ai="center" gap="$2" p="$4">
+                <YStack gap="$2">
                   <Text fontSize={16} color="#666" textAlign="center">
                     Create an account to connect and start walking together.
                   </Text>

@@ -27,7 +27,7 @@ const height = 44;
 
 // Underline thickness and offset
 const underlineHeight = 4;
-const underlineOffset = 20;
+const underlineOffset = 5;
 
 export default function AnimatedLogo({ width = 168 }: { width?: number }) {
   const [isAnimating, setIsAnimating] = useState(false);
@@ -151,8 +151,6 @@ export default function AnimatedLogo({ width = 168 }: { width?: number }) {
 
   return (
     <XStack
-      alignItems="center"
-      space={0}
       width={width}
       height={height + underlineHeight + underlineOffset}
       onPress={() => {
