@@ -1,6 +1,7 @@
 import { Slogan } from "@/components/AnimatedLogo/Slogan";
 import AnimatedLogo from "@/components/AnimatedLogo/index";
 import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
+import { AuthCard } from "@/components/Auth/AuthCard";
 import PhoneForm from "@/components/Auth/Form/PhoneForm";
 import TokenSignInForm from "@/components/Auth/Form/TokenSignInForm";
 import VerificationCodeForm, {
@@ -107,70 +108,37 @@ export default function Auth() {
       contentContainerStyle={{ paddingBottom: 180 }}
     >
       <YStack padding="$5">
-        <Card
-          backgroundColor="white"
-          borderRadius="$4"
-          padding="$4"
-          shadowColor="#000"
-          shadowOffset={{ width: 0, height: 2 }}
-          shadowOpacity={0.25}
-          shadowRadius={3.84}
-          elevation={5}
-        >
-          {/* Title with or without profile picture */}
-          {authMode === "token" ? (
-            <Text
-              fontSize={26}
-              fontWeight="bold"
-              color={COLORS.primary}
-              textAlign="center"
-              marginBottom="$2"
-            >
-              Token Authentication
-            </Text>
-          ) : verificationId ? (
-            <Text
-              fontSize={26}
-              fontWeight="bold"
-              color={COLORS.primary}
-              textAlign="center"
-              marginBottom="$2"
-            >
-              Verify Your Phone
-            </Text>
-          ) : authMode === "invitation" && inviterData ? (
-            <XStack
-              gap="$2"
-              justifyContent="center"
-              alignItems="center"
-              marginBottom="$2"
-            >
-              <Avatar circular size="$5">
-                {inviterData.profilePicUrl ? (
-                  <Avatar.Image src={inviterData.profilePicUrl} />
-                ) : (
-                  <Avatar.Fallback backgroundColor="$primary">
-                    <Text color="white" fontWeight="700" fontSize={14}>
-                      {inviterData.name.charAt(0).toUpperCase()}
-                    </Text>
-                  </Avatar.Fallback>
-                )}
-              </Avatar>
-              <Text fontSize={24} fontWeight="bold" color={COLORS.primary}>
-                Join {inviterData.name} on Walk2Gether
-              </Text>
-            </XStack>
-          ) : (
-            <Text
-              fontSize={26}
-              fontWeight="bold"
-              color={COLORS.primary}
-              textAlign="center"
-              marginBottom="$2"
-            >
-              Get Started
-            </Text>
-          )}
+        <AuthCard
+          title={
+            authMode === "token" ? (
+              "Token Authentication"
+            ) : verificationId ? (
+              "Verify Your Phone"
+            ) : authMode === "invitation" && inviterData ? (
+              <XStack
+                gap="$2"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Avatar circular size="$5">
+                  {inviterData.profilePicUrl ? (
+                    <Avatar.Image src={inviterData.profilePicUrl} />
+                  ) : (
+                    <Avatar.Fallback backgroundColor="$primary">
+                      <Text color="white" fontWeight="700" fontSize={14}>
+                        {inviterData.name.charAt(0).toUpperCase()}
+                      </Text>
+                    </Avatar.Fallback>
+                  )}
+                </Avatar>
+                <Text fontSize={24} fontWeight="bold" color={COLORS.primary}>
+                  Join {inviterData.name} on Walk2Gether
+                </Text>
+              </XStack>
+            ) : (
+              "Get Started"
+            )
+          }>
 
           <View mb="$1">
             {authMode === "token" ? (
@@ -250,7 +218,7 @@ export default function Auth() {
           </View>
 
           <YStack mt="$3" alignItems="center" gap="$2">
-            <Text fontSize="$1" color="$gray10" textAlign="center">
+            <Text mb="$2" fontSize="$1" color="$gray10" textAlign="center">
               By continuing, you agree to our
             </Text>
             <XStack alignItems="center" gap="$2">
@@ -273,7 +241,7 @@ export default function Auth() {
               </Button>
             </XStack>
           </YStack>
-        </Card>
+        </AuthCard>
       </YStack>
     </AuthScenicLayout>
   );

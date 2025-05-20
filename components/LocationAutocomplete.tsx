@@ -26,7 +26,7 @@ const LocationAutocomplete: React.FC<Omit<Props, "styles">> = ({
   touched,
   onCancel,
   errors,
-  placeholder = "Search for your city",
+  placeholder = "Enter your home address",
   includeChooseAnotherWayButton,
 }) => {
   const placesAutocompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
@@ -49,14 +49,13 @@ const LocationAutocomplete: React.FC<Omit<Props, "styles">> = ({
       backgroundColor: "transparent",
       padding: 0,
       margin: 0,
-      // TypeScript expects a number for width in ViewStyle
-      width: "100%" as any,
+      width: "100%" as const,
     },
     textInputContainer: {
       backgroundColor: "transparent",
       borderTopWidth: 0,
       borderBottomWidth: 0,
-      width: "100%",
+      width: "100%" as const,
       paddingHorizontal: 0,
       marginTop: 0,
       marginLeft: 0,
@@ -64,14 +63,15 @@ const LocationAutocomplete: React.FC<Omit<Props, "styles">> = ({
     },
     textInput: {
       width: "100%",
-      borderColor: touched.location && errors.location ? COLORS.error : COLORS.primary,
+      borderColor:
+        touched.location && errors.location ? COLORS.error : COLORS.primary,
       backgroundColor: COLORS.background,
       color: COLORS.text,
       borderRadius: 10,
       paddingHorizontal: 16,
       paddingVertical: 10,
-      fontSize: 16,
-      height: 40, // Match Tamagui Input default height
+      fontSize: 15,
+      height: 44,
       borderWidth: 1,
       marginLeft: 0,
       marginRight: 0,
@@ -129,21 +129,20 @@ const LocationAutocomplete: React.FC<Omit<Props, "styles">> = ({
   };
 
   return (
-    <YStack space="$2" marginBottom="$5">
+    <YStack space="$2">
       <PlacesAutocomplete
         ref={placesAutocompleteRef}
         placeholder={placeholder}
         value={placeDataValue}
         onSelect={handlePlaceSelect}
         googleApiKey={GOOGLE_MAPS_API_KEY}
-        // Pass comprehensive styles to match FormInput appearance
         containerStyle={styles.container}
         textInputProps={{
           autoComplete: "off",
           selectionColor: COLORS.primary,
           returnKeyType: "search",
           style: styles.textInput,
-          placeholderTextColor: "#AAA",
+          placeholderTextColor: "#999",
         }}
       />
       {touched.location && errors.location && (
@@ -151,7 +150,7 @@ const LocationAutocomplete: React.FC<Omit<Props, "styles">> = ({
           {errors.location}
         </Text>
       )}
-      {(value && includeChooseAnotherWayButton || !value) && (
+      {((value && includeChooseAnotherWayButton) || !value) && (
         <Button
           size="$4"
           mt="$2"
@@ -161,12 +160,7 @@ const LocationAutocomplete: React.FC<Omit<Props, "styles">> = ({
             onCancel?.();
           }}
           f={2}
-          icon={
-            <ArrowLeft
-              size={20}
-              style={{ marginRight: 8 }}
-            />
-          }
+          icon={<ArrowLeft size={20} style={{ marginRight: 8 }} />}
         >
           Choose another way
         </Button>

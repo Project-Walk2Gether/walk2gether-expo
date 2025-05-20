@@ -354,9 +354,8 @@ export default function MeScreen() {
           icon={<AlertTriangle size={24} color="#DC2626" opacity={0.8} />}
           label="Delete My Account"
           onPress={() => router.push("/me/delete-account")}
+          isLast={true}
         />
-
-        <Separator borderColor="$gray5" />
       </Card>
 
       <YStack mt="$4" mb="$4">
