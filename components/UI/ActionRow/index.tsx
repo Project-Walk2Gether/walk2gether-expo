@@ -13,6 +13,7 @@ interface Props {
   onPress?: () => void;
   children?: ReactNode;
   action?: ReactNode;
+  isLast?: boolean;
 }
 
 const ActionRow: React.FC<Props> = ({
@@ -25,6 +26,7 @@ const ActionRow: React.FC<Props> = ({
   onPress,
   children,
   action,
+  isLast = false,
 }) => {
   const content = (
     <YStack
@@ -33,6 +35,8 @@ const ActionRow: React.FC<Props> = ({
       flexDirection="row"
       alignItems="center"
       minHeight={50}
+      borderBottomWidth={isLast ? 0 : 1}
+      borderBottomColor={COLORS.border}
     >
       {icon && <View mr="$3">{React.isValidElement(icon) && icon}</View>}
       <View flex={1} justifyContent="center">
