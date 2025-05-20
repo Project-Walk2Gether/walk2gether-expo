@@ -35,7 +35,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="walks"
         options={{
-          title: "Let's Walk!",
+          title: "Walks",
           tabBarIcon: ({ color, size }) => (
             <Footprints size={size} color={color} />
           ),

@@ -2,7 +2,7 @@ import { COLORS } from "@/styles/colors";
 import { getInitials } from "@/utils/userUtils";
 import { Avatar, Text } from "tamagui";
 
-interface StatelessAvatarProps {
+interface Props {
   profilePicUrl?: string;
   name?: string;
   size?: number;
@@ -21,7 +21,7 @@ export function StatelessAvatar({
   borderWidth = 2,
   backgroundColor = COLORS.primary,
   onPress,
-}: StatelessAvatarProps) {
+}: Props) {
   const fontSize = size * 0.4; // Proportional font size for initials
 
   return (

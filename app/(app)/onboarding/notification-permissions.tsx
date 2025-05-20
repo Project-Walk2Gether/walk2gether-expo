@@ -37,11 +37,11 @@ export default function NotificationPermissionsScreen() {
       >
         <Card elevate bordered width={360} maxWidth="100%" p={24} ai="center">
           <Text fontSize="$6" fontWeight="bold" mb="$2">
-            Stay Connected!
+            Let's enable notifications
           </Text>
           <Text fontSize="$4" mb="$4" textAlign="center">
-            Enable notifications to get stay informed about nearby walks! You
-            can manage your notifications at any time in settings.
+            Timely notifications help you make the most of your Walk2Gether
+            experience.
           </Text>
           {error && (
             <Text color="$red10" mb="$2" textAlign="center">
@@ -54,9 +54,7 @@ export default function NotificationPermissionsScreen() {
             color="white"
             width="100%"
             fontWeight="bold"
-            mt="$2"
             mb="$2"
-            py="$2.5"
             onPress={requestPermissions}
             disabled={loading}
           >
@@ -71,6 +69,10 @@ export default function NotificationPermissionsScreen() {
               "Enable Notifications"
             )}
           </Button>
+          <Text color="$gray6" fontSize="$4" mb="$4" textAlign="center">
+            Timely notifications help you make the most of your Walk2Gether
+            experience.
+          </Text>
         </Card>
 
         <XStack justifyContent="flex-end" width="100%">
@@ -124,10 +126,8 @@ export default function NotificationPermissionsScreen() {
           >
             <Dialog.Title fontSize={18}>Skip Notifications?</Dialog.Title>
             <Dialog.Description size="$4" marginTop="$2" marginBottom="$4">
-              Are you sure you want to skip notifications? You won't be notified
-              of any new walks in your area, even from your friends.
+              Are you sure you want to skip notifications?
             </Dialog.Description>
-
             <YStack gap="$3">
               <Button
                 backgroundColor={COLORS.primary}

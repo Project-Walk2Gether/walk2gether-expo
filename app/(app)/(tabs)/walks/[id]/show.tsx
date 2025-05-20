@@ -52,7 +52,7 @@ export default function WalkScreen() {
 
   // Define snap points for the chat bottom sheet (30% and 100% of screen height)
   // Get collapsed height for calculations (30% of screen height)
-  const collapsedHeight = 230;
+  const collapsedHeight = 130;
   const chatSnapPoints = useMemo(() => [collapsedHeight, "100%"], []);
 
   // Function to handle when message form takes focus

@@ -67,8 +67,6 @@ const MessageList = forwardRef<MessageListRef, Props>(
               flexGrow={1}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{
-                flex: 1,
-                flexGrow: 1,
                 padding: 20,
                 paddingBottom: 80,
               }}

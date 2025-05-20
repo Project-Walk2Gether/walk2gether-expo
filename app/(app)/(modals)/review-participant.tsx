@@ -137,7 +137,14 @@ export default function ReviewParticipantScreen() {
 
           {/* Show introduction if available */}
           {participant.introduction && (
-            <YStack space="$2" backgroundColor="$gray3" padding="$3" borderRadius="$3" width="100%" maxWidth={400}>
+            <YStack
+              space="$2"
+              backgroundColor="$gray3"
+              padding="$3"
+              borderRadius="$3"
+              width="100%"
+              maxWidth={400}
+            >
               <Text fontSize="$2" fontWeight="500" color="$gray11">
                 Introduction:
               </Text>
@@ -176,7 +183,7 @@ export default function ReviewParticipantScreen() {
             onPress={handleReject}
             disabled={loading}
           >
-            {loading ? "Rejecting..." : "Reject Participant"}
+            {loading ? "Declining..." : "Decline Participant"}
           </Button>
         </YStack>
       </YStack>

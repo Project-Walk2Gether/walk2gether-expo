@@ -44,7 +44,7 @@ export default function FriendsScreen() {
     <>
       <StatusBar style="dark" />
       <Screen
-        title="My Friends"
+        title="Friends"
         gradientVariant="modern"
         useTopInsets
         floatingAction={

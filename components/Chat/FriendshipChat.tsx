@@ -6,8 +6,9 @@ import firestore, {
   query as fbQuery,
   orderBy,
 } from "@react-native-firebase/firestore";
+import { useRouter } from "expo-router";
 import React from "react";
-import { Text, View, XStack, YStack } from "tamagui";
+import { Button, Text, View, XStack, YStack } from "tamagui";
 import { Friendship, Message } from "walk2gether-shared";
 import {
   deleteMessage as deleteMessageUtil,
@@ -94,6 +95,7 @@ export function FriendshipChat({ friendship }: FriendshipChatProps) {
       </Text>
     </XStack>
   );
+  const router = useRouter();
 
   return (
     <YStack f={1}>
@@ -106,6 +108,22 @@ export function FriendshipChat({ friendship }: FriendshipChatProps) {
           currentUserId={user?.uid || ""}
         />
       </View>
+      <Button
+        size="$2"
+        borderRadius={0}
+        borderTopColor="$borderColor"
+        // backgroundColor={COLORS.primary}
+        // color="white"
+        onPress={(e) => {
+          e.stopPropagation();
+          router.push({
+            pathname: "/(app)/(modals)/new-walk",
+            params: { friendId: "friendId" },
+          });
+        }}
+      >
+        Invite on a walk
+      </Button>
       <MessageForm
         keyboardVerticalOffset={100}
         onSendMessage={sendMessage}
