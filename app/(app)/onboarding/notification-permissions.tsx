@@ -1,8 +1,8 @@
 import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
-import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useNotifications } from "@/context/NotificationsContext";
+import { useOnboarding } from "@/context/OnboardingContext";
 import { COLORS } from "@/styles/colors";
-import { useRouter } from "expo-router";
+import { Info } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
 import { Button, Card, Dialog, Spinner, Text, XStack, YStack } from "tamagui";
@@ -10,18 +10,15 @@ import { Button, Card, Dialog, Spinner, Text, XStack, YStack } from "tamagui";
 const { height } = Dimensions.get("window");
 
 export default function NotificationPermissionsScreen() {
-  const router = useRouter();
+  const { goToNextScreen } = useOnboarding();
   const { permissionStatus, requestPermissions, loading, error } =
     useNotifications();
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const { showMessage } = useFlashMessage();
-
-  const goToNext = () => router.push("/walks");
 
   useEffect(() => {
     // When permissions are granted, token is automatically synced via the context
     if (permissionStatus?.granted) {
-      goToNext();
+      goToNextScreen();
     }
   }, [permissionStatus]);
 
@@ -37,9 +34,9 @@ export default function NotificationPermissionsScreen() {
       >
         <Card elevate bordered width={360} maxWidth="100%" p={24} ai="center">
           <Text fontSize="$6" fontWeight="bold" mb="$2">
-            Let's enable notifications
+            Enable notifications
           </Text>
-          <Text fontSize="$4" mb="$4" textAlign="center">
+          <Text color="$color" fontSize="$4" mb="$4" textAlign="center">
             Timely notifications help you make the most of your Walk2Gether
             experience.
           </Text>
@@ -69,10 +66,13 @@ export default function NotificationPermissionsScreen() {
               "Enable Notifications"
             )}
           </Button>
-          <Text color="$gray6" fontSize="$4" mb="$4" textAlign="center">
-            Timely notifications help you make the most of your Walk2Gether
-            experience.
-          </Text>
+          <XStack alignItems="center" mt="$2" gap="$2">
+            <Info color="$gray12" />
+            <Text color="$gray12" fontSize={12}>
+              You can adjust notification settings later from the app
+              preferences screen.
+            </Text>
+          </XStack>
         </Card>
 
         <XStack justifyContent="flex-end" width="100%">
@@ -132,7 +132,7 @@ export default function NotificationPermissionsScreen() {
               <Button
                 backgroundColor={COLORS.primary}
                 color="white"
-                onPress={goToNext}
+                onPress={goToNextScreen}
                 borderRadius="$4"
                 padding="$2.5"
               >

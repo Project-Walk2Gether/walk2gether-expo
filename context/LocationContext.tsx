@@ -1,14 +1,20 @@
-import * as Location from "expo-location";
-import * as Linking from "expo-linking";
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
-import { Platform, Alert } from "react-native";
-import { locationService } from "@/utils/locationService";
 import {
   startBackgroundLocationTracking,
   stopBackgroundLocationTracking,
 } from "@/background/backgroundLocationTask";
-import { writeLogIfEnabled } from "@/utils/logging";
 import { auth_instance } from "@/config/firebase";
+import { locationService } from "@/utils/locationService";
+import { writeLogIfEnabled } from "@/utils/logging";
+import * as Linking from "expo-linking";
+import * as Location from "expo-location";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { Alert, Platform } from "react-native";
 
 interface LocationContextValue {
   // Basic location data
@@ -16,19 +22,25 @@ interface LocationContextValue {
   userLocation: Location.LocationObject | null;
   error?: string;
   loading: boolean;
-  
+
   // Permissions
   locationPermission: boolean | null;
   backgroundLocationPermission: boolean | null;
-  
+
   // General location methods
   refresh: () => Promise<void>;
-  requestPermissions: () => Promise<{foreground: boolean; background: boolean}>;
-  
+  requestPermissions: () => Promise<{
+    foreground: boolean;
+    background: boolean;
+  }>;
+
   // Walk tracking
   activeWalkId?: string;
   locationTracking: boolean;
-  startWalkTracking: (walkId: string, estimatedEndTimeWithBuffer?: Date) => Promise<boolean>;
+  startWalkTracking: (
+    walkId: string,
+    estimatedEndTimeWithBuffer?: Date
+  ) => Promise<boolean>;
   stopWalkTracking: () => Promise<void>;
   updateLocation: (location: Location.LocationObject) => Promise<void>;
 }
@@ -56,33 +68,45 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     latitude: number;
     longitude: number;
   }>();
-  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+  const [userLocation, setUserLocation] =
+    useState<Location.LocationObject | null>(null);
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
 
   // Permissions
-  const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
-  const [backgroundLocationPermission, setBackgroundLocationPermission] = 
+  const [locationPermission, setLocationPermission] = useState<boolean | null>(
+    null
+  );
+  const [backgroundLocationPermission, setBackgroundLocationPermission] =
     useState<boolean | null>(null);
 
   // Walk tracking state
   const [activeWalkId, setActiveWalkId] = useState<string>();
   const [locationTracking, setLocationTracking] = useState(false);
-  const locationSubscription = useRef<Location.LocationSubscription | null>(null);
+  const locationSubscription = useRef<Location.LocationSubscription | null>(
+    null
+  );
 
   // Fetch location on initial mount
   useEffect(() => {
-    getLocation();
     checkPermissions();
   }, []);
+
+  useEffect(() => {
+    if (locationPermission) {
+      getLocation();
+    }
+  }, [locationPermission]);
 
   // Check existing permissions without requesting them
   const checkPermissions = async () => {
     try {
-      const { status: foregroundStatus } = await Location.getForegroundPermissionsAsync();
+      const { status: foregroundStatus } =
+        await Location.getForegroundPermissionsAsync();
       setLocationPermission(foregroundStatus === "granted");
 
-      const { status: backgroundStatus } = await Location.getBackgroundPermissionsAsync();
+      const { status: backgroundStatus } =
+        await Location.getBackgroundPermissionsAsync();
       setBackgroundLocationPermission(backgroundStatus === "granted");
     } catch (e) {
       console.error("Error checking permissions:", e);
@@ -93,7 +117,8 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
   const requestPermissions = async () => {
     try {
       // Request foreground permission first
-      const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+      const { status: foregroundStatus } =
+        await Location.requestForegroundPermissionsAsync();
       setLocationPermission(foregroundStatus === "granted");
 
       if (foregroundStatus !== "granted") {
@@ -105,7 +130,8 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       // Request background permission
-      const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+      const { status: backgroundStatus } =
+        await Location.requestBackgroundPermissionsAsync();
       setBackgroundLocationPermission(backgroundStatus === "granted");
 
       if (backgroundStatus !== "granted") {
@@ -131,9 +157,9 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
         // Continue with foreground only
       }
 
-      return { 
-        foreground: foregroundStatus === "granted", 
-        background: backgroundStatus === "granted" 
+      return {
+        foreground: foregroundStatus === "granted",
+        background: backgroundStatus === "granted",
       };
     } catch (e) {
       console.error("Error requesting permissions:", e);
@@ -150,7 +176,8 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       const { status } = await Location.getForegroundPermissionsAsync();
       if (status !== "granted") {
         // Only request if we don't already have permission
-        const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
+        const { status: newStatus } =
+          await Location.requestForegroundPermissionsAsync();
         if (newStatus !== "granted") {
           setError("Location permission not granted");
           setLoading(false);
@@ -162,7 +189,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       const loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      
+
       setUserLocation(loc);
       setCoords({
         latitude: loc.coords.latitude,
@@ -181,12 +208,15 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   // Start tracking location for a specific walk
-  const startWalkTracking = async (walkId: string, estimatedEndTimeWithBuffer?: Date) => {
+  const startWalkTracking = async (
+    walkId: string,
+    estimatedEndTimeWithBuffer?: Date
+  ) => {
     if (!walkId) {
       console.error("Cannot start tracking without walkId");
       return false;
     }
-    
+
     const userId = auth_instance.currentUser?.uid;
     if (!userId) {
       console.error("Cannot start tracking without authenticated user");
@@ -218,7 +248,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
         await writeLogIfEnabled({
           message: `Starting background tracking for walkId: ${walkId}, userId: ${userId}`,
         });
-        
+
         await startBackgroundLocationTracking({
           walkId,
           userId,
@@ -226,7 +256,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
           timeInterval: 15000, // 15 seconds
           distanceInterval: 10, // 10 meters,
           // Pass the estimated end time if available
-          endTime: estimatedEndTimeWithBuffer
+          endTime: estimatedEndTimeWithBuffer,
         });
         setLocationTracking(true);
         return true;
@@ -277,7 +307,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
   // Update location in Firebase
   const updateLocation = async (location: Location.LocationObject) => {
     if (!activeWalkId) return;
-    
+
     const userId = auth_instance.currentUser?.uid;
     if (!userId) return;
 

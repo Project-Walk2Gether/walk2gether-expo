@@ -17,7 +17,7 @@ import React, { useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, ScrollView, YStack } from "tamagui";
 import { userDataSchema } from "walk2gether-shared";
-import { useOnboarding } from "./_layout";
+import { useOnboarding } from "@/context/OnboardingContext";
 
 export default function CompleteYourProfile() {
   const { setUserData } = useUserData();

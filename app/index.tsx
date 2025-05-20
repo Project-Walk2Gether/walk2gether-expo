@@ -1,5 +1,4 @@
 import { useAuth } from "@/context/AuthContext";
-import { useFlashMessage } from "@/context/FlashMessageContext";
 import { determineUserRoute, RouteResult } from "@/utils/navigation";
 import { Redirect } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -8,7 +7,6 @@ import { YStack } from "tamagui";
 
 export default function IndexScreen() {
   const { user, loading, claims } = useAuth();
-  const { showMessage } = useFlashMessage();
   const [redirectTo, setRedirectTo] = useState<RouteResult | null>(null);
 
   // Handle navigation logic once user is authenticated
