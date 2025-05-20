@@ -1,6 +1,6 @@
 import { COLORS } from "@/styles/colors";
-import { Input, styled } from "tamagui";
-import React from "react";
+import { Input, styled, XStack } from "tamagui";
+import React, { ReactNode } from "react";
 import { FormControl } from "../FormControl";
 
 const StyledInput = styled(Input, {
@@ -24,6 +24,8 @@ interface Props extends React.ComponentProps<typeof StyledInput> {
   touched?: boolean;
   label?: string;
   required?: boolean;
+  leftAccessory?: ReactNode;
+  rightAccessory?: ReactNode;
 }
 
 export function FormInput({
@@ -35,6 +37,8 @@ export function FormInput({
   touched,
   label,
   required,
+  leftAccessory,
+  rightAccessory,
   ...props
 }: Props) {
   return (
@@ -44,14 +48,37 @@ export function FormInput({
       label={label}
       required={required}
     >
-      <StyledInput
-        placeholder={placeholder}
-        value={value}
-        onChangeText={onChangeText}
-        width={width}
-        borderColor={error && touched ? COLORS.error : COLORS.primary}
-        {...props}
-      />
+      {leftAccessory || rightAccessory ? (
+        <XStack width={width} alignItems="center">
+          {leftAccessory && (
+            <XStack marginRight="$2" alignItems="center">
+              {leftAccessory}
+            </XStack>
+          )}
+          <StyledInput
+            placeholder={placeholder}
+            value={value}
+            onChangeText={onChangeText}
+            flex={1}
+            borderColor={error && touched ? COLORS.error : COLORS.primary}
+            {...props}
+          />
+          {rightAccessory && (
+            <XStack marginLeft="$2" alignItems="center">
+              {rightAccessory}
+            </XStack>
+          )}
+        </XStack>
+      ) : (
+        <StyledInput
+          placeholder={placeholder}
+          value={value}
+          onChangeText={onChangeText}
+          width={width}
+          borderColor={error && touched ? COLORS.error : COLORS.primary}
+          {...props}
+        />
+      )}
     </FormControl>
   );
 }

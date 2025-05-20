@@ -1,8 +1,9 @@
-import { CheckCircle, X as XIcon } from "@tamagui/lucide-icons";
+import { X as XIcon } from "@tamagui/lucide-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Text, XStack, YStack } from "tamagui";
 import FakeLoadingBar from "./FakeLoadingBar";
+import { FormInput } from "./FormInput";
 
 interface AutoDetectLocationProps {
   values: any;
@@ -66,32 +67,10 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
         });
         const { latitude, longitude } = position.coords;
 
-        if (__DEV__) {
-          await new Promise((resolve) =>
-            setTimeout(() => {
-              if (!cancelled) {
-                setProgress(70); // Update progress before API call
-                resolve(null);
-              }
-            }, 1000)
-          );
-        }
-
         const response = await fetch(
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyCVRcp8LoR83nVd-ur3kEQ6MdOYMBevHhk`
         );
         const data = await response.json();
-
-        if (__DEV__) {
-          await new Promise((resolve) =>
-            setTimeout(() => {
-              if (!cancelled) {
-                setProgress(90); // Update progress after API call
-                resolve(null);
-              }
-            }, 1000)
-          );
-        }
 
         // Look for street address level result first
         const streetAddressResult = data.results.find((r: any) =>
@@ -179,38 +158,34 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
 
     if (values.location)
       return (
-        <>
-          <CheckCircle size={18} color="#22c55e" style={{ marginRight: 6 }} />
-          <Text color="$green10" fontWeight="bold" fontSize={16} flex={1}>
-            {values.location.name}
-          </Text>
-        </>
+        <FormInput
+          value={values.location.name}
+          onChangeText={(text) => {
+            setFieldValue("location", {
+              ...values.location,
+              name: text,
+            });
+          }}
+          placeholder="Enter location"
+          // leftAccessory={<CheckCircle size={18} color="#22c55e" />}
+          rightAccessory={
+            <Button
+              size="$2"
+              circular
+              chromeless
+              onPress={clearLocation}
+              aria-label="Clear location"
+            >
+              <XIcon size={16} color="#888" />
+            </Button>
+          }
+        />
       );
   }
 
   return (
-    <XStack
-      ai="center"
-      jc="center"
-      bg="$green1"
-      px={12}
-      py={8}
-      br={10}
-      my={4}
-      width="100%"
-      gap="$2"
-    >
+    <XStack ai="center" jc="center" width="100%">
       {getContent()}
-      <Button
-        size="$2"
-        circular
-        chromeless
-        ml={8}
-        onPress={clearLocation}
-        aria-label="Clear location"
-      >
-        <XIcon size={16} color="#888" />
-      </Button>
     </XStack>
   );
 };
