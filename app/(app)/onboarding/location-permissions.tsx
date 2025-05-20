@@ -37,14 +37,16 @@ const LocationPermissionsScreen = () => {
     }
   }, [locationPermission]);
 
-  // Mark permissions as completed
+  // Mark permissions as completed and continue to next screen
   const completePermissionsSetup = async () => {
     if (!user) return;
 
     try {
+      // Update the user data to mark this step as complete
       await updateUserData({
         locationPermissionsSetAt: serverTimestamp(),
       });
+      // Then go to the next screen in the flow
       goToNextScreen();
     } catch (error) {
       console.error("Error updating user data:", error);

@@ -1,10 +1,10 @@
 import { ActionButton } from "@/components/ActionButton";
 import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
 import { InfoRow } from "@/components/InfoRow";
+import { useOnboarding } from "@/context/OnboardingContext";
 import { Heart, MapPin, Shield } from "@tamagui/lucide-icons";
 import React from "react";
 import { H1, Text, YStack } from "tamagui";
-import { useOnboarding } from "@/context/OnboardingContext";
 
 export default function HowItWorks() {
   const { goToNextScreen } = useOnboarding();
@@ -21,7 +21,7 @@ export default function HowItWorks() {
             What you need to know:
           </Text>
 
-          <YStack gap="$5" width="100%" px="$3">
+          <YStack gap="$3" width="100%" px="$4">
             <InfoRow
               icon={<Heart size={24} />}
               title="Nonprofit Mission"

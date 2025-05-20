@@ -2,6 +2,7 @@ import { useUpdates } from "@/context/UpdatesContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
 import { Bell, Footprints, User, Users } from "@tamagui/lucide-icons";
+import WalkIcon from "@/components/WalkIcon";
 import { Redirect, Tabs } from "expo-router";
 import React from "react";
 import { View } from "tamagui";
@@ -46,7 +47,7 @@ export default function TabLayout() {
         options={{
           title: "Friends",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <WalkIcon size={size} color={color} />,
         }}
       />
       <Tabs.Screen

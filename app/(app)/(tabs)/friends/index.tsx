@@ -2,9 +2,9 @@ import { EmptyMessage } from "@/components/EmptyMessage";
 import FAB from "@/components/FAB";
 import FriendshipCard from "@/components/FriendshipCard";
 import { Screen } from "@/components/UI";
+import WalkIcon from "@/components/WalkIcon";
 import { useAuth } from "@/context/AuthContext";
 import { useFriends } from "@/context/FriendsContext";
-import { Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
@@ -59,7 +59,7 @@ export default function FriendsScreen() {
             <EmptyMessage
               message="No Friends Yet"
               subtitle="Add friends to chat and invite on walks!"
-              icon={Users}
+              icon={WalkIcon}
               iconSize={70}
               iconColor="#7C5F45"
             />

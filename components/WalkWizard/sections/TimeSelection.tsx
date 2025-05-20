@@ -29,8 +29,6 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
     updateFormData({ date: Timestamp.fromDate(selectedDate) });
   };
 
-  console.log({ date: formData.date });
-
   const handleTimeChange = (_: any, selectedTime?: Date) => {
     if (selectedTime) {
       // Create a new date with current date but updated time

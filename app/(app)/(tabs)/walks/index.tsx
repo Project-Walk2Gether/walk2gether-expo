@@ -2,37 +2,24 @@ import { EmptyMessage } from "@/components/EmptyMessage";
 import FAB from "@/components/FAB";
 import { Screen } from "@/components/UI";
 import WalkCard from "@/components/WalkCard";
-import WalkIcon from "@/components/WalkIcon";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useWalks } from "@/context/WalksContext";
 import { syncWalkReminders } from "@/utils/notifications";
+import { Footprints } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { FlatList } from "react-native";
 import { Text, View } from "tamagui";
 import { Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
-
-
 
 export default function WalksScreen() {
   const router = useRouter();
   const { activeWalks, upcomingWalks } = useWalks();
   const { permissionStatus } = useNotifications();
-  const [notificationMap, setNotificationMap] = useState<
-    Record<string, string>
-  >({});
 
   // Sync walk reminders whenever upcoming walks change
   useEffect(() => {
-    const syncNotifications = async () => {
-      // Only sync notifications if permission granted
-      if (permissionStatus?.granted) {
-        const notifications = await syncWalkReminders(upcomingWalks);
-        setNotificationMap(notifications);
-      }
-    };
-
-    syncNotifications();
+    if (permissionStatus?.granted) syncWalkReminders(upcomingWalks);
   }, [upcomingWalks, permissionStatus?.granted]);
 
   // Custom handler for walk card navigation
@@ -112,7 +99,7 @@ export default function WalksScreen() {
         <EmptyMessage
           message="The Walk2Gether app supports various types of walks"
           subtitle="To explore, please tap the button below. Happy walking!"
-          icon={WalkIcon}
+          icon={Footprints}
           iconSize={70}
           iconColor="#7C5F45"
         />
