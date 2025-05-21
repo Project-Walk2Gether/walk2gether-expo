@@ -3,23 +3,27 @@ import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useWalkForm, WalkFormData } from "@/context/WalkFormContext";
 import { useQuoteOfTheDay } from "@/utils/quotes";
+import { updateExistingWalk } from "@/utils/updateWalk";
 import { createWalkFromForm } from "@/utils/walkSubmission";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo } from "react";
-import HeaderBackButton from "../HeaderBackButton";
+import { Button, View, XStack } from "tamagui";
 import {
   DurationSelection,
+  InviteSelection,
   LocationSelection,
-  ReviewScreen,
   TimeSelection,
   TypeSelection,
 } from "./sections";
+import { WizardHeader } from "./sections/WizardHeader";
 
 // Define the structure of a wizard step
 interface WizardStep {
   title: string;
-  component: React.ComponentType<any>; // Using any here as we'll properly type when rendering
+  component: React.ComponentType<any>;
+  onContinue: () => void;
+  onBack?: () => void;
 }
 
 export function WalkWizard() {
@@ -30,6 +34,8 @@ export function WalkWizard() {
     goToPreviousStep,
     goToStep,
     setFormData,
+    createdWalkId,
+    setCreatedWalkId,
   } = useWalkForm();
   const router = useRouter();
   const { user } = useAuth();
@@ -46,10 +52,6 @@ export function WalkWizard() {
         invitedUserIds: friendId ? [friendId] : prev.invitedUserIds,
         type: "friends",
       }));
-
-      // Skip the first two steps (type selection and invite selection)
-      // Go directly to step 3 (index 2) which is time selection
-      goToStep(2);
     }
   }, [friendId]);
 
@@ -62,6 +64,33 @@ export function WalkWizard() {
       return;
     }
 
+    // If we already have a created walk ID, update the existing walk instead of creating a new one
+    if (createdWalkId) {
+      console.log(
+        `Updating existing walk ${createdWalkId} instead of creating a new one`
+      );
+      const success = await updateExistingWalk({
+        walkId: createdWalkId,
+        formData,
+        userData,
+      });
+
+      if (!success) {
+        showMessage("Failed to update walk", "error");
+        return;
+      }
+
+      // For friend walks, advance to invite step
+      if (formData.type === "friends") {
+        goToNextStep();
+      } else {
+        // For other walk types, close the wizard (navigate away)
+        router.back();
+      }
+      return;
+    }
+
+    // Create a new walk if we don't have an ID yet
     const walkDoc = await createWalkFromForm({
       formData,
       userData,
@@ -69,52 +98,52 @@ export function WalkWizard() {
 
     if (!walkDoc) return;
 
+    // Store the created walk ID to prevent duplicate creation
+    setCreatedWalkId(walkDoc.id);
+
     // Advance to the next quote when a walk is successfully created
     advanceToNextQuote();
 
-    // For friend walks, navigate to the invite screen after creation
-    if (formData.type === "friends" && !formData.invitedUserIds?.length) {
-      router.replace(`/walks/${walkDoc.id}/invite`);
-    } else {
-      // For other walk types, navigate to the main walk page
-      router.replace(`/walks/${walkDoc.id}`);
-    }
-  }, [formData, router, userData, user, advanceToNextQuote]);
-
-  const handleBackPress = useCallback(() => {
-    if (currentStep > 0) {
-      goToPreviousStep();
-    } else {
-      // Close the modal
-      router.back();
-    }
-  }, [currentStep, goToPreviousStep, router]);
+    // Always call goToNextStep which will handle navigation appropriately
+    // For friend walks, it will go to the invite step
+    // For other walk types, if it's the last step, it will close the wizard
+    goToNextStep();
+  }, [
+    formData,
+    router,
+    userData,
+    user,
+    advanceToNextQuote,
+    goToNextStep,
+    createdWalkId,
+    setCreatedWalkId,
+    showMessage,
+  ]);
 
   // Define the step configuration - using useMemo to avoid recreating the array on each render
   const wizardSteps = useMemo<WizardStep[]>(() => {
-    // First step is always type selection
     const baseSteps = [
       {
-        title: "Please select type of walk",
-        component: TypeSelection, // Only needs onContinue
+        title: "Select walk type",
+        component: TypeSelection,
+        onContinue: goToNextStep,
       },
     ];
 
-    // If this is a neighborhood walk, use a simplified flow
     if (formData.type === "neighborhood") {
       return [
         ...baseSteps,
         {
-          title: "Where is the meetup point?",
-          component: LocationSelection, // Needs onContinue and onBack
+          title: "Select start point",
+          component: LocationSelection,
+          onContinue: goToNextStep,
+          onBack: goToPreviousStep,
         },
         {
-          title: "How long will this walk be?",
-          component: DurationSelection, // Needs onContinue and onBack
-        },
-        {
-          title: "Review & Submit",
-          component: ReviewScreen, // Needs onSubmit, onBack, and onEdit
+          title: "Set duration",
+          component: DurationSelection,
+          onContinue: handleSubmit,
+          onBack: goToPreviousStep,
         },
       ];
     }
@@ -123,37 +152,47 @@ export function WalkWizard() {
     return [
       ...baseSteps,
       {
-        title: "When do you want to walk?",
-        component: TimeSelection, // Needs onContinue and onBack
+        title: "Select date and time",
+        component: TimeSelection,
+        onContinue: goToNextStep,
+        onBack: goToPreviousStep,
       },
       {
-        title: "How long will this walk be?",
-        component: DurationSelection, // Needs onContinue and onBack
+        title: "Select start point",
+        component: LocationSelection,
+        onContinue: goToNextStep,
+        onBack: goToPreviousStep,
       },
       {
-        title: "Where is the meetup point?",
-        component: LocationSelection, // Needs onContinue and onBack
+        title: "Set duration",
+        component: DurationSelection,
+        onContinue: handleSubmit,
+        onBack: goToPreviousStep,
       },
       {
-        title: "Review & Submit",
-        component: ReviewScreen, // Needs onSubmit, onBack, and onEdit
+        title: "Invite",
+        component: InviteSelection,
+        onContinue: goToNextStep, // This will close the wizard since it's the last step
+        onBack: goToPreviousStep,
       },
     ];
-  }, [formData.type]);
-  // Get screen title based on current step
-  const getScreenTitle = () => {
-    // Special case for step 0 (type selection)
-    if (currentStep === 0) {
-      return "What type of walk?";
-    }
+  }, [formData.type, goToNextStep, goToPreviousStep, goToStep, handleSubmit]);
 
-    // Return the title from wizardSteps if available
-    if (currentStep < wizardSteps.length) {
-      return wizardSteps[currentStep].title;
-    }
+  // Create a custom header component for the Stack.Screen
+  const renderHeader = () => {
+    // Get the title from wizardSteps if available
+    const title =
+      currentStep < wizardSteps.length
+        ? wizardSteps[currentStep].title
+        : "Create a Walk";
 
-    // Fallback
-    return "Create a Walk";
+    return (
+      <WizardHeader
+        title={title}
+        currentStep={currentStep + 1}
+        totalSteps={wizardSteps.length}
+      />
+    );
   };
 
   // Set default values for neighborhood walks
@@ -179,44 +218,68 @@ export function WalkWizard() {
 
   // Render the appropriate step based on currentStep
   const renderStep = () => {
+    if (currentStep >= wizardSteps.length) {
+      // No more steps to render, close the wizard
+      router.back();
+      return null;
+    }
     if (currentStep >= 0 && currentStep < wizardSteps.length) {
-      const StepComponent = wizardSteps[currentStep].component;
-
-      // First step (Type Selection) only needs onContinue
-      if (currentStep === 0) {
-        return <StepComponent onContinue={goToNextStep} />;
-      }
-
-      // Last step (Review Screen) needs onSubmit, onBack, and onEdit
-      if (currentStep === wizardSteps.length - 1) {
-        return (
-          <StepComponent
-            onSubmit={handleSubmit}
-            onBack={goToPreviousStep}
-            onEdit={goToStep}
-          />
-        );
-      }
-
-      // Middle steps need onContinue and onBack
+      const {
+        component: StepComponent,
+        onContinue,
+        onBack,
+      } = wizardSteps[currentStep];
       return (
-        <StepComponent onContinue={goToNextStep} onBack={goToPreviousStep} />
+        <StepComponent
+          onContinue={onContinue}
+          onBack={onBack}
+          currentStep={currentStep + 1}
+          totalSteps={wizardSteps.length}
+        />
       );
     }
-
     // Default fallback
     const DefaultComponent = wizardSteps[0].component;
     return <DefaultComponent onContinue={goToNextStep} />;
   };
 
+  const { systemErrors = [] } = useWalkForm();
+
   return (
     <>
       <Stack.Screen
         options={{
-          title: getScreenTitle(),
-          headerLeft: () => <HeaderBackButton onPress={handleBackPress} />,
+          header: renderHeader,
+          headerShown: true,
         }}
       />
+      {systemErrors && systemErrors.length > 0 && (
+        <View marginTop={16} paddingHorizontal={16}>
+          {systemErrors.map((err: string, idx: number) => (
+            <View key={idx} marginBottom={8}>
+              <XStack alignItems="center" gap={8}>
+                <View
+                  width={6}
+                  height={6}
+                  borderRadius={3}
+                  backgroundColor="red"
+                  marginRight={8}
+                />
+                <Button
+                  size="$2"
+                  chromeless
+                  backgroundColor="transparent"
+                  color="red"
+                  disabled
+                  style={{ textAlign: "left", flex: 1 }}
+                >
+                  {err}
+                </Button>
+              </XStack>
+            </View>
+          ))}
+        </View>
+      )}
 
       {renderStep()}
     </>

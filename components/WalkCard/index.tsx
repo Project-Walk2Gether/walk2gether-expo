@@ -14,7 +14,6 @@ import {
   Timer,
 } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
-import { useRouter } from "expo-router";
 import React from "react";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
 import {
@@ -52,7 +51,6 @@ const WalkCard: React.FC<Props> = ({
   const { user } = useAuth();
   const isMine = user?.uid === walk.createdByUid;
   const status = getWalkStatus(walk);
-  const router = useRouter();
 
   // Get the participant document for the current user (if they exist as a participant)
   const { doc: participantDoc } = useDoc<Participant>(
@@ -107,7 +105,7 @@ const WalkCard: React.FC<Props> = ({
     return (
       <XStack alignItems="center" gap={6}>
         <Pin size={16} color="#666" />
-        <Text fontSize={14} color="#666" numberOfLines={1}>
+        <Text fontSize={14} flexShrink={1} color="#666">
           {displayContent}
         </Text>
       </XStack>
@@ -141,7 +139,7 @@ const WalkCard: React.FC<Props> = ({
         onPress={onPress}
       >
         <XStack alignItems="center" justifyContent="space-between">
-          <XStack alignItems="center" gap={8} flex={1}>
+          <XStack alignItems="center" gap="$1.5" flex={1}>
             <UserAvatar uid={walk.createdByUid} size={32} />
             <Text
               fontSize={18}
@@ -156,7 +154,9 @@ const WalkCard: React.FC<Props> = ({
           </XStack>
 
           {/* Simple menu button that triggers the global menu context */}
-          {isMine && <WalkMenu walk={walk} hideInviteOption={hideInviteOption} />}
+          {isMine && (
+            <WalkMenu walk={walk} hideInviteOption={hideInviteOption} />
+          )}
         </XStack>
 
         <XStack alignItems="center" gap={6} justifyContent="space-between">
@@ -215,7 +215,7 @@ const WalkCard: React.FC<Props> = ({
                   </Text>
                 </XStack>
               )}
-              
+
               {/* If user has requested to join and it's rejected */}
               {isRejected && (
                 <XStack

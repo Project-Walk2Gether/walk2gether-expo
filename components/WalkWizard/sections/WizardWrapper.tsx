@@ -13,6 +13,8 @@ interface WizardWrapperProps {
   continueText?: string;
   backText?: string;
   hideFooter?: boolean;
+  currentStep?: number;
+  totalSteps?: number;
 }
 
 export const WizardWrapper: React.FC<WizardWrapperProps> = ({
@@ -38,6 +40,7 @@ export const WizardWrapper: React.FC<WizardWrapperProps> = ({
           paddingBottom: 80 + insets.bottom,
         }}
       >
+        {/* Progress dots moved to header */}
         {children}
       </RNScrollView>
 
@@ -48,37 +51,39 @@ export const WizardWrapper: React.FC<WizardWrapperProps> = ({
           bottom={0}
           left={0}
           right={0}
-          backgroundColor="rgba(0, 0, 0, 0.05)"
+          backgroundColor="rgba(0, 0, 0, 0.2)"
           paddingHorizontal={16}
           paddingBottom={Math.max(insets.bottom, 16)}
           paddingTop={16}
           borderTopLeftRadius={16}
           borderTopRightRadius={16}
         >
-        <XStack gap="$4" justifyContent="space-between">
-          {onBack ? (
+          <XStack gap="$4" justifyContent="space-between">
+            {onBack ? (
+              <Button
+                size="$5"
+                backgroundColor={COLORS.actionSecondary}
+                color={COLORS.textOnDark}
+                onPress={onBack}
+                flex={1}
+              >
+                {backText}
+              </Button>
+            ) : null}
             <Button
               size="$5"
-              backgroundColor={COLORS.actionSecondary}
+              backgroundColor={
+                continueDisabled ? COLORS.disabled : COLORS.action
+              }
               color={COLORS.textOnDark}
-              onPress={onBack}
+              disabled={continueDisabled}
+              onPress={onContinue}
               flex={1}
             >
-              {backText}
+              {continueText}
             </Button>
-          ) : null}
-          <Button
-            size="$5"
-            backgroundColor={continueDisabled ? COLORS.disabled : COLORS.action}
-            color={COLORS.textOnDark}
-            disabled={continueDisabled}
-            onPress={onContinue}
-            flex={1}
-          >
-            {continueText}
-          </Button>
-        </XStack>
-      </View>
+          </XStack>
+        </View>
       )}
     </BrandGradient>
   );

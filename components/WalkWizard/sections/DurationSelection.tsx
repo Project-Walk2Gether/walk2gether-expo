@@ -21,21 +21,24 @@ import {
 } from "tamagui";
 import WizardWrapper from "./WizardWrapper";
 
-interface DurationSelectionProps {
+interface Props {
   onContinue: () => void;
-  onBack: () => void;
+  onBack?: () => void;
+  currentStep?: number;
+  totalSteps?: number;
 }
 
-export const DurationSelection: React.FC<DurationSelectionProps> = ({
+export const DurationSelection: React.FC<Props> = ({
   onContinue,
   onBack,
+  currentStep,
+  totalSteps,
 }) => {
   const { formData, updateFormData } = useWalkForm();
-  const [duration, setDuration] = useState(formData.duration || 30);
+  const [duration, setDuration] = useState(formData.durationMinutes || 30);
   const [customModalOpen, setCustomModalOpen] = useState(false);
   const [customHours, setCustomHours] = useState("0");
   const [customMinutes, setCustomMinutes] = useState("30");
-
   const durationOptions = [15, 30, 45, 60, 75, 90, 120];
 
   const handleDurationChange = (value: number) => {
@@ -45,7 +48,7 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
     });
 
     setDuration(closest);
-    updateFormData({ duration: closest });
+    updateFormData({ durationMinutes: closest });
   };
 
   const openCustomDurationPicker = () => {
@@ -68,7 +71,7 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
     const sanitizedDuration = Math.max(5, Math.min(180, totalMinutes));
 
     setDuration(sanitizedDuration);
-    updateFormData({ duration: sanitizedDuration });
+    updateFormData({ durationMinutes: sanitizedDuration });
     setCustomModalOpen(false);
   };
 
@@ -86,18 +89,17 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
     }
   };
 
-  // Define the continue handler to use with the WizardWrapper
-  const handleContinue = () => {
-    // Pass the duration data to the next step
-    onContinue();
-  };
-
   return (
     <>
-      <WizardWrapper onContinue={handleContinue} onBack={onBack}>
+      <WizardWrapper
+        onContinue={onContinue}
+        onBack={onBack}
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+      >
         <YStack gap="$4">
           <Card
-            backgroundColor="rgba(255, 255, 255, 0.15)"
+            backgroundColor="white"
             borderRadius="$4"
             padding="$5"
             alignItems="center"
@@ -108,13 +110,8 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
               justifyContent="center"
               marginBottom="$4"
             >
-              <Clock size="$6" color={COLORS.textOnDark} />
-              <Text
-                fontSize={36}
-                fontWeight="bold"
-                color={COLORS.textOnDark}
-                marginLeft="$2"
-              >
+              <Clock size="$6" color={COLORS.primary} />
+              <Text fontSize={36} fontWeight="bold" marginLeft="$2">
                 {formatDuration(duration)}
               </Text>
             </XStack>
@@ -130,8 +127,8 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
                 onValueChange={([value]) => handleDurationChange(value)}
                 marginBottom="$8"
               >
-                <Slider.Track backgroundColor="rgba(255,255,255,0.3)">
-                  <Slider.TrackActive backgroundColor={COLORS.background} />
+                <Slider.Track backgroundColor="rgba(100,100,100,0.1)">
+                  <Slider.TrackActive backgroundColor={COLORS.primary} />
                 </Slider.Track>
                 <Slider.Thumb
                   index={0}
@@ -157,7 +154,7 @@ export const DurationSelection: React.FC<DurationSelectionProps> = ({
                     }}
                     onPress={() => {
                       setDuration(option);
-                      updateFormData({ duration: option });
+                      updateFormData({ durationMinutes: option });
                     }}
                   >
                     <SizableText

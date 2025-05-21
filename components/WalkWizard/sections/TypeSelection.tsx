@@ -7,9 +7,11 @@ import WizardWrapper from "./WizardWrapper";
 
 interface TypeSelectionProps {
   onContinue: () => void;
+  currentStep?: number;
+  totalSteps?: number;
 }
 
-export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue }) => {
+export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue, currentStep, totalSteps }) => {
   const { formData, updateFormData } = useWalkForm();
 
   // When a type is selected, update the form data and proceed
@@ -22,6 +24,8 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue }) => {
     <WizardWrapper
       onContinue={onContinue}
       hideFooter={true}
+      currentStep={currentStep}
+      totalSteps={totalSteps}
     >
       <YStack gap="$4" paddingBottom="$4">
         <WalkTypeCard
