@@ -35,7 +35,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   const { userData } = useUserData();
   const { showMessage } = useFlashMessage();
   const [selectedFriends, setSelectedFriends] = useState<string[]>(
-    formData.invitedUserIds || []
+    formData.visibleToUserIds || []
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [invitationSent, setInvitationSent] = useState(false);
@@ -59,11 +59,11 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
     setSelectedFriends((prev) => {
       if (prev.includes(friendId)) {
         const updated = prev.filter((id) => id !== friendId);
-        updateFormData({ invitedUserIds: updated });
+        updateFormData({ visibleToUserIds: updated });
         return updated;
       } else {
         const updated = [...prev, friendId];
-        updateFormData({ invitedUserIds: updated });
+        updateFormData({ visibleToUserIds: updated });
         return updated;
       }
     });

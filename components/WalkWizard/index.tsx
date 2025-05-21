@@ -50,7 +50,7 @@ export function WalkWizard() {
       // Set the friend as an invited user and set the walk type
       setFormData((prev: WalkFormData) => ({
         ...prev,
-        invitedUserIds: friendId ? [friendId] : prev.invitedUserIds,
+        visibleToUserIds: friendId ? [friendId] : prev.visibleToUserIds,
         type: "friends",
       }));
     }

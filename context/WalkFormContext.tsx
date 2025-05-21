@@ -117,27 +117,31 @@ export const WalkFormProvider: React.FC<Props> = ({ children }) => {
   // Form validation logic
   const validateForm = (): boolean => {
     const newErrors: WalkFormErrors = {};
-    
+
     // Required fields validation
     if (!formData.date) {
       newErrors.date = "Date and time are required";
     }
-    
+
     if (!formData.durationMinutes) {
       newErrors.durationMinutes = "Duration is required";
     }
-    
+
     if (!formData.startLocation) {
       newErrors.startLocation = "Starting location is required";
     }
-    
-    if (formData.type === "neighborhood" && (!formData.invitedUserIds || formData.invitedUserIds.length === 0)) {
-      newErrors.invitedUserIds = "No nearby walkers found in this neighborhood";
+
+    if (
+      formData.type === "neighborhood" &&
+      (!formData.visibleToUserIds || formData.visibleToUserIds.length === 0)
+    ) {
+      newErrors.visibleToUserIds =
+        "No nearby walkers found in this neighborhood";
     }
 
     // Set the errors state
     setErrors(newErrors);
-    
+
     // Form is valid if there are no errors
     const valid = Object.keys(newErrors).length === 0;
     setIsValid(valid);

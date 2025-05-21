@@ -49,8 +49,8 @@ export default function InviteScreen() {
 
   // Set initial selected friends based on walk data
   useEffect(() => {
-    if (walk?.invitedUserIds) {
-      setSelectedFriends(walk.invitedUserIds);
+    if (walk?.visibleToUserIds) {
+      setSelectedFriends(walk.visibleToUserIds);
     }
   }, [walk]);
 
@@ -162,7 +162,9 @@ export default function InviteScreen() {
                 walk={walk}
                 showAttachments={false}
                 showActions={false}
-                hideInviteOption={true} /* Hide Invite option when on the invite screen */
+                hideInviteOption={
+                  true
+                } /* Hide Invite option when on the invite screen */
                 onPress={undefined} /* Explicitly disable navigation */
               />
             )}

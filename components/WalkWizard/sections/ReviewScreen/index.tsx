@@ -81,11 +81,11 @@ export const ReviewScreen: React.FC<Props> = ({ onSubmit, onBack, onEdit }) => {
                   </Text>
                   {formData.type === "neighborhood" && (
                     <Text fontSize={14} color="$gray11" numberOfLines={2}>
-                      {formData.invitedUserIds &&
-                      formData.invitedUserIds.length > 0
+                      {formData.visibleToUserIds &&
+                      formData.visibleToUserIds.length > 0
                         ? `${pluralize(
                             "Walk2Gether member",
-                            formData.invitedUserIds.length,
+                            formData.visibleToUserIds.length,
                             true
                           )} will be notified`
                         : "No members found in this area"}
@@ -94,7 +94,7 @@ export const ReviewScreen: React.FC<Props> = ({ onSubmit, onBack, onEdit }) => {
                 </YStack>
               }
               onEdit={() => onEdit(3)}
-              error={errors.startLocation || errors.invitedUserIds}
+              error={errors.startLocation || errors.visibleToUserIds}
             />
           </YStack>
         </Card>
