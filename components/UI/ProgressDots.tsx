@@ -9,6 +9,7 @@ interface ProgressDotsProps {
   gap?: number;
   activeColor?: string;
   inactiveColor?: string;
+  visible?: boolean;
 }
 
 export const ProgressDots: React.FC<ProgressDotsProps> = ({
@@ -18,9 +19,10 @@ export const ProgressDots: React.FC<ProgressDotsProps> = ({
   gap = 8,
   activeColor = COLORS.action,
   inactiveColor = "#D0D0D0",
+  visible = true,
 }) => {
   return (
-    <XStack gap={gap} justifyContent="center">
+    <XStack opacity={visible ? 1 : 0} gap={gap} justifyContent="center">
       {Array.from({ length: totalSteps }).map((_, index) => (
         <View
           key={index}

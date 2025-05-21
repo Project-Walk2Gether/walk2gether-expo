@@ -3,10 +3,10 @@ import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import React, { useEffect, useState } from "react";
 import { YStack } from "tamagui";
+import NeighborhoodWalkHowItWorksSection from "../NeighborhoodWalkHowItWorksSection";
 import WizardWrapper from "../WizardWrapper";
 import { findNearbyWalkers } from "./findNearbyWalkers";
 import NearbyMembersMap from "./NearbyMembersMap";
-import NeighborhoodWalkHowItWorksSection from "./NeighborhoodWalkHowItWorksSection";
 
 interface NeighborhoodConfirmationProps {
   onSubmit: () => void;
@@ -84,7 +84,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
       <YStack gap="$4">
         <YStack justifyContent="flex-start" gap="$4">
           {/* Map with nearby members */}
-          <NearbyMembersMap 
+          <NearbyMembersMap
             walkRadius={walkRadius}
             nearbyWalkers={nearbyWalkers}
             isLoadingNearbyUsers={isLoadingNearbyUsers}

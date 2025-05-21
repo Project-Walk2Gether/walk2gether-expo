@@ -92,15 +92,14 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
           mimeType: "text/plain",
           UTI: "public.plain-text",
         });
-        
+
         // Mark invitation as sent
         setInvitationSent(true);
-        showMessage("Invitation link shared successfully", "success");
       } else {
         // Fallback for web or devices where Sharing is not available
         Clipboard.setString(link);
         showMessage("Invitation link copied to clipboard", "success");
-        
+
         // Mark invitation as sent
         setInvitationSent(true);
       }
@@ -129,7 +128,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
         currentStep={currentStep}
         totalSteps={totalSteps}
       >
-        <YStack flex={1} gap="$4" paddingHorizontal="$2" paddingVertical="$4">
+        <YStack flex={1} gap="$4">
           {isNeighborhoodWalk && (
             <YStack gap="$4">
               <Card

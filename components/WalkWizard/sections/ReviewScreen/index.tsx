@@ -3,7 +3,7 @@ import { Calendar, Clock, MapPin } from "@tamagui/lucide-icons";
 import { differenceInMinutes, format } from "date-fns";
 import React from "react";
 import { Card, Separator, Text, YStack } from "tamagui";
-import NeighborhoodWalkHowItWorksSection from "../NeighborhoodConfirmationScreen/NeighborhoodWalkHowItWorksSection";
+import NeighborhoodWalkHowItWorksSection from "../NeighborhoodWalkHowItWorksSection";
 import WizardWrapper from "../WizardWrapper";
 import ReviewItem from "./ReviewItem";
 

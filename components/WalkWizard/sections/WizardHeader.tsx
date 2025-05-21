@@ -6,12 +6,14 @@ import ProgressDots from "../../UI/ProgressDots";
 interface WizardHeaderProps {
   title: string;
   currentStep: number;
+  displayDots?: boolean;
   totalSteps: number;
 }
 
 export const WizardHeader: React.FC<WizardHeaderProps> = ({
   title,
   currentStep,
+  displayDots,
   totalSteps,
 }) => {
   return (
@@ -38,6 +40,7 @@ export const WizardHeader: React.FC<WizardHeaderProps> = ({
           totalSteps={totalSteps}
           dotSize={6}
           gap={6}
+          visible={displayDots}
         />
       </YStack>
 

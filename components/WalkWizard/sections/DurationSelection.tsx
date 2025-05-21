@@ -103,7 +103,6 @@ export const DurationSelection: React.FC<Props> = ({
             borderRadius="$4"
             padding="$5"
             alignItems="center"
-            marginVertical="$5"
           >
             <XStack
               alignItems="center"
