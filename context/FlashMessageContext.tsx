@@ -1,6 +1,6 @@
+import Toast from "@/components/UI/Toast";
 import { ReactNode, createContext, useContext } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Toast from "@/components/UI/Toast";
 
 export type MessageType = "success" | "error" | "info";
 
@@ -34,6 +34,7 @@ export const FlashMessageProvider: React.FC<FlashMessageProviderProps> = ({
   children,
 }) => {
   const insets = useSafeAreaInsets();
+
   const showMessage = (
     message: string,
     type: MessageType = "info",

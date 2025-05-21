@@ -22,13 +22,13 @@ export const ContentCard = ({
   return (
     <YStack
       gap="$3"
-      backgroundColor="rgba(255, 255, 255, 0.7)"
-      borderRadius={18}
+      backgroundColor="white"
+      borderRadius="$4"
       padding="$5"
       shadowColor="#000"
-      shadowOpacity={0.05}
+      shadowOpacity={0.07}
       shadowRadius={7}
-      shadowOffset={{ width: 0, height: 2 }}
+      shadowOffset={{ width: 0, height: 3 }}
     >
       <XStack
         alignItems="center"

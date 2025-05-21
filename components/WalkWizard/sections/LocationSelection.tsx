@@ -1,3 +1,4 @@
+import { FormInput } from "@/components/FormInput";
 import LocationButton from "@/components/UI/LocationButton";
 import { PlacesAutocomplete } from "@/components/UI/PlacesAutocomplete";
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
@@ -18,11 +19,34 @@ import WizardWrapper from "./WizardWrapper";
 
 interface Props {
   onContinue: () => void;
-  onBack: () => void;
+  onBack?: () => void;
+  currentStep?: number;
+  totalSteps?: number;
 }
 
-export const LocationSelection: React.FC<Props> = ({ onContinue, onBack }) => {
-  const { formData, updateFormData } = useWalkForm();
+export const LocationSelection: React.FC<Props> = ({ onContinue, onBack, currentStep, totalSteps }) => {
+  const { formData, updateFormData, errors, systemErrors, setSystemErrors } =
+    useWalkForm();
+
+  // Local state for notes
+  const [notes, setNotes] = useState<string>(
+    formData.startLocation?.notes || ""
+  );
+
+  // Sync local notes to formData.startLocation.notes
+  useEffect(() => {
+    if (!formData.startLocation) return;
+    if (formData.startLocation.notes !== notes) {
+      updateFormData({
+        startLocation: {
+          ...formData.startLocation,
+          notes,
+        },
+      });
+    }
+    // Only run when notes changes, not on every keystroke if not needed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notes]);
   const { user } = useAuth();
   const {
     refresh: getLocation,
@@ -81,17 +105,14 @@ export const LocationSelection: React.FC<Props> = ({ onContinue, onBack }) => {
     try {
       const newLocation = await reverseGeocode(latitude, longitude);
       updateFormData({ startLocation: newLocation });
+      setSystemErrors([]); // Clear any previous system errors
       return newLocation;
     } catch (error) {
       console.error("Error during reverse geocoding:", error);
-      // Fallback to coordinate-based location
-      const newLocation = {
-        name: `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-        latitude,
-        longitude,
-      };
-      updateFormData({ startLocation: newLocation });
-      return newLocation;
+      setSystemErrors([
+        "We couldn't determine the address for this location. Please try again or pick a different spot on the map.",
+      ]);
+      return null;
     } finally {
       setIsReverseGeocoding(false);
     }
@@ -133,6 +154,8 @@ export const LocationSelection: React.FC<Props> = ({ onContinue, onBack }) => {
       if (googlePlacesRef.current && newLocation) {
         googlePlacesRef.current.setAddressText(newLocation.name);
       }
+
+      console.log({ newLocation });
 
       return newLocation;
     } catch (error) {
@@ -206,6 +229,8 @@ export const LocationSelection: React.FC<Props> = ({ onContinue, onBack }) => {
     <WizardWrapper
       onContinue={handleContinue}
       onBack={onBack}
+      currentStep={currentStep}
+      totalSteps={totalSteps}
       continueDisabled={!formData.startLocation}
     >
       <YStack gap="$4">
@@ -239,7 +264,6 @@ export const LocationSelection: React.FC<Props> = ({ onContinue, onBack }) => {
             }}
           />
         </View>
-
         <LocationButton
           onPress={async () => {
             setIsReverseGeocoding(true);
@@ -275,7 +299,6 @@ export const LocationSelection: React.FC<Props> = ({ onContinue, onBack }) => {
             locationLoading || isReverseGeocoding || pendingLocationRequest
           }
         />
-
         <View
           flex={1}
           height={300}
@@ -400,6 +423,15 @@ export const LocationSelection: React.FC<Props> = ({ onContinue, onBack }) => {
             </View>
           )}
         </View>
+        {/* Notes input field for location */}
+        <FormInput
+          label="Meetup location (optional)"
+          placeholder="Add details about where to meet"
+          value={notes}
+          onChangeText={setNotes}
+          multiline
+          numberOfLines={3}
+        />
       </YStack>
     </WizardWrapper>
   );

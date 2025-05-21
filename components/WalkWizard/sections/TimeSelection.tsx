@@ -12,12 +12,18 @@ import { combineDateAndTime } from "@/utils/timezone";
 
 interface TimeSelectionProps {
   onContinue: () => void;
-  onBack: () => void;
+  onBack?: () => void;
+  onSubmit?: () => void;
+  currentStep?: number;
+  totalSteps?: number;
 }
 
 export const TimeSelection: React.FC<TimeSelectionProps> = ({
   onContinue,
   onBack,
+  onSubmit,
+  currentStep,
+  totalSteps,
 }) => {
   const { formData, updateFormData } = useWalkForm();
   const [timeOption, setTimeOption] = useState<"now" | "future">("future");
@@ -70,11 +76,21 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
         date: Timestamp.fromDate(new Date()),
       });
     }
-    onContinue();
+    if (onSubmit) {
+      onSubmit();
+    } else if (onContinue) {
+      onContinue();
+    }
   };
 
   return (
-    <WizardWrapper onContinue={handleContinue} onBack={onBack}>
+    <WizardWrapper
+      onContinue={handleContinue}
+      onBack={onBack}
+      currentStep={currentStep}
+      totalSteps={totalSteps}
+      continueText="Continue"
+    >
       <YStack gap="$4">
         {/* Time option tabs */}
         <XStack backgroundColor="white" borderRadius={12} overflow="hidden">

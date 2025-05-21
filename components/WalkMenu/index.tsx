@@ -1,4 +1,5 @@
 import { MenuItem, useMenu } from "@/context/MenuContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
 import { COLORS } from "@/styles/colors";
 import { Edit3, MoreVertical, Trash, UserPlus } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
@@ -11,21 +12,25 @@ interface Props {
   onOpenMaps?: () => void;
   hasLocation?: boolean;
   hideInviteOption?: boolean;
+  afterDelete?: () => void;
 }
 
-export default function WalkMenu({
-  walk,
-  onOpenMaps,
-  hasLocation = true, // Changed the default to true since most walks have locations
-  hideInviteOption = false,
-}: Props) {
+export default function WalkMenu({ walk, hideInviteOption = false, afterDelete }: Props) {
   const router = useRouter();
   const { showMenu } = useMenu();
+  const { showMessage } = useFlashMessage();
 
   const onDelete = useCallback(() => {
     walk._ref.delete();
-    router.push("/");
-  }, [walk._ref]);
+    
+    // Show confirmation message
+    showMessage("Walk has been cancelled", "success");
+    
+    // If afterDelete is provided, call it after deletion
+    if (afterDelete) {
+      afterDelete();
+    }
+  }, [walk._ref, afterDelete, showMessage]);
 
   const handleShowMenu = useCallback(() => {
     // Use the MenuItem type from the MenuContext
@@ -36,7 +41,7 @@ export default function WalkMenu({
         onPress: () => router.push(`/walks/${walk.id}/edit`),
       },
     ];
-    
+
     // Only add the Invite Friends option if not hidden
     if (!hideInviteOption) {
       menuItems.push({
@@ -45,7 +50,7 @@ export default function WalkMenu({
         onPress: () => router.push(`/walks/${walk.id}/invite`),
       });
     }
-    
+
     // // Conditionally add the Open in Maps option
     // if (hasLocation) {
     //   menuItems.push({
@@ -54,7 +59,7 @@ export default function WalkMenu({
     //     onPress: onOpenMaps || openDirections,
     //   });
     // }
-    
+
     // Add the Cancel Walk option at the end
     menuItems.push({
       label: "Cancel Walk",
@@ -62,10 +67,9 @@ export default function WalkMenu({
       onPress: onDelete,
       theme: "red",
     });
-    
-    showMenu("Walk Options", menuItems);
-  }, [walk.id, showMenu, router, onOpenMaps, onDelete, hasLocation, hideInviteOption]);
 
+    showMenu("Walk Options", menuItems);
+  }, [walk.id, showMenu, router, onDelete, hideInviteOption]);
 
   return (
     <Button

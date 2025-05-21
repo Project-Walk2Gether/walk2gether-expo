@@ -1,6 +1,6 @@
 import { COLORS } from "@/styles/colors";
-import { Input, styled, XStack } from "tamagui";
 import React, { ReactNode } from "react";
+import { Input, styled, XStack } from "tamagui";
 import { FormControl } from "../FormControl";
 
 const StyledInput = styled(Input, {
@@ -11,7 +11,6 @@ const StyledInput = styled(Input, {
   borderWidth: 1,
   focusStyle: {
     borderColor: COLORS.primary,
-    // Removed the thicker border to match LocationAutocomplete
   },
 });
 

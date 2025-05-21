@@ -19,12 +19,16 @@ import WizardWrapper from "./WizardWrapper";
 
 interface InviteSelectionProps {
   onContinue: () => void;
-  onBack: () => void;
+  onBack?: () => void;
+  currentStep?: number;
+  totalSteps?: number;
 }
 
 export const InviteSelection: React.FC<InviteSelectionProps> = ({
   onContinue,
   onBack,
+  currentStep,
+  totalSteps,
 }) => {
   const { formData, updateFormData } = useWalkForm();
   const { user } = useAuth();
@@ -34,6 +38,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
     formData.invitedUserIds || []
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [invitationSent, setInvitationSent] = useState(false);
   // Query friendships for current user where deletedAt is null (not deleted)
   const friendshipsQuery = user?.uid
     ? query(
@@ -87,10 +92,17 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
           mimeType: "text/plain",
           UTI: "public.plain-text",
         });
+        
+        // Mark invitation as sent
+        setInvitationSent(true);
+        showMessage("Invitation link shared successfully", "success");
       } else {
         // Fallback for web or devices where Sharing is not available
         Clipboard.setString(link);
         showMessage("Invitation link copied to clipboard", "success");
+        
+        // Mark invitation as sent
+        setInvitationSent(true);
       }
     } catch (error) {
       console.error("Error sharing link:", error);
@@ -112,7 +124,10 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
       <WizardWrapper
         onContinue={handleContinue}
         onBack={onBack}
-        continueText="Next"
+        continueText="Done"
+        continueDisabled={!invitationSent}
+        currentStep={currentStep}
+        totalSteps={totalSteps}
       >
         <YStack flex={1} gap="$4" paddingHorizontal="$2" paddingVertical="$4">
           {isNeighborhoodWalk && (
@@ -157,13 +172,24 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                     onSearchChange={setSearchQuery}
                     selectedFriendIds={selectedFriends}
                   />
+                  <Text
+                    fontSize={16}
+                    color={COLORS.textOnLight}
+                    marginTop="$2"
+                    textAlign="center"
+                    fontWeight="600"
+                  >
+                    {selectedFriends.length}{" "}
+                    {selectedFriends.length === 1 ? "friend" : "friends"}{" "}
+                    selected
+                  </Text>
                 </ContentCard>
               ) : null}
 
               <ContentCard
-                title="Invite friends"
+                title="Invite new friend"
                 icon={<Link size={20} color={COLORS.textOnLight} />}
-                description="Share an invitation link with friends to join your walk. Send it in a message in your favourite messaging app!"
+                description="Send an invitation for your friend to download the Walk2Gether app to join the walk."
               >
                 <Button
                   backgroundColor={COLORS.primary}
@@ -176,20 +202,9 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                   hoverStyle={{ backgroundColor: "#6d4c2b" }}
                   pressStyle={{ backgroundColor: "#4b2e13" }}
                 >
-                  Share Link
+                  Send Invitation
                 </Button>
               </ContentCard>
-
-              <Text
-                fontSize={16}
-                color={COLORS.textOnLight}
-                marginTop="$2"
-                textAlign="center"
-                fontWeight="600"
-              >
-                {selectedFriends.length}{" "}
-                {selectedFriends.length === 1 ? "friend" : "friends"} selected
-              </Text>
             </YStack>
           )}
         </YStack>

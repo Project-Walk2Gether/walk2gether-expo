@@ -74,28 +74,36 @@ export const reverseGeocode = async (latitude: number, longitude: number) => {
       const addressResult = data.results[0];
       const addressComponents = addressResult.address_components;
 
-      // Extract locality (city) and route (street) if available
-      let locality = "";
+      // Extract street number, route, and locality for a concise address
+      let streetNumber = "";
       let route = "";
-
+      let locality = "";
       for (const component of addressComponents) {
-        if (component.types.includes("locality")) {
-          locality = component.long_name;
+        if (component.types.includes("street_number")) {
+          streetNumber = component.long_name;
         }
         if (component.types.includes("route")) {
           route = component.long_name;
         }
+        if (component.types.includes("locality")) {
+          locality = component.long_name;
+        }
       }
-
-      // Create a name from the components or use a default
-      const name = route || locality || "Selected Location";
-
+      let conciseAddress = "";
+      if (streetNumber && route && locality) {
+        conciseAddress = `${streetNumber} ${route}, ${locality}`;
+      } else if (route && locality) {
+        conciseAddress = `${route}, ${locality}`;
+      } else if (addressResult.formatted_address) {
+        conciseAddress = addressResult.formatted_address;
+      } else {
+        conciseAddress = `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+      }
       const newLocation = {
-        name: name || addressResult.formatted_address || `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+        name: conciseAddress,
         latitude,
         longitude,
       };
-
       return newLocation;
     } else {
       // Handle geocoding error

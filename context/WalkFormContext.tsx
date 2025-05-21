@@ -1,4 +1,5 @@
 import { Timestamp } from "@react-native-firebase/firestore";
+import { useRouter } from "expo-router";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Walk } from "walk2gether-shared";
 
@@ -22,6 +23,12 @@ interface WalkFormContextType {
   errors: WalkFormErrors;
   validateForm: () => boolean;
   isValid: boolean;
+  // System-level errors (e.g., API failures)
+  systemErrors: string[];
+  setSystemErrors: React.Dispatch<React.SetStateAction<string[]>>;
+  // Track if a walk has been created already
+  createdWalkId: string | null;
+  setCreatedWalkId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 // Generate a random 6-character alphanumeric invitation code
@@ -59,6 +66,10 @@ export const WalkFormProvider: React.FC<Props> = ({ children }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [errors, setErrors] = useState<WalkFormErrors>({});
   const [isValid, setIsValid] = useState(true);
+  // System-level errors (e.g., API failures)
+  const [systemErrors, setSystemErrors] = useState<string[]>([]);
+  // Track if a walk has been created already
+  const [createdWalkId, setCreatedWalkId] = useState<string | null>(null);
   const totalSteps = 6; // Type selection + 4 wizard steps
 
   const updateFormData = (newData: Partial<WalkFormData>) => {
@@ -75,11 +86,19 @@ export const WalkFormProvider: React.FC<Props> = ({ children }) => {
       invitationCode: generateInvitationCode(),
     });
     setCurrentStep(0);
+    setCreatedWalkId(null); // Reset the created walk ID
   };
+
+  // Get the router for navigation
+  const router = useRouter();
 
   const goToNextStep = () => {
     if (currentStep < totalSteps - 1) {
+      // If there's a next step, go to it
       setCurrentStep(currentStep + 1);
+    } else {
+      // If we're on the last step, close the wizard by navigating back
+      router.back();
     }
   };
 
@@ -145,6 +164,10 @@ export const WalkFormProvider: React.FC<Props> = ({ children }) => {
         errors,
         validateForm,
         isValid,
+        systemErrors,
+        setSystemErrors,
+        createdWalkId,
+        setCreatedWalkId,
       }}
     >
       {children}
