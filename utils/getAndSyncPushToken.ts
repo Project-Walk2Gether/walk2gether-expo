@@ -1,10 +1,10 @@
 import { firestore_instance } from "@/config/firebase";
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { doc, setDoc } from "@react-native-firebase/firestore";
+import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import Constants from "expo-constants";
 import { isDevice } from "expo-device";
 import Notifications from "expo-notifications";
-import { callApi } from "./api";
+import { writeLogIfEnabled } from "./logging";
 
 export async function getAndSyncPushToken(user: FirebaseAuthTypes.User) {
   const projectId =
@@ -26,14 +26,16 @@ export async function getAndSyncPushToken(user: FirebaseAuthTypes.User) {
           userDoc,
           {
             expoPushToken: token,
+            lastActiveAt: Timestamp.now(),
           },
           { merge: true }
         );
       }
     } catch (tokenError) {
-      console.error("Error getting push token:", tokenError);
-      // Call API without push token if we failed to get one
-      await callApi("user/set-permissions-claim");
+      writeLogIfEnabled({
+        message: "Error getting push token",
+        metadata: { error: tokenError },
+      });
     }
   }
 }

@@ -6,15 +6,7 @@ import { Friendship } from "walk2gether-shared";
 import { UserAvatar } from "./UserAvatar";
 
 interface Props {
-  friendship: Friendship & {
-    userDataByUid?: Record<
-      string,
-      {
-        name: string;
-        profilePicUrl?: string;
-      }
-    >;
-  };
+  friendship: Friendship;
   onPress?: () => void;
 }
 
