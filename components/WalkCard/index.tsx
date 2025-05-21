@@ -25,6 +25,7 @@ import {
 import { UserAvatar } from "../UserAvatar";
 import WalkAttachmentsCarousel from "../WalkAttachmentsCarousel";
 import WalkMenu from "../WalkMenu";
+import { IconTextRow } from "./IconTextRow";
 import { ParticipantsSection } from "./ParticipantsSection";
 
 // Props interface for WalkCard
@@ -103,12 +104,14 @@ const WalkCard: React.FC<Props> = ({
     if (!displayContent) return null;
 
     return (
-      <XStack alignItems="center" gap={6}>
-        <Pin size={16} color="#666" />
-        <Text fontSize={14} flexShrink={1} color="#666">
-          {displayContent}
-        </Text>
-      </XStack>
+      <IconTextRow
+        icon={<Pin size={16} color="#666" />}
+        text={displayContent}
+        fontSize={14}
+        color="#666"
+        gap={6}
+        textProps={{ flexShrink: 1 }}
+      />
     );
   })();
 
@@ -139,19 +142,16 @@ const WalkCard: React.FC<Props> = ({
         onPress={onPress}
       >
         <XStack alignItems="center" justifyContent="space-between">
-          <XStack alignItems="center" gap="$1.5" flex={1}>
-            <UserAvatar uid={walk.createdByUid} size={32} />
-            <Text
-              fontSize={18}
-              fontWeight="600"
-              color="$gray12"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              flex={1}
-            >
-              {getWalkTitle(walk, user?.uid)}
-            </Text>
-          </XStack>
+          <IconTextRow
+            icon={<UserAvatar uid={walk.createdByUid} size={32} />}
+            text={getWalkTitle(walk, user?.uid)}
+            fontSize={18}
+            fontWeight="600"
+            color="$gray12"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            flex={1}
+          />
 
           {/* Simple menu button that triggers the global menu context */}
           {isMine && (
@@ -160,12 +160,13 @@ const WalkCard: React.FC<Props> = ({
         </XStack>
 
         <XStack alignItems="center" gap={6} justifyContent="space-between">
-          <XStack alignItems="center" gap={6}>
-            <Calendar size={16} color="#666" />
-            <Text fontSize={14} color="#666">
-              {format(walk.date.toDate(), "EEE, MMM d 'at' h:mm a")}
-            </Text>
-          </XStack>
+          <IconTextRow
+            icon={<Calendar size={16} color="#666" />}
+            text={format(walk.date.toDate(), "EEE, MMM d 'at' h:mm a")}
+            fontSize={14}
+            color="#666"
+            gap={6}
+          />
           {status === "active" && (
             <XStack
               backgroundColor="#4caf50"
@@ -181,20 +182,22 @@ const WalkCard: React.FC<Props> = ({
             </XStack>
           )}
         </XStack>
-        <XStack alignItems="center" gap={6}>
-          <Timer size={16} color="#666" />
-          <Text fontSize={14} color="#666">
-            {walk.durationMinutes} minutes
-          </Text>
-        </XStack>
+        <IconTextRow
+          icon={<Timer size={16} color="#666" />}
+          text={`${walk.durationMinutes} minutes`}
+          fontSize={14}
+          color="#666"
+          gap={6}
+        />
         {locationDisplay}
 
         {/* Actions footer */}
         <XStack alignItems="center" gap="$2">
-          {isMine ? (
-            /* Show participants row only if current user is the walk owner */
-            <ParticipantsSection walk={walk} currentUserUid={user?.uid} />
-          ) : showActions ? (
+          {/* Show participants section for all users, it will render the appropriate view internally */}
+          <ParticipantsSection walk={walk} currentUserUid={user?.uid} />
+          
+          {/* Show action buttons for non-owners when showActions is true */}
+          {!isMine && showActions ? (
             /* Request status or Join button */
             <>
               {/* If user has requested to join and it's approved */}
