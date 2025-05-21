@@ -2,11 +2,16 @@ import { COLORS } from "@/styles/colors";
 import { Users } from "@tamagui/lucide-icons";
 import React from "react";
 import { Avatar, Text, View, XStack, YStack } from "tamagui";
-import { walkIsFriendsWalk } from "walk2gether-shared";
-import { ParticipantData, ParticipantsSectionProps } from "./types";
+import { Participant, Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
 
-interface Props extends ParticipantsSectionProps {
-  participantData: ParticipantData;
+interface Props {
+  walk: WithId<Walk>;
+  currentUserUid?: string;
+  approvedParticipants: WithId<Participant>[];
+  pendingParticipants: WithId<Participant>[];
+  approvedCount: number;
+  avatarsToDisplay: WithId<Participant>[];
+  overflow: number;
 }
 
 /**
@@ -14,15 +19,12 @@ interface Props extends ParticipantsSectionProps {
  */
 export const GuestParticipantsSection: React.FC<Props> = ({
   walk,
-  participantData,
+  approvedParticipants,
+  pendingParticipants,
+  approvedCount,
+  avatarsToDisplay,
+  overflow,
 }) => {
-  const {
-    approvedParticipants,
-    pendingParticipants,
-    approvedCount,
-    avatarsToDisplay,
-    overflow,
-  } = participantData;
 
   return (
     <YStack gap={12} flex={1}>

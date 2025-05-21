@@ -1,4 +1,5 @@
 import { db } from "@/config/firebase";
+import { doc } from "@react-native-firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
 import { useRouter } from "expo-router";
@@ -36,7 +37,7 @@ export const TokenSignInForm: React.FC<TokenSignInFormProps> = ({
         const userCredential = await signInWithToken(token);
 
         // Check if the user has a profile
-        const userDataDoc = db.collection("users").doc(userCredential.user.uid);
+        const userDataDoc = doc(db, `users/${userCredential.user.uid}`);
         const hasData = (await userDataDoc.get()).exists;
 
         if (!hasData) {

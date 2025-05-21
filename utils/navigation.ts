@@ -1,4 +1,5 @@
 import { firestore_instance } from "@/config/firebase";
+import { doc } from "@react-native-firebase/firestore";
 import { UserData } from "walk2gether-shared";
 
 // Type for route result
@@ -22,7 +23,7 @@ export const determineUserRoute = async (
   }
 ): Promise<RouteResult> => {
   // Now check if the user has profile data
-  const userDataDocRef = firestore_instance.collection("users").doc(userId);
+  const userDataDocRef = doc(firestore_instance, `users/${userId}`);
   const userDataDoc = await userDataDocRef.get();
   const userData = userDataDoc.data();
   const hasData = !!userData;

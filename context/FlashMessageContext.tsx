@@ -42,9 +42,7 @@ export const FlashMessageProvider: React.FC<FlashMessageProviderProps> = ({
   ) => {
     Toast.show({
       type,
-      text1:
-        options?.title ||
-        (type === "success" ? "Success" : type === "error" ? "Error" : "Info"),
+      text1: options?.title || type === "error" ? "Error" : undefined,
       text2: message,
     });
   };

@@ -4,6 +4,7 @@ import { useFlashMessage } from "@/context/FlashMessageContext";
 import { Formik } from "formik";
 import { useCallback, useRef, useState } from "react";
 import PhoneInput from "react-native-phone-number-input";
+import { YStack } from "tamagui";
 import * as yup from "yup";
 import { ActionButton } from "../../ActionButton";
 
@@ -53,7 +54,7 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
       onSubmit={onSubmit}
     >
       {({ handleChange, handleSubmit, values, errors, touched, isValid }) => (
-        <>
+        <YStack gap="$3">
           <PhoneInputField
             ref={phoneInputRef}
             defaultValue={values.phoneNumber}
@@ -70,7 +71,7 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
             onPress={handleSubmit}
             disabled={!isValid || loading}
           ></ActionButton>
-        </>
+        </YStack>
       )}
     </Formik>
   );

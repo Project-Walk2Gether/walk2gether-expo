@@ -1,6 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
-import firestore, { increment } from "@react-native-firebase/firestore";
+import firestore, { doc, increment } from "@react-native-firebase/firestore";
 import { useCallback, useMemo } from "react";
 import { QuotesCollection } from "walk2gether-shared";
 import { useDoc } from "./firestore";
@@ -37,12 +37,9 @@ export const useQuoteOfTheDay = () => {
     if (!user || !userData) return;
 
     try {
-      await firestore()
-        .collection("users")
-        .doc(user.uid)
-        .update({
-          currentQuoteIndex: increment(1),
-        });
+      await doc(firestore(), `users/${user.uid}`).update({
+        currentQuoteIndex: increment(1),
+      });
     } catch (error) {
       console.error("Error advancing to next quote:", error);
       return null;
