@@ -4,11 +4,18 @@ import { UserPlus, Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Avatar, Button, Text, View, XStack, YStack } from "tamagui";
-import { walkIsFriendsWalk } from "walk2gether-shared";
-import { ParticipantData, ParticipantsSectionProps } from "./types";
+import { Participant, Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
 
-interface Props extends ParticipantsSectionProps {
-  participantData: ParticipantData;
+interface Props {
+  walk: WithId<Walk>;
+  currentUserUid?: string;
+  approvedParticipants: WithId<Participant>[];
+  pendingParticipants: WithId<Participant>[];
+  approvedCount: number;
+  pendingCount: number;
+  unapprovedCount: number;
+  avatarsToDisplay: WithId<Participant>[];
+  overflow: number;
 }
 
 /**
@@ -16,19 +23,15 @@ interface Props extends ParticipantsSectionProps {
  */
 export const OwnerParticipantsSection: React.FC<Props> = ({
   walk,
-  participantData,
+  approvedParticipants,
+  pendingParticipants,
+  approvedCount,
+  unapprovedCount,
+  avatarsToDisplay,
+  overflow,
 }) => {
   const router = useRouter();
   const status = getWalkStatus(walk);
-  
-  const {
-    approvedParticipants,
-    pendingParticipants,
-    approvedCount,
-    unapprovedCount,
-    avatarsToDisplay,
-    overflow,
-  } = participantData;
 
   return (
     <YStack gap={12} flex={1}>

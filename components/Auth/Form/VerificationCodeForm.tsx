@@ -2,7 +2,6 @@ import { ActionButton } from "@/components/ActionButton";
 import { FormControl } from "@/components/FormControl";
 import { FormInput } from "@/components/FormInput";
 import { COLORS } from "@/styles/colors";
-import { Pencil } from "@tamagui/lucide-icons";
 import { Formik } from "formik";
 import { useState } from "react";
 import { Text, YStack } from "tamagui";
@@ -52,7 +51,7 @@ export default function VerificationCodeForm({
         touched,
         isValid,
       }) => (
-        <>
+        <YStack gap="$3">
           <FormControl
             label={`Sent to ${phoneNumber}`}
             error={errors.verificationCode}
@@ -90,7 +89,7 @@ export default function VerificationCodeForm({
             loading={loading}
             label="Let's go!"
           ></ActionButton>
-        </>
+        </YStack>
       )}
     </Formik>
   );

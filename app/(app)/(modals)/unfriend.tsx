@@ -1,7 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { COLORS } from "@/styles/colors";
-import firestore from "@react-native-firebase/firestore";
+import firestore, { doc, serverTimestamp } from "@react-native-firebase/firestore";
 import { AlertTriangle, ArrowLeft, Flag } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -41,11 +41,11 @@ export default function UnfriendScreen() {
       setIsProcessing(true);
 
       // Create a reference to the friendship document
-      const friendshipRef = firestore().doc(`friendships/${friendshipId}`);
+      const friendshipRef = doc(firestore(), `friendships/${friendshipId}`);
 
       // Prepare update data
       const updateData: any = {
-        deletedAt: firestore.FieldValue.serverTimestamp(), // Set timestamp when deleting (not null)
+        deletedAt: serverTimestamp(), // Set timestamp when deleting (not null)
         deletedByUid: user.uid,
       };
 

@@ -31,7 +31,6 @@ export function ActionButton({
       disabled={disabled || loading}
       width="100%"
       height={55}
-      marginTop={10}
       backgroundColor={rest.theme ? undefined : "#4EB1BA"}
       borderRadius={10}
       justifyContent="center"
@@ -50,7 +49,7 @@ export function ActionButton({
       testID={testID}
     >
       {loading ? (
-        <ActivityIndicator />
+        <ActivityIndicator color="white" />
       ) : (
         <XStack alignItems="center" space="$2">
           {icon}

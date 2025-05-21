@@ -67,8 +67,8 @@ export const DurationSelection: React.FC<Props> = ({
     // Convert to total minutes
     const totalMinutes = hours * 60 + minutes;
 
-    // Enforce minimum of 5 minutes and maximum of 180 minutes (3 hours)
-    const sanitizedDuration = Math.max(5, Math.min(180, totalMinutes));
+    // Enforce minimum of 5 minutes only
+    const sanitizedDuration = Math.max(5, totalMinutes);
 
     setDuration(sanitizedDuration);
     updateFormData({ durationMinutes: sanitizedDuration });
@@ -144,13 +144,21 @@ export const DurationSelection: React.FC<Props> = ({
                     key={option}
                     style={{
                       backgroundColor:
-                        duration === option
-                          ? "white"
-                          : "rgba(255, 255, 255, 0.6)",
-                      padding: 8,
+                        duration === option ? COLORS.primary : "white",
+                      padding: 10,
                       borderRadius: 20,
-                      minWidth: 40,
+                      minWidth: 50,
                       alignItems: "center",
+                      borderWidth: 1,
+                      borderColor:
+                        duration === option
+                          ? COLORS.primary
+                          : "rgba(0,0,0,0.1)",
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 1,
+                      elevation: 1,
                     }}
                     onPress={() => {
                       setDuration(option);
@@ -159,7 +167,7 @@ export const DurationSelection: React.FC<Props> = ({
                   >
                     <SizableText
                       size="$2"
-                      color={COLORS.text}
+                      color={duration === option ? "white" : COLORS.text}
                       fontWeight={duration === option ? "700" : "500"}
                     >
                       {option < 60 ? `${option}m` : `${option / 60}h`}
@@ -182,9 +190,16 @@ export const DurationSelection: React.FC<Props> = ({
                   paddingVertical="$2"
                   borderRadius={20}
                   alignItems="center"
+                  borderWidth={1}
+                  borderColor="rgba(0,0,0,0.1)"
+                  shadowColor="#000"
+                  shadowOffset={{ width: 0, height: 1 }}
+                  shadowOpacity={0.1}
+                  shadowRadius={1}
+                  elevation={1}
                 >
-                  <Plus size={16} color={COLORS.text} />
-                  <Text color={COLORS.text} marginLeft="$1" fontWeight="500">
+                  <Plus size={16} color={COLORS.primary} />
+                  <Text color={COLORS.primary} marginLeft="$1" fontWeight="600">
                     Custom Duration
                   </Text>
                 </XStack>
@@ -197,7 +212,7 @@ export const DurationSelection: React.FC<Props> = ({
       {/* Custom Duration Modal */}
       <Modal
         visible={customModalOpen}
-        animationType="slide"
+        // animationType="slide"
         transparent={true}
         onRequestClose={() => setCustomModalOpen(false)}
       >

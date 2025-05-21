@@ -38,6 +38,8 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({
     error,
   } = useDoc<UserData>(firebaseUser ? "users/" + firebaseUser!.uid : undefined);
 
+  console.log("User data:", { userData, status });
+
   useEffect(() => {
     if (error && error.code === "firestore/permission-denied") {
       console.log(
