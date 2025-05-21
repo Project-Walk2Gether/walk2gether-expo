@@ -16,6 +16,7 @@ import {
   TimeSelection,
   TypeSelection,
 } from "./sections";
+import NeighborhoodWalkHowItWorksSection from "./sections/NeighborhoodWalkHowItWorksSection";
 import { WizardHeader } from "./sections/WizardHeader";
 
 // Define the structure of a wizard step
@@ -120,6 +121,11 @@ export function WalkWizard() {
     showMessage,
   ]);
 
+  // Memoize whether to show the how it works section based on user preference
+  const showHowItWorks = useMemo(() => {
+    return userData && !userData.neighborhoodWalksHowItWorksDontShowAgain;
+  }, [userData]);
+
   // Define the step configuration - using useMemo to avoid recreating the array on each render
   const wizardSteps = useMemo<WizardStep[]>(() => {
     const baseSteps = [
@@ -134,14 +140,20 @@ export function WalkWizard() {
       return [
         ...baseSteps,
         {
-          title: "Select start point",
-          component: LocationSelection,
+          title: "How it works",
+          component: NeighborhoodWalkHowItWorksSection,
           onContinue: goToNextStep,
           onBack: goToPreviousStep,
         },
         {
           title: "Set duration",
           component: DurationSelection,
+          onContinue: goToNextStep,
+          onBack: goToPreviousStep,
+        },
+        {
+          title: "Select start point",
+          component: LocationSelection,
           onContinue: handleSubmit,
           onBack: goToPreviousStep,
         },
@@ -189,8 +201,9 @@ export function WalkWizard() {
     return (
       <WizardHeader
         title={title}
-        currentStep={currentStep + 1}
-        totalSteps={wizardSteps.length}
+        displayDots={currentStep > 0}
+        currentStep={currentStep}
+        totalSteps={wizardSteps.length - 1}
       />
     );
   };
