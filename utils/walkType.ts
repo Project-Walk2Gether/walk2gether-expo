@@ -25,8 +25,10 @@ export const getWalkTitle = (
   const isMine = walk.createdByUid === currentUserId;
 
   if (isMine) {
-    return `Your ${getWalkTypeLabel(walk.type)}`;
+    return `Your ${walk.type === 'friends' ? 'friend' : 'neighborhood'} walk`;
+  } else if (walk.type === 'friends') {
+    return `${walk.organizerName} invited you`;
   } else {
-    return `${walk.organizerName}'s ${getWalkTypeLabel(walk.type)}`;
+    return `${walk.organizerName}'s neighborhood walk`;
   }
 };
