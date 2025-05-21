@@ -52,7 +52,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     return query(
       collection(firestore_instance, "walks"),
       where("estimatedEndTime", ">", now),
-      where("invitedUserIds", "array-contains", user.uid),
+      where("visibleToUserIds", "array-contains", user.uid),
       orderBy("estimatedEndTime", "asc"),
       limit(10)
     );

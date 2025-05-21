@@ -24,7 +24,12 @@ interface Props {
   totalSteps?: number;
 }
 
-export const LocationSelection: React.FC<Props> = ({ onContinue, onBack, currentStep, totalSteps }) => {
+export const LocationSelection: React.FC<Props> = ({
+  onContinue,
+  onBack,
+  currentStep,
+  totalSteps,
+}) => {
   const { formData, updateFormData, errors, systemErrors, setSystemErrors } =
     useWalkForm();
 
@@ -203,7 +208,7 @@ export const LocationSelection: React.FC<Props> = ({ onContinue, onBack, current
 
           // Store the userIds in formData if needed
           if (result.nearbyUserIds.length > 0) {
-            updateFormData({ invitedUserIds: result.nearbyUserIds });
+            updateFormData({ visibleToUserIds: result.nearbyUserIds });
           }
         } catch (error) {
           console.error("Error finding nearby walkers:", error);

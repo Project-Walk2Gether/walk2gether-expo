@@ -27,7 +27,7 @@ export default function WalksScreen() {
     if (walkIsFriendsWalk(walk)) {
       // For friends walks, check if participants exist
       const hasParticipants =
-        walk.invitedUserIds && walk.invitedUserIds.length > 1; // More than just the creator
+        walk.visibleToUserIds && walk.visibleToUserIds.length > 1; // More than just the creator
 
       if (hasParticipants) {
         // Friends walk with participants - go to show screen

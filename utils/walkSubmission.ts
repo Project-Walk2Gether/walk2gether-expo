@@ -59,7 +59,7 @@ export async function createWalkFromForm({
 
       // Invitation details
       invitationCode: invitationCode,
-      invitedUserIds: [...(formData.invitedUserIds || []), userData.id],
+      visibleToUserIds: [...(formData.visibleToUserIds || []), userData.id],
       invitedPhoneNumbers: formData.invitedPhoneNumbers || [],
 
       estimatedEndTime: Timestamp.fromDate(estimatedEndTime),

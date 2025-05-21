@@ -48,7 +48,7 @@ export const NeighborhoodConfirmationScreen: React.FC<
 
     // Update the form data with nearby user IDs
     updateFormData({
-      invitedUserIds: nearbyIds,
+      visibleToUserIds: nearbyIds,
     });
   };
 

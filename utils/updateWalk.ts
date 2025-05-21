@@ -23,7 +23,7 @@ export async function updateExistingWalk({
     // Create update payload with fields that might have changed
     const updatePayload: Record<string, any> = {
       durationMinutes: formData.durationMinutes,
-      invitedUserIds: [...(formData.invitedUserIds || []), userData.id],
+      visibleToUserIds: [...(formData.visibleToUserIds || []), userData.id],
     };
 
     // Only include startLocation if it exists in formData
@@ -39,7 +39,7 @@ export async function updateExistingWalk({
 
     const walkRef = doc(firestore_instance, `walks/${walkId}`);
     await updateDoc(walkRef, updatePayload);
-    
+
     console.log(`Walk ${walkId} updated successfully`);
     return true;
   } catch (error) {
