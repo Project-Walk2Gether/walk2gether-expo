@@ -2,7 +2,7 @@
   "expo": {
     "name": "Walk2Gether",
     "slug": "walkmate",
-    "version": "1.1.7",
+    "version": "1.1.8",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -84,6 +84,16 @@
           }
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification_icon.png",
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "sounds": ["./assets/notification_sound.wav"],
+          "enableBackgroundRemoteNotifications": false
+        }
+      ],
       "expo-font",
       [
         "expo-location",
@@ -114,7 +124,7 @@
         "projectId": "7b384d5a-3e2e-4c79-895f-30255a67819a"
       },
       "googleMapsApiKey": "AIzaSyAjnbays5Hi7wYTj9PLljDDFJzZq3Dh3z8",
-      "emulatorsEnabledInDev": false
+      "emulatorsEnabledInDev": true
     },
     "owner": "michaeldawson"
   }
