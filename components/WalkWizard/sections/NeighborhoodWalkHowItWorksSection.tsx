@@ -1,10 +1,19 @@
-import { COLORS } from "@/styles/colors";
 import { useUserData } from "@/context/UserDataContext";
+import { COLORS } from "@/styles/colors";
 import { Bell, Check, Clock, MapPin } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
-import { Card, Checkbox, Label, Text, View, XStack, YStack } from "tamagui";
-import WizardWrapper from "./WizardWrapper";
+import {
+  Card,
+  Checkbox,
+  Label,
+  Spacer,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 import WalkIcon from "../../WalkIcon";
+import WizardWrapper from "./WizardWrapper";
 
 interface Props {
   onContinue: () => void;
@@ -59,7 +68,9 @@ export default function NeighborhoodWalkHowItWorksSection({
             >
               <MapPin size={16} color="white" />
             </View>
-            <Text flex={1} fontSize="$5">Start a walk in your neighborhood</Text>
+            <Text flex={1} fontSize="$5">
+              Start a walk in your neighborhood
+            </Text>
           </XStack>
 
           <XStack gap="$3" alignItems="center">
@@ -110,26 +121,28 @@ export default function NeighborhoodWalkHowItWorksSection({
               walk2gether!
             </Text>
           </XStack>
-
-          {/* Don't show this again checkbox */}
-          <XStack gap="$2" alignItems="center" marginTop="$4">
-            <Checkbox
-              id="dontShowAgain"
-              size="$4"
-              checked={dontShowAgain}
-              onCheckedChange={handleCheckboxChange}
-              backgroundColor={dontShowAgain ? COLORS.action : undefined}
-            >
-              <Checkbox.Indicator>
-                <Check size={16} color="white" />
-              </Checkbox.Indicator>
-            </Checkbox>
-            <Label htmlFor="dontShowAgain" size="$4" color="$gray11">
-              Don't show this again
-            </Label>
-          </XStack>
         </YStack>
       </Card>
+
+      <Spacer flexGrow={1} />
+      {userData?.hasCreatedNeighborhoodWalk || (
+        <XStack gap="$2" alignItems="center">
+          <Checkbox
+            id="dontShowAgain"
+            size="$4"
+            checked={dontShowAgain}
+            onCheckedChange={handleCheckboxChange}
+            backgroundColor={dontShowAgain ? COLORS.action : undefined}
+          >
+            <Checkbox.Indicator>
+              <Check size={16} color="white" />
+            </Checkbox.Indicator>
+          </Checkbox>
+          <Label htmlFor="dontShowAgain" size="$4" color="$gray11">
+            Got it! Don't show this again
+          </Label>
+        </XStack>
+      )}
     </WizardWrapper>
   );
 }

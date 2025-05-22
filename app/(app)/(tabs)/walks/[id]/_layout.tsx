@@ -11,7 +11,7 @@ export default function WalkStackLayout() {
       >
         <Stack.Screen name="index" />
         <Stack.Screen name="edit" options={{ title: "Edit Walk" }} />
-        <Stack.Screen name="request" />
+        <Stack.Screen name="view-invitation" />
         <Stack.Screen
           name="show"
           options={{

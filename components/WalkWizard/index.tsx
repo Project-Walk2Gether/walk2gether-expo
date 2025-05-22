@@ -7,6 +7,7 @@ import { updateExistingWalk } from "@/utils/updateWalk";
 import { createWalkFromForm } from "@/utils/walkSubmission";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { compact } from "lodash";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { Button, View, XStack } from "tamagui";
 import {
@@ -137,14 +138,16 @@ export function WalkWizard() {
     ];
 
     if (formData.type === "neighborhood") {
-      return [
+      return compact([
         ...baseSteps,
-        {
-          title: "How it works",
-          component: NeighborhoodWalkHowItWorksSection,
-          onContinue: goToNextStep,
-          onBack: goToPreviousStep,
-        },
+        showHowItWorks
+          ? {
+              title: "How it works",
+              component: NeighborhoodWalkHowItWorksSection,
+              onContinue: goToNextStep,
+              onBack: goToPreviousStep,
+            }
+          : null,
         {
           title: "Set duration",
           component: DurationSelection,
@@ -157,7 +160,7 @@ export function WalkWizard() {
           onContinue: handleSubmit,
           onBack: goToPreviousStep,
         },
-      ];
+      ]);
     }
 
     // For friend walks, use the full flow
