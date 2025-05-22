@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
-import { YStack, Button, Text, XStack } from "tamagui";
-import { useUpdates } from "../context/UpdatesContext";
+import { Button, Text, XStack, YStack } from "tamagui";
 import { useAuth } from "../context/AuthContext";
+import { useUpdates } from "../context/UpdatesContext";
 
 interface Props {
   timeoutMs?: number;
 }
 
-export default function FullScreenLoader({ timeoutMs = 15000 }: Props) {
+export default function FullScreenLoader({ timeoutMs = 5000 }: Props) {
   const [hasTimedOut, setHasTimedOut] = useState(false);
   const { reloadApp } = useUpdates();
   const { signOut } = useAuth();
@@ -42,7 +42,8 @@ export default function FullScreenLoader({ timeoutMs = 15000 }: Props) {
             Taking longer than expected
           </Text>
           <Text textAlign="center" color="$gray11">
-            The operation is taking longer than expected. You can try reloading the app or sign out.
+            The operation is taking longer than expected. You can try reloading
+            the app or sign out.
           </Text>
           <XStack space="$4" marginTop="$4">
             <Button onPress={handleReload} theme="active">

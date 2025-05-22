@@ -6,7 +6,7 @@ import { useQuoteOfTheDay } from "@/utils/quotes";
 import { updateExistingWalk } from "@/utils/updateWalk";
 import { createWalkFromForm } from "@/utils/walkSubmission";
 import { Timestamp } from "@react-native-firebase/firestore";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { compact } from "lodash";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { Button, View, XStack } from "tamagui";
@@ -30,6 +30,7 @@ interface WizardStep {
 
 export function WalkWizard() {
   const {
+    friendId,
     formData,
     currentStep,
     goToNextStep,
@@ -42,7 +43,6 @@ export function WalkWizard() {
   const router = useRouter();
   const { user } = useAuth();
   const { userData } = useUserData();
-  const { friendId } = useLocalSearchParams<{ friendId: string }>();
   const { showMessage } = useFlashMessage();
 
   // If a friendId is provided, set it in the form data and skip to time selection

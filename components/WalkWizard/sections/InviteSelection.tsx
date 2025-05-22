@@ -39,6 +39,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [invitationSent, setInvitationSent] = useState(false);
+  const continueDisabled = !invitationSent && !selectedFriends.length;
   // Query friendships for current user where deletedAt is null (not deleted)
   const friendshipsQuery = user?.uid
     ? query(
@@ -124,7 +125,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
         onContinue={handleContinue}
         onBack={onBack}
         continueText="Done"
-        continueDisabled={!invitationSent}
+        continueDisabled={continueDisabled}
         currentStep={currentStep}
         totalSteps={totalSteps}
       >

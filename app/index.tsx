@@ -1,9 +1,8 @@
+import FullScreenLoader from "@/components/FullScreenLoader";
 import { useAuth } from "@/context/AuthContext";
 import { determineUserRoute, RouteResult } from "@/utils/navigation";
 import { Redirect } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator } from "react-native";
-import { YStack } from "tamagui";
 
 export default function IndexScreen() {
   const { user, loading, claims } = useAuth();
@@ -28,22 +27,10 @@ export default function IndexScreen() {
   }, [user, loading, claims]);
 
   // Show loading indicator while loading auth state
-  if (loading)
-    return (
-      <YStack
-        flex={1}
-        justifyContent="center"
-        alignItems="center"
-        backgroundColor="#f5f5f5"
-      >
-        <ActivityIndicator size="large" color="#4285F4" />
-      </YStack>
-    );
+  if (loading) return <FullScreenLoader />;
 
   // Handle authentication and routing
-  if (!user) {
-    return <Redirect href="/auth" />;
-  }
+  if (!user) return <Redirect href="/auth" />;
 
   // If we have a route to redirect to, do it
   if (redirectTo) {
@@ -52,14 +39,5 @@ export default function IndexScreen() {
   }
 
   // Show loading indicator while we determine routing
-  return (
-    <YStack
-      flex={1}
-      justifyContent="center"
-      alignItems="center"
-      backgroundColor="#f5f5f5"
-    >
-      <ActivityIndicator size="large" color="#4285F4" />
-    </YStack>
-  );
+  return <FullScreenLoader />;
 }

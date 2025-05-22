@@ -8,12 +8,14 @@ import firestore, {
 } from "@react-native-firebase/firestore";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Button, Text, View, XStack, YStack } from "tamagui";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Text, View, XStack } from "tamagui";
 import { Friendship, Message } from "walk2gether-shared";
 import {
   deleteMessage as deleteMessageUtil,
   sendMessage as sendMessageUtil,
 } from "../../utils/messages";
+import FAB from "../FAB";
 import { UserAvatar } from "../UserAvatar";
 import MessageForm from "./MessageForm";
 import MessageList from "./MessageList";
@@ -25,6 +27,8 @@ interface FriendshipChatProps {
 export function FriendshipChat({ friendship }: FriendshipChatProps) {
   const { user } = useAuth();
   const { userData } = useUserData();
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   // Find the friend's ID from the friendship uids
   const friendId = friendship.uids.find((uid) => uid !== user?.uid) || "";
@@ -37,6 +41,16 @@ export function FriendshipChat({ friendship }: FriendshipChatProps) {
     collection(firestore(), `friendships/${friendship.id}/messages`),
     orderBy("createdAt", "asc")
   );
+
+  const handleInviteToWalkButtonPress = () => {
+    router.push({
+      pathname: "/(app)/(modals)/new-walk",
+      params: {
+        friendId,
+        friendName: friendData?.name || "Chat",
+      },
+    });
+  };
 
   // Type needs to match MessageList component expectations
   const { docs: messagesData, status: messagesStatus } =
@@ -95,11 +109,10 @@ export function FriendshipChat({ friendship }: FriendshipChatProps) {
       </Text>
     </XStack>
   );
-  const router = useRouter();
 
   return (
-    <YStack f={1}>
-      <View flexGrow={1}>
+    <View f={1} bg="$background075">
+      <View f={1}>
         <MessageList
           messages={messages}
           loading={messagesStatus === "loading"}
@@ -107,29 +120,14 @@ export function FriendshipChat({ friendship }: FriendshipChatProps) {
           headerTitle={renderHeaderTitle()}
           currentUserId={user?.uid || ""}
         />
+        <FAB text="Invite to walk" onPress={handleInviteToWalkButtonPress} />
       </View>
-      <Button
-        size="$2"
-        borderRadius={0}
-        borderTopColor="$borderColor"
-        // backgroundColor={COLORS.primary}
-        // color="white"
-        onPress={(e) => {
-          e.stopPropagation();
-          router.push({
-            pathname: "/(app)/(modals)/new-walk",
-            params: { friendId: "friendId" },
-          });
-        }}
-      >
-        Invite on a walk
-      </Button>
       <MessageForm
         keyboardVerticalOffset={100}
         onSendMessage={sendMessage}
         chatId={friendship.id || ""}
         senderId={user?.uid || ""}
       />
-    </YStack>
+    </View>
   );
 }
