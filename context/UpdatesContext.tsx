@@ -16,6 +16,7 @@ interface UpdatesContextType {
   isCheckingForUpdate: boolean;
   isUpdateAvailable: boolean;
   applyUpdate: () => Promise<void>;
+  reloadApp: () => Promise<void>;
 }
 
 const UpdatesContext = createContext<UpdatesContextType | undefined>(undefined);
@@ -80,13 +81,13 @@ export const UpdatesProvider: React.FC<UpdatesProviderProps> = ({
 
       if (update.isAvailable) {
         // Download the update if available
-        console.log('Update available, downloading...');
+        console.log("Update available, downloading...");
         await Updates.fetchUpdateAsync();
-        console.log('Update downloaded successfully');
+        console.log("Update downloaded successfully");
         setUpdateAvailable(true);
         return true;
       }
-      
+
       return false;
     } catch (error) {
       console.error("Error checking for or downloading update:", error);
@@ -102,15 +103,16 @@ export const UpdatesProvider: React.FC<UpdatesProviderProps> = ({
   }, []);
 
   // Function to apply the update
-  const applyUpdate = async () => {
+  const reloadApp = async () => {
     await Updates.reloadAsync();
   };
 
   const value = {
+    reloadApp,
+    applyUpdate: reloadApp,
     checkForUpdate,
     isCheckingForUpdate,
     isUpdateAvailable,
-    applyUpdate,
   };
 
   return (
