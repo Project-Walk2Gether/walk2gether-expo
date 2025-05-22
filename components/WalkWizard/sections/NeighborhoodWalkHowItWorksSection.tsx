@@ -1,10 +1,10 @@
-import { COLORS } from "@/styles/colors";
 import { useUserData } from "@/context/UserDataContext";
+import { COLORS } from "@/styles/colors";
 import { Bell, Check, Clock, MapPin } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import { Card, Checkbox, Label, Text, View, XStack, YStack } from "tamagui";
-import WizardWrapper from "./WizardWrapper";
 import WalkIcon from "../../WalkIcon";
+import WizardWrapper from "./WizardWrapper";
 
 interface Props {
   onContinue: () => void;
@@ -19,7 +19,7 @@ export default function NeighborhoodWalkHowItWorksSection({
   currentStep,
   totalSteps,
 }: Props) {
-  const { userData, updateUserData } = useUserData();
+  const { updateUserData } = useUserData();
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
   const handleCheckboxChange = (checked: boolean) => {
@@ -59,7 +59,9 @@ export default function NeighborhoodWalkHowItWorksSection({
             >
               <MapPin size={16} color="white" />
             </View>
-            <Text flex={1} fontSize="$5">Start a walk in your neighborhood</Text>
+            <Text flex={1} fontSize="$5">
+              Start a walk in your neighborhood
+            </Text>
           </XStack>
 
           <XStack gap="$3" alignItems="center">
@@ -112,7 +114,7 @@ export default function NeighborhoodWalkHowItWorksSection({
           </XStack>
 
           {/* Don't show this again checkbox */}
-          <XStack gap="$2" alignItems="center" marginTop="$4">
+          <XStack gap="$2" alignItems="center">
             <Checkbox
               id="dontShowAgain"
               size="$4"
@@ -125,7 +127,7 @@ export default function NeighborhoodWalkHowItWorksSection({
               </Checkbox.Indicator>
             </Checkbox>
             <Label htmlFor="dontShowAgain" size="$4" color="$gray11">
-              Don't show this again
+              Got it! Don't show this again
             </Label>
           </XStack>
         </YStack>
