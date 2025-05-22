@@ -74,7 +74,8 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
   // Check if there are unread messages (we'll need to implement this later)
   return (
     <Card
-      padding="$4"
+      padding="$2"
+      pr="$4"
       marginVertical="$2"
       backgroundColor="white"
       onPress={onPress}
@@ -86,7 +87,7 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
         {/* Friend's Avatar */}
         <UserAvatar
           uid={friendId || ""}
-          size={48}
+          size={60}
           backgroundColor={COLORS.primary}
         />
 

@@ -6,11 +6,26 @@ import React from "react";
 import { Avatar, Button, Text, View, XStack, YStack } from "tamagui";
 import { Participant, Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
 
+/**
+ * Format an array of names into a sentence case string (e.g., "Mary, Sue and Bob")
+ */
+const formatNamesInSentenceCase = (names: string[]): string => {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  
+  // For 3+ names: "Name1, Name2, ... and NameN"
+  const lastIndex = names.length - 1;
+  const firstPart = names.slice(0, lastIndex).join(", ");
+  return `${firstPart} and ${names[lastIndex]}`;
+};
+
 interface Props {
   walk: WithId<Walk>;
   currentUserUid?: string;
   approvedParticipants: WithId<Participant>[];
   pendingParticipants: WithId<Participant>[];
+  invitedParticipants: WithId<Participant>[];
   approvedCount: number;
   pendingCount: number;
   unapprovedCount: number;
@@ -25,6 +40,7 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
   walk,
   approvedParticipants,
   pendingParticipants,
+  invitedParticipants,
   approvedCount,
   unapprovedCount,
   avatarsToDisplay,
@@ -100,13 +116,72 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
         </XStack>
       </XStack>
 
-      {/* Invited participants (pending) avatars */}
-      {pendingParticipants.length > 0 && (
+      {/* Invited participants */}
+      {invitedParticipants.length > 0 && (
         <XStack alignItems="center" gap={8}>
           <XStack alignItems="center" gap={4}>
             <UserPlus size={16} color="#666" />
             <Text fontSize={14} fontWeight="600" color="$gray10">
               Invited:
+            </Text>
+          </XStack>
+          <XStack justifyContent="flex-start" flex={1}>
+            <XStack gap={-10} flexShrink={1}>
+              {invitedParticipants.slice(0, 5).map((participant, index) => (
+                <Avatar
+                  key={participant.id || index}
+                  size={32}
+                  circular
+                  borderColor="white"
+                  borderWidth={2}
+                  opacity={0.7}
+                >
+                  <Avatar.Image src={participant.photoURL || undefined} />
+                  <Avatar.Fallback
+                    justifyContent="center"
+                    alignItems="center"
+                    backgroundColor={COLORS.primary}
+                  >
+                    <Text color="white">
+                      {(participant.displayName || "A").charAt(0).toUpperCase()}
+                    </Text>
+                  </Avatar.Fallback>
+                </Avatar>
+              ))}
+              {invitedParticipants.length > 5 && (
+                <View
+                  backgroundColor={COLORS.primary}
+                  width={32}
+                  height={32}
+                  borderRadius={16}
+                  alignItems="center"
+                  justifyContent="center"
+                  borderColor="white"
+                  borderWidth={2}
+                  opacity={0.7}
+                >
+                  <Text
+                    fontSize={11}
+                    color="white"
+                    fontWeight="bold"
+                  >{`+${invitedParticipants.length - 5}`}</Text>
+                </View>
+              )}
+            </XStack>
+            <Text fontSize={13} color="#666" ml={16} alignSelf="center" flex={1}>
+              {formatNamesInSentenceCase(invitedParticipants.map(p => p.displayName || "Unknown"))}
+            </Text>
+          </XStack>
+        </XStack>
+      )}
+      
+      {/* Pending participants (requested) avatars */}
+      {pendingParticipants.length > 0 && (
+        <XStack alignItems="center" gap={8}>
+          <XStack alignItems="center" gap={4}>
+            <UserPlus size={16} color="#666" />
+            <Text fontSize={14} fontWeight="600" color="$gray10">
+              Requested:
             </Text>
           </XStack>
           <XStack justifyContent="flex-start" gap={-10} flex={1}>
@@ -133,7 +208,7 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
             ))}
             <Text fontSize={13} color="#666" ml={16} alignSelf="center">
               {pendingParticipants.length}{" "}
-              {pendingParticipants.length === 1 ? "invited" : "invited"}
+              {pendingParticipants.length === 1 ? "requested" : "requested"}
             </Text>
           </XStack>
         </XStack>

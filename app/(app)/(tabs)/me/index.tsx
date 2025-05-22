@@ -1,6 +1,4 @@
-import Clouds from "@/components/Clouds";
 import Menu from "@/components/Menu";
-import Sun from "@/components/Sun";
 import { Screen } from "@/components/UI";
 import ActionRow from "@/components/UI/ActionRow";
 import { PlaceData } from "@/components/UI/PlacesAutocomplete";
@@ -194,27 +192,7 @@ export default function MeScreen() {
   }
 
   return (
-    <Screen
-      title=""
-      useTopInsets
-      gradientVariant="outdoor"
-      renderAbsolute={
-        <View>
-          <Sun
-            style={{ position: "absolute", top: 20, right: -10, bottom: 20 }}
-          />
-          <Clouds
-            style={{
-              position: "absolute",
-              top: -80,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}
-          />
-        </View>
-      }
-    >
+    <Screen title="" useTopInsets gradientVariant="modern">
       <YStack alignItems="center" mb="$6">
         <Menu
           title="Profile Picture"

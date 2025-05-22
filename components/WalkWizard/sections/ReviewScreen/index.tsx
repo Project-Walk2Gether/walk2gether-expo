@@ -9,12 +9,11 @@ import ReviewItem from "./ReviewItem";
 const pluralize = require("pluralize");
 
 interface Props {
-  onSubmit: () => void;
+  onContinue: () => void;
   onBack: () => void;
-  onEdit: (step: number) => void;
 }
 
-export const ReviewScreen: React.FC<Props> = ({ onSubmit, onBack, onEdit }) => {
+export const ReviewScreen: React.FC<Props> = ({ onContinue, onBack }) => {
   const { formData, errors, isValid } = useWalkForm();
 
   // Determine if walk is less than 30 minutes from now
@@ -31,7 +30,7 @@ export const ReviewScreen: React.FC<Props> = ({ onSubmit, onBack, onEdit }) => {
 
   return (
     <WizardWrapper
-      onContinue={onSubmit}
+      onContinue={onContinue}
       onBack={onBack}
       continueText={isSoon ? "I'm all set!" : "Create Walk"}
     >
@@ -50,7 +49,7 @@ export const ReviewScreen: React.FC<Props> = ({ onSubmit, onBack, onEdit }) => {
                   ? format(formData.date.toDate(), "EEEE MMMM d, yyyy h:mm a")
                   : "Not set"
               }
-              onEdit={() => onEdit(1)}
+              stepKey="time"
               error={errors.date}
             />
 
@@ -64,7 +63,7 @@ export const ReviewScreen: React.FC<Props> = ({ onSubmit, onBack, onEdit }) => {
                   ? `${formData.durationMinutes} minutes`
                   : "Not set"
               }
-              onEdit={() => onEdit(2)}
+              stepKey="duration"
               error={errors.durationMinutes}
             />
 
@@ -92,7 +91,7 @@ export const ReviewScreen: React.FC<Props> = ({ onSubmit, onBack, onEdit }) => {
                   )}
                 </YStack>
               }
-              onEdit={() => onEdit(3)}
+              stepKey="location"
               error={errors.startLocation || errors.visibleToUserIds}
             />
           </YStack>

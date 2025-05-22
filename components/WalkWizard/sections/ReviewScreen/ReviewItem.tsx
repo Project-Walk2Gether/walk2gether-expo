@@ -1,13 +1,14 @@
 import { COLORS } from "@/styles/colors";
+import { useWalkForm } from "@/context/WalkFormContext";
+import { AlertTriangle, Pencil } from "@tamagui/lucide-icons";
 import React from "react";
-import { AlertTriangle } from "@tamagui/lucide-icons";
-import { Button, Text, XStack, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 
 interface Props {
   icon: React.ComponentType<{ size?: string; color?: string }>;
   title: string;
   content: React.ReactNode;
-  onEdit: () => void;
+  stepKey: string;
   error?: string;
 }
 
@@ -15,17 +16,25 @@ export const ReviewItem: React.FC<Props> = ({
   icon,
   title,
   content,
-  onEdit,
+  stepKey,
   error,
 }) => {
+  const { goToStepByKey } = useWalkForm();
   return (
     <XStack alignItems="center" gap="$2">
-      {React.createElement(icon, { size: "$3", color: error ? COLORS.error : COLORS.primary })}
+      {React.createElement(icon, {
+        size: "$2",
+        color: error ? COLORS.error : COLORS.primary,
+      })}
 
       {/* Content section with flex to take available space and ensure text wrapping */}
       <YStack flex={1} paddingRight="$2" flexShrink={1}>
         <XStack alignItems="center" gap="$1">
-          <Text fontSize={16} color={error ? COLORS.error : "$gray11"} fontWeight="600">
+          <Text
+            fontSize={16}
+            color={error ? COLORS.error : "$gray11"}
+            fontWeight="600"
+          >
             {title}
           </Text>
           {error && <AlertTriangle size="$1" color={COLORS.error} />}
@@ -45,9 +54,7 @@ export const ReviewItem: React.FC<Props> = ({
       </YStack>
 
       {/* Edit button with fixed width */}
-      <Button size="$2" variant="outlined" onPress={onEdit}>
-        Edit
-      </Button>
+      <Pencil size={14} onPress={() => goToStepByKey(stepKey)} />
     </XStack>
   );
 };

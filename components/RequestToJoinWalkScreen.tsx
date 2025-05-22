@@ -58,7 +58,7 @@ export default function RequestToJoinScreen({
   const isActivePending = requestSent && !requestCancelled;
 
   // Check if user is friends with the walk organizer
-  const isFriendWithOrganizer = friendships.some(friendship => {
+  const isFriendWithOrganizer = friendships.some((friendship) => {
     return friendship.uids.includes(walk.createdByUid);
   });
 
@@ -89,7 +89,7 @@ export default function RequestToJoinScreen({
         userUid: user.uid,
         displayName: userData?.name || "Anonymous",
         photoURL: userData?.profilePicUrl || null,
-        approvedAt: isFriendWithOrganizer ? Timestamp.now() : null,
+        acceptedAt: isFriendWithOrganizer ? Timestamp.now() : null,
         lastLocation: {
           latitude: userLocation?.coords.latitude || 0,
           longitude: userLocation?.coords.longitude || 0,
@@ -211,7 +211,7 @@ export default function RequestToJoinScreen({
               ) : (
                 <>
                   <Text fontSize="$4" textAlign="center" color="$gray11">
-                    {isFriendWithOrganizer 
+                    {isFriendWithOrganizer
                       ? "You can join this walk immediately since you're friends with the organizer."
                       : "Send a request to your neighbor organizer to join this walk."}
                   </Text>
@@ -269,8 +269,10 @@ export default function RequestToJoinScreen({
                   >
                     {loading ? (
                       <ActivityIndicator color="white" />
+                    ) : isFriendWithOrganizer ? (
+                      "Join This Walk"
                     ) : (
-                      isFriendWithOrganizer ? "Join This Walk" : "I'm Interested in Joining"
+                      "I'm Interested in Joining"
                     )}
                   </Button>
                 </>

@@ -1,5 +1,7 @@
+import Clouds from "@/components/Clouds";
 import { EmptyMessage } from "@/components/EmptyMessage";
 import FAB from "@/components/FAB";
+import Sun from "@/components/Sun";
 import { Screen } from "@/components/UI";
 import WalkCard from "@/components/WalkCard";
 import { useNotifications } from "@/context/NotificationsContext";
@@ -58,7 +60,23 @@ export default function WalksScreen() {
     <Screen
       title="Walks"
       useTopInsets
-      gradientVariant="modern"
+      gradientVariant="outdoor"
+      renderAbsolute={
+        <View>
+          <Sun
+            style={{ position: "absolute", top: 20, right: -10, bottom: 20 }}
+          />
+          <Clouds
+            style={{
+              position: "absolute",
+              top: -80,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          />
+        </View>
+      }
       floatingAction={
         <FAB text="Start a Walk" onPress={() => router.push("/new-walk")} />
       }
@@ -75,8 +93,6 @@ export default function WalksScreen() {
                 renderItem={renderWalkItem}
                 keyExtractor={(item) => item.id}
                 scrollEnabled={false}
-                ItemSeparatorComponent={() => <View height={16} />}
-                contentContainerStyle={{ marginBottom: 24 }}
               />
             </>
           )}
@@ -90,7 +106,6 @@ export default function WalksScreen() {
                 renderItem={renderWalkItem}
                 keyExtractor={(item) => item.id}
                 scrollEnabled={false}
-                ItemSeparatorComponent={() => <View height={16} />}
               />
             </>
           )}

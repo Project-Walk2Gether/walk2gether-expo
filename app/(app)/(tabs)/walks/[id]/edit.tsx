@@ -1,11 +1,13 @@
 import CopyableIdField from "@/components/CopyableIdField";
 import FullScreenLoader from "@/components/FullScreenLoader";
+import HeaderCloseButton from "@/components/HeaderCloseButton";
 import WalkForm from "@/components/WalkForm";
 import { db } from "@/config/firebase";
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { useDoc } from "@/utils/firestore";
 import { doc, updateDoc } from "@react-native-firebase/firestore";
 import {
+  Stack,
   useGlobalSearchParams,
   useLocalSearchParams,
   useRouter,
@@ -43,22 +45,25 @@ export default function EditWalkScreen() {
   if (!walk) return <FullScreenLoader />;
 
   return (
-    <ScrollView
-      flex={1}
-      backgroundColor="#f5f5f5"
-      p="$5"
-      keyboardShouldPersistTaps="handled"
-    >
-      {/* Copyable Walk ID field */}
-      <CopyableIdField id={walk.id} label="Walk ID" />
-      
-      <WalkForm
-        initialValues={walk}
-        onSubmit={handleSubmit}
-        submitButtonText="Update Walk"
-        onCancel={() => router.back()}
-        googleApiKey={GOOGLE_MAPS_API_KEY}
-      />
-    </ScrollView>
+    <>
+      <Stack.Screen options={{ headerRight: () => <HeaderCloseButton /> }} />
+      <ScrollView
+        flex={1}
+        backgroundColor="#f5f5f5"
+        p="$5"
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Copyable Walk ID field */}
+        <CopyableIdField id={walk.id} label="Walk ID" />
+
+        <WalkForm
+          initialValues={walk}
+          onSubmit={handleSubmit}
+          submitButtonText="Update Walk"
+          onCancel={() => router.back()}
+          googleApiKey={GOOGLE_MAPS_API_KEY}
+        />
+      </ScrollView>
+    </>
   );
 }

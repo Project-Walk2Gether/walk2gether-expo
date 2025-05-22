@@ -61,8 +61,8 @@ const WalkCard: React.FC<Props> = ({
   // Determine the request status of the current user
   const hasRequested = !!participantDoc;
   const isApproved =
-    participantDoc?.approvedAt !== null &&
-    participantDoc?.approvedAt !== undefined;
+    participantDoc?.acceptedAt !== null &&
+    participantDoc?.acceptedAt !== undefined;
   const isCancelled =
     participantDoc?.cancelledAt !== null &&
     participantDoc?.cancelledAt !== undefined;
@@ -195,7 +195,7 @@ const WalkCard: React.FC<Props> = ({
         <XStack alignItems="center" gap="$2">
           {/* Show participants section for all users, it will render the appropriate view internally */}
           <ParticipantsSection walk={walk} currentUserUid={user?.uid} />
-          
+
           {/* Show action buttons for non-owners when showActions is true */}
           {!isMine && showActions ? (
             /* Request status or Join button */

@@ -6,7 +6,7 @@ import { Participant } from "walk2gether-shared";
 export function useWaitingParticipants(walkId: string) {
   const waitingParticipantsQuery = query(
     collection(firestore_instance, `walks/${walkId}/participants`),
-    where("approvedAt", "==", null)
+    where("acceptedAt", "==", null)
   );
   const { docs: waitingParticipants } = useQuery<Participant>(
     waitingParticipantsQuery

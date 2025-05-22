@@ -9,6 +9,7 @@ interface Props {
   currentUserUid?: string;
   approvedParticipants: WithId<Participant>[];
   pendingParticipants: WithId<Participant>[];
+  invitedParticipants?: WithId<Participant>[];
   approvedCount: number;
   avatarsToDisplay: WithId<Participant>[];
   overflow: number;

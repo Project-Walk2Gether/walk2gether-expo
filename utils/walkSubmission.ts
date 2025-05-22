@@ -51,7 +51,7 @@ export async function createWalkFromForm({
       durationMinutes: formData.durationMinutes,
       organizerName: userData?.name || "",
       createdByUid: userData.id,
-      
+
       // Location data - For friends walk, both start and current are the same initially
       startLocation: formData.startLocation,
       currentLocation: formData.startLocation,
@@ -59,29 +59,32 @@ export async function createWalkFromForm({
       // Invitation details
       invitationCode: invitationCode,
       visibleToUserIds: [...(formData.visibleToUserIds || []), userData.id],
-      
+
       // Timestamp fields
       estimatedEndTime: Timestamp.fromDate(estimatedEndTime),
-      estimatedEndTimeWithBuffer: Timestamp.fromDate(estimatedEndTimeWithBuffer),
+      estimatedEndTimeWithBuffer: Timestamp.fromDate(
+        estimatedEndTimeWithBuffer
+      ),
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-      
+
       // Required participant tracking fields
       participantsById: {},
       approvedParticipantCount: 0,
       pendingParticipantCount: 0,
       rejectedParticipantCount: 0,
     };
-    
+
     // Add type-specific fields based on walk type
     let walkPayload;
-    
+
     if (formData.type === "meetup") {
       walkPayload = {
         ...basePayload,
         type: "meetup" as const,
         topic: formData.topic || "General Discussion", // Default topic
-        minimumNumberOfMinutesWithEachPartner: formData.minimumNumberOfMinutesWithEachPartner || 5,
+        minimumNumberOfMinutesWithEachPartner:
+          formData.minimumNumberOfMinutesWithEachPartner || 5,
         rounds: [],
       };
     } else if (formData.type === "neighborhood") {
@@ -119,7 +122,8 @@ export async function createWalkFromForm({
       userUid: userId,
       displayName: userData?.name || "Anonymous",
       photoURL: userData?.profilePicUrl || null,
-      approvedAt: Timestamp.now(), // Auto-approve the walk creator
+      acceptedAt: Timestamp.now(), // Auto-approve the walk creator
+      sourceType: "walk-creator", // Set source type to walk
       status: "pending", // Set initial status to pending
       navigationMethod: "walking", // Default navigation method
       route: null,
@@ -129,43 +133,50 @@ export async function createWalkFromForm({
 
     console.log({ organizerParticipant });
     await setDoc(participantRef, organizerParticipant);
-    
+
     // Create participant documents for invited users
     const participantPromises: Promise<void>[] = [];
     const invitedUserIds = formData.invitedUserIds || [];
-    
+
     for (const invitedUserId of invitedUserIds) {
       // Skip if this is the organizer (already added above)
       if (invitedUserId === userId) continue;
-      
+
       const invitedParticipantRef = doc(
         firestore_instance,
         `walks/${walkId}/participants/${invitedUserId}`
       );
-      
+
       const invitedParticipant: Participant = {
         userUid: invitedUserId,
         displayName: "Invited User", // Will be updated when user accepts
         photoURL: null,
-        approvedAt: null, // Not auto-approved
+        acceptedAt: null, // Not auto-approved
         rejectedAt: null,
         cancelledAt: null,
         status: "pending",
+        sourceType: "invited",
         navigationMethod: "walking",
         route: null,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
-      
-      participantPromises.push(setDoc(invitedParticipantRef, invitedParticipant));
+
+      participantPromises.push(
+        setDoc(invitedParticipantRef, invitedParticipant)
+      );
     }
-    
+
     // Wait for all participant documents to be created
     if (participantPromises.length > 0) {
       await Promise.all(participantPromises);
     }
 
-    console.log(`Created walk with ${formData.invitedUserIds?.length || 0} invited participants`);
+    console.log(
+      `Created walk with ${
+        formData.invitedUserIds?.length || 0
+      } invited participants`
+    );
     return walkDocRef;
   } catch (error) {
     console.error("Error creating walk:", error);

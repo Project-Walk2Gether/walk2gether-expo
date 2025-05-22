@@ -37,7 +37,7 @@ export default function WaitingRoomScreen({ walk, onBack }: Props) {
       await updateDoc(
         participant._ref as FirebaseFirestoreTypes.DocumentReference<Participant>,
         {
-          approvedAt: Timestamp.now(),
+          acceptedAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
         }
       );

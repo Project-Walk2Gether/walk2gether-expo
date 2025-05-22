@@ -46,7 +46,7 @@ export default function ParticipantsList({
     const isCurrentUser = item.id === currentUserId;
     const isArrived = item.status === "arrived";
     const isOnTheWay = item.status === "on-the-way";
-    const needsApproval = !item.approvedAt && !item.rejectedAt;
+    const needsApproval = !item.acceptedAt && !item.rejectedAt;
     const isRejected = !!item.rejectedAt;
 
     // Determine status display text and color

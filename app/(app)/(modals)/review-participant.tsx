@@ -53,7 +53,7 @@ export default function ReviewParticipantScreen() {
         `walks/${walkId}/participants/${participantId}`
       );
       await updateDoc(participantRef, {
-        approvedAt: serverTimestamp(),
+        acceptedAt: serverTimestamp(),
         rejectedAt: null,
         status: "approved",
       });
@@ -76,7 +76,7 @@ export default function ReviewParticipantScreen() {
       );
       await updateDoc(participantRef, {
         rejectedAt: serverTimestamp(),
-        approvedAt: deleteField(),
+        acceptedAt: deleteField(),
         status: "rejected",
       });
       router.back();

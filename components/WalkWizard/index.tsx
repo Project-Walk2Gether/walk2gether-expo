@@ -7,7 +7,6 @@ import { updateExistingWalk } from "@/utils/updateWalk";
 import { createWalkFromForm } from "@/utils/walkSubmission";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useRouter } from "expo-router";
-import { compact } from "lodash";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { Button, View, XStack } from "tamagui";
 import {
@@ -21,8 +20,9 @@ import NeighborhoodWalkHowItWorksSection from "./sections/NeighborhoodWalkHowItW
 import ReviewScreen from "./sections/ReviewScreen";
 import { WizardHeader } from "./sections/WizardHeader";
 
-// Define the structure of a wizard step
-interface WizardStep {
+// Define the structure of a wizard step with UI components
+interface WizardStepWithComponents {
+  key: string;
   title: string;
   component: React.ComponentType<any>;
   onContinue: () => void;
@@ -36,7 +36,7 @@ export function WalkWizard() {
     currentStep,
     goToNextStep,
     goToPreviousStep,
-    goToStep,
+    wizardSteps: formSteps,
     setFormData,
     createdWalkId,
     setCreatedWalkId,
@@ -62,6 +62,7 @@ export function WalkWizard() {
   const { advanceToNextQuote } = useQuoteOfTheDay();
 
   const handleSubmit = useCallback(async () => {
+    console.log("submitting");
     if (!userData) {
       showMessage("User data not found", "error");
       return;
@@ -123,82 +124,68 @@ export function WalkWizard() {
     showMessage,
   ]);
 
-  // Memoize whether to show the how it works section based on user preference
-  const showHowItWorks = useMemo(() => {
-    return userData && !userData.neighborhoodWalksHowItWorksDontShowAgain;
-  }, [userData]);
+  // Enhance the step configuration with components and navigation handlers
+  const wizardSteps = useMemo<WizardStepWithComponents[]>(() => {
+    // Map each step key to its corresponding component and handlers
+    const getComponentForKey = (key: string) => {
+      switch (key) {
+        case "type":
+          return {
+            component: TypeSelection,
+            onContinue: goToNextStep,
+          };
+        case "howItWorks":
+          return {
+            component: NeighborhoodWalkHowItWorksSection,
+            onContinue: goToNextStep,
+            onBack: goToPreviousStep,
+          };
+        case "time":
+          return {
+            component: TimeSelection,
+            onContinue: goToNextStep,
+            onBack: goToPreviousStep,
+          };
+        case "duration":
+          // Different onContinue behavior based on walk type
+          return {
+            component: DurationSelection,
+            onContinue:
+              formData.type === "neighborhood" ? goToNextStep : handleSubmit,
+            onBack: goToPreviousStep,
+          };
+        case "location":
+          return {
+            component: LocationSelection,
+            onContinue: goToNextStep,
+            onBack: goToPreviousStep,
+          };
+        case "review":
+          return {
+            component: ReviewScreen,
+            onContinue: handleSubmit,
+            onBack: goToPreviousStep,
+          };
+        case "invite":
+          return {
+            component: InviteSelection,
+            onContinue: goToNextStep, // This will close the wizard since it's the last step
+            onBack: goToPreviousStep,
+          };
+        default:
+          return {
+            component: TypeSelection,
+            onContinue: goToNextStep,
+          };
+      }
+    };
 
-  // Define the step configuration - using useMemo to avoid recreating the array on each render
-  const wizardSteps = useMemo<WizardStep[]>(() => {
-    const baseSteps = [
-      {
-        title: "Select walk type",
-        component: TypeSelection,
-        onContinue: goToNextStep,
-      },
-    ];
-
-    if (formData.type === "neighborhood") {
-      return compact([
-        ...baseSteps,
-        showHowItWorks
-          ? {
-              title: "How it works",
-              component: NeighborhoodWalkHowItWorksSection,
-              onContinue: goToNextStep,
-              onBack: goToPreviousStep,
-            }
-          : null,
-        {
-          title: "Set duration",
-          component: DurationSelection,
-          onContinue: goToNextStep,
-          onBack: goToPreviousStep,
-        },
-        {
-          title: "Select start point",
-          component: LocationSelection,
-          onContinue: goToNextStep,
-          onBack: goToPreviousStep,
-        },
-        {
-          title: "Review",
-          component: ReviewScreen,
-          onContinue: handleSubmit,
-          onBack: goToPreviousStep,
-        },
-      ]);
-    }
-
-    // For friend walks, use the full flow
-    return [
-      ...baseSteps,
-      {
-        title: "Select date and time",
-        component: TimeSelection,
-        onContinue: goToNextStep,
-        onBack: goToPreviousStep,
-      },
-      {
-        title: "Select start point",
-        component: LocationSelection,
-        onContinue: goToNextStep,
-        onBack: goToPreviousStep,
-      },
-      {
-        title: "Set duration",
-        component: DurationSelection,
-        onContinue: handleSubmit,
-        onBack: goToPreviousStep,
-      },
-      {
-        title: "Invite",
-        component: InviteSelection,
-        onContinue: goToNextStep, // This will close the wizard since it's the last step
-        onBack: goToPreviousStep,
-      },
-    ];
-  }, [formData.type, goToNextStep, goToPreviousStep, goToStep, handleSubmit]);
+    // Enhance each step with its component and handlers
+    return formSteps.map((step) => ({
+      ...step,
+      ...getComponentForKey(step.key),
+    }));
+  }, [formSteps, formData.type, goToNextStep, goToPreviousStep, handleSubmit]);
 
   // Create a custom header component for the Stack.Screen
   const renderHeader = () => {
@@ -238,6 +225,8 @@ export function WalkWizard() {
       }
     }
   }, [formData.type]);
+
+  // We're now using goToStepByKey from the WalkFormContext directly
 
   // Render the appropriate step based on currentStep
   const renderStep = () => {
