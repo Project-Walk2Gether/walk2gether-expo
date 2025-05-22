@@ -1,0 +1,22 @@
+appId: org.projectwalk2gether.walk2gether
+clearState: true
+---
+# Start the app and verify we're on the auth screen
+- clearKeychain
+- launchApp
+- assertVisible: 'Get Started'
+
+# Enter phone number and submit
+- tapOn:
+    text: "Phone Number"
+- inputText: "2003004000"  # Test phone number
+- tapOn:
+    text: "Send Code"
+
+# Verify we're on the verification screen
+- assertVisible: "Verify Your Phone"
+
+# Enter verification code - use the label text to find the proper element
+- inputText: "123456"
+- tapOn:
+    text: "Let's go!"
