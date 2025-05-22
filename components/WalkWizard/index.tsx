@@ -18,6 +18,7 @@ import {
   TypeSelection,
 } from "./sections";
 import NeighborhoodWalkHowItWorksSection from "./sections/NeighborhoodWalkHowItWorksSection";
+import ReviewScreen from "./sections/ReviewScreen";
 import { WizardHeader } from "./sections/WizardHeader";
 
 // Define the structure of a wizard step
@@ -157,6 +158,12 @@ export function WalkWizard() {
         {
           title: "Select start point",
           component: LocationSelection,
+          onContinue: goToNextStep,
+          onBack: goToPreviousStep,
+        },
+        {
+          title: "Review",
+          component: ReviewScreen,
           onContinue: handleSubmit,
           onBack: goToPreviousStep,
         },

@@ -3,7 +3,6 @@ import { Calendar, Clock, MapPin } from "@tamagui/lucide-icons";
 import { differenceInMinutes, format } from "date-fns";
 import React from "react";
 import { Card, Separator, Text, YStack } from "tamagui";
-import NeighborhoodWalkHowItWorksSection from "../NeighborhoodWalkHowItWorksSection";
 import WizardWrapper from "../WizardWrapper";
 import ReviewItem from "./ReviewItem";
 
@@ -110,11 +109,6 @@ export const ReviewScreen: React.FC<Props> = ({ onSubmit, onBack, onEdit }) => {
               Please complete all required fields before creating your walk
             </Text>
           </Card>
-        )}
-
-        {/* Render the how it works section for neighborhood walks */}
-        {formData.type === "neighborhood" && (
-          <NeighborhoodWalkHowItWorksSection />
         )}
       </YStack>
     </WizardWrapper>
