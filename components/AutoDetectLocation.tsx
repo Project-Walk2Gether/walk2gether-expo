@@ -29,6 +29,7 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
 
   useEffect(() => {
     let cancelled = false;
+
     async function detectLocation() {
       // Only proceed if location permission is granted
       if (!locationPermission) {
@@ -53,29 +54,6 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
       locationFound.current = false;
 
       try {
-        // Artificial delay in development mode
-        if (__DEV__) {
-          await new Promise((resolve) =>
-            setTimeout(() => {
-              if (!cancelled) {
-                setProgress(20); // Update progress
-                resolve(null);
-              }
-            }, 1000)
-          );
-        }
-
-        if (__DEV__) {
-          await new Promise((resolve) =>
-            setTimeout(() => {
-              if (!cancelled) {
-                setProgress(50); // Update progress after getting position
-                resolve(null);
-              }
-            }, 1500)
-          );
-        }
-
         const position = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
         });
@@ -172,11 +150,7 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
     if (error) {
       // Show error with manual entry option
       return (
-        <XStack
-          width="100%"
-          alignItems="center"
-          justifyContent="space-between"
-        >
+        <XStack width="100%" alignItems="center" justifyContent="space-between">
           <Text color="$red10">{error}</Text>
           <Button
             size="$3"
