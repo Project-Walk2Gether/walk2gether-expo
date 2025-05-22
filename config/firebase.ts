@@ -28,6 +28,9 @@ if (emulatorsEnabled) {
   connectFunctionsEmulator(functions_instance, "localhost", 5001);
   connectFirestoreEmulator(firestore_instance, "localhost", 8080);
   connectStorageEmulator(storage_instance, "localhost", 9199);
+
+  auth_instance.settings.appVerificationDisabledForTesting = true;
+
   console.log("Firebase emulators enabled");
 } else {
   console.log("Firebase emulators disabled");
