@@ -1,0 +1,22 @@
+# - signIn(andrewsNumber)
+# - completeOnboard
+#   - withName: Andrew
+# - tapOn:
+#     text: "Friends"
+# - tapOn:
+#     text: "Invite a friend"
+# - tapOn:
+#     text: "Share Invitation"
+# - assertCopiedLink:
+# - signOut
+# - signIn(johnsNumber)
+# - completeOnboarding
+#   - withName: John
+# - visitCopiedLink
+# - tapOn:
+#     text: "Friends"
+# - assertVisible: "Andrew"
+# - signOut
+# - signIn(andrewsNumber)
+# - tapOnFriends
+# - assertVisible: "John"

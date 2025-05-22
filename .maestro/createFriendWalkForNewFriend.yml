@@ -1,0 +1,12 @@
+appId: org.projectwalk2gether.walk2gether
+clearState: true
+---
+# Start the app and verify we're on the auth screen
+- clearKeychain
+- launchApp
+- tapOn:
+    text: "Start a Walk"
+- tapOn:
+    text: "Friend Walk"
+- tapOn:
+    text: "Continue"
