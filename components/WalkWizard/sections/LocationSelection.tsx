@@ -79,6 +79,7 @@ export const LocationSelection: React.FC<Props> = ({
       setPendingLocationRequest(false);
     }
   }, [coords, pendingLocationRequest]);
+
   const handleLocationSelect = (data: any, details: any) => {
     if (details && details.geometry) {
       const newLocation = {
@@ -270,28 +271,16 @@ export const LocationSelection: React.FC<Props> = ({
         </View>
         <LocationButton
           onPress={async () => {
-            setIsReverseGeocoding(true);
-
             try {
               // Set the flag to indicate we're waiting for location coordinates
               setPendingLocationRequest(true);
+              setIsReverseGeocoding(true);
 
               // Call getLocation to update the location context
-              await getLocation();
-
-              // The useEffect will handle the coordinates when they are updated
-              // This approach properly uses React's state management instead of setTimeout
-
-              // If we already have coords and getLocation didn't trigger an update,
-              // manually handle them (fallback)
-              if (coords && pendingLocationRequest) {
-                handleLocationCoordinates(
-                  coords.latitude,
-                  coords.longitude,
-                  setIsReverseGeocoding
-                );
-                setPendingLocationRequest(false);
-              }
+              // The useEffect hook will handle processing the coordinates
+              // when they are updated
+              const location = await getLocation();
+              console.log({ location });
             } catch (error) {
               console.error("Error getting current location:", error);
               setIsReverseGeocoding(false);

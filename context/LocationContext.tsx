@@ -5,6 +5,7 @@ import {
 import { auth_instance } from "@/config/firebase";
 import { locationService } from "@/utils/locationService";
 import { writeLogIfEnabled } from "@/utils/logging";
+import * as Device from "expo-device";
 import * as Linking from "expo-linking";
 import * as Location from "expo-location";
 import React, {
@@ -28,7 +29,7 @@ interface LocationContextValue {
   backgroundLocationPermission: boolean | null;
 
   // General location methods
-  refresh: () => Promise<void>;
+  refresh: () => Promise<Location.LocationObject | null | undefined>;
   // Separated permission methods
   requestForegroundPermissions: () => Promise<boolean>;
   requestBackgroundPermissions: () => Promise<boolean>;
@@ -55,7 +56,7 @@ const LocationContext = createContext<LocationContextValue>({
   locationPermission: null,
   backgroundLocationPermission: null,
   locationTracking: false,
-  refresh: async () => {},
+  refresh: async () => null,
   requestForegroundPermissions: async () => false,
   requestBackgroundPermissions: async () => false,
   requestPermissions: async () => ({ foreground: false, background: false }),
@@ -148,7 +149,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       // Check if foreground permission is granted first (required for background)
       const { status: foregroundStatus } =
         await Location.getForegroundPermissionsAsync();
-      
+
       if (foregroundStatus !== "granted") {
         // Need foreground permission first
         const foregroundGranted = await requestForegroundPermissions();
@@ -214,11 +215,46 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // Mock location data for simulator
+  const getMockLocation = (): Location.LocationObject => {
+    // Return mock location data for San Francisco
+    return {
+      coords: {
+        latitude: 37.7749,
+        longitude: -122.4194,
+        altitude: 0,
+        accuracy: 5,
+        altitudeAccuracy: 5,
+        heading: 0,
+        speed: 0
+      },
+      timestamp: Date.now()
+    };
+  };
+
   // Get current location (used for initial location and refresh)
   const getLocation = async () => {
     setLoading(true);
     setError(undefined);
     try {
+      // Check if running on a simulator
+      const isSimulator = await Device.isDevice === false;
+      
+      if (isSimulator) {
+        // Use mock location data for simulator
+        console.log("Using mock location for simulator");
+        const mockLoc = getMockLocation();
+        
+        setUserLocation(mockLoc);
+        setCoords({
+          latitude: mockLoc.coords.latitude,
+          longitude: mockLoc.coords.longitude,
+        });
+        
+        return mockLoc;
+      }
+      
+      // For real devices, continue with normal flow
       // Check if we have permission first
       const { status } = await Location.getForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -232,10 +268,23 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
 
-      // Get the location
-      const loc = await Location.getCurrentPositionAsync({
+      // Create a promise that will resolve with the location
+      const locationPromise = Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
+
+      // Create a timeout promise that will reject after 10 seconds
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("Location request timed out after 10 seconds"));
+        }, 10000); // 10 second timeout
+      });
+
+      // Race the location promise against the timeout
+      const loc = (await Promise.race([
+        locationPromise,
+        timeoutPromise,
+      ])) as Location.LocationObject;
 
       setUserLocation(loc);
       setCoords({
@@ -247,8 +296,12 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       if (activeWalkId && locationTracking && auth_instance.currentUser?.uid) {
         await updateLocation(loc);
       }
+      
+      return loc;
     } catch (e: any) {
+      console.warn("Location error:", e);
       setError(e.message || "Failed to get location");
+      return null;
     } finally {
       setLoading(false);
     }
