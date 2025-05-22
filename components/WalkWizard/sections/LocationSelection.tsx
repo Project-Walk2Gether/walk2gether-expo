@@ -30,8 +30,7 @@ export const LocationSelection: React.FC<Props> = ({
   currentStep,
   totalSteps,
 }) => {
-  const { formData, updateFormData, errors, systemErrors, setSystemErrors } =
-    useWalkForm();
+  const { formData, updateFormData, setSystemErrors } = useWalkForm();
 
   // Local state for notes
   const [notes, setNotes] = useState<string>(
@@ -228,7 +227,7 @@ export const LocationSelection: React.FC<Props> = ({
     }
   };
 
-  console.log({ startLocation: formData.startLocation });
+  console.log({ pendingLocationRequest, isReverseGeocoding });
 
   return (
     <WizardWrapper

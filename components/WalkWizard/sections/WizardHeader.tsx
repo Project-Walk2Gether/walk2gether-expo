@@ -31,17 +31,24 @@ export const WizardHeader: React.FC<WizardHeaderProps> = ({
       <View width={24} />
 
       {/* Center title and progress dots */}
-      <YStack alignItems="center" gap="$1.5" maxWidth="80%">
+      <YStack
+        minHeight={34}
+        justifyContent="center"
+        alignItems="center"
+        gap="$1.5"
+        maxWidth="80%"
+      >
         <Text fontSize={17} fontWeight="600" textAlign="center" color="#000">
           {title}
         </Text>
-        <ProgressDots
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          dotSize={6}
-          gap={6}
-          visible={displayDots}
-        />
+        {displayDots && (
+          <ProgressDots
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            dotSize={6}
+            gap={6}
+          />
+        )}
       </YStack>
 
       {/* Close button */}

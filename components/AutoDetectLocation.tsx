@@ -19,7 +19,7 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
   setFieldValue,
   setLocationMode,
   clearLocation,
-  expectedWaitTime = 5000,
+  expectedWaitTime = 9000,
 }) => {
   const { locationPermission, requestForegroundPermissions } = useLocation();
   const [loading, setLoading] = useState(false);
@@ -49,7 +49,6 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
       }
 
       setLoading(true);
-      setProgress(0);
       setError(null);
       locationFound.current = false;
 
@@ -150,8 +149,10 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
     if (error) {
       // Show error with manual entry option
       return (
-        <XStack width="100%" alignItems="center" justifyContent="space-between">
-          <Text color="$red10">{error}</Text>
+        <YStack width="100%" alignItems="center" justifyContent="space-between">
+          <Text flexShrink={1} color="$red10">
+            {error}
+          </Text>
           <Button
             size="$3"
             backgroundColor="$blue9"
@@ -160,7 +161,7 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
           >
             Enter manually
           </Button>
-        </XStack>
+        </YStack>
       );
     }
 

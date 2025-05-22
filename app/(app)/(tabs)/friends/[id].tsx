@@ -1,12 +1,14 @@
 import { FriendshipChat } from "@/components/Chat/FriendshipChat";
+import FullScreenLoader from "@/components/FullScreenLoader";
 import Menu from "@/components/Menu";
+import { NotFoundState } from "@/components/NotFoundState";
 import { StatefulAvatarWithFullScreen } from "@/components/UserAvatar/StatefulAvatarWithFullScreen";
 import { useAuth } from "@/context/AuthContext";
 import { useDoc } from "@/utils/firestore";
 import { ArrowLeft, UserMinus } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { Button, Spinner, Text, XStack, YStack } from "tamagui";
+import { Button, Text, XStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
 
 export default function ChatDetailScreen() {
@@ -34,10 +36,11 @@ export default function ChatDetailScreen() {
 
     // Get friend data from the denormalized friendship document
     return {
-      data: friendId && friendship.userDataByUid
-        ? friendship.userDataByUid[friendId]
-        : null,
-      id: friendId || null
+      data:
+        friendId && friendship.userDataByUid
+          ? friendship.userDataByUid[friendId]
+          : null,
+      id: friendId || null,
     };
   };
 
@@ -81,10 +84,7 @@ export default function ChatDetailScreen() {
         <XStack alignItems="center" space="$2">
           {/* Display friend's avatar with full screen capability */}
           {friendId && (
-            <StatefulAvatarWithFullScreen
-              uid={friendId}
-              size={36}
-            />
+            <StatefulAvatarWithFullScreen uid={friendId} size={36} />
           )}
           <Text fontWeight="bold" fontSize="$5">
             {friendName}
@@ -115,44 +115,22 @@ export default function ChatDetailScreen() {
     };
   };
 
+  if (status === "loading") return <FullScreenLoader />;
+
+  if (!friendship)
+    return (
+      <NotFoundState
+        title="Conversation not found"
+        message="This conversation may have been deleted or is no longer available."
+        buttonText="Go Back"
+        onButtonPress={handleBack}
+      />
+    );
+
   return (
     <>
       <Stack.Screen options={renderHeader()} />
-
-      {status === "loading" ? (
-        <YStack flex={1} justifyContent="center" alignItems="center">
-          <Spinner size="large" color="#4EB1BA" />
-          <Text marginTop="$4" color="#666">
-            Loading conversation...
-          </Text>
-        </YStack>
-      ) : friendship ? (
-        <>
-          <FriendshipChat friendship={friendship} />
-          {/* Invite on a walk button */}
-        </>
-      ) : (
-        <YStack
-          flex={1}
-          justifyContent="center"
-          alignItems="center"
-          padding="$4"
-        >
-          <Text fontSize="$5" textAlign="center" color="#666">
-            Conversation not found
-          </Text>
-          <Button
-            marginTop="$6"
-            onPress={handleBack}
-            backgroundColor="#4EB1BA"
-            color="white"
-          >
-            Go Back
-          </Button>
-        </YStack>
-      )}
-
-      {/* No longer using inline confirmation dialog */}
+      <FriendshipChat friendship={friendship} />
     </>
   );
 }

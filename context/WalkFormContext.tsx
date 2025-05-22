@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Walk } from "walk2gether-shared";
 
-export type WalkFormData = Partial<Walk>;
+export type WalkFormData = Partial<Walk> & { invitedUserIds: string[] };
 
 // Define a type for form errors with the same shape as the form data
 export type WalkFormErrors = {
@@ -11,6 +11,7 @@ export type WalkFormErrors = {
 };
 
 interface WalkFormContextType {
+  friendId?: string;
   formData: WalkFormData;
   updateFormData: (newData: Partial<Walk>) => void;
   setFormData: React.Dispatch<React.SetStateAction<WalkFormData>>;
@@ -44,6 +45,7 @@ const generateInvitationCode = (): string => {
 
 const initialFormData: WalkFormContextType["formData"] = {
   durationMinutes: 30, // Default duration in minutes
+  invitedUserIds: [],
   invitationCode: generateInvitationCode(),
 };
 
@@ -53,9 +55,10 @@ const WalkFormContext = createContext<WalkFormContextType | undefined>(
 
 export interface Props {
   children: React.ReactNode;
+  friendId?: string;
 }
 
-export const WalkFormProvider: React.FC<Props> = ({ children }) => {
+export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
   // Initialize form with a fresh invitation code on each form creation
   const initializedFormData = {
     ...initialFormData,
@@ -63,7 +66,7 @@ export const WalkFormProvider: React.FC<Props> = ({ children }) => {
     invitationCode: generateInvitationCode(),
   };
   const [formData, setFormData] = useState<WalkFormData>(initializedFormData);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(friendId ? 1 : 0);
   const [errors, setErrors] = useState<WalkFormErrors>({});
   const [isValid, setIsValid] = useState(true);
   // System-level errors (e.g., API failures)
@@ -156,6 +159,7 @@ export const WalkFormProvider: React.FC<Props> = ({ children }) => {
   return (
     <WalkFormContext.Provider
       value={{
+        friendId,
         formData,
         updateFormData,
         setFormData,
@@ -185,19 +189,4 @@ export const useWalkForm = (): WalkFormContextType => {
     throw new Error("useWalkForm must be used within a WalkFormProvider");
   }
   return context;
-};
-
-// Higher-Order Component (HOC) that wraps a component with the WalkFormProvider
-export const WithWalkFormProvider = <P extends object>(
-  Component: React.ComponentType<P>
-): React.FC<P & Partial<Props>> => {
-  return (props) => {
-    const { ...componentProps } = props;
-
-    return (
-      <WalkFormProvider>
-        <Component {...(componentProps as P)} />
-      </WalkFormProvider>
-    );
-  };
 };
