@@ -25,19 +25,19 @@ export const getParticipantStatusInfo = (
       sourceType: participant.sourceType,
       acceptedAt: participant.acceptedAt,
       cancelledAt: participant.cancelledAt,
-      rejectedAt: participant.rejectedAt,
+      deniedAt: participant.deniedAt,
       walkStatus,
-      participantData: participant
+      participantData: participant,
     });
   }
-  
+
   const isArrived = participant.status === "arrived";
   const isOnTheWay = participant.status === "on-the-way";
   const isCancelled = !!participant.cancelledAt;
   const isAccepted = !!participant.acceptedAt;
   const isInvited = participant.sourceType === "invited";
   const isNotified = isInvited && !participant.acceptedAt;
-  
+
   // Determine status display text and color
   if (isCancelled) {
     return {
@@ -106,25 +106,27 @@ export const getParticipantBorderColor = (
   if (isCurrentUser) {
     return COLORS.primary;
   }
-  
+
   if (participant.cancelledAt) {
     return "$gray4";
   }
-  
+
   if (participant.status === "arrived") {
     return "$green7";
   }
-  
+
   if (participant.status === "on-the-way") {
     return COLORS.primary;
   }
-  
+
   return "$gray4";
 };
 
 /**
  * Get opacity for participant card based on their status
  */
-export const getParticipantOpacity = (participant: ParticipantWithRoute): number => {
+export const getParticipantOpacity = (
+  participant: ParticipantWithRoute
+): number => {
   return participant.cancelledAt ? 0.5 : 1;
 };

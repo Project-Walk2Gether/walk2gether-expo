@@ -76,8 +76,7 @@ const WalkCard: React.FC<Props> = ({
     participantDoc?.cancelledAt !== null &&
     participantDoc?.cancelledAt !== undefined;
   const isRejected =
-    participantDoc?.rejectedAt !== null &&
-    participantDoc?.rejectedAt !== undefined;
+    participantDoc?.deniedAt !== null && participantDoc?.deniedAt !== undefined;
 
   // Check if the user is invited (in participantsById but not from a "requested" source)
   const isInvited =

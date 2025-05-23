@@ -1,10 +1,9 @@
 import { COLORS } from "@/styles/colors";
-import { 
-  getParticipantStatusInfo, 
-  getParticipantBorderColor, 
-  getParticipantOpacity 
+import {
+  getParticipantBorderColor,
+  getParticipantOpacity,
+  getParticipantStatusInfo,
 } from "@/utils/participantStatus";
-import { formatNamesInSentenceCase } from "@/utils/participantFilters";
 import { getWalkStatus } from "@/utils/walkUtils";
 import {
   AlertCircle,
@@ -34,18 +33,21 @@ export default function ParticipantsList({
 }: Props) {
   // For ALL users (even owners), we don't directly show invited participants
   // They'll be shown as a special message item
-  const confirmedParticipants = participants.filter(p => 
-    // Include accepted participants or those who are on the way/arrived
-    !!p.acceptedAt || p.status === "on-the-way" || p.status === "arrived"
+  const confirmedParticipants = participants.filter(
+    (p) =>
+      // Include accepted participants or those who are on the way/arrived
+      !!p.acceptedAt || p.status === "on-the-way" || p.status === "arrived"
   );
-  
+
   // Get invited participants (those who haven't accepted/rejected/cancelled yet)
-  const invitedParticipants = isOwner 
-    ? participants.filter(p => 
-        !p.acceptedAt && 
-        !p.rejectedAt && 
-        !p.cancelledAt && 
-        p.sourceType === "invited")
+  const invitedParticipants = isOwner
+    ? participants.filter(
+        (p) =>
+          !p.acceptedAt &&
+          !p.deniedAt &&
+          !p.cancelledAt &&
+          p.sourceType === "invited"
+      )
     : [];
 
   // Sort participants based on requirements
@@ -79,7 +81,7 @@ export default function ParticipantsList({
 
   const renderItem = ({ item }: { item: ParticipantWithRoute }) => {
     const isCurrentUser = item.id === currentUserId;
-    
+
     // Get participant status information from the utility function
     const statusInfo = getParticipantStatusInfo(item, status);
     const statusText = statusInfo.text;
@@ -184,28 +186,34 @@ export default function ParticipantsList({
   };
 
   // Define a type that extends ParticipantWithRoute to include our flag
-  type ExtendedParticipant = ParticipantWithRoute & { isInvitedParticipant?: boolean };
-  
+  type ExtendedParticipant = ParticipantWithRoute & {
+    isInvitedParticipant?: boolean;
+  };
+
   // Create a combined data array that includes regular participants and invited participants
   const dataArray: ExtendedParticipant[] = [...sortedParticipants];
-  
+
   // Add invited participants as individual items if the user is the owner
   if (isOwner && invitedParticipants.length > 0) {
     // Add each invited participant to the data array
-    invitedParticipants.forEach(participant => {
+    invitedParticipants.forEach((participant) => {
       dataArray.push({
         ...participant,
-        isInvitedParticipant: true // Flag to identify this as an invited participant
+        isInvitedParticipant: true, // Flag to identify this as an invited participant
       } as ExtendedParticipant);
     });
   }
-  
+
   // Modified renderItem to handle both regular and invited participants
-  const renderListItem = ({ item }: { item: ParticipantWithRoute & { isInvitedParticipant?: boolean } }) => {
+  const renderListItem = ({
+    item,
+  }: {
+    item: ParticipantWithRoute & { isInvitedParticipant?: boolean };
+  }) => {
     // Check if this is an invited participant
     if (item.isInvitedParticipant) {
       const isCurrentUser = item.id === currentUserId;
-      
+
       return (
         <XStack
           padding="$2"
@@ -249,7 +257,7 @@ export default function ParticipantsList({
                 {isCurrentUser ? "You" : item.displayName}
               </Text>
             </XStack>
-            
+
             {/* Bottom row: Status text */}
             <Text
               fontSize="$1"
@@ -264,15 +272,15 @@ export default function ParticipantsList({
         </XStack>
       );
     }
-    
+
     // Otherwise, render a regular participant item
     return renderItem({ item });
   };
-  
+
   return (
     <FlatList
       data={dataArray}
-      renderItem={({ item }) => renderListItem({ item })} 
+      renderItem={({ item }) => renderListItem({ item })}
       keyExtractor={(item) => item.id || `participant-${item.userUid}`}
       horizontal
       showsHorizontalScrollIndicator={false}

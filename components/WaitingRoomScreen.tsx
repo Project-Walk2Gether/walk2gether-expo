@@ -57,7 +57,7 @@ export default function WaitingRoomScreen({ walk, onBack }: Props) {
         firestore_instance,
         `walks/${walk.id}/participants/${participant.id}`
       );
-      await updateDoc(participantRef, { rejectedAt: Timestamp.now() });
+      await updateDoc(participantRef, { deniedAt: Timestamp.now() });
       Alert.alert("Success", "Request has been declined");
     } catch (error) {
       console.error("Error declining request:", error);

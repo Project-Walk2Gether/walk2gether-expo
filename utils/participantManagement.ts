@@ -7,8 +7,8 @@ import {
   setDoc,
   updateDoc,
 } from "@react-native-firebase/firestore";
-import { fetchDocsByIds } from "./firestore";
 import { Participant, UserData, WithId } from "walk2gether-shared";
+import { fetchDocsByIds } from "./firestore";
 
 /**
  * Updates the participants collection for a walk
@@ -28,7 +28,7 @@ export async function updateParticipants(
       `walks/${walkId}/participants`
     );
     const participantsSnapshot = await getDocs(participantsRef);
-    
+
     // Keep track of new participants that need user data
     const newParticipantIds: string[] = [];
 
@@ -103,12 +103,15 @@ export async function updateParticipants(
     // If we have new participants, fetch their user data
     if (newParticipantIds.length > 0) {
       // Fetch user data for all new participants
-      const usersData = await fetchDocsByIds<UserData>('users', newParticipantIds);
-      
+      const usersData = await fetchDocsByIds<UserData>(
+        "users",
+        newParticipantIds
+      );
+
       // Create a map of user data by ID for easier lookup
       const userDataMap = new Map<string, UserData & { id: string }>();
-      usersData.forEach(user => userDataMap.set(user.id, user));
-      
+      usersData.forEach((user) => userDataMap.set(user.id, user));
+
       // Create participant documents with real user data
       for (const userId of newParticipantIds) {
         const user = userDataMap.get(userId);
@@ -116,7 +119,7 @@ export async function updateParticipants(
           firestore_instance,
           `walks/${walkId}/participants/${userId}`
         );
-        
+
         // Create new participant with real name if available
         const participant: Omit<Participant, "id"> = {
           userUid: userId,
@@ -124,7 +127,7 @@ export async function updateParticipants(
           photoURL: user?.profilePicUrl || null,
           status: "pending",
           acceptedAt: null,
-          rejectedAt: null,
+          deniedAt: null,
           cancelledAt: null,
           sourceType: userId === userData.id ? "walk-creator" : sourceType,
           navigationMethod: "walking",
@@ -132,11 +135,11 @@ export async function updateParticipants(
           createdAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
         };
-        
+
         newParticipantPromises.push(setDoc(participantRef, participant));
       }
     }
-    
+
     // Wait for all operations to complete
     await Promise.all([...removedPromises, ...newParticipantPromises]);
 

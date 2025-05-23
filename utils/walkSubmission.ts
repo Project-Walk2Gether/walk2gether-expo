@@ -152,7 +152,7 @@ export async function createWalkFromForm({
         displayName: "Invited User", // Will be updated when user accepts
         photoURL: null,
         acceptedAt: null, // Not auto-approved
-        rejectedAt: null,
+        deniedAt: null,
         cancelledAt: null,
         status: "pending",
         sourceType: "invited",

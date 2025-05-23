@@ -1,4 +1,9 @@
-import { Participant, Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
+import {
+  Participant,
+  Walk,
+  WithId,
+  walkIsFriendsWalk,
+} from "walk2gether-shared";
 
 /**
  * Filter and categorize participants for a walk
@@ -10,12 +15,10 @@ export function categorizeParticipants(
   currentUserUid?: string
 ) {
   // Convert to array and add id property
-  const allParticipants = Object.entries(participantsById).map(
-    ([id, data]) => {
-      const participant = data as Participant;
-      return { id, ...participant } as WithId<Participant>;
-    }
-  );
+  const allParticipants = Object.entries(participantsById).map(([id, data]) => {
+    const participant = data as Participant;
+    return { id, ...participant } as WithId<Participant>;
+  });
 
   // Filter participants into different categories
   const cancelledParticipants = allParticipants.filter(
@@ -23,14 +26,14 @@ export function categorizeParticipants(
   );
 
   const deniedParticipants = allParticipants.filter(
-    (p) => p.rejectedAt && !p.cancelledAt && p.userUid !== currentUserUid
+    (p) => p.deniedAt && !p.cancelledAt && p.userUid !== currentUserUid
   );
 
   const acceptedParticipants = allParticipants.filter(
     (p) =>
       p.acceptedAt &&
       !p.cancelledAt &&
-      !p.rejectedAt &&
+      !p.deniedAt &&
       p.userUid !== currentUserUid
   );
 
@@ -38,7 +41,7 @@ export function categorizeParticipants(
     (p) =>
       p.sourceType === "requested" &&
       !p.acceptedAt &&
-      !p.rejectedAt &&
+      !p.deniedAt &&
       !p.cancelledAt &&
       p.userUid !== currentUserUid
   );
@@ -52,7 +55,7 @@ export function categorizeParticipants(
         (p) =>
           p.sourceType === "invited" &&
           !p.acceptedAt &&
-          !p.rejectedAt &&
+          !p.deniedAt &&
           !p.cancelledAt &&
           p.userUid !== currentUserUid
       )
@@ -64,7 +67,7 @@ export function categorizeParticipants(
         (p) =>
           p.sourceType === "invited" &&
           !p.acceptedAt &&
-          !p.rejectedAt &&
+          !p.deniedAt &&
           !p.cancelledAt &&
           p.userUid !== currentUserUid
       )
