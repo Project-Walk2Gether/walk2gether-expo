@@ -12,12 +12,14 @@ import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { FlatList } from "react-native";
 import { Text, View } from "tamagui";
+import useDynamicRefs from "use-dynamic-refs";
 import { Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
 
 export default function WalksScreen() {
   const router = useRouter();
   const { activeWalks, upcomingWalks } = useWalks();
   const { permissionStatus } = useNotifications();
+  const [_getRef, setRef] = useDynamicRefs();
 
   // Sync walk reminders whenever upcoming walks change
   useEffect(() => {
@@ -78,7 +80,11 @@ export default function WalksScreen() {
         </View>
       }
       floatingAction={
-        <FAB text="Start a Walk" onPress={() => router.push("/new-walk")} />
+        <FAB
+          ref={setRef("startWalkFab") as any}
+          text="Start a Walk"
+          onPress={() => router.push("/new-walk")}
+        />
       }
     >
       {activeWalks.length > 0 || upcomingWalks.length > 0 ? (

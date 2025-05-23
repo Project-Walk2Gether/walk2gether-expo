@@ -87,8 +87,10 @@
     "react-native-svg": "15.11.2",
     "react-native-tab-view": "^3.5.2",
     "react-native-toast-message": "^2.3.0",
+    "react-native-ui-lib": "7.39.0",
     "react-native-uuid": "^2.0.3",
     "tamagui": "1.126.9",
+    "use-dynamic-refs": "github:JeongHwanMun/use-dynamic-refs",
     "walk2gether-shared": "github:Project-Walk2Gether/walk2gether-shared",
     "yup": "^1.6.1"
   },

@@ -25,8 +25,6 @@ export default function GalleryScreen() {
     10
   );
 
-  console.log({ walkId });
-
   // Reference to the FlatList for scrolling
   const galleryListRef = useRef<FlatList>(null);
 
