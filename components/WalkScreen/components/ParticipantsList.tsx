@@ -4,6 +4,7 @@ import {
   getParticipantBorderColor, 
   getParticipantOpacity 
 } from "@/utils/participantStatus";
+import { formatNamesInSentenceCase } from "@/utils/participantFilters";
 import { getWalkStatus } from "@/utils/walkUtils";
 import {
   AlertCircle,
@@ -31,14 +32,24 @@ export default function ParticipantsList({
   isOwner,
   onParticipantPress,
 }: Props) {
-  // Filter participants: for non-owners, only show confirmed participants
-  // For owners, show all participants
-  const filteredParticipants = isOwner 
-    ? participants 
-    : participants.filter(p => !!p.acceptedAt);
+  // For ALL users (even owners), we don't directly show invited participants
+  // They'll be shown as a special message item
+  const confirmedParticipants = participants.filter(p => 
+    // Include accepted participants or those who are on the way/arrived
+    !!p.acceptedAt || p.status === "on-the-way" || p.status === "arrived"
+  );
+  
+  // Get invited participants (those who haven't accepted/rejected/cancelled yet)
+  const invitedParticipants = isOwner 
+    ? participants.filter(p => 
+        !p.acceptedAt && 
+        !p.rejectedAt && 
+        !p.cancelledAt && 
+        p.sourceType === "invited")
+    : [];
 
   // Sort participants based on requirements
-  const sortedParticipants = [...filteredParticipants].sort((a, b) => {
+  const sortedParticipants = [...confirmedParticipants].sort((a, b) => {
     const aIsConfirmed = !!a.acceptedAt;
     const bIsConfirmed = !!b.acceptedAt;
     const aIsOwner = a.userUid === currentUserId;
@@ -172,10 +183,96 @@ export default function ParticipantsList({
     );
   };
 
+  // Define a type that extends ParticipantWithRoute to include our flag
+  type ExtendedParticipant = ParticipantWithRoute & { isInvitedParticipant?: boolean };
+  
+  // Create a combined data array that includes regular participants and invited participants
+  const dataArray: ExtendedParticipant[] = [...sortedParticipants];
+  
+  // Add invited participants as individual items if the user is the owner
+  if (isOwner && invitedParticipants.length > 0) {
+    // Add each invited participant to the data array
+    invitedParticipants.forEach(participant => {
+      dataArray.push({
+        ...participant,
+        isInvitedParticipant: true // Flag to identify this as an invited participant
+      } as ExtendedParticipant);
+    });
+  }
+  
+  // Modified renderItem to handle both regular and invited participants
+  const renderListItem = ({ item }: { item: ParticipantWithRoute & { isInvitedParticipant?: boolean } }) => {
+    // Check if this is an invited participant
+    if (item.isInvitedParticipant) {
+      const isCurrentUser = item.id === currentUserId;
+      
+      return (
+        <XStack
+          padding="$2"
+          margin="$1"
+          gap="$2"
+          alignItems="center"
+          pressStyle={{ scale: 0.98 }}
+          animation="quick"
+          borderRadius="$4"
+          backgroundColor="$gray1"
+          borderWidth={1}
+          borderColor="$blue7"
+          opacity={1}
+        >
+          {/* Same avatar and name layout as regular participants */}
+          <Avatar circular size="$3">
+            {item.photoURL ? (
+              <Avatar.Image src={item.photoURL} />
+            ) : (
+              <Avatar.Fallback
+                justifyContent="center"
+                alignItems="center"
+                backgroundColor={COLORS.primary}
+              >
+                <Text color="white" fontSize="$2">
+                  {item.displayName?.charAt(0).toUpperCase()}
+                </Text>
+              </Avatar.Fallback>
+            )}
+          </Avatar>
+          <YStack gap="$1">
+            {/* Top row: Name */}
+            <XStack alignItems="center" gap="$1">
+              <Text
+                fontSize="$2"
+                fontWeight="bold"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                flexShrink={1}
+              >
+                {isCurrentUser ? "You" : item.displayName}
+              </Text>
+            </XStack>
+            
+            {/* Bottom row: Status text */}
+            <Text
+              fontSize="$1"
+              color="$blue9"
+              fontWeight="bold"
+              flexShrink={1}
+              numberOfLines={1}
+            >
+              Waiting for response
+            </Text>
+          </YStack>
+        </XStack>
+      );
+    }
+    
+    // Otherwise, render a regular participant item
+    return renderItem({ item });
+  };
+  
   return (
     <FlatList
-      data={sortedParticipants}
-      renderItem={renderItem}
+      data={dataArray}
+      renderItem={({ item }) => renderListItem({ item })} 
       keyExtractor={(item) => item.id || `participant-${item.userUid}`}
       horizontal
       showsHorizontalScrollIndicator={false}

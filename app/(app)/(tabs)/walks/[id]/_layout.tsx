@@ -16,6 +16,13 @@ export default function WalkStackLayout() {
           name="show"
           options={{
             title: "Let's walk2gether!",
+            presentation: "modal",
+          }}
+        />
+        <Stack.Screen
+          name="invite"
+          options={{
+            presentation: "modal",
           }}
         />
         <Stack.Screen

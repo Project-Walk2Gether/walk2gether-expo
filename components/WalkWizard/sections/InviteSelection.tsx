@@ -11,7 +11,7 @@ import { updateParticipants } from "@/utils/participantManagement";
 import { findNearbyWalkers } from "@/utils/userSearch";
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
-import { Link, Share2, Users } from "@tamagui/lucide-icons";
+import { Share2, Users } from "@tamagui/lucide-icons";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
 import { Alert, Clipboard } from "react-native";
@@ -46,7 +46,8 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   // Use either the provided walkId or get it from the context
   const effectiveWalkId = walkId || walkFormContext!.createdWalkId;
   const effectiveWalkType = walkType || walkFormContext!.formData?.type;
-  const effectiveInvitationCode = invitationCode || walkFormContext?.formData?.invitationCode;
+  const effectiveInvitationCode =
+    invitationCode || walkFormContext?.formData?.invitationCode;
 
   // State variables
   const [participantUids, setParticipantUids] = useState<string[]>([]);
@@ -98,7 +99,10 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
       try {
         const location = userData.location;
         if (!location || !location.latitude || !location.longitude) {
-          showMessage("Unable to find nearby users: location not available", "error");
+          showMessage(
+            "Unable to find nearby users: location not available",
+            "error"
+          );
           return;
         }
 
@@ -107,20 +111,20 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
           user,
           userLocation: {
             latitude: location.latitude,
-            longitude: location.longitude
+            longitude: location.longitude,
           },
-          radiusKm: 0.8
+          radiusKm: 0.8,
         });
 
         setNearbyUserIds(userIds);
-        
+
         // For neighborhood walks, automatically select all nearby users
         if (userIds.length > 0) {
           setParticipantUids(userIds);
         }
       } catch (error) {
-        console.error('Error finding nearby users:', error);
-        showMessage('Failed to find nearby users', 'error');
+        console.error("Error finding nearby users:", error);
+        showMessage("Failed to find nearby users", "error");
       } finally {
         setIsLoadingNearbyUsers(false);
       }
@@ -133,43 +137,53 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   useEffect(() => {
     const fetchUsers = async () => {
       if (!user) return;
-      
+
       setIsLoadingUsers(true);
-      
+
       try {
         if (isFriendsWalk && friendships) {
           // For friends walks, get friends' user data from friendships
           const friendUserIds = friendships
-            .map(friendship => friendship.uids.find(uid => uid !== user.uid))
+            .map((friendship) =>
+              friendship.uids.find((uid) => uid !== user.uid)
+            )
             .filter(Boolean) as string[];
-            
+
           if (friendUserIds.length > 0) {
             // Use the fetchDocsByIds function to get all friend users at once
-            const userDocs = await fetchDocsByIds<UserData>('users', friendUserIds);
-            setUsersList(userDocs as Array<UserData & {id: string}>);
+            const userDocs = await fetchDocsByIds<UserData>(
+              "users",
+              friendUserIds
+            );
+            setUsersList(userDocs as Array<UserData & { id: string }>);
           } else {
             setUsersList([]);
           }
         } else if (isNeighborhoodWalk && nearbyUserIds.length > 0) {
           // For neighborhood walks, filter out current user
-          const filteredUserIds = nearbyUserIds.filter((id: string) => id !== user.uid);
-          
+          const filteredUserIds = nearbyUserIds.filter(
+            (id: string) => id !== user.uid
+          );
+
           if (filteredUserIds.length > 0) {
             // Use the fetchDocsByIds function to get all nearby users at once
-            const userDocs = await fetchDocsByIds<UserData>('users', filteredUserIds);
-            setUsersList(userDocs as Array<UserData & {id: string}>);
+            const userDocs = await fetchDocsByIds<UserData>(
+              "users",
+              filteredUserIds
+            );
+            setUsersList(userDocs as Array<UserData & { id: string }>);
           } else {
             setUsersList([]);
           }
         }
       } catch (error) {
-        console.error('Error fetching users:', error);
-        showMessage('Failed to load users', 'error');
+        console.error("Error fetching users:", error);
+        showMessage("Failed to load users", "error");
       } finally {
         setIsLoadingUsers(false);
       }
     };
-    
+
     fetchUsers();
   }, [isFriendsWalk, isNeighborhoodWalk, friendships, nearbyUserIds, user]);
 
@@ -186,11 +200,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
 
   // Generate and share the invitation link
   const getInvitationLink = () => {
-    if (
-      !userData?.friendInvitationCode ||
-      !effectiveInvitationCode
-    )
-      return "";
+    if (!userData?.friendInvitationCode || !effectiveInvitationCode) return "";
 
     return `https://projectwalk2gether.org/join?code=${userData.friendInvitationCode}&walk=${effectiveInvitationCode}`;
   };
@@ -340,51 +350,52 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                     marginTop="$2"
                     textAlign="center"
                     fontWeight="600"
+                    marginBottom="$2"
                   >
                     {isNeighborhoodWalk
                       ? isLoadingNearbyUsers
                         ? "Finding neighbors nearby..."
                         : participantUids.length > 0
-                          ? `${participantUids.length} ${
-                              participantUids.length === 1
-                                ? "neighbor"
-                                : "neighbors"
-                            } will be notified`
-                          : "No neighbors found in your area"
+                        ? `${participantUids.length} ${
+                            participantUids.length === 1
+                              ? "neighbor"
+                              : "neighbors"
+                          } will be notified`
+                        : "No neighbors found in your area"
                       : `${participantUids.length} ${
                           participantUids.length === 1 ? "friend" : "friends"
                         } selected`}
                   </Text>
+
+                  <YStack
+                    alignItems="center"
+                    marginTop="$4"
+                    paddingBottom="$2"
+                    gap="$4"
+                  >
+                    {usersList.length > 0 && !isNeighborhoodWalk && (
+                      <Text fontSize={14} color="$gray10" fontWeight="500">
+                        Don't see your friend here yet?
+                      </Text>
+                    )}
+                    <Button
+                      backgroundColor={COLORS.primary}
+                      color={COLORS.textOnDark}
+                      onPress={handleShareLink}
+                      size="$4"
+                      icon={<Share2 size={18} color="#fff" />}
+                      paddingHorizontal={16}
+                      borderRadius={8}
+                      hoverStyle={{ backgroundColor: "#6d4c2b" }}
+                      pressStyle={{ backgroundColor: "#4b2e13" }}
+                    >
+                      {isNeighborhoodWalk
+                        ? "Invite another neighbor"
+                        : "Invite a new friend to Walk2Gether"}
+                    </Button>
+                  </YStack>
                 </>
               )}
-            </ContentCard>
-
-            <ContentCard
-              title={
-                isNeighborhoodWalk ? "Invite more users" : "Invite new friend"
-              }
-              icon={<Link size={20} color={COLORS.textOnLight} />}
-              description={
-                isNeighborhoodWalk
-                  ? "Send an invitation to have more people join your neighborhood walk."
-                  : "Send an invitation for your friend to download the Walk2Gether app to join the walk."
-              }
-            >
-              <Button
-                backgroundColor={COLORS.primary}
-                color={COLORS.textOnDark}
-                onPress={handleShareLink}
-                size="$4"
-                icon={<Share2 size={18} color="#fff" />}
-                paddingHorizontal={16}
-                borderRadius={8}
-                hoverStyle={{ backgroundColor: "#6d4c2b" }}
-                pressStyle={{ backgroundColor: "#4b2e13" }}
-              >
-                {isNeighborhoodWalk
-                  ? "Invite another neighbor"
-                  : "Send Invitation"}
-              </Button>
             </ContentCard>
           </YStack>
         </YStack>

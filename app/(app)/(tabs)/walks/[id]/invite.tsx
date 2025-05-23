@@ -1,14 +1,12 @@
 import HeaderCloseButton from "@/components/HeaderCloseButton";
 import InviteSelection from "@/components/WalkWizard/sections/InviteSelection";
-import WalkCard from "@/components/WalkCard";
 import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
-import { LinearGradient } from "@tamagui/linear-gradient";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
-import { ScrollView, Text, YStack } from "tamagui";
+import { Text } from "tamagui";
 import { Walk } from "walk2gether-shared";
 
 export default function InviteScreen() {
@@ -29,9 +27,12 @@ export default function InviteScreen() {
             title: "Loading...",
             headerRight: () => <HeaderCloseButton />,
             headerShadowVisible: false,
+            presentation: "modal",
           }}
         />
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       </>
@@ -44,12 +45,22 @@ export default function InviteScreen() {
       <>
         <Stack.Screen
           options={{
-            title: walk?.type === "neighborhood" ? "Notify Neighbors" : "Invite Friends",
+            title:
+              walk?.type === "neighborhood"
+                ? "Notify Neighbors"
+                : "Invite Friends",
             headerRight: () => <HeaderCloseButton />,
             headerShadowVisible: false,
           }}
         />
-        <View style={{ flex: 1, padding: 16, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{
+            flex: 1,
+            padding: 16,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <Text fontSize={18} textAlign="center">
             Only the creator of this walk can invite friends.
           </Text>
@@ -65,7 +76,10 @@ export default function InviteScreen() {
     <>
       <Stack.Screen
         options={{
-          title: walk.type === "neighborhood" ? "Notify Neighbors" : "Invite Friends",
+          title:
+            walk.type === "neighborhood"
+              ? "Notify Neighbors"
+              : "Invite Friends",
           headerRight: () => <HeaderCloseButton />,
           headerShadowVisible: false,
         }}

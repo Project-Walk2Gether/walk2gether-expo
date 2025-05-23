@@ -131,6 +131,8 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
           statusUpdatedAt: new Date().getTime(),
           // Always ensure navigation method is set
           navigationMethod: isDriving ? "driving" : "walking",
+          // Clear cancelledAt if present - this allows cancelled users to rejoin
+          cancelledAt: null,
         },
         { merge: true }
       );

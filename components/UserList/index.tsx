@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { Card, Input, Spinner, Text, XStack, YStack } from "tamagui";
 import { UserData, WithId } from "walk2gether-shared";
+import { UserAvatar } from "../UserAvatar";
 
 interface Props {
   users: Array<UserData & {id: string}>;
@@ -89,11 +90,28 @@ export default function UserList({
               <Card.Header padded>
                 <XStack alignItems="center" justifyContent="space-between">
                   <XStack alignItems="center" gap="$2">
-                    <Ionicons
-                      name={isSelected ? "checkmark-circle" : "person"}
-                      size={20}
-                      color={isSelected ? "#3f78e0" : "#4285F4"}
-                    />
+                    <XStack position="relative">
+                      <UserAvatar 
+                        uid={user.id} 
+                        size={36} 
+                        backgroundColor={COLORS.primary}
+                      />
+                      {isSelected && (
+                        <XStack 
+                          position="absolute" 
+                          right={-4} 
+                          bottom={-4} 
+                          backgroundColor="white" 
+                          borderRadius={10}
+                        >
+                          <Ionicons 
+                            name="checkmark-circle" 
+                            size={16} 
+                            color="#3f78e0" 
+                          />
+                        </XStack>
+                      )}
+                    </XStack>
                     <Text>{user.name}</Text>
                   </XStack>
                 </XStack>

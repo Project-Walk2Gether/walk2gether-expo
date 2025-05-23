@@ -17,9 +17,26 @@ export const getParticipantStatusInfo = (
   participant: ParticipantWithRoute,
   walkStatus: WalkStatus
 ): ParticipantStatusInfo => {
+  // Debug logging for Michael 2089
+  if (participant.displayName?.includes("2089")) {
+    console.log("Michael 2089 DEBUG:", {
+      displayName: participant.displayName,
+      status: participant.status,
+      sourceType: participant.sourceType,
+      acceptedAt: participant.acceptedAt,
+      cancelledAt: participant.cancelledAt,
+      rejectedAt: participant.rejectedAt,
+      walkStatus,
+      participantData: participant
+    });
+  }
+  
   const isArrived = participant.status === "arrived";
   const isOnTheWay = participant.status === "on-the-way";
   const isCancelled = !!participant.cancelledAt;
+  const isAccepted = !!participant.acceptedAt;
+  const isInvited = participant.sourceType === "invited";
+  const isNotified = isInvited && !participant.acceptedAt;
   
   // Determine status display text and color
   if (isCancelled) {
@@ -45,8 +62,20 @@ export const getParticipantStatusInfo = (
         color: COLORS.primary,
       };
     }
+  } else if (isNotified) {
+    // Participants who have been invited but not yet accepted
+    return {
+      text: "Notified about walk",
+      color: "$blue9",
+    };
+  } else if (!isAccepted) {
+    // Participants who requested to join but haven't been accepted yet
+    return {
+      text: "Requested to join",
+      color: "$purple9",
+    };
   } else {
-    // Pending - not arrived and not on the way
+    // Only show these statuses for accepted participants
     if (walkStatus === "future") {
       return {
         text: "Planning to join",
