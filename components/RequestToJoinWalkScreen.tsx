@@ -86,7 +86,7 @@ export default function RequestToJoinScreen({
       // All neighborhood walk join requests are now auto-accepted
       // For consistency, we also auto-accept friend walks if the user is friends with organizer
       const isAutoAccepted = true; // Previously was isFriendWithOrganizer
-      
+
       const participant: Participant = {
         userUid: user.uid,
         displayName: userData?.name || "Anonymous",
@@ -164,7 +164,14 @@ export default function RequestToJoinScreen({
 
   return (
     <BrandGradient style={{ flex: 1 }} variant="modern">
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingBottom: insets.bottom,
+          paddingHorizontal: 16,
+        }}
+        showsVerticalScrollIndicator={true}
+        alwaysBounceVertical={true}
+      >
         <YStack p="$4" ai="center" gap="$6">
           <Card
             elevate
@@ -186,18 +193,19 @@ export default function RequestToJoinScreen({
                   <Text fontSize="$4" textAlign="center" color="$gray11">
                     You've successfully joined this walk!
                   </Text>
-                  <WalkCard walk={walk} />
+                  <View style={{ maxHeight: 300 }}>
+                    <WalkCard walk={walk} showActions={false} />
+                  </View>
                 </>
               ) : requestCancelled ? (
                 <>
                   <Text fontSize="$4" textAlign="center" color="$gray11">
                     You can join this walk if you'd like to participate.
                   </Text>
-                  <WalkCard walk={walk} />
+
+                  <WalkCard walk={walk} showActions={false} />
 
                   <Button
-                    size="$5"
-                    w="100%"
                     bg={COLORS.primary}
                     color="white"
                     onPress={handleRequestToJoin}
@@ -214,10 +222,11 @@ export default function RequestToJoinScreen({
               ) : (
                 <>
                   <Text fontSize="$4" textAlign="center" color="$gray11">
-                    You can join this walk immediately. Click the button below to participate.
+                    You can join this walk immediately. Click the button below
+                    to participate.
                   </Text>
-                  <View>
-                    <WalkCard walk={walk} />
+                  <View style={{ maxHeight: 300 }}>
+                    <WalkCard walk={walk} showActions={false} />
                   </View>
 
                   <YStack gap="$2" w="100%" mt="$2">
@@ -284,7 +293,6 @@ export default function RequestToJoinScreen({
             <Button
               mt="$4"
               mb="$2"
-              // color="$gray10"
               bg="transparent"
               theme="red"
               borderColor="$gray6"
@@ -297,7 +305,7 @@ export default function RequestToJoinScreen({
               {loading ? (
                 <ActivityIndicator size="small" color={COLORS.textSecondary} />
               ) : (
-                "Cancel Request"
+                "I can no longer make it"
               )}
             </Button>
           )}

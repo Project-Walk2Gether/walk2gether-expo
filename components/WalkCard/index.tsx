@@ -5,14 +5,7 @@ import { useDoc } from "@/utils/firestore";
 import { getDistanceToLocation } from "@/utils/locationUtils";
 import { getWalkTitle } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
-import {
-  Calendar,
-  CheckCircle,
-  Clock,
-  Hand,
-  Pin,
-  Timer,
-} from "@tamagui/lucide-icons";
+import { Calendar, CheckCircle, Hand, Pin, Timer } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React from "react";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
@@ -58,7 +51,7 @@ const WalkCard: React.FC<Props> = ({
     user?.uid ? `walks/${walk.id}/participants/${user.uid}` : undefined
   );
 
-  // Determine the request status of the current user
+  // Determine the participant status of the current user
   const hasRequested = !!participantDoc;
   const isApproved =
     participantDoc?.acceptedAt !== null &&
@@ -69,7 +62,13 @@ const WalkCard: React.FC<Props> = ({
   const isRejected =
     participantDoc?.rejectedAt !== null &&
     participantDoc?.rejectedAt !== undefined;
-  const isPending = hasRequested && !isApproved && !isCancelled && !isRejected;
+
+  // Check if the user is invited (in participantsById but not from a "requested" source)
+  const isInvited =
+    !isMine && !hasRequested && walk.participantsById && user?.uid
+      ? !!walk.participantsById[user.uid] &&
+        walk.participantsById[user.uid].sourceType !== "requested"
+      : false;
   // Calculate the distance and prepare the location display text
   const locationDisplay = (() => {
     if (walkIsNeighborhoodWalk(walk)) return null;
@@ -191,32 +190,44 @@ const WalkCard: React.FC<Props> = ({
         />
         {locationDisplay}
 
-        {/* Actions footer */}
-        <XStack alignItems="center" gap="$2">
+        {/* Participants section */}
+        <YStack gap="$3">
           {/* Show participants section for all users, it will render the appropriate view internally */}
           <ParticipantsSection walk={walk} currentUserUid={user?.uid} />
 
           {/* Show action buttons for non-owners when showActions is true */}
           {!isMine && showActions ? (
-            /* Request status or Join button */
             <>
-              {/* If user has requested to join and it's approved */}
+              {/* If user is approved - show "See walk details" button */}
               {isApproved && (
-                <XStack
-                  backgroundColor="$green4"
-                  paddingHorizontal="$3"
-                  paddingVertical="$2"
-                  borderRadius="$3"
-                  alignItems="center"
-                  gap="$1"
-                  mt="$2"
+                <Button
+                  backgroundColor={COLORS.primary}
+                  size="$3"
                   flex={1}
+                  mt="$2"
+                  onPress={onPress}
+                  icon={<CheckCircle color="white" size={16} />}
                 >
-                  <CheckCircle size={16} color="$green9" />
-                  <Text fontSize={12} fontWeight="600" color="$green9">
-                    Request accepted!
+                  <Text fontSize={12} fontWeight="bold" color="white">
+                    See walk details
                   </Text>
-                </XStack>
+                </Button>
+              )}
+
+              {/* If user has been invited but hasn't responded */}
+              {isInvited && !isApproved && !isRejected && !isCancelled && (
+                <Button
+                  backgroundColor={COLORS.primary}
+                  size="$3"
+                  flex={1}
+                  mt="$2"
+                  onPress={onPress}
+                  icon={<Hand color="white" size={16} />}
+                >
+                  <Text fontSize={12} fontWeight="bold" color="white">
+                    Respond to invitation
+                  </Text>
+                </Button>
               )}
 
               {/* If user has requested to join and it's rejected */}
@@ -237,11 +248,10 @@ const WalkCard: React.FC<Props> = ({
                 </XStack>
               )}
 
-              {/* We no longer show the pending state as we now auto-accept */}
-
-              {/* Show join button if user hasn't requested or request was cancelled/rejected */}
+              {/* Show join button for neighborhood walks if user hasn't requested or request was cancelled/rejected */}
               {(!hasRequested || isCancelled || isRejected) &&
                 walkIsNeighborhoodWalk(walk) &&
+                !isInvited &&
                 status !== "past" && (
                   <Button
                     backgroundColor={COLORS.primary}
@@ -249,7 +259,7 @@ const WalkCard: React.FC<Props> = ({
                     flex={1}
                     mt="$2"
                     onPress={onPress}
-                    icon={<Hand color="white" />}
+                    icon={<Hand color="white" size={16} />}
                   >
                     <Text fontSize={12} fontWeight="bold" color="white">
                       Join this walk
@@ -258,7 +268,7 @@ const WalkCard: React.FC<Props> = ({
                 )}
             </>
           ) : null}
-        </XStack>
+        </YStack>
       </YStack>
     </Card>
   );

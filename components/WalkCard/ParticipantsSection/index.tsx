@@ -1,5 +1,10 @@
 import React, { useMemo } from "react";
-import { Participant, Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
+import {
+  Participant,
+  Walk,
+  WithId,
+  walkIsFriendsWalk,
+} from "walk2gether-shared";
 import { GuestParticipantsSection } from "./GuestParticipantsSection";
 import { OwnerParticipantsSection } from "./OwnerParticipantsSection";
 
@@ -44,37 +49,62 @@ export const ParticipantsSection: React.FC<Props> = ({
     const cancelledParticipants = allParticipants.filter(
       (p) => p.cancelledAt && p.userUid !== currentUserUid
     );
-    
+
     const deniedParticipants = allParticipants.filter(
       (p) => p.rejectedAt && !p.cancelledAt && p.userUid !== currentUserUid
     );
-    
+
     const acceptedParticipants = allParticipants.filter(
-      (p) => p.acceptedAt && !p.cancelledAt && !p.rejectedAt && p.userUid !== currentUserUid
+      (p) =>
+        p.acceptedAt &&
+        !p.cancelledAt &&
+        !p.rejectedAt &&
+        p.userUid !== currentUserUid
     );
-    
+
     const requestedParticipants = allParticipants.filter(
-      (p) => p.sourceType === "requested" && !p.acceptedAt && !p.rejectedAt && !p.cancelledAt && p.userUid !== currentUserUid
+      (p) =>
+        p.sourceType === "requested" &&
+        !p.acceptedAt &&
+        !p.rejectedAt &&
+        !p.cancelledAt &&
+        p.userUid !== currentUserUid
     );
-    
+
     // Split invited participants based on walk type
     const isFriendsWalk = walkIsFriendsWalk(walk);
-    
+
     // For friends walks: invited participants
-    const invitedParticipants = isFriendsWalk ? allParticipants.filter(
-      (p) => p.sourceType === "invited" && !p.acceptedAt && !p.rejectedAt && !p.cancelledAt && p.userUid !== currentUserUid
-    ) : [];
-    
+    const invitedParticipants = isFriendsWalk
+      ? allParticipants.filter(
+          (p) =>
+            p.sourceType === "invited" &&
+            !p.acceptedAt &&
+            !p.rejectedAt &&
+            !p.cancelledAt &&
+            p.userUid !== currentUserUid
+        )
+      : [];
+
     // For neighborhood walks: notified participants
-    const notifiedParticipants = !isFriendsWalk ? allParticipants.filter(
-      (p) => p.sourceType === "invited" && !p.acceptedAt && !p.rejectedAt && !p.cancelledAt && p.userUid !== currentUserUid
-    ) : [];
+    const notifiedParticipants = !isFriendsWalk
+      ? allParticipants.filter(
+          (p) =>
+            p.sourceType === "invited" &&
+            !p.acceptedAt &&
+            !p.rejectedAt &&
+            !p.cancelledAt &&
+            p.userUid !== currentUserUid
+        )
+      : [];
 
     // For the avatar display, always show accepted participants, limited to maxAvatars
     const maxAvatars = 5;
     const avatarsToDisplay = acceptedParticipants.slice(0, maxAvatars);
-    const overflow = acceptedParticipants.length > maxAvatars ? 
-      acceptedParticipants.length - maxAvatars : 0;
+    const overflow =
+      acceptedParticipants.length > maxAvatars
+        ? acceptedParticipants.length - maxAvatars
+        : 0;
 
     return {
       acceptedParticipants,

@@ -342,13 +342,15 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                     fontWeight="600"
                   >
                     {isNeighborhoodWalk
-                      ? participantUids.length > 0
-                        ? `${participantUids.length} ${
-                            participantUids.length === 1
-                              ? "neighbor"
-                              : "neighbors"
-                          } will be notified`
-                        : "No neighbors found to notify"
+                      ? isLoadingNearbyUsers
+                        ? "Finding neighbors nearby..."
+                        : participantUids.length > 0
+                          ? `${participantUids.length} ${
+                              participantUids.length === 1
+                                ? "neighbor"
+                                : "neighbors"
+                            } will be notified`
+                          : "No neighbors found in your area"
                       : `${participantUids.length} ${
                           participantUids.length === 1 ? "friend" : "friends"
                         } selected`}
