@@ -132,18 +132,20 @@ export default function WalkScreen() {
         options={{
           title: getWalkTitle(walk, user?.uid),
           headerLeft: () => <HeaderBackButton />,
-          headerRight: () => (
-            <WalkMenu 
-              walk={walk} 
-              afterDelete={() => {
-                if (router.canGoBack()) {
-                  router.back();
-                } else {
-                  router.push("/");
-                }
-              }}
-            />
-          ),
+          headerRight: isWalkOwner
+            ? () => (
+                <WalkMenu
+                  walk={walk}
+                  afterDelete={() => {
+                    if (router.canGoBack()) {
+                      router.back();
+                    } else {
+                      router.push("/");
+                    }
+                  }}
+                />
+              )
+            : undefined,
         }}
       />
       {/* Main container */}

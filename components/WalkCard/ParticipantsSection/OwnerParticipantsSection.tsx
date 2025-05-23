@@ -324,7 +324,7 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
             {formatNamesInSentenceCase(
               cancelledParticipants.map((p) => p.displayName || "Someone")
             )}{" "}
-            cancelled participation
+            can't make it any more
           </Text>
         </XStack>
       )}

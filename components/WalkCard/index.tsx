@@ -191,7 +191,7 @@ const WalkCard: React.FC<Props> = ({
         {locationDisplay}
 
         {/* Participants section */}
-        <YStack gap="$3" pt="$2">
+        <YStack gap="$2" pt="$2">
           {/* Show participants section for all users, it will render the appropriate view internally */}
           <ParticipantsSection walk={walk} currentUserUid={user?.uid} />
 
@@ -249,7 +249,9 @@ const WalkCard: React.FC<Props> = ({
               )}
 
               {/* Show join button for neighborhood walks if user hasn't requested or request was cancelled/rejected */}
+              {/* Don't show if the user is already approved */}
               {(!hasRequested || isCancelled || isRejected) &&
+                !isApproved &&
                 walkIsNeighborhoodWalk(walk) &&
                 !isInvited &&
                 status !== "past" && (
