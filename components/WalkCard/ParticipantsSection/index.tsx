@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Participant, Walk, WithId } from "walk2gether-shared";
+import { Participant, Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
 import { GuestParticipantsSection } from "./GuestParticipantsSection";
 import { OwnerParticipantsSection } from "./OwnerParticipantsSection";
 
@@ -18,19 +18,17 @@ export const ParticipantsSection: React.FC<Props> = ({
 }) => {
   const isMine = currentUserUid === walk.createdByUid;
 
-  // Use the count fields from the walk document for efficient rendering
-  const approvedCount = walk.approvedParticipantCount || 0;
-  const pendingCount = walk.pendingParticipantCount || 0;
-  const unapprovedCount = walk.pendingParticipantCount || 0;
-
   // Get participants from the denormalized data
   const participantsById = (walk as any).participantsById || {};
 
   // Process the participant data for display
   const {
-    approvedParticipants,
-    pendingParticipants,
+    acceptedParticipants,
+    requestedParticipants,
     invitedParticipants,
+    notifiedParticipants,
+    deniedParticipants,
+    cancelledParticipants,
     avatarsToDisplay,
     overflow,
   } = useMemo(() => {
@@ -42,47 +40,65 @@ export const ParticipantsSection: React.FC<Props> = ({
       }
     );
 
-    // Separate approved and pending participants
-    const approvedParticipants = allParticipants.filter(
-      (p) => p.acceptedAt && p.userUid !== currentUserUid
+    // Filter participants into different categories
+    const cancelledParticipants = allParticipants.filter(
+      (p) => p.cancelledAt && p.userUid !== currentUserUid
     );
     
-    // Filter invited participants (sourceType=invited and acceptedAt=null)
-    const invitedParticipants = allParticipants.filter(
-      (p) => !p.acceptedAt && !p.rejectedAt && p.sourceType === "invited" && p.userUid !== currentUserUid
+    const deniedParticipants = allParticipants.filter(
+      (p) => p.rejectedAt && !p.cancelledAt && p.userUid !== currentUserUid
     );
     
-    // Get other pending participants (excluding invited ones)
-    const pendingParticipants = allParticipants.filter(
-      (p) => !p.acceptedAt && !p.rejectedAt && p.sourceType !== "invited" && p.userUid !== currentUserUid
+    const acceptedParticipants = allParticipants.filter(
+      (p) => p.acceptedAt && !p.cancelledAt && !p.rejectedAt && p.userUid !== currentUserUid
     );
+    
+    const requestedParticipants = allParticipants.filter(
+      (p) => p.sourceType === "requested" && !p.acceptedAt && !p.rejectedAt && !p.cancelledAt && p.userUid !== currentUserUid
+    );
+    
+    // Split invited participants based on walk type
+    const isFriendsWalk = walkIsFriendsWalk(walk);
+    
+    // For friends walks: invited participants
+    const invitedParticipants = isFriendsWalk ? allParticipants.filter(
+      (p) => p.sourceType === "invited" && !p.acceptedAt && !p.rejectedAt && !p.cancelledAt && p.userUid !== currentUserUid
+    ) : [];
+    
+    // For neighborhood walks: notified participants
+    const notifiedParticipants = !isFriendsWalk ? allParticipants.filter(
+      (p) => p.sourceType === "invited" && !p.acceptedAt && !p.rejectedAt && !p.cancelledAt && p.userUid !== currentUserUid
+    ) : [];
 
-    // For the avatar display, always show approved participants, limited to maxAvatars
+    // For the avatar display, always show accepted participants, limited to maxAvatars
     const maxAvatars = 5;
-    const avatarsToDisplay = approvedParticipants.slice(0, maxAvatars);
-    const overflow =
-      approvedCount > maxAvatars ? approvedCount - maxAvatars : 0;
+    const avatarsToDisplay = acceptedParticipants.slice(0, maxAvatars);
+    const overflow = acceptedParticipants.length > maxAvatars ? 
+      acceptedParticipants.length - maxAvatars : 0;
 
     return {
-      approvedParticipants,
-      pendingParticipants,
+      acceptedParticipants,
+      requestedParticipants,
       invitedParticipants,
+      notifiedParticipants,
+      deniedParticipants,
+      cancelledParticipants,
       avatarsToDisplay,
       overflow,
     };
-  }, [participantsById, approvedCount, currentUserUid]);
+  }, [participantsById, currentUserUid, walk]);
 
   // Render the appropriate component based on whether the user is the owner
   return isMine ? (
     <OwnerParticipantsSection
       walk={walk}
       currentUserUid={currentUserUid}
-      approvedParticipants={approvedParticipants}
-      pendingParticipants={pendingParticipants}
+      acceptedParticipants={acceptedParticipants}
+      requestedParticipants={requestedParticipants}
       invitedParticipants={invitedParticipants}
-      approvedCount={approvedCount}
-      pendingCount={pendingCount}
-      unapprovedCount={unapprovedCount}
+      notifiedParticipants={notifiedParticipants}
+      deniedParticipants={deniedParticipants}
+      cancelledParticipants={cancelledParticipants}
       avatarsToDisplay={avatarsToDisplay}
       overflow={overflow}
     />
@@ -90,9 +106,8 @@ export const ParticipantsSection: React.FC<Props> = ({
     <GuestParticipantsSection
       walk={walk}
       currentUserUid={currentUserUid}
-      approvedParticipants={approvedParticipants}
-      pendingParticipants={pendingParticipants}
-      approvedCount={approvedCount}
+      acceptedParticipants={acceptedParticipants}
+      requestedParticipants={requestedParticipants}
       avatarsToDisplay={avatarsToDisplay}
       overflow={overflow}
     />

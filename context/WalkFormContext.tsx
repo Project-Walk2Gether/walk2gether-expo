@@ -17,7 +17,11 @@ interface WizardStep {
 }
 
 // TODO: simply defininng this as Partial<Walk> is not a particularly strong approach
-export type WalkFormData = Partial<Walk>;
+export type WalkFormData = Partial<Walk> & {
+  // Include any additional fields needed for the form but not in the Walk type
+  participantUids?: string[];
+  participantUids?: string[];
+};
 
 // Define a type for form errors with the same shape as the form data
 export type WalkFormErrors = {

@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
 import { ScrollView, Text, YStack } from "tamagui";
@@ -15,6 +15,7 @@ export default function InviteScreen() {
   const params = useLocalSearchParams<{ id: string }>();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { user } = useAuth();
+  const router = useRouter();
 
   // Get walk data
   const { doc: walk, status: walkStatus } = useDoc<Walk>(`walks/${id}`);
@@ -72,7 +73,7 @@ export default function InviteScreen() {
       {/* Render the InviteSelection component directly */}
       {walk && (
         <InviteSelection
-          onContinue={() => {}} // No-op since we're not using the wizard navigation
+          onContinue={() => router.back()} // Close the screen when Done is pressed
           walkId={id} // Pass the walk ID from the route params
           walkType={walk.type} // Pass the walk type
           invitationCode={walk.invitationCode} // Pass the walk's invitation code

@@ -58,7 +58,7 @@ export async function createWalkFromForm({
 
       // Invitation details
       invitationCode: invitationCode,
-      visibleToUserIds: [...(formData.visibleToUserIds || []), userData.id],
+      participantUids: [...(formData.participantUids || []), userData.id],
 
       // Timestamp fields
       estimatedEndTime: Timestamp.fromDate(estimatedEndTime),
@@ -136,7 +136,7 @@ export async function createWalkFromForm({
 
     // Create participant documents for invited users
     const participantPromises: Promise<void>[] = [];
-    const invitedUserIds = formData.invitedUserIds || [];
+    const invitedUserIds = formData.participantUids || [];
 
     for (const invitedUserId of invitedUserIds) {
       // Skip if this is the organizer (already added above)
@@ -174,7 +174,7 @@ export async function createWalkFromForm({
 
     console.log(
       `Created walk with ${
-        formData.invitedUserIds?.length || 0
+        formData.participantUids?.length || 0
       } invited participants`
     );
     return walkDocRef;

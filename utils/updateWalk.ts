@@ -24,7 +24,7 @@ export async function updateExistingWalk({
     // Create update payload with fields that might have changed
     const updatePayload: Record<string, any> = {
       durationMinutes: formData.durationMinutes,
-      visibleToUserIds: [...(formData.visibleToUserIds || []), userData.id],
+      participantUids: [...(formData.participantUids || []), userData.id],
     };
 
     // Only include startLocation if it exists in formData
@@ -42,7 +42,7 @@ export async function updateExistingWalk({
     await updateDoc(walkRef, updatePayload);
 
     // Handle participant management
-    await updateParticipants(walkId, formData.invitedUserIds || [], userData);
+    await updateParticipants(walkId, formData.participantUids || [], userData);
 
     console.log(`Walk ${walkId} updated successfully`);
     return true;

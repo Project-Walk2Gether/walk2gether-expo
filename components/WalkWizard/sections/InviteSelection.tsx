@@ -49,7 +49,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   const effectiveInvitationCode = invitationCode || walkFormContext?.formData?.invitationCode;
 
   // State variables
-  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [participantUids, setParticipantUids] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -116,7 +116,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
         
         // For neighborhood walks, automatically select all nearby users
         if (userIds.length > 0) {
-          setSelectedUserIds(userIds);
+          setParticipantUids(userIds);
         }
       } catch (error) {
         console.error('Error finding nearby users:', error);
@@ -175,7 +175,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
 
   // Handle user selection/deselection
   const handleUserToggle = (user: UserData & { id: string }) => {
-    setSelectedUserIds((prev) => {
+    setParticipantUids((prev) => {
       if (prev.includes(user.id)) {
         return prev.filter((id) => id !== user.id);
       } else {
@@ -237,7 +237,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
 
     // Check if we should proceed to the next screen or show a confirmation
     const handleProceed = () => {
-      if (selectedUserIds.length === 0) {
+      if (participantUids.length === 0) {
         // Show a confirmation dialog if no users are selected
         Alert.alert(
           "No Participants Selected",
@@ -269,7 +269,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
         // Update the participants collection with the selected user IDs
         await updateParticipants(
           effectiveWalkId as string,
-          selectedUserIds,
+          participantUids,
           userData
         );
 
@@ -327,7 +327,7 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                     searchEnabled={true}
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
-                    selectedUserIds={selectedUserIds}
+                    selectedUserIds={participantUids}
                     emptyMessage={
                       isFriendsWalk
                         ? "You don't have any friends yet. Add friends to invite them."
@@ -342,15 +342,15 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
                     fontWeight="600"
                   >
                     {isNeighborhoodWalk
-                      ? selectedUserIds.length > 0
-                        ? `${selectedUserIds.length} ${
-                            selectedUserIds.length === 1
+                      ? participantUids.length > 0
+                        ? `${participantUids.length} ${
+                            participantUids.length === 1
                               ? "neighbor"
                               : "neighbors"
                           } will be notified`
                         : "No neighbors found to notify"
-                      : `${selectedUserIds.length} ${
-                          selectedUserIds.length === 1 ? "friend" : "friends"
+                      : `${participantUids.length} ${
+                          participantUids.length === 1 ? "friend" : "friends"
                         } selected`}
                   </Text>
                 </>

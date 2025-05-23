@@ -16,7 +16,7 @@ import { Participant, UserData, WithId } from "walk2gether-shared";
  */
 export async function updateParticipants(
   walkId: string,
-  invitedUserIds: string[],
+  participantUids: string[],
   userData: WithId<UserData>,
   sourceType: "invited" | "requested" | "walk-creator" = "invited"
 ): Promise<void> {
@@ -45,13 +45,13 @@ export async function updateParticipants(
       });
     });
 
-    // Create a set of invited user IDs for easier checking
-    const invitedUserIdSet = new Set([...invitedUserIds, userData.id]); // Include the organizer
+    // Create a set of participant UIDs for easier checking
+    const participantUidSet = new Set([...participantUids, userData.id]); // Include the organizer
 
     // Handle removed participants (set cancelledAt)
     const removedPromises: Promise<void>[] = [];
     existingParticipants.forEach((participant, userUid) => {
-      if (!invitedUserIdSet.has(userUid) && !participant.cancelledAt) {
+      if (!participantUidSet.has(userUid) && !participant.cancelledAt) {
         const participantRef = doc(
           firestore_instance,
           `walks/${walkId}/participants/${userUid}`
@@ -67,7 +67,7 @@ export async function updateParticipants(
 
     // Handle newly added participants
     const newParticipantPromises: Promise<void>[] = [];
-    for (const userId of invitedUserIds) {
+    for (const userId of participantUids) {
       // Skip if the user is already a participant and not cancelled
       if (
         existingParticipants.has(userId) &&
@@ -113,6 +113,28 @@ export async function updateParticipants(
 
     // Wait for all operations to complete
     await Promise.all([...removedPromises, ...newParticipantPromises]);
+
+    // Get the final list of active participants (not cancelled)
+    // This includes newly added users and excludes recently cancelled ones
+    const activeParticipantIds: string[] = [];
+
+    // Add the walk creator/organizer
+    activeParticipantIds.push(userData.id);
+
+    // Add all participants who are not cancelled
+    for (const userId of participantUids) {
+      if (userId !== userData.id) {
+        // Don't add organizer twice
+        activeParticipantIds.push(userId);
+      }
+    }
+
+    // Update the walk document with the participantUids field
+    const walkRef = doc(firestore_instance, `walks/${walkId}`);
+    await updateDoc(walkRef, {
+      participantUids: activeParticipantIds,
+      updatedAt: Timestamp.now(),
+    });
   } catch (error) {
     console.error("Error updating participants:", error);
     throw error;
@@ -120,7 +142,7 @@ export async function updateParticipants(
 }
 
 /**
- * Updates the visibleToUserIds array in a walk document
+ * Updates the participantUids array in a walk document
  * This is used for querying walks that should be visible to a user
  */
 export async function updateWalkVisibility(
@@ -130,7 +152,7 @@ export async function updateWalkVisibility(
   try {
     const walkRef = doc(firestore_instance, `walks/${walkId}`);
     await updateDoc(walkRef, {
-      visibleToUserIds: userIds,
+      participantUids: userIds,
       updatedAt: Timestamp.now(),
     });
   } catch (error) {

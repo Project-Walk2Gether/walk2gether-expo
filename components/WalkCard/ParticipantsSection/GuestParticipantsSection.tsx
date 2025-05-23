@@ -7,10 +7,8 @@ import { Participant, Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared
 interface Props {
   walk: WithId<Walk>;
   currentUserUid?: string;
-  approvedParticipants: WithId<Participant>[];
-  pendingParticipants: WithId<Participant>[];
-  invitedParticipants?: WithId<Participant>[];
-  approvedCount: number;
+  acceptedParticipants: WithId<Participant>[];
+  requestedParticipants: WithId<Participant>[];
   avatarsToDisplay: WithId<Participant>[];
   overflow: number;
 }
@@ -20,15 +18,21 @@ interface Props {
  */
 export const GuestParticipantsSection: React.FC<Props> = ({
   walk,
-  approvedParticipants,
-  pendingParticipants,
-  approvedCount,
+  acceptedParticipants,
+  requestedParticipants,
   avatarsToDisplay,
   overflow,
 }) => {
+  const isFriendsWalk = walkIsFriendsWalk(walk);
 
   return (
-    <YStack gap={12} flex={1}>
+    <YStack 
+      borderTopWidth={1} 
+      borderTopColor="$gray4"
+      mt={12}
+      pt={12}
+      gap={16} 
+      flex={1}>
       {/* Approved participant avatars */}
       <XStack alignItems="center" gap={8}>
         <XStack alignItems="center" gap={4}>
@@ -75,16 +79,16 @@ export const GuestParticipantsSection: React.FC<Props> = ({
                   >{`+${overflow}`}</Text>
                 </View>
               )}
-              <Text fontSize={13} color="#666" ml={16} alignSelf="center">
-                {approvedCount}{" "}
-                {approvedCount === 1 ? "participant" : "participants"}
+              <Text fontSize={14} color="#666" ml={16} alignSelf="center">
+                {acceptedParticipants.length}{" "}
+                {acceptedParticipants.length === 1 ? "participant" : "participants"}
               </Text>
             </>
           ) : (
             <Text fontSize={14} color="#666">
-              {walkIsFriendsWalk(walk) && pendingParticipants.length > 0
-                ? `Invited: ${pendingParticipants
-                    .map((p) => p.displayName || "Unknown")
+              {walkIsFriendsWalk(walk) && requestedParticipants.length > 0
+                ? `Requested: ${requestedParticipants
+                    .map((p: WithId<Participant>) => p.displayName || "Unknown")
                     .join(", ")}`
                 : walkIsFriendsWalk(walk)
                 ? "Just the organizer so far"

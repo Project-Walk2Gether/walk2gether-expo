@@ -23,12 +23,12 @@ const formatNamesInSentenceCase = (names: string[]): string => {
 interface Props {
   walk: WithId<Walk>;
   currentUserUid?: string;
-  approvedParticipants: WithId<Participant>[];
-  pendingParticipants: WithId<Participant>[];
+  acceptedParticipants: WithId<Participant>[];
+  requestedParticipants: WithId<Participant>[];
   invitedParticipants: WithId<Participant>[];
-  approvedCount: number;
-  pendingCount: number;
-  unapprovedCount: number;
+  notifiedParticipants: WithId<Participant>[];
+  deniedParticipants: WithId<Participant>[];
+  cancelledParticipants: WithId<Participant>[];
   avatarsToDisplay: WithId<Participant>[];
   overflow: number;
 }
@@ -38,27 +38,38 @@ interface Props {
  */
 export const OwnerParticipantsSection: React.FC<Props> = ({
   walk,
-  approvedParticipants,
-  pendingParticipants,
+  acceptedParticipants,
+  requestedParticipants,
   invitedParticipants,
-  approvedCount,
-  unapprovedCount,
+  notifiedParticipants,
+  deniedParticipants,
+  cancelledParticipants,
   avatarsToDisplay,
   overflow,
 }) => {
   const router = useRouter();
   const status = getWalkStatus(walk);
-
+  const isFriendsWalk = walkIsFriendsWalk(walk);
+  
   return (
-    <YStack gap={12} flex={1}>
-      {/* Approved participant avatars */}
-      <XStack alignItems="center" gap={8}>
-        <XStack alignItems="center" gap={4}>
-          <Users size={16} color="#666" />
-        </XStack>
-        <XStack justifyContent="flex-start" gap={-10} flex={1}>
-          {avatarsToDisplay.length > 0 ? (
-            <>
+    <YStack 
+      borderTopWidth={1} 
+      borderTopColor="$gray4"
+      mt={12}
+      pt={12}
+      gap={16} 
+      flex={1}>
+      {/* Accepted participants */}
+      {acceptedParticipants.length > 0 && (
+        <XStack alignItems="center" gap={8}>
+          <XStack alignItems="center" gap={4}>
+            <Users size={16} color="#666" />
+            <Text fontSize={14} fontWeight="600" color="$gray10">
+              {acceptedParticipants.length === 1 ? "Joined" : "Joined"}: 
+            </Text>
+          </XStack>
+          <XStack flex={1} alignItems="center">
+            <XStack justifyContent="flex-start" gap={-10} flexShrink={1}>
               {avatarsToDisplay.map((participant, index) => (
                 <Avatar
                   key={participant.id || index}
@@ -97,26 +108,30 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
                   >{`+${overflow}`}</Text>
                 </View>
               )}
-              <Text fontSize={13} color="#666" ml={16} alignSelf="center">
-                {approvedCount}{" "}
-                {approvedCount === 1 ? "participant" : "participants"}
-              </Text>
-            </>
-          ) : (
-            <Text fontSize={14} color="#666">
-              {walkIsFriendsWalk(walk) && pendingParticipants.length > 0
-                ? `You invited: ${pendingParticipants
-                    .map((p) => p.displayName || "Unknown")
-                    .join(", ")}`
-                : walkIsFriendsWalk(walk)
-                ? "Just you so far"
-                : "No neighbors joined yet"}
+            </XStack>
+            <Text fontSize={14} color="#666" ml={10} flex={1}>
+              {formatNamesInSentenceCase(acceptedParticipants.map(p => p.displayName || "Someone"))}
             </Text>
-          )}
+          </XStack>
         </XStack>
-      </XStack>
+      )}
+      
+      {/* No participants yet */}
+      {acceptedParticipants.length === 0 && 
+       invitedParticipants.length === 0 && 
+       notifiedParticipants.length === 0 && 
+       requestedParticipants.length === 0 && (
+        <XStack alignItems="center" gap={8}>
+          <XStack alignItems="center" gap={4}>
+            <Users size={16} color="#666" />
+          </XStack>
+          <Text fontSize={14} color="#666">
+            {isFriendsWalk ? "Just you so far" : "No neighbors joined yet"}
+          </Text>
+        </XStack>
+      )}
 
-      {/* Invited participants */}
+      {/* Invited friends */}
       {invitedParticipants.length > 0 && (
         <XStack alignItems="center" gap={8}>
           <XStack alignItems="center" gap={4}>
@@ -125,9 +140,9 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
               Invited:
             </Text>
           </XStack>
-          <XStack justifyContent="flex-start" flex={1}>
-            <XStack gap={-10} flexShrink={1}>
-              {invitedParticipants.slice(0, 5).map((participant, index) => (
+          <XStack flex={1} alignItems="center">
+            <XStack justifyContent="flex-start" gap={-10} flexShrink={1}>
+              {invitedParticipants.slice(0, 3).map((participant, index) => (
                 <Avatar
                   key={participant.id || index}
                   size={32}
@@ -148,7 +163,7 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
                   </Avatar.Fallback>
                 </Avatar>
               ))}
-              {invitedParticipants.length > 5 && (
+              {invitedParticipants.length > 3 && (
                 <View
                   backgroundColor={COLORS.primary}
                   width={32}
@@ -164,19 +179,78 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
                     fontSize={11}
                     color="white"
                     fontWeight="bold"
-                  >{`+${invitedParticipants.length - 5}`}</Text>
+                  >{`+${invitedParticipants.length - 3}`}</Text>
                 </View>
               )}
             </XStack>
-            <Text fontSize={13} color="#666" ml={16} alignSelf="center" flex={1}>
-              {formatNamesInSentenceCase(invitedParticipants.map(p => p.displayName || "Unknown"))}
+            <Text fontSize={14} color="#666" ml={10} flex={1}>
+              {formatNamesInSentenceCase(invitedParticipants.map(p => p.displayName || "Someone"))}
             </Text>
           </XStack>
         </XStack>
       )}
       
-      {/* Pending participants (requested) avatars */}
-      {pendingParticipants.length > 0 && (
+      {/* Notified neighbors */}
+      {notifiedParticipants.length > 0 && (
+        <XStack alignItems="center" gap={8}>
+          <XStack alignItems="center" gap={4}>
+            <UserPlus size={16} color="#666" />
+            <Text fontSize={14} fontWeight="600" color="$gray10">
+              Notified:
+            </Text>
+          </XStack>
+          <XStack flex={1} alignItems="center">
+            <XStack justifyContent="flex-start" gap={-10} flexShrink={1}>
+              {notifiedParticipants.slice(0, 3).map((participant, index) => (
+                <Avatar
+                  key={participant.id || index}
+                  size={32}
+                  circular
+                  borderColor="white"
+                  borderWidth={2}
+                  opacity={0.7}
+                >
+                  <Avatar.Image src={participant.photoURL || undefined} />
+                  <Avatar.Fallback
+                    justifyContent="center"
+                    alignItems="center"
+                    backgroundColor={COLORS.primary}
+                  >
+                    <Text color="white">
+                      {(participant.displayName || "A").charAt(0).toUpperCase()}
+                    </Text>
+                  </Avatar.Fallback>
+                </Avatar>
+              ))}
+              {notifiedParticipants.length > 3 && (
+                <View
+                  backgroundColor={COLORS.primary}
+                  width={32}
+                  height={32}
+                  borderRadius={16}
+                  alignItems="center"
+                  justifyContent="center"
+                  borderColor="white"
+                  borderWidth={2}
+                  opacity={0.7}
+                >
+                  <Text
+                    fontSize={11}
+                    color="white"
+                    fontWeight="bold"
+                  >{`+${notifiedParticipants.length - 3}`}</Text>
+                </View>
+              )}
+            </XStack>
+            <Text fontSize={14} color="#666" ml={10} flex={1}>
+              {formatNamesInSentenceCase(notifiedParticipants.map(p => p.displayName || "Someone"))}
+            </Text>
+          </XStack>
+        </XStack>
+      )}
+      
+      {/* Requested to join */}
+      {requestedParticipants.length > 0 && (
         <XStack alignItems="center" gap={8}>
           <XStack alignItems="center" gap={4}>
             <UserPlus size={16} color="#666" />
@@ -184,38 +258,87 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
               Requested:
             </Text>
           </XStack>
-          <XStack justifyContent="flex-start" gap={-10} flex={1}>
-            {pendingParticipants.map((participant, index) => (
-              <Avatar
-                key={participant.id || index}
-                size={32}
-                circular
-                borderColor="white"
-                borderWidth={2}
-                opacity={0.7}
-              >
-                <Avatar.Image src={participant.photoURL || undefined} />
-                <Avatar.Fallback
-                  justifyContent="center"
-                  alignItems="center"
-                  backgroundColor={COLORS.primary}
+          <XStack flex={1} alignItems="center">
+            <XStack justifyContent="flex-start" gap={-10} flexShrink={1}>
+              {requestedParticipants.slice(0, 3).map((participant, index) => (
+                <Avatar
+                  key={participant.id || index}
+                  size={32}
+                  circular
+                  borderColor="white"
+                  borderWidth={2}
                 >
-                  <Text color="white">
-                    {(participant.displayName || "A").charAt(0).toUpperCase()}
-                  </Text>
-                </Avatar.Fallback>
-              </Avatar>
-            ))}
-            <Text fontSize={13} color="#666" ml={16} alignSelf="center">
-              {pendingParticipants.length}{" "}
-              {pendingParticipants.length === 1 ? "requested" : "requested"}
+                  <Avatar.Image src={participant.photoURL || undefined} />
+                  <Avatar.Fallback
+                    justifyContent="center"
+                    alignItems="center"
+                    backgroundColor={COLORS.primary}
+                  >
+                    <Text color="white">
+                      {(participant.displayName || "A").charAt(0).toUpperCase()}
+                    </Text>
+                  </Avatar.Fallback>
+                </Avatar>
+              ))}
+              {requestedParticipants.length > 3 && (
+                <View
+                  backgroundColor={COLORS.primary}
+                  width={32}
+                  height={32}
+                  borderRadius={16}
+                  alignItems="center"
+                  justifyContent="center"
+                  borderColor="white"
+                  borderWidth={2}
+                  opacity={0.7}
+                >
+                  <Text
+                    fontSize={11}
+                    color="white"
+                    fontWeight="bold"
+                  >{`+${requestedParticipants.length - 3}`}</Text>
+                </View>
+              )}
+            </XStack>
+            <Text fontSize={14} color="#666" ml={10} flex={1}>
+              {formatNamesInSentenceCase(requestedParticipants.map(p => p.displayName || "Someone"))}
             </Text>
           </XStack>
         </XStack>
       )}
 
-      {/* Approval notification for walk owner */}
-      {status !== "past" && unapprovedCount > 0 && (
+      {/* Denied participants */}
+      {deniedParticipants.length > 0 && (
+        <XStack alignItems="center" gap={8}>
+          <XStack alignItems="center" gap={4}>
+            <UserPlus size={16} color="#666" />
+            <Text fontSize={14} fontWeight="600" color="$gray10">
+              Denied:
+            </Text>
+          </XStack>
+          <Text fontSize={14} color="#666" flex={1}>
+            {formatNamesInSentenceCase(deniedParticipants.map(p => p.displayName || "Someone"))}
+          </Text>
+        </XStack>
+      )}
+      
+      {/* Cancelled participants */}
+      {cancelledParticipants.length > 0 && (
+        <XStack alignItems="center" gap={8}>
+          <XStack alignItems="center" gap={4}>
+            <UserPlus size={16} color="#666" />
+            <Text fontSize={14} fontWeight="600" color="$gray10">
+              Cancelled:
+            </Text>
+          </XStack>
+          <Text fontSize={14} color="#666" flex={1}>
+            {formatNamesInSentenceCase(cancelledParticipants.map(p => p.displayName || "Someone"))}
+          </Text>
+        </XStack>
+      )}
+
+      {/* Request notification for walk owner */}
+      {status !== "past" && requestedParticipants.length > 0 && (
         <XStack flexShrink={1} alignItems="center" gap={8} py={4}>
           <View
             backgroundColor="rgba(230, 126, 34, 0.15)"
@@ -225,7 +348,7 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
             flex={1}
           >
             <Text fontWeight="600" fontSize={13} color="#e67e22">
-              {unapprovedCount} {unapprovedCount === 1 ? "person" : "people"}{" "}
+              {requestedParticipants.length} {requestedParticipants.length === 1 ? "person" : "people"}{" "}
               waiting for approval
             </Text>
           </View>
