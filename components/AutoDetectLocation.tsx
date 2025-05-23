@@ -1,5 +1,5 @@
 import { useLocation } from "@/context/LocationContext";
-import { MapPin, X as XIcon } from "@tamagui/lucide-icons";
+import { MapPin, X as XIcon, XCircle } from "@tamagui/lucide-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Text, XStack, YStack } from "tamagui";
@@ -25,19 +25,22 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<number | undefined>(undefined);
+  const cancelLocationDetection = useRef<boolean>(false);
   const locationFound = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function detectLocation() {
+      // Reset the cancel flag
+      cancelLocationDetection.current = false;
       // Only proceed if location permission is granted
       if (!locationPermission) {
         // Request only foreground permissions instead of showing error
         try {
           const permissionGranted = await requestForegroundPermissions();
-          if (!permissionGranted) {
-            // User denied permission, clear location
+          if (!permissionGranted || cancelLocationDetection.current) {
+            // User denied permission or operation was canceled, clear location
             if (clearLocation) clearLocation();
             return;
           }
@@ -53,10 +56,22 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
       locationFound.current = false;
 
       try {
+        // Check if operation was canceled
+        if (cancelLocationDetection.current) {
+          setLoading(false);
+          return;
+        }
+
         const position = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
         });
         const { latitude, longitude } = position.coords;
+
+        // Check if operation was canceled
+        if (cancelLocationDetection.current) {
+          setLoading(false);
+          return;
+        }
 
         const response = await fetch(
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyCVRcp8LoR83nVd-ur3kEQ6MdOYMBevHhk`
@@ -131,17 +146,33 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
     if (loading) {
       return (
         <YStack width="100%" p={8}>
-          <FakeLoadingBar
-            expectedWaitTime={expectedWaitTime}
-            progress={progress}
-            showText
-            progressText="Detecting location"
-            onComplete={() => {
-              if (locationFound.current) {
-                setTimeout(() => setLoading(false), 300);
-              }
-            }}
-          />
+          <XStack width="100%" alignItems="center" justifyContent="space-between" gap={8}>
+            <YStack flex={1}>
+              <FakeLoadingBar
+                expectedWaitTime={expectedWaitTime}
+                progress={progress}
+                showText
+                progressText="Detecting location"
+                onComplete={() => {
+                  if (locationFound.current) {
+                    setTimeout(() => setLoading(false), 300);
+                  }
+                }}
+              />
+            </YStack>
+            <Button
+              size="$3"
+              backgroundColor="$red9"
+              onPress={() => {
+                cancelLocationDetection.current = true;
+                setLoading(false);
+                if (clearLocation) clearLocation();
+              }}
+              icon={<XCircle size={16} color="white" />}
+            >
+              Cancel
+            </Button>
+          </XStack>
         </YStack>
       );
     }

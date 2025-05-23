@@ -75,6 +75,19 @@ export const NotificationsProvider: React.FC<Props> = ({ children }) => {
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log("Notification response:", response);
+        
+        // Handle navigation if URL is provided in the notification data
+        const url = response.notification.request.content.data?.url;
+        if (url && typeof url === 'string') {
+          // Use router to navigate to the specified URL
+          try {
+            const router = require('expo-router');
+            router.router.push(url);
+            console.log(`Navigated to ${url} from notification`);
+          } catch (error) {
+            console.error('Error navigating from notification:', error);
+          }
+        }
       });
 
     return () => {

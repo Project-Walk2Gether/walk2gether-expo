@@ -23,16 +23,14 @@ const Tour: React.FC<Props> = ({ isVisible, onDismiss }) => {
   const steps = [
     {
       id: "startWalk",
-      title: "Start a Walk",
-      message:
-        "The Walk2Gether app supports various types of walks\nTo explore, please tap the button below. Happy walking!",
+      title: "Walk2Gether supports various types of walks",
+      message: "To explore, please tap the button below.",
       elementRefName: "startWalkFab",
     },
     {
       id: "inviteFriends",
       title: "Connect with Friends",
-      message:
-        "Invite your friends and walk 2gether!\nTo go fast: go alone. To go far: go together.",
+      message: "Invite your friends and walk 2gether!",
       elementRefName: "friendsTab",
     },
   ];
@@ -68,29 +66,32 @@ const Tour: React.FC<Props> = ({ isVisible, onDismiss }) => {
   // Create a function to get the current target element
   const getTarget = () => getRef(currentTourStep.elementRefName)?.current;
 
+  const target = getTarget();
+  console.log({ target, elementRefName: currentTourStep.elementRefName });
+
   return (
     <FeatureHighlight
       visible={isVisible}
       title={currentTourStep.title}
       message={currentTourStep.message}
       confirmButtonProps={{
-        label: currentStep === steps.length - 1 ? "Got it!" : "Next",
+        label: currentStep === steps.length - 1 ? "Let's go!" : "Next",
         onPress: onStepDone,
       }}
       getTarget={getTarget}
       overlayColor={"rgba(0, 0, 0, 0.8)"}
-      borderRadius={8}
       titleStyle={{
         fontSize: 20,
         fontWeight: "bold",
         marginBottom: 12,
         color: "#fff",
       }}
+      innerPadding={4}
+      borderRadius={3}
       messageStyle={{
         fontSize: 16,
         lineHeight: 24,
         color: "#fff",
-        textAlign: "center",
       }}
     />
   );

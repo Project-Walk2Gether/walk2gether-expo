@@ -10,8 +10,8 @@ import { syncWalkReminders } from "@/utils/notifications";
 import { Footprints } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { FlatList } from "react-native";
-import { Text, View } from "tamagui";
+import { FlatList, View } from "react-native";
+import { Text } from "tamagui";
 import useDynamicRefs from "use-dynamic-refs";
 import { Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
 
@@ -118,11 +118,11 @@ export default function WalksScreen() {
         </>
       ) : (
         <EmptyMessage
-          message="The Walk2Gether app supports various types of walks"
-          subtitle="To explore, please tap the button below. Happy walking!"
+          message="Start a walk to get started"
+          subtitle="Tap the button below to start a walk with a friend or your neighbors"
           icon={Footprints}
           iconSize={70}
-          iconColor="#7C5F45"
+          iconColor="#e6e6e6"
         />
       )}
     </Screen>

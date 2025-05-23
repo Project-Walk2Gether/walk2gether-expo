@@ -57,8 +57,8 @@ export default function FriendsScreen() {
         <View flex={1}>
           {friendships.length === 0 ? (
             <EmptyMessage
-              message="Your friends aren't here yet"
-              subtitle="Add friends to chat and invite on walks!"
+              message="Your friends aren't here yet!"
+              subtitle="Add friends to chat and invite on walks"
               icon={WalkIcon}
               iconSize={70}
               iconColor="#7C5F45"
