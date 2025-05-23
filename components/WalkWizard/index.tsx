@@ -1,7 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
-import { useWalkForm, WalkFormData } from "@/context/WalkFormContext";
+import { useWalkForm } from "@/context/WalkFormContext";
 import { useQuoteOfTheDay } from "@/utils/quotes";
 import { updateExistingWalk } from "@/utils/updateWalk";
 import { createWalkFromForm } from "@/utils/walkSubmission";
@@ -31,7 +31,6 @@ interface WizardStepWithComponents {
 
 export function WalkWizard() {
   const {
-    friendId,
     formData,
     currentStep,
     goToNextStep,
@@ -45,18 +44,6 @@ export function WalkWizard() {
   const { user } = useAuth();
   const { userData } = useUserData();
   const { showMessage } = useFlashMessage();
-
-  // If a friendId is provided, set it in the form data and skip to time selection
-  useEffect(() => {
-    if (friendId) {
-      // Set the friend as an invited user and set the walk type
-      setFormData((prev: WalkFormData) => ({
-        ...prev,
-        visibleToUserIds: friendId ? [friendId] : prev.visibleToUserIds,
-        type: "friends",
-      }));
-    }
-  }, [friendId]);
 
   // Get the quote advancement function
   const { advanceToNextQuote } = useQuoteOfTheDay();
@@ -147,11 +134,9 @@ export function WalkWizard() {
             onBack: goToPreviousStep,
           };
         case "duration":
-          // Different onContinue behavior based on walk type
           return {
             component: DurationSelection,
-            onContinue:
-              formData.type === "neighborhood" ? goToNextStep : handleSubmit,
+            onContinue: handleSubmit,
             onBack: goToPreviousStep,
           };
         case "location":

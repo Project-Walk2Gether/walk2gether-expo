@@ -1,20 +1,21 @@
 import { ContentCard } from "@/components/ContentCard";
+import UserList from "@/components/UserList";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
-import { useQuery } from "@/utils/firestore";
+import { fetchDocsByIds, useQuery } from "@/utils/firestore";
+import { updateParticipants } from "@/utils/participantManagement";
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { Link, MapPin, Share2, Users } from "@tamagui/lucide-icons";
 import * as Sharing from "expo-sharing";
-import React, { useState } from "react";
-import { Clipboard } from "react-native";
-import { Button, Card, Text, XStack, YStack } from "tamagui";
-import { Friendship } from "walk2gether-shared";
-import FriendsList from "../../FriendsList";
+import React, { useEffect, useState } from "react";
+import { Alert, Clipboard } from "react-native";
+import { Button, Card, Spinner, Text, XStack, YStack } from "tamagui";
+import { Friendship, UserData, WithId } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
 
 interface InviteSelectionProps {
@@ -30,18 +31,35 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   currentStep,
   totalSteps,
 }) => {
-  const { formData, updateFormData } = useWalkForm();
+  const { formData, updateFormData, createdWalkId } = useWalkForm();
   const { user } = useAuth();
   const { userData } = useUserData();
   const { showMessage } = useFlashMessage();
-  const [selectedFriends, setSelectedFriends] = useState<string[]>(
-    formData.visibleToUserIds || []
-  );
+  
+  // State variables
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [invitationSent, setInvitationSent] = useState(false);
-  const continueDisabled = !invitationSent && !selectedFriends.length;
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Using UserData & {id: string} instead of WithId<UserData> to avoid _ref requirement
+  const [usersList, setUsersList] = useState<Array<UserData & {id: string}>>([]);
+  
+  // Check participants if we have a created walk ID
+  const walkParticipantsCollection = createdWalkId
+    ? collection(firestore_instance, `walks/${createdWalkId}/participants`)
+    : undefined;
+  const { docs: walkParticipants } = useQuery(walkParticipantsCollection);
+  
+  // Determine walk type
+  const isNeighborhoodWalk = formData.type === "neighborhood";
+  const isFriendsWalk = formData.type === "friends";
+  
+  // Determine if user can continue
+  // Disable continue button while submitting
+  const continueDisabled = isSubmitting;
+  
   // Query friendships for current user where deletedAt is null (not deleted)
-  const friendshipsQuery = user?.uid
+  const friendshipsQuery = user?.uid && isFriendsWalk
     ? query(
         collection(firestore_instance, "friendships"),
         where("uids", "array-contains", user.uid),
@@ -49,23 +67,62 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
       )
     : undefined;
 
-  const { docs: friendships } = useQuery<Friendship>(friendshipsQuery);
+  const { docs: friendships, status: friendshipsStatus } = useQuery<Friendship>(friendshipsQuery);
+  
+  // For neighborhood walks, we'll fetch nearby users when rebuilding this functionality
+  const nearbyUserIds: string[] = [];
 
-  // Determine if user has any friends
-  const hasFriends = friendships && friendships.length > 0;
-  const isNeighborhoodWalk = formData.type === "neighborhood";
-  const isFriendsWalk = formData.type === "friends";
+  // Load user data based on walk type
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!user) return;
+      
+      setIsLoadingUsers(true);
+      
+      try {
+        if (isFriendsWalk && friendships) {
+          // For friends walks, get friends' user data from friendships
+          const friendUserIds = friendships
+            .map(friendship => friendship.uids.find(uid => uid !== user.uid))
+            .filter(Boolean) as string[];
+            
+          if (friendUserIds.length > 0) {
+            // Use the new fetchDocsByIds function to get all friend users at once
+            const userDocs = await fetchDocsByIds<UserData>('users', friendUserIds);
+            setUsersList(userDocs as Array<UserData & {id: string}>);
+          } else {
+            setUsersList([]);
+          }
+        } else if (isNeighborhoodWalk && nearbyUserIds.length > 0) {
+          // For neighborhood walks, filter out current user
+          const filteredUserIds = nearbyUserIds.filter((id: string) => id !== user.uid);
+          
+          if (filteredUserIds.length > 0) {
+            // Use the new fetchDocsByIds function to get all nearby users at once
+            const userDocs = await fetchDocsByIds<UserData>('users', filteredUserIds);
+            setUsersList(userDocs as Array<UserData & {id: string}>);
+          } else {
+            setUsersList([]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        showMessage('Failed to load users', 'error');
+      } finally {
+        setIsLoadingUsers(false);
+      }
+    };
+    
+    fetchUsers();
+  }, [isFriendsWalk, isNeighborhoodWalk, friendships, nearbyUserIds, user]);
 
-  const handleFriendToggle = (friendId: string) => {
-    setSelectedFriends((prev) => {
-      if (prev.includes(friendId)) {
-        const updated = prev.filter((id) => id !== friendId);
-        updateFormData({ visibleToUserIds: updated });
-        return updated;
+  // Handle user selection/deselection
+  const handleUserToggle = (user: UserData & {id: string}) => {
+    setSelectedUserIds((prev) => {
+      if (prev.includes(user.id)) {
+        return prev.filter((id) => id !== user.id);
       } else {
-        const updated = [...prev, friendId];
-        updateFormData({ visibleToUserIds: updated });
-        return updated;
+        return [...prev, user.id];
       }
     });
   };
@@ -94,15 +151,13 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
           UTI: "public.plain-text",
         });
 
-        // Mark invitation as sent
-        setInvitationSent(true);
+        // Success - link has been shared
       } else {
         // Fallback for web or devices where Sharing is not available
         Clipboard.setString(link);
         showMessage("Invitation link copied to clipboard", "success");
-
-        // Mark invitation as sent
-        setInvitationSent(true);
+        
+        // Success - link has been copied to clipboard
       }
     } catch (error) {
       console.error("Error sharing link:", error);
@@ -110,8 +165,62 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
     }
   };
 
-  const handleContinue = () => {
-    onContinue();
+  const handleContinue = async () => {
+    if (!createdWalkId || !userData) {
+      showMessage("Unable to update participants. Missing walk ID or user data.", "error");
+      return;
+    }
+    
+    // If no participants are selected, show a confirmation dialog
+    if (selectedUserIds.length === 0) {
+      const confirmationMessage = isFriendsWalk
+        ? "You haven't invited any friends yet. Are you sure you're done?"
+        : "There are no walk2gether members in the neighborhood. Do you want to continue?";
+      
+      Alert.alert(
+        "Confirm", 
+        confirmationMessage,
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "Continue",
+            onPress: () => submitParticipants()
+          }
+        ]
+      );
+      return;
+    }
+    
+    // If participants are selected, proceed directly
+    submitParticipants();
+  };
+  
+  // Submit participants function to avoid duplicating code
+  const submitParticipants = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      // Update participants based on the selected user IDs
+      await updateParticipants(
+        createdWalkId!,
+        selectedUserIds,
+        userData!,
+        "invited"
+      );
+      
+      showMessage("Participants updated successfully", "success");
+      
+      // Move to the next step
+      onContinue();
+    } catch (error) {
+      console.error("Error updating participants:", error);
+      showMessage("Failed to update participants", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -159,37 +268,46 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
 
           {isFriendsWalk && (
             <YStack gap="$5">
-              {hasFriends ? (
-                <ContentCard
-                  title="Select Friends"
-                  icon={<Users size={20} color={COLORS.textOnLight} />}
-                  description="Choose friends to invite to your walk."
-                >
-                  <FriendsList
-                    onSelectFriend={(friend) => handleFriendToggle(friend.id)}
-                    searchEnabled={true}
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                    selectedFriendIds={selectedFriends}
-                  />
-                  <Text
-                    fontSize={16}
-                    color={COLORS.textOnLight}
-                    marginTop="$2"
-                    textAlign="center"
-                    fontWeight="600"
-                  >
-                    {selectedFriends.length}{" "}
-                    {selectedFriends.length === 1 ? "friend" : "friends"}{" "}
-                    selected
-                  </Text>
-                </ContentCard>
-              ) : null}
+              <ContentCard
+                title="Select Friends"
+                icon={<Users size={20} color={COLORS.textOnLight} />}
+                description="Choose friends to invite to your walk."
+              >
+                {isLoadingUsers ? (
+                  <YStack alignItems="center" padding="$4">
+                    <Spinner size="large" color="$blue10" />
+                    <Text color={COLORS.textOnLight} marginTop="$2">Loading friends...</Text>
+                  </YStack>
+                ) : (
+                  <>
+                    <UserList
+                      users={usersList}
+                      onSelectUser={handleUserToggle}
+                      searchEnabled={true}
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                      selectedUserIds={selectedUserIds}
+                      emptyMessage={isFriendsWalk ? "You don't have any friends yet. Add friends to invite them." : "No nearby users found."}
+                    />
+                    <Text
+                      fontSize={16}
+                      color={COLORS.textOnLight}
+                      marginTop="$2"
+                      textAlign="center"
+                      fontWeight="600"
+                    >
+                      {selectedUserIds.length}{" "}
+                      {selectedUserIds.length === 1 ? "user" : "users"}{" "}
+                      selected
+                    </Text>
+                  </>
+                )}
+              </ContentCard>
 
               <ContentCard
-                title="Invite new friend"
+                title={isNeighborhoodWalk ? "Invite more users" : "Invite new friend"}
                 icon={<Link size={20} color={COLORS.textOnLight} />}
-                description="Send an invitation for your friend to download the Walk2Gether app to join the walk."
+                description={isNeighborhoodWalk ? "Send an invitation to have more people join your neighborhood walk." : "Send an invitation for your friend to download the Walk2Gether app to join the walk."}
               >
                 <Button
                   backgroundColor={COLORS.primary}

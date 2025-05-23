@@ -82,7 +82,7 @@ export default function ReviewParticipantScreen() {
       router.back();
     } catch (error) {
       console.error("Error rejecting participant:", error);
-      setError("Failed to reject participant. Please try again.");
+      setError("Failed to decline. Please try again.");
     } finally {
       setLoading(false);
     }

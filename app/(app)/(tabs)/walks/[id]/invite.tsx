@@ -8,14 +8,15 @@ import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
 import { useDoc, useQuery } from "@/utils/firestore";
+import { updateParticipants } from "@/utils/participantManagement";
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
-import { Link, MapPin, Share2, Users } from "@tamagui/lucide-icons";
+import { Link, MapPin, Save, Share2, Users } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Clipboard } from "react-native";
-import { Button, ScrollView, Text, View, YStack } from "tamagui";
+import { Button, ScrollView, Text, View, XStack, YStack } from "tamagui";
 import { Friendship, Walk } from "walk2gether-shared";
 import FriendsList from "../../../../../components/FriendsList";
 
@@ -53,6 +54,30 @@ export default function InviteScreen() {
       setSelectedFriends(walk.visibleToUserIds);
     }
   }, [walk]);
+
+  // Handle saving the selected friends to the walk
+  const [isSaving, setIsSaving] = useState(false);
+  const handleSaveInvites = useCallback(async () => {
+    if (!id || !userData || !walk) return;
+
+    try {
+      setIsSaving(true);
+
+      // Update the participants collection
+      await updateParticipants(
+        id,
+        selectedFriends.filter((uid) => uid !== userData.id),
+        userData
+      );
+
+      showMessage("Friends invited successfully!", "success");
+    } catch (error) {
+      console.error("Error saving invites:", error);
+      showMessage("Failed to save invites", "error");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [id, userData, walk, selectedFriends, showMessage]);
 
   // Determine if user has any friends
   const hasFriends = friendships && friendships.length > 0;
@@ -197,6 +222,23 @@ export default function InviteScreen() {
                       onSearchChange={setSearchQuery}
                       selectedFriendIds={selectedFriends}
                     />
+
+                    <XStack mt="$4" justifyContent="center">
+                      <Button
+                        onPress={handleSaveInvites}
+                        size="$4"
+                        backgroundColor={COLORS.primary}
+                        color="white"
+                        icon={
+                          isSaving ? undefined : (
+                            <Save size={16} color="white" />
+                          )
+                        }
+                        disabled={isSaving}
+                      >
+                        {isSaving ? "Saving..." : "Save Invited Friends"}
+                      </Button>
+                    </XStack>
                   </ContentCard>
                 )}
 

@@ -16,8 +16,7 @@ import { useAuth } from "./AuthContext";
 interface WalksContextType {
   upcomingWalks: WithId<Walk>[];
   activeWalks: WithId<Walk>[];
-  walksLoading: boolean; // Loading state for fetching walks
-  currentWalk: Walk | null;
+  walksLoading: boolean;
   createWalk: (
     walk: Walk
   ) => Promise<FirebaseFirestoreTypes.DocumentReference<Walk>>;
@@ -84,12 +83,6 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     );
   }, [currentWalks]);
 
-  // Current active walk
-  const currentWalk = useMemo(
-    () => currentWalks.find((walk) => walk.active) || null,
-    [currentWalks]
-  );
-
   // Add getWalkById function to find a walk by its ID
   const getWalkById = (walkId: string): Walk | undefined => {
     return currentWalks.find((walk) => walk.id === walkId);
@@ -101,7 +94,6 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
         upcomingWalks,
         activeWalks,
         walksLoading,
-        currentWalk,
         getWalkById,
       }}
     >

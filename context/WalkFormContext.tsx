@@ -1,16 +1,23 @@
+import { useUserData } from "@/context/UserDataContext";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { useRouter } from "expo-router";
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Walk } from "walk2gether-shared";
-import { useUserData } from "@/context/UserDataContext";
 
 // Define the structure of a wizard step
 interface WizardStep {
   key: string;
   title: string;
-};
+}
 
-export type WalkFormData = Partial<Walk> & { invitedUserIds: string[] };
+// TODO: simply defininng this as Partial<Walk> is not a particularly strong approach
+export type WalkFormData = Partial<Walk>;
 
 // Define a type for form errors with the same shape as the form data
 export type WalkFormErrors = {
@@ -54,7 +61,6 @@ const generateInvitationCode = (): string => {
 
 const initialFormData: WalkFormContextType["formData"] = {
   durationMinutes: 30, // Default duration in minutes
-  invitedUserIds: [],
   invitationCode: generateInvitationCode(),
 };
 
@@ -82,7 +88,7 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
   const [systemErrors, setSystemErrors] = useState<string[]>([]);
   // Track if a walk has been created already
   const [createdWalkId, setCreatedWalkId] = useState<string | null>(null);
-  
+
   // Get the user data preference for showing how it works
   const { userData } = useUserData();
   const showHowItWorks = useMemo(() => {
@@ -101,23 +107,26 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
     if (formData.type === "neighborhood") {
       return [
         ...baseSteps,
-        ...(showHowItWorks ? [
-          {
-            key: "howItWorks",
-            title: "How it works",
-          }
-        ] : []),
-        {
-          key: "duration",
-          title: "Set duration",
-        },
+        ...(showHowItWorks
+          ? [
+              {
+                key: "howItWorks",
+                title: "How it works",
+              },
+            ]
+          : []),
         {
           key: "location",
           title: "Select start point",
         },
         {
-          key: "review",
-          title: "Review",
+          key: "duration",
+          title: "Set duration",
+        },
+
+        {
+          key: "invite",
+          title: "Invite",
         },
       ];
     }
@@ -143,7 +152,7 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
       },
     ];
   }, [formData.type, showHowItWorks]);
-  
+
   const totalSteps = wizardSteps.length;
 
   const updateFormData = (newData: Partial<WalkFormData>) => {
@@ -190,7 +199,7 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
 
   // Function to navigate to a step by its key
   const goToStepByKey = (key: string) => {
-    const stepIndex = wizardSteps.findIndex(step => step.key === key);
+    const stepIndex = wizardSteps.findIndex((step) => step.key === key);
     if (stepIndex !== -1) {
       goToStep(stepIndex);
     } else {

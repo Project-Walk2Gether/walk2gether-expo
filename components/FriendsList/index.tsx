@@ -18,7 +18,6 @@ type Friend = {
 
 type Props = {
   onSelectFriend: (friend: Friend) => void;
-  title?: string;
   searchEnabled?: boolean;
   searchQuery?: string;
   onSearchChange?: (text: string) => void;
@@ -27,7 +26,6 @@ type Props = {
 
 export default function FriendsList({
   onSelectFriend,
-  title = "Your Friends",
   searchEnabled = false,
   searchQuery = "",
   onSearchChange,

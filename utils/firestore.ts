@@ -10,9 +10,10 @@ import { useCallback, useEffect, useState } from "react";
 import { WithId } from "walk2gether-shared";
 import { DocumentReferenceLike } from "walk2gether-shared/lib/firestore/documentReference";
 
-export function useDoc<T extends FirebaseFirestoreTypes.DocumentData>(
-  docPath?: string
-) {
+type DocumentData = FirebaseFirestoreTypes.DocumentData;
+type DocumentReference<T> = FirebaseFirestoreTypes.DocumentReference<T>;
+
+export function useDoc<T extends DocumentData>(docPath?: string) {
   const [doc, setDoc] = useState<WithId<T> | null>(null);
   const [status, setStatus] = useState<"loading" | "success">("loading");
   const [error, setError] = useState<any>(null);
@@ -123,7 +124,7 @@ export function useQuery<T extends FirebaseFirestoreTypes.DocumentData>(
         const data = extantDocs.map((doc) => ({
           ...(doc.data() as T),
           id: doc.id,
-          _ref: doc.ref as DocumentReferenceLike<T>,
+          _ref: doc.ref as unknown as DocumentReferenceLike<T>,
         }));
         setDocs(data);
         setStatus("success");
@@ -135,4 +136,69 @@ export function useQuery<T extends FirebaseFirestoreTypes.DocumentData>(
   }, [...deps]);
 
   return { status, docs };
+}
+
+/**
+ * Fetches multiple documents by their references
+ * @param refs Array of document references to fetch
+ * @returns Array of documents with their IDs
+ */
+export async function fetchDocsByRefs<T extends DocumentData>(
+  refs: DocumentReference<T>[]
+): Promise<Array<T & { id: string }>> {
+  if (!refs || refs.length === 0) return [];
+
+  const results = await Promise.all(
+    refs.map(async (ref) => {
+      try {
+        console.log("Getting: " + ref.path);
+        const snap = await ref.get();
+        return snap.exists ? { id: ref.id, ...snap.data() } : null;
+      } catch (error: any) {
+        console.error("Error fetching doc", error);
+        return null;
+      }
+    })
+  );
+
+  return results.filter(Boolean) as Array<T & { id: string }>;
+}
+
+/**
+ * Fetches multiple documents by their IDs from a specified collection
+ * Uses batching when fetching more than 10 documents for better performance
+ * @param collectionPath The path to the collection containing the documents
+ * @param ids Array of document IDs to fetch
+ * @returns Array of documents with their IDs
+ */
+export async function fetchDocsByIds<T extends DocumentData>(
+  collectionPath: string,
+  ids: string[]
+): Promise<Array<T & { id: string }>> {
+  if (!ids || ids.length === 0) return [];
+
+  // Convert IDs to document references
+  const refs = ids.map(
+    (id) => db.doc(`${collectionPath}/${id}`) as DocumentReference<T>
+  );
+
+  // If we have 10 or fewer documents, fetch them all at once
+  if (refs.length <= 10) {
+    return fetchDocsByRefs<T>(refs);
+  }
+
+  // Otherwise, break into batches of 10
+  const batches: DocumentReference<T>[][] = [];
+  for (let i = 0; i < refs.length; i += 10) {
+    batches.push(refs.slice(i, i + 10));
+  }
+
+  // Process each batch
+  const results: Array<T & { id: string }> = [];
+  for (const batch of batches) {
+    const batchResults = await fetchDocsByRefs<T>(batch);
+    results.push(...batchResults);
+  }
+
+  return results;
 }
