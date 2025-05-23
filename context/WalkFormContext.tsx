@@ -267,6 +267,10 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
   );
 };
 
+export const useMaybeWalkForm = (): WalkFormContextType | undefined => {
+  return useContext(WalkFormContext);
+};
+
 export const useWalkForm = (): WalkFormContextType => {
   const context = useContext(WalkFormContext);
   if (!context) {

@@ -17,7 +17,6 @@ import {
   TypeSelection,
 } from "./sections";
 import NeighborhoodWalkHowItWorksSection from "./sections/NeighborhoodWalkHowItWorksSection";
-import ReviewScreen from "./sections/ReviewScreen";
 import { WizardHeader } from "./sections/WizardHeader";
 
 // Define the structure of a wizard step with UI components
@@ -133,21 +132,15 @@ export function WalkWizard() {
             onContinue: goToNextStep,
             onBack: goToPreviousStep,
           };
-        case "duration":
-          return {
-            component: DurationSelection,
-            onContinue: handleSubmit,
-            onBack: goToPreviousStep,
-          };
         case "location":
           return {
             component: LocationSelection,
             onContinue: goToNextStep,
             onBack: goToPreviousStep,
           };
-        case "review":
+        case "duration":
           return {
-            component: ReviewScreen,
+            component: DurationSelection,
             onContinue: handleSubmit,
             onBack: goToPreviousStep,
           };

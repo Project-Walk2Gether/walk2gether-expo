@@ -1,4 +1,4 @@
-import { db } from "@/config/firebase";
+import { firestore_instance } from "@/config/firebase";
 import { collection, getDocs } from "@react-native-firebase/firestore";
 import { getDistanceInKm } from "walk2gether-shared";
 
@@ -24,7 +24,7 @@ export async function findNearbyWalkers({
 
   try {
     // Query users from Firestore who have location data
-    const usersRef = collection(db, "users");
+    const usersRef = collection(firestore_instance, "users");
     const usersSnapshot = await getDocs(usersRef);
 
     if (usersSnapshot.empty) {

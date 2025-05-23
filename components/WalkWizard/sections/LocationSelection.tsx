@@ -5,16 +5,16 @@ import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
+import NearbyWalkersInfo from "@/components/NearbyWalkersInfo";
 import { COLORS } from "@/styles/colors";
 import { getRegionForRadius } from "@/utils/geo";
 import { reverseGeocode } from "@/utils/locationUtils";
+import { findNearbyWalkers } from "@/utils/userSearch";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Text, View, YStack } from "tamagui";
-import { findNearbyWalkers } from "./NeighborhoodConfirmationScreen/findNearbyWalkers";
-import NearbyWalkersInfo from "./NeighborhoodConfirmationScreen/NearbyWalkersInfo";
 import WizardWrapper from "./WizardWrapper";
 
 interface Props {
@@ -206,10 +206,9 @@ export const LocationSelection: React.FC<Props> = ({
 
           setNearbyWalkers(result.nearbyUsersCount);
 
-          // Store the userIds in formData if needed
-          if (result.nearbyUserIds.length > 0) {
-            updateFormData({ visibleToUserIds: result.nearbyUserIds });
-          }
+          // We found nearby users - store this count
+          console.log(`Found ${result.nearbyUsersCount} nearby users`);
+          // Note: we no longer store user IDs in the form since this is handled by InviteSelection
         } catch (error) {
           console.error("Error finding nearby walkers:", error);
           setNearbyWalkers(0);
