@@ -108,6 +108,10 @@ export const ParticipantsSection: React.FC<Props> = ({
       currentUserUid={currentUserUid}
       acceptedParticipants={acceptedParticipants}
       requestedParticipants={requestedParticipants}
+      invitedParticipants={invitedParticipants}
+      notifiedParticipants={notifiedParticipants}
+      deniedParticipants={deniedParticipants}
+      cancelledParticipants={cancelledParticipants}
       avatarsToDisplay={avatarsToDisplay}
       overflow={overflow}
     />

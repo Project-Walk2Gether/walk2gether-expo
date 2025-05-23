@@ -62,12 +62,9 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
       {/* Accepted participants */}
       {acceptedParticipants.length > 0 && (
         <XStack alignItems="center" gap={8}>
-          <XStack alignItems="center" gap={4}>
-            <Users size={16} color="#666" />
-            <Text fontSize={14} fontWeight="600" color="$gray10">
-              {acceptedParticipants.length === 1 ? "Joined" : "Joined"}: 
-            </Text>
-          </XStack>
+          <Text fontSize={14} fontWeight="600" color="$gray10">
+            {acceptedParticipants.length === 1 ? "Joined" : "Joined"}: 
+          </Text>
           <XStack flex={1} alignItems="center">
             <XStack justifyContent="flex-start" gap={-10} flexShrink={1}>
               {avatarsToDisplay.map((participant, index) => (
@@ -122,9 +119,6 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
        notifiedParticipants.length === 0 && 
        requestedParticipants.length === 0 && (
         <XStack alignItems="center" gap={8}>
-          <XStack alignItems="center" gap={4}>
-            <Users size={16} color="#666" />
-          </XStack>
           <Text fontSize={14} color="#666">
             {isFriendsWalk ? "Just you so far" : "No neighbors joined yet"}
           </Text>
@@ -134,12 +128,9 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
       {/* Invited friends */}
       {invitedParticipants.length > 0 && (
         <XStack alignItems="center" gap={8}>
-          <XStack alignItems="center" gap={4}>
-            <UserPlus size={16} color="#666" />
-            <Text fontSize={14} fontWeight="600" color="$gray10">
-              Invited:
-            </Text>
-          </XStack>
+          <Text fontSize={14} fontWeight="600" color="$gray10">
+            Invited:
+          </Text>
           <XStack flex={1} alignItems="center">
             <XStack justifyContent="flex-start" gap={-10} flexShrink={1}>
               {invitedParticipants.slice(0, 3).map((participant, index) => (
@@ -193,12 +184,9 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
       {/* Notified neighbors */}
       {notifiedParticipants.length > 0 && (
         <XStack alignItems="center" gap={8}>
-          <XStack alignItems="center" gap={4}>
-            <UserPlus size={16} color="#666" />
-            <Text fontSize={14} fontWeight="600" color="$gray10">
-              Notified:
-            </Text>
-          </XStack>
+          <Text fontSize={14} fontWeight="600" color="$gray10">
+            Notified:
+          </Text>
           <XStack flex={1} alignItems="center">
             <XStack justifyContent="flex-start" gap={-10} flexShrink={1}>
               {notifiedParticipants.slice(0, 3).map((participant, index) => (
@@ -252,12 +240,9 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
       {/* Requested to join */}
       {requestedParticipants.length > 0 && (
         <XStack alignItems="center" gap={8}>
-          <XStack alignItems="center" gap={4}>
-            <UserPlus size={16} color="#666" />
-            <Text fontSize={14} fontWeight="600" color="$gray10">
-              Requested:
-            </Text>
-          </XStack>
+          <Text fontSize={14} fontWeight="600" color="$gray10">
+            Requested:
+          </Text>
           <XStack flex={1} alignItems="center">
             <XStack justifyContent="flex-start" gap={-10} flexShrink={1}>
               {requestedParticipants.slice(0, 3).map((participant, index) => (
@@ -310,12 +295,9 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
       {/* Denied participants */}
       {deniedParticipants.length > 0 && (
         <XStack alignItems="center" gap={8}>
-          <XStack alignItems="center" gap={4}>
-            <UserPlus size={16} color="#666" />
-            <Text fontSize={14} fontWeight="600" color="$gray10">
-              Denied:
-            </Text>
-          </XStack>
+          <Text fontSize={14} fontWeight="600" color="$gray10">
+            Denied:
+          </Text>
           <Text fontSize={14} color="#666" flex={1}>
             {formatNamesInSentenceCase(deniedParticipants.map(p => p.displayName || "Someone"))}
           </Text>
@@ -325,12 +307,9 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
       {/* Cancelled participants */}
       {cancelledParticipants.length > 0 && (
         <XStack alignItems="center" gap={8}>
-          <XStack alignItems="center" gap={4}>
-            <UserPlus size={16} color="#666" />
-            <Text fontSize={14} fontWeight="600" color="$gray10">
-              Cancelled:
-            </Text>
-          </XStack>
+          <Text fontSize={14} fontWeight="600" color="$gray10">
+            Cancelled:
+          </Text>
           <Text fontSize={14} color="#666" flex={1}>
             {formatNamesInSentenceCase(cancelledParticipants.map(p => p.displayName || "Someone"))}
           </Text>

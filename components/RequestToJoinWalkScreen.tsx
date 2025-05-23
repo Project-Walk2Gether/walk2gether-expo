@@ -66,12 +66,10 @@ export default function RequestToJoinScreen({
   useEffect(() => {
     navigation.setOptions({
       title: isActivePending
-        ? "Request Sent!"
-        : isFriendWithOrganizer
-        ? `Join ${walk.organizerName}'s walk`
-        : `Request to join ${walk.organizerName}`,
+        ? "You've joined this walk!"
+        : `Join ${walk.organizerName}'s walk`,
     });
-  }, [navigation, walk.organizerName, isActivePending, isFriendWithOrganizer]);
+  }, [navigation, walk.organizerName, isActivePending]);
 
   const handleRequestToJoin = async () => {
     if (!user || !walk?.id) return;
@@ -85,11 +83,15 @@ export default function RequestToJoinScreen({
         `walks/${walk.id}/participants/${participantId}`
       );
 
+      // All neighborhood walk join requests are now auto-accepted
+      // For consistency, we also auto-accept friend walks if the user is friends with organizer
+      const isAutoAccepted = true; // Previously was isFriendWithOrganizer
+      
       const participant: Participant = {
         userUid: user.uid,
         displayName: userData?.name || "Anonymous",
         photoURL: userData?.profilePicUrl || null,
-        acceptedAt: isFriendWithOrganizer ? Timestamp.now() : null,
+        acceptedAt: isAutoAccepted ? Timestamp.now() : null,
         lastLocation: {
           latitude: userLocation?.coords.latitude || 0,
           longitude: userLocation?.coords.longitude || 0,
@@ -97,8 +99,9 @@ export default function RequestToJoinScreen({
         },
         route: null,
         introduction: introduction.trim(), // Add the introduction
-        status: "pending",
+        status: isAutoAccepted ? "arrived" : "pending", // Set status to arrived if auto-accepted
         navigationMethod: "driving",
+        sourceType: "requested", // Adding the required sourceType field
         cancelledAt: deleteField() as any,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
@@ -181,14 +184,14 @@ export default function RequestToJoinScreen({
               {isActivePending ? (
                 <>
                   <Text fontSize="$4" textAlign="center" color="$gray11">
-                    Your neighbor needs to approve your request to join.
+                    You've successfully joined this walk!
                   </Text>
                   <WalkCard walk={walk} />
                 </>
               ) : requestCancelled ? (
                 <>
                   <Text fontSize="$4" textAlign="center" color="$gray11">
-                    You can send a new request if you'd like to join this walk.
+                    You can join this walk if you'd like to participate.
                   </Text>
                   <WalkCard walk={walk} />
 
@@ -204,16 +207,14 @@ export default function RequestToJoinScreen({
                     {loading ? (
                       <ActivityIndicator color="white" />
                     ) : (
-                      "Send New Request"
+                      "Join This Walk"
                     )}
                   </Button>
                 </>
               ) : (
                 <>
                   <Text fontSize="$4" textAlign="center" color="$gray11">
-                    {isFriendWithOrganizer
-                      ? "You can join this walk immediately since you're friends with the organizer."
-                      : "Send a request to your neighbor organizer to join this walk."}
+                    You can join this walk immediately. Click the button below to participate.
                   </Text>
                   <View>
                     <WalkCard walk={walk} />
@@ -269,10 +270,8 @@ export default function RequestToJoinScreen({
                   >
                     {loading ? (
                       <ActivityIndicator color="white" />
-                    ) : isFriendWithOrganizer ? (
-                      "Join This Walk"
                     ) : (
-                      "I'm Interested in Joining"
+                      "Join This Walk"
                     )}
                   </Button>
                 </>

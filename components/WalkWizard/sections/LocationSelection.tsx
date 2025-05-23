@@ -1,13 +1,13 @@
 import { FormInput } from "@/components/FormInput";
+import NearbyWalkersInfo from "@/components/NearbyWalkersInfo";
 import LocationButton from "@/components/UI/LocationButton";
 import { PlacesAutocomplete } from "@/components/UI/PlacesAutocomplete";
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { useWalkForm } from "@/context/WalkFormContext";
-import NearbyWalkersInfo from "@/components/NearbyWalkersInfo";
 import { COLORS } from "@/styles/colors";
-import { getRegionForRadius } from "@/utils/geo";
+import { getDistanceMeters, getRegionForRadius } from "@/utils/geo";
 import { reverseGeocode } from "@/utils/locationUtils";
 import { findNearbyWalkers } from "@/utils/userSearch";
 import React, { useEffect, useRef, useState } from "react";
@@ -143,6 +143,20 @@ export const LocationSelection: React.FC<Props> = ({
     try {
       // Reverse geocode and update form data
       const newLocation = await handleReverseGeocode(latitude, longitude);
+
+      // Check if user's current location is near the selected location
+      if (coords) {
+        const distance = getDistanceMeters(
+          coords.latitude,
+          coords.longitude,
+          latitude,
+          longitude
+        );
+
+        // If user is within 50 meters of the start location, they are considered "at location"
+        const isUserAtLocation = distance <= 50;
+        updateFormData({ ownerIsInitiallyAtLocation: isUserAtLocation });
+      }
 
       // Small delay before animating map to give time for state updates
       setTimeout(() => {

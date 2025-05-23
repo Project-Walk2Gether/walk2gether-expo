@@ -237,24 +237,7 @@ const WalkCard: React.FC<Props> = ({
                 </XStack>
               )}
 
-              {/* If user has requested to join and it's pending */}
-              {isPending && (
-                <XStack
-                  backgroundColor="$yellow8"
-                  paddingHorizontal="$3"
-                  paddingVertical="$2"
-                  borderRadius="$3"
-                  alignItems="center"
-                  gap="$2"
-                  mt="$2"
-                  flex={1}
-                >
-                  <Clock size={16} />
-                  <Text fontSize={12} fontWeight="600">
-                    You requested to join
-                  </Text>
-                </XStack>
-              )}
+              {/* We no longer show the pending state as we now auto-accept */}
 
               {/* Show join button if user hasn't requested or request was cancelled/rejected */}
               {(!hasRequested || isCancelled || isRejected) &&
@@ -269,7 +252,7 @@ const WalkCard: React.FC<Props> = ({
                     icon={<Hand color="white" />}
                   >
                     <Text fontSize={12} fontWeight="bold" color="white">
-                      Ask to join
+                      Join this walk
                     </Text>
                   </Button>
                 )}
