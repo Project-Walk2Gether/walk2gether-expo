@@ -1,13 +1,11 @@
 import CustomTabBar from "@/components/CustomTabBar";
 import Tour from "@/components/Tour";
-import { useUpdates } from "@/context/UpdatesContext";
 import { useUserData } from "@/context/UserDataContext";
 import { Redirect, Tabs } from "expo-router";
 import React, { useEffect, useState } from "react";
 
 export default function TabLayout() {
   const { userData, loading: userDataLoading } = useUserData();
-  const { isUpdateAvailable } = useUpdates();
   const [showTour, setShowTour] = useState(false);
 
   // Check if we should show the tour when user data is loaded
@@ -17,7 +15,7 @@ export default function TabLayout() {
       setTimeout(() => {
         console.log("SHOWING TOUR: ", !userData.tourDismissedAt);
         setShowTour(!userData.tourDismissedAt);
-      }, 1000);
+      }, 400);
     }
   }, [userDataLoading, userData]);
 

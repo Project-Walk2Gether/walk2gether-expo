@@ -6,6 +6,7 @@ import { Screen } from "@/components/UI";
 import WalkCard from "@/components/WalkCard";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useWalks } from "@/context/WalksContext";
+import { COLORS } from "@/styles/colors";
 import { syncWalkReminders } from "@/utils/notifications";
 import { Footprints } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
@@ -118,11 +119,11 @@ export default function WalksScreen() {
         </>
       ) : (
         <EmptyMessage
-          message="Start a walk to get started"
-          subtitle="Tap the button below to start a walk with a friend or your neighbors"
+          message="Ready to get started?"
+          subtitle="Start a walk with a friend or neighbor and turn your day into something special."
           icon={Footprints}
           iconSize={70}
-          iconColor="#e6e6e6"
+          iconColor={COLORS.primary}
         />
       )}
     </Screen>

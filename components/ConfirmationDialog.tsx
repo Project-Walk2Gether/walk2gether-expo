@@ -50,12 +50,18 @@ export function ConfirmationDialog({
           scale={1}
           opacity={1}
           y={0}
+          mx="$4"
+          p="$4"
         >
-          <YStack>
-            <AlertDialog.Title>{title}</AlertDialog.Title>
-            <AlertDialog.Description>{description}</AlertDialog.Description>
+          <YStack space="$4">
+            <YStack space="$2">
+              <AlertDialog.Title fontSize={18} fontWeight="bold">
+                {title}
+              </AlertDialog.Title>
+              <AlertDialog.Description>{description}</AlertDialog.Description>
+            </YStack>
 
-            <XStack gap="$3" justifyContent="flex-end">
+            <XStack gap="$3" justifyContent="flex-end" mt="$2">
               <AlertDialog.Cancel asChild>
                 <Button variant="outlined">{cancelText}</Button>
               </AlertDialog.Cancel>

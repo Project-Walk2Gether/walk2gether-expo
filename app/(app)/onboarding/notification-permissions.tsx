@@ -2,8 +2,8 @@ import AuthScenicLayout from "@/components/Auth/AuthScenicLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useOnboarding } from "@/context/OnboardingContext";
-import { useDoc } from "@/utils/firestore";
 import { COLORS } from "@/styles/colors";
+import { useDoc } from "@/utils/firestore";
 import { serverTimestamp } from "@react-native-firebase/firestore";
 import { Info } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
@@ -15,8 +15,9 @@ const { height } = Dimensions.get("window");
 export default function NotificationPermissionsScreen() {
   const { goToNextScreen } = useOnboarding();
   const { user } = useAuth();
-  const { permissionStatus, requestPermissions, loading, error } = useNotifications();
-  const { doc: userData, updateDoc: updateUserData } = useDoc(
+  const { permissionStatus, requestPermissions, loading, error } =
+    useNotifications();
+  const { updateDoc: updateUserData } = useDoc(
     user ? `users/${user.uid}` : undefined
   );
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -27,7 +28,7 @@ export default function NotificationPermissionsScreen() {
       completePermissionsSetup();
     }
   }, [permissionStatus]);
-  
+
   // Mark permissions as completed and continue to next screen
   const completePermissionsSetup = async () => {
     if (!user) return;
@@ -52,7 +53,7 @@ export default function NotificationPermissionsScreen() {
         ai="center"
         jc="center"
         gap="$4"
-        p={24}
+        p="$4"
       >
         <Card elevate bordered width={360} maxWidth="100%" p={24} ai="center">
           <Text fontSize="$6" fontWeight="bold" mb="$2">

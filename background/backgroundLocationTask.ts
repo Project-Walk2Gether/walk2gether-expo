@@ -3,7 +3,6 @@ import * as BackgroundFetch from "expo-background-fetch";
 import * as ExpoLocation from "expo-location";
 import * as TaskManager from "expo-task-manager";
 import { writeLogIfEnabled } from "../utils/logging";
-import { auth_instance } from "@/config/firebase";
 
 // Define a task name for background location tracking
 export const LOCATION_TRACKING_TASK = "background-location-tracking";
@@ -51,16 +50,19 @@ TaskManager.defineTask(
           LOCATION_TRACKING_TASK
         )) as LocationTaskOptions;
         console.log("Task options retrieved:", JSON.stringify(taskOptions));
-        
+
         // Check if tracking should be stopped based on endTime
         if (taskOptions.endTime) {
           const endTime = new Date(taskOptions.endTime);
           const now = new Date();
-          
+
           if (now > endTime) {
-            console.log("Background tracking has reached its end time, stopping...");
+            console.log(
+              "Background tracking has reached its end time, stopping..."
+            );
             await writeLogIfEnabled({
-              message: "Stopping background location tracking because endTime has passed",
+              message:
+                "Stopping background location tracking because endTime has passed",
             });
             await stopBackgroundLocationTracking();
             return BackgroundFetch.BackgroundFetchResult.NoData;
@@ -110,7 +112,11 @@ export const startBackgroundLocationTracking = async ({
   userId,
   ...locationOptions
 }: LocationTaskOptions = {}) => {
-  console.log("Starting background tracking with:", { walkId, userId, endTime: locationOptions.endTime });
+  console.log("Starting background tracking with:", {
+    walkId,
+    userId,
+    endTime: locationOptions.endTime,
+  });
 
   if (!walkId) {
     console.error("Cannot start background tracking without walkId");
@@ -122,10 +128,13 @@ export const startBackgroundLocationTracking = async ({
     console.error("Cannot start background tracking without user ID");
     return false;
   }
-  
+
   // Log the end time if provided
   if (locationOptions.endTime) {
-    console.log("Background tracking will automatically stop at:", locationOptions.endTime);
+    console.log(
+      "Background tracking will automatically stop at:",
+      locationOptions.endTime
+    );
   }
 
   const defaultOptions: LocationTaskOptions = {

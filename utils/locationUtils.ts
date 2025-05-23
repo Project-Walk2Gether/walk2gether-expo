@@ -1,5 +1,6 @@
 import { formatDistance, getDistanceMeters } from "./geo";
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
+import { Linking, Platform } from "react-native";
 
 // Generic location interface to handle different location formats in the app
 export interface Location {
@@ -126,4 +127,44 @@ export const reverseGeocode = async (latitude: number, longitude: number) => {
 
     return newLocation;
   }
+};
+
+/**
+ * Opens the location in the device's default maps app
+ * 
+ * @param latitude The latitude coordinate
+ * @param longitude The longitude coordinate
+ * @param label Optional label for the location
+ */
+export const openLocationInMaps = (
+  latitude: number,
+  longitude: number,
+  label?: string
+) => {
+  const location = `${latitude},${longitude}`;
+  const encodedLabel = label ? encodeURIComponent(label) : 'Location';
+
+  let url: string;
+  
+  if (Platform.OS === 'ios') {
+    // Apple Maps format
+    url = `maps:?q=${encodedLabel}&ll=${location}`;
+  } else {
+    // Google Maps format for Android and fallback
+    url = `https://www.google.com/maps/search/?api=1&query=${location}`;
+  }
+
+  Linking.canOpenURL(url)
+    .then((supported) => {
+      if (supported) {
+        return Linking.openURL(url);
+      } else {
+        // Fallback to Google Maps web URL if the maps app can't be opened
+        const fallbackUrl = `https://www.google.com/maps/search/?api=1&query=${location}`;
+        return Linking.openURL(fallbackUrl);
+      }
+    })
+    .catch((error) => {
+      console.error('Error opening map link:', error);
+    });
 };

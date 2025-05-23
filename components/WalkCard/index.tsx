@@ -2,10 +2,20 @@ import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
-import { getDistanceToLocation } from "@/utils/locationUtils";
+import {
+  getDistanceToLocation,
+  openLocationInMaps,
+} from "@/utils/locationUtils";
 import { getWalkTitle } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
-import { Calendar, CheckCircle, Hand, Pin, Timer } from "@tamagui/lucide-icons";
+import {
+  Calendar,
+  CheckCircle,
+  Hand,
+  Navigation,
+  Pin,
+  Timer,
+} from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React from "react";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
@@ -117,15 +127,43 @@ const WalkCard: React.FC<Props> = ({
 
     if (!displayContent) return null;
 
+    // Function to handle navigation to the location
+    const handleNavigate = () => {
+      if (walk.currentLocation?.latitude && walk.currentLocation?.longitude) {
+        openLocationInMaps(
+          walk.currentLocation.latitude,
+          walk.currentLocation.longitude,
+          walk.currentLocation.name
+        );
+      }
+    };
+
     return (
-      <IconTextRow
-        icon={<Pin size={16} color="#666" />}
-        text={displayContent}
-        fontSize={14}
-        color="#666"
-        gap={6}
-        textProps={{ flexShrink: 1 }}
-      />
+      <YStack gap="$1">
+        <IconTextRow
+          icon={<Pin size={16} color="#666" />}
+          text={displayContent}
+          fontSize={14}
+          color="#666"
+          gap={6}
+          textProps={{ flexShrink: 1 }}
+        />
+        <Button
+          size="$2"
+          onPress={handleNavigate}
+          accessibilityLabel="Navigate to location"
+          icon={<Navigation size={14} color="white" />}
+          backgroundColor={COLORS.primary}
+          mt="$2"
+          opacity={0.9}
+          alignSelf="flex-start"
+          paddingHorizontal={10}
+        >
+          <Text color="white" fontSize={12} fontWeight="500">
+            Navigate
+          </Text>
+        </Button>
+      </YStack>
     );
   })();
 

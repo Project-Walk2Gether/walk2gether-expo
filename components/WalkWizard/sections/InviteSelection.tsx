@@ -12,14 +12,13 @@ import { findNearbyWalkers } from "@/utils/userSearch";
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { Share2, Users } from "@tamagui/lucide-icons";
-import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
-import { Alert, Clipboard } from "react-native";
+import { Alert, Clipboard, Share } from "react-native";
 import { Button, Spinner, Text, YStack } from "tamagui";
 import { Friendship, UserData } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
 
-interface InviteSelectionProps {
+interface Props {
   onContinue: () => void;
   onBack?: () => void;
   currentStep?: number;
@@ -29,7 +28,7 @@ interface InviteSelectionProps {
   invitationCode?: string; // Optional invitationCode for direct usage outside the wizard
 }
 
-export const InviteSelection: React.FC<InviteSelectionProps> = ({
+export const InviteSelection: React.FC<Props> = ({
   onContinue,
   onBack,
   currentStep,
@@ -46,8 +45,13 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
   // Use either the provided walkId or get it from the context
   const effectiveWalkId = walkId || walkFormContext!.createdWalkId;
   const effectiveWalkType = walkType || walkFormContext!.formData?.type;
+
+  // Use the invitation code from props or context
+  // We'll keep the existing code generation mechanism intact
   const effectiveInvitationCode =
     invitationCode || walkFormContext?.formData?.invitationCode;
+
+  console.log({ effectiveWalkId, effectiveWalkType, effectiveInvitationCode });
 
   // State variables
   const [participantUids, setParticipantUids] = useState<string[]>([]);
@@ -200,9 +204,25 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
 
   // Generate and share the invitation link
   const getInvitationLink = () => {
-    if (!userData?.friendInvitationCode || !effectiveInvitationCode) return "";
+    // Need user's invitation code and walk invitation code to generate a valid link
+    if (!userData?.friendInvitationCode) {
+      console.warn("No friend invitation code available");
+      return "";
+    }
 
-    return `https://projectwalk2gether.org/join?code=${userData.friendInvitationCode}&walk=${effectiveInvitationCode}`;
+    if (!effectiveInvitationCode) {
+      console.warn("No walk invitation code available");
+      return "";
+    }
+
+    // Properly encode URL parameters to prevent encoding issues
+    const userCode = encodeURIComponent(userData.friendInvitationCode);
+    const walkCode = encodeURIComponent(effectiveInvitationCode);
+
+    console.log({ userCode, walkCode });
+
+    // Use the properly encoded parameters in the URL
+    return `https://projectwalk2gether.org/join?code=${userCode}&walk=${walkCode}`;
   };
 
   // Handle sharing the invitation link
@@ -214,13 +234,14 @@ export const InviteSelection: React.FC<InviteSelectionProps> = ({
     }
 
     try {
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(link, {
-          dialogTitle: "Invite friends to walk",
-          mimeType: "text/plain",
-          UTI: "public.plain-text",
-        });
+      // Use React Native's Share API which properly handles text content
+      const result = await Share.share({
+        message: link,
+        title: "Invite friends to walk",
+        url: link, // fallback for iOS
+      });
 
+      if (result.action === Share.sharedAction) {
         // Success - link has been shared
       } else {
         // Fallback for web or devices where Sharing is not available

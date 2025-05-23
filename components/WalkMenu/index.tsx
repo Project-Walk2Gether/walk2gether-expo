@@ -1,9 +1,10 @@
 import { MenuItem, useMenu } from "@/context/MenuContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 import { COLORS } from "@/styles/colors";
 import { Edit3, MoreVertical, Trash, UserPlus } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { Button } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
 
@@ -19,8 +20,15 @@ export default function WalkMenu({ walk, hideInviteOption = false, afterDelete }
   const router = useRouter();
   const { showMenu } = useMenu();
   const { showMessage } = useFlashMessage();
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   const onDelete = useCallback(() => {
+    // Open the confirmation dialog instead of deleting immediately
+    setConfirmDialogOpen(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    // Actually delete the walk after confirmation
     walk._ref.delete();
     
     // Show confirmation message
@@ -72,12 +80,24 @@ export default function WalkMenu({ walk, hideInviteOption = false, afterDelete }
   }, [walk.id, showMenu, router, onDelete, hideInviteOption]);
 
   return (
-    <Button
-      size="$2"
-      circular
-      chromeless
-      onPress={handleShowMenu}
-      icon={<MoreVertical size="$1" color="black" />}
-    />
+    <>
+      <Button
+        size="$2"
+        circular
+        chromeless
+        onPress={handleShowMenu}
+        icon={<MoreVertical size="$1" color="black" />}
+      />
+      
+      <ConfirmationDialog
+        open={confirmDialogOpen}
+        onOpenChange={setConfirmDialogOpen}
+        title="Cancel Walk"
+        description="Are you sure you want to cancel this walk? This action cannot be undone."
+        confirmText="Cancel Walk"
+        onConfirm={handleConfirmDelete}
+        destructive={true}
+      />
+    </>
   );
 }

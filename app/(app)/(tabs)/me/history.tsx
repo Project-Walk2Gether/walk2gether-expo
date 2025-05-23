@@ -1,11 +1,11 @@
+import FullScreenLoader from "@/components/FullScreenLoader";
 import { Screen } from "@/components/UI";
 import WalkCard from "@/components/WalkCard";
 import { useAuth } from "@/context/AuthContext";
-import { COLORS } from "@/styles/colors";
 import { useQuery } from "@/utils/firestore";
 import firestore, { Timestamp } from "@react-native-firebase/firestore";
 import React, { useState } from "react";
-import { ActivityIndicator, FlatList } from "react-native";
+import { FlatList } from "react-native";
 import { Card, Text, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
 
@@ -29,18 +29,12 @@ export default function WalkHistoryScreen() {
   const walkIds = pastWalks.map((walk) => walk.id);
 
   if (status === "loading") {
-    return (
-      <Screen title="My Walk History">
-        <YStack f={1} jc="center" ai="center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
-        </YStack>
-      </Screen>
-    );
+    return <FullScreenLoader />;
   }
 
   if (error) {
     return (
-      <Screen title="My Walk History">
+      <Screen>
         <Card backgroundColor="$red2" p="$4" borderRadius={12}>
           <Text color="$red9">{error}</Text>
         </Card>

@@ -1,5 +1,5 @@
 import { useLocation } from "@/context/LocationContext";
-import { MapPin, X as XIcon, XCircle } from "@tamagui/lucide-icons";
+import { MapPin, X as XIcon } from "@tamagui/lucide-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Text, XStack, YStack } from "tamagui";
@@ -19,7 +19,7 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
   setFieldValue,
   setLocationMode,
   clearLocation,
-  expectedWaitTime = 9000,
+  expectedWaitTime = 15000,
 }) => {
   const { locationPermission, requestForegroundPermissions } = useLocation();
   const [loading, setLoading] = useState(false);
@@ -126,10 +126,15 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
       } catch (err: any) {
         setError("Error: " + err.message);
       } finally {
-        // Only set loading to false if we didn't find a location
-        // If we found a location, we'll let the progress animation complete first
+        // If we didn't find a location, reset loading state immediately
         if (!locationFound.current) {
           setLoading(false);
+        }
+        // Otherwise, set a backup timer to ensure loading is eventually reset
+        // This is a fallback in case the progress animation's onComplete doesn't fire
+        else {
+          // Set a maximum timeout to ensure loading state is reset even if animation fails
+          setTimeout(() => setLoading(false), expectedWaitTime + 1000);
         }
       }
     }
@@ -146,7 +151,12 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
     if (loading) {
       return (
         <YStack width="100%" p={8}>
-          <XStack width="100%" alignItems="center" justifyContent="space-between" gap={8}>
+          <XStack
+            width="100%"
+            alignItems="center"
+            justifyContent="space-between"
+            gap={8}
+          >
             <YStack flex={1}>
               <FakeLoadingBar
                 expectedWaitTime={expectedWaitTime}
@@ -154,23 +164,23 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
                 showText
                 progressText="Detecting location"
                 onComplete={() => {
-                  if (locationFound.current) {
-                    setTimeout(() => setLoading(false), 300);
-                  }
+                  // Always reset loading state when animation completes, with a small delay for visual polish
+                  setTimeout(() => setLoading(false), 300);
                 }}
               />
             </YStack>
             <Button
-              size="$3"
-              backgroundColor="$red9"
+              size={22}
+              circular
+              backgroundColor="rgba(150, 150, 150, 0.8)"
               onPress={() => {
                 cancelLocationDetection.current = true;
                 setLoading(false);
                 if (clearLocation) clearLocation();
               }}
-              icon={<XCircle size={16} color="white" />}
+              aria-label="Cancel"
             >
-              Cancel
+              <XIcon size={12} color="white" />
             </Button>
           </XStack>
         </YStack>

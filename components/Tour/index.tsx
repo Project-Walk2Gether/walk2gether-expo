@@ -29,7 +29,7 @@ const Tour: React.FC<Props> = ({ isVisible, onDismiss }) => {
     },
     {
       id: "inviteFriends",
-      title: "Connect with Friends",
+      title: "Invite your friends",
       message: "Invite your friends and walk 2gether!",
       elementRefName: "friendsTab",
     },
@@ -66,9 +66,6 @@ const Tour: React.FC<Props> = ({ isVisible, onDismiss }) => {
   // Create a function to get the current target element
   const getTarget = () => getRef(currentTourStep.elementRefName)?.current;
 
-  const target = getTarget();
-  console.log({ target, elementRefName: currentTourStep.elementRefName });
-
   return (
     <FeatureHighlight
       visible={isVisible}
@@ -86,8 +83,8 @@ const Tour: React.FC<Props> = ({ isVisible, onDismiss }) => {
         marginBottom: 12,
         color: "#fff",
       }}
-      innerPadding={4}
-      borderRadius={3}
+      innerPadding={12}
+      borderRadius={20}
       messageStyle={{
         fontSize: 16,
         lineHeight: 24,

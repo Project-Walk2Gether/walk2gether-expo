@@ -14,11 +14,9 @@ const FAB = forwardRef<typeof Button, FABProps>(
     return (
       <View
         style={{
-          padding: 15,
           position: "absolute",
           bottom,
           right,
-          zIndex: 100,
         }}
         ref={ref as any}
       >

@@ -10,6 +10,7 @@ import { COLORS } from "@/styles/colors";
 import { getDistanceMeters, getRegionForRadius } from "@/utils/geo";
 import { reverseGeocode } from "@/utils/locationUtils";
 import { findNearbyWalkers } from "@/utils/userSearch";
+import { writeLogIfEnabled } from "@/utils/logging";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
@@ -284,20 +285,46 @@ export const LocationSelection: React.FC<Props> = ({
         </View>
         <LocationButton
           onPress={async () => {
+            writeLogIfEnabled({ 
+              message: "Location request started", 
+              metadata: { timestamp: new Date().toISOString() } 
+            });
+            
             try {
               // Set the flag to indicate we're waiting for location coordinates
               setPendingLocationRequest(true);
               setIsReverseGeocoding(true);
+              writeLogIfEnabled({ 
+                message: "State flags set, about to call getLocation", 
+                metadata: { pendingLocationRequest: true, isReverseGeocoding: true } 
+              });
 
               // Call getLocation to update the location context
               // The useEffect hook will handle processing the coordinates
               // when they are updated
+              writeLogIfEnabled({ message: "Calling getLocation" });
               const location = await getLocation();
+              writeLogIfEnabled({ 
+                message: "getLocation completed successfully", 
+                metadata: { location } 
+              });
               console.log({ location });
             } catch (error) {
+              const errorMessage = error instanceof Error ? error.message : String(error);
+              const errorStack = error instanceof Error ? error.stack : undefined;
+              writeLogIfEnabled({ 
+                message: "Error getting current location", 
+                metadata: { error: errorMessage, stack: errorStack } 
+              });
               console.error("Error getting current location:", error);
               setIsReverseGeocoding(false);
               setPendingLocationRequest(false);
+            } finally {
+              // Ensure flags are reset even if the code after getLocation() silently fails
+              writeLogIfEnabled({ 
+                message: "Location request completed (finally block)", 
+                metadata: { timestamp: new Date().toISOString() } 
+              });
             }
           }}
           disabled={locationLoading || isReverseGeocoding}
