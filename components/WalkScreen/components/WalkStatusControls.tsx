@@ -1,7 +1,7 @@
 import Menu, { MenuItem } from "@/components/Menu";
 import { firestore_instance } from "@/config/firebase";
 import { COLORS } from "@/styles/colors";
-import { doc, setDoc } from "@react-native-firebase/firestore";
+import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { Car, Check, Footprints, MapPin } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable } from "react-native";
@@ -16,6 +16,7 @@ type WalkStatusControlsProps = {
   isOwner?: boolean;
   walkStarted?: boolean;
   walkEnded?: boolean;
+  isCancelled?: boolean;
   onStatusChange?: (status: "pending" | "on-the-way" | "arrived") => void;
   onNavigationMethodChange?: (isDriving: boolean) => void;
   onStartWalk?: () => void;
@@ -33,6 +34,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
   isOwner = false,
   walkStarted = false,
   walkEnded = false,
+  isCancelled = false,
   onStatusChange,
   onNavigationMethodChange,
   onStartWalk,
@@ -57,6 +59,53 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
   useEffect(() => {
     setIsDriving(initialNavigationMethod === "driving");
   }, [initialNavigationMethod]);
+
+  // Handle cancelling participation
+  const handleCancelParticipation = () => {
+    if (!userId || !walkId) return;
+
+    // Show confirmation dialog before proceeding
+    Alert.alert(
+      "Cancel Participation",
+      "Are you sure you can no longer make it to this walk?",
+      [
+        {
+          text: "No, I can still make it",
+          style: "cancel"
+        },
+        {
+          text: "Yes, I can't make it",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // Update the participant doc with cancelledAt
+              const participantDocRef = doc(
+                firestore_instance,
+                `walks/${walkId}/participants/${userId}`
+              );
+
+              await setDoc(
+                participantDocRef,
+                {
+                  cancelledAt: Timestamp.now(),
+                },
+                { merge: true }
+              );
+
+              // Show confirmation
+              Alert.alert(
+                "Cancelled",
+                "You've let the organizer know you can no longer make it to this walk."
+              );
+            } catch (error) {
+              console.error("Error cancelling participation:", error);
+              Alert.alert("Error", "Failed to cancel participation. Please try again.");
+            }
+          }
+        }
+      ]
+    );
+  };
 
   // Handle status change
   const handleStatusChange = async (
@@ -159,6 +208,11 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
 
   // Get status button color based on the current status
   const getStatusButtonColor = () => {
+    // If the participant has cancelled, show red
+    if (isCancelled) {
+      return "$red9";
+    }
+    
     // Show a distinct color when the walk has started
     if (walkStarted && status === "arrived") {
       return "$purple9"; // Purple for walk started
@@ -176,6 +230,11 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
 
   // Get status button text based on the current status
   const getStatusButtonText = () => {
+    // If the participant has cancelled
+    if (isCancelled) {
+      return "I can't make it";
+    }
+    
     // If the walk has ended
     if (walkEnded && status === "arrived") {
       return "Walk ended";
@@ -192,7 +251,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
         return "On my way";
       case "arrived":
         // Don't show text when start walk slider is active
-        return showSlider ? "" : "I've arrived";
+        return showSlider ? "" : "I've arrived!";
       default:
         return "Tell others I'm on my way";
     }
@@ -221,6 +280,18 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
 
   // Create menu items for the status menu
   const statusMenuItems: MenuItem[] = [
+    // Only show the cancel option for non-owners
+    ...(isOwner
+      ? []
+      : [
+          {
+            label: "I can no longer make it",
+            onPress: handleCancelParticipation,
+            buttonProps: {
+              backgroundColor: "$red9",
+            },
+          } as MenuItem,
+        ]),
     {
       label: "Not on my way yet",
       onPress: () => handleStatusChange("pending"),

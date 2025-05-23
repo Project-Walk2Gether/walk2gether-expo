@@ -335,6 +335,7 @@ export default function LiveWalkMap({
           isOwner={isWalkOwner}
           walkStarted={hasWalkStarted}
           walkEnded={hasWalkEnded}
+          isCancelled={!!userParticipant?.cancelledAt}
           onNavigationMethodChange={(isDriving) =>
             setNavigationMethod(isDriving ? "driving" : "walking")
           }

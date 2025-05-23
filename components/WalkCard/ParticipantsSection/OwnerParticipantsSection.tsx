@@ -56,14 +56,7 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
   const isFriendsWalk = walkIsFriendsWalk(walk);
 
   return (
-    <YStack
-      borderTopWidth={1}
-      borderTopColor="$gray4"
-      mt={12}
-      pt={12}
-      gap={16}
-      flex={1}
-    >
+    <YStack borderTopWidth={1} borderTopColor="$gray4" pt={12} gap={16}>
       {/* Accepted participants */}
       {acceptedParticipants.length > 0 && (
         <XStack alignItems="center" gap={8}>
@@ -109,10 +102,12 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
               )}
             </XStack>
             <Text fontSize={14} color="#666" ml={10} flex={1}>
-              {acceptedParticipants.length > 0 
+              {acceptedParticipants.length > 0
                 ? `${formatNamesInSentenceCase(
-                  acceptedParticipants.map((p) => p.displayName || "Someone")
-                )} ${acceptedParticipants.length === 1 ? "is" : "are"} joining you`
+                    acceptedParticipants.map((p) => p.displayName || "Someone")
+                  )} ${
+                    acceptedParticipants.length === 1 ? "is" : "are"
+                  } joining you`
                 : ""}
             </Text>
           </XStack>
@@ -179,10 +174,10 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
               )}
             </XStack>
             <Text fontSize={14} color="#666" ml={10} flex={1}>
-              {invitedParticipants.length > 0 
+              {invitedParticipants.length > 0
                 ? `${formatNamesInSentenceCase(
-                  invitedParticipants.map((p) => p.displayName || "Someone")
-                )} invited to join you`
+                    invitedParticipants.map((p) => p.displayName || "Someone")
+                  )} invited to join you`
                 : ""}
             </Text>
           </XStack>
@@ -237,10 +232,10 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
               )}
             </XStack>
             <Text fontSize={14} color="#666" ml={10} flex={1}>
-              {notifiedParticipants.length > 0 
+              {notifiedParticipants.length > 0
                 ? `${formatNamesInSentenceCase(
-                  notifiedParticipants.map((p) => p.displayName || "Someone")
-                )} notified about your walk`
+                    notifiedParticipants.map((p) => p.displayName || "Someone")
+                  )} notified about your walk`
                 : ""}
             </Text>
           </XStack>
@@ -294,10 +289,10 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
               )}
             </XStack>
             <Text fontSize={14} color="#666" ml={10} flex={1}>
-              {requestedParticipants.length > 0 
+              {requestedParticipants.length > 0
                 ? `${formatNamesInSentenceCase(
-                  requestedParticipants.map((p) => p.displayName || "Someone")
-                )} recently joined your walk`
+                    requestedParticipants.map((p) => p.displayName || "Someone")
+                  )} recently joined your walk`
                 : ""}
             </Text>
           </XStack>
@@ -313,7 +308,8 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
           <Text fontSize={14} color="#666" flex={1}>
             {formatNamesInSentenceCase(
               deniedParticipants.map((p) => p.displayName || "Someone")
-            )} denied from the walk
+            )}{" "}
+            denied from the walk
           </Text>
         </XStack>
       )}
@@ -327,7 +323,8 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
           <Text fontSize={14} color="#666" flex={1}>
             {formatNamesInSentenceCase(
               cancelledParticipants.map((p) => p.displayName || "Someone")
-            )} cancelled participation
+            )}{" "}
+            cancelled participation
           </Text>
         </XStack>
       )}
@@ -339,10 +336,10 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
             Recently joined:
           </Text>
           <Text fontSize={14} color="#666" flex={1}>
-            {requestedParticipants.length > 0 
+            {requestedParticipants.length > 0
               ? `${formatNamesInSentenceCase(
-                requestedParticipants.map((p) => p.displayName || "Someone")
-              )} recently joined your walk`
+                  requestedParticipants.map((p) => p.displayName || "Someone")
+                )} recently joined your walk`
               : ""}
           </Text>
         </XStack>

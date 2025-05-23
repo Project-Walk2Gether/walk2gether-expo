@@ -7,6 +7,7 @@ import {
   setDoc,
   updateDoc,
 } from "@react-native-firebase/firestore";
+import { fetchDocsByIds } from "./firestore";
 import { Participant, UserData, WithId } from "walk2gether-shared";
 
 /**
@@ -27,6 +28,9 @@ export async function updateParticipants(
       `walks/${walkId}/participants`
     );
     const participantsSnapshot = await getDocs(participantsRef);
+    
+    // Keep track of new participants that need user data
+    const newParticipantIds: string[] = [];
 
     // Create a map of existing participants by user ID
     const existingParticipants = new Map<
@@ -91,11 +95,33 @@ export async function updateParticipants(
           })
         );
       } else {
-        // Create new participant
+        // Add to list of users we need to fetch data for
+        newParticipantIds.push(userId);
+      }
+    }
+
+    // If we have new participants, fetch their user data
+    if (newParticipantIds.length > 0) {
+      // Fetch user data for all new participants
+      const usersData = await fetchDocsByIds<UserData>('users', newParticipantIds);
+      
+      // Create a map of user data by ID for easier lookup
+      const userDataMap = new Map<string, UserData & { id: string }>();
+      usersData.forEach(user => userDataMap.set(user.id, user));
+      
+      // Create participant documents with real user data
+      for (const userId of newParticipantIds) {
+        const user = userDataMap.get(userId);
+        const participantRef = doc(
+          firestore_instance,
+          `walks/${walkId}/participants/${userId}`
+        );
+        
+        // Create new participant with real name if available
         const participant: Omit<Participant, "id"> = {
           userUid: userId,
-          displayName: "Invited User", // This will be updated when user accepts
-          photoURL: null,
+          displayName: user?.name || "Invited User",
+          photoURL: user?.profilePicUrl || null,
           status: "pending",
           acceptedAt: null,
           rejectedAt: null,
@@ -106,11 +132,11 @@ export async function updateParticipants(
           createdAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
         };
-
+        
         newParticipantPromises.push(setDoc(participantRef, participant));
       }
     }
-
+    
     // Wait for all operations to complete
     await Promise.all([...removedPromises, ...newParticipantPromises]);
 

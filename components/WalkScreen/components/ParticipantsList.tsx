@@ -1,4 +1,9 @@
 import { COLORS } from "@/styles/colors";
+import { 
+  getParticipantStatusInfo, 
+  getParticipantBorderColor, 
+  getParticipantOpacity 
+} from "@/utils/participantStatus";
 import { getWalkStatus } from "@/utils/walkUtils";
 import {
   AlertCircle,
@@ -15,6 +20,7 @@ interface Props {
   status: ReturnType<typeof getWalkStatus>;
   participants: ParticipantWithRoute[];
   currentUserId?: string;
+  isOwner: boolean;
   onParticipantPress?: (participant: ParticipantWithRoute) => void;
 }
 
@@ -22,13 +28,31 @@ export default function ParticipantsList({
   status,
   participants,
   currentUserId,
+  isOwner,
   onParticipantPress,
 }: Props) {
-  // Sort participants: current user first, then by status (arrived, on-the-way, pending)
-  const sortedParticipants = [...participants].sort((a, b) => {
-    // Current user first
-    if (a.id === currentUserId) return 1;
-    if (b.id === currentUserId) return -1;
+  // Filter participants: for non-owners, only show confirmed participants
+  // For owners, show all participants
+  const filteredParticipants = isOwner 
+    ? participants 
+    : participants.filter(p => !!p.acceptedAt);
+
+  // Sort participants based on requirements
+  const sortedParticipants = [...filteredParticipants].sort((a, b) => {
+    const aIsConfirmed = !!a.acceptedAt;
+    const bIsConfirmed = !!b.acceptedAt;
+    const aIsOwner = a.userUid === currentUserId;
+    const bIsOwner = b.userUid === currentUserId;
+
+    // First sort by confirmation status
+    if (aIsConfirmed && !bIsConfirmed) return -1;
+    if (!aIsConfirmed && bIsConfirmed) return 1;
+
+    // Among confirmed participants, owners last
+    if (aIsConfirmed && bIsConfirmed) {
+      if (aIsOwner && !bIsOwner) return 1;
+      if (!aIsOwner && bIsOwner) return -1;
+    }
 
     // Then by status: arrived first
     if (a.status === "arrived" && b.status !== "arrived") return -1;
@@ -44,34 +68,11 @@ export default function ParticipantsList({
 
   const renderItem = ({ item }: { item: ParticipantWithRoute }) => {
     const isCurrentUser = item.id === currentUserId;
-    const isArrived = item.status === "arrived";
-    const isOnTheWay = item.status === "on-the-way";
-    const needsApproval = !item.acceptedAt && !item.rejectedAt;
-    const isRejected = !!item.rejectedAt;
-
-    // Determine status display text and color
-    let statusText =
-      status === "future" ? "Planning to go" : "Not on the way yet";
-    let statusColor = "$gray11";
-
-    if (isRejected) {
-      statusText = "Rejected";
-      statusColor = "$red9";
-    } else if (isArrived) {
-      statusText = "Arrived!";
-      statusColor = "$green9";
-    } else if (isOnTheWay) {
-      // Show ETA if available
-      if (item.route?.duration?.text) {
-        statusText = `ETA: ${item.route.duration.text}`;
-      } else {
-        statusText = "On the way";
-      }
-      statusColor = COLORS.primary;
-    } else if (needsApproval) {
-      statusText = "Needs approval";
-      statusColor = "$orange9";
-    }
+    
+    // Get participant status information from the utility function
+    const statusInfo = getParticipantStatusInfo(item, status);
+    const statusText = statusInfo.text;
+    const statusColor = statusInfo.color;
 
     // Only allow pressing participants that are not the current user
     const handlePress = () => {
@@ -92,10 +93,8 @@ export default function ParticipantsList({
         borderRadius="$4"
         backgroundColor="$gray1"
         borderWidth={1}
-        borderColor={
-          isCurrentUser ? COLORS.primary : needsApproval ? "$orange7" : "$gray4"
-        }
-        opacity={item.rejectedAt ? 0.5 : 1}
+        borderColor={getParticipantBorderColor(item, isCurrentUser)}
+        opacity={getParticipantOpacity(item)}
       >
         {/* Row 1: Avatar and name */}
         <Avatar circular size="$3">
@@ -116,17 +115,19 @@ export default function ParticipantsList({
         <YStack gap="$1">
           <XStack alignItems="center" gap="$1">
             {/* Mode/status icon */}
-            {isArrived ? (
+            {item.cancelledAt ? (
+              <AlertCircle size={14} color="$gray9" />
+            ) : item.status === "arrived" ? (
               <CheckCircle2 size={14} color="$green9" />
-            ) : isOnTheWay ? (
+            ) : item.status === "on-the-way" ? (
               item.navigationMethod === "driving" ? (
                 <Car size={14} color={COLORS.primary} />
               ) : (
                 <Footprints size={14} color={COLORS.primary} />
               )
-            ) : needsApproval ? (
+            ) : (
               <AlertCircle size={14} color="$orange9" />
-            ) : null}
+            )}
             <Text
               fontSize="$2"
               fontWeight="bold"

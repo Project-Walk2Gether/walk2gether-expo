@@ -13,7 +13,7 @@ import {
   updateDoc,
 } from "@react-native-firebase/firestore";
 import { Check } from "@tamagui/lucide-icons";
-import { useNavigation } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -49,6 +49,7 @@ export default function RequestToJoinScreen({
   const insets = useSafeAreaInsets();
   const [introduction, setIntroduction] = useState("");
   const [saveToProfile, setSaveToProfile] = useState(false);
+  const router = useRouter();
 
   const { doc: participantDoc } = useDoc<Participant>(
     `walks/${walk.id}/participants/${user?.uid}`
@@ -107,8 +108,6 @@ export default function RequestToJoinScreen({
         updatedAt: Timestamp.now(),
       };
 
-      console.log("HERE");
-
       // Save participant document
       await setDoc(participantRef, participant, { merge: true });
 
@@ -131,6 +130,8 @@ export default function RequestToJoinScreen({
           // We don't want to fail the whole request if this part fails
         }
       }
+
+      router.push(`/walks/${walk.id}`);
     } catch (error) {
       console.error("Error requesting to join:", error);
       Alert.alert("Error", "Failed to send join request. Please try again.");

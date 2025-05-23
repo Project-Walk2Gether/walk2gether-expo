@@ -172,6 +172,7 @@ export default function WalkScreen() {
               status={status}
               participants={participants}
               currentUserId={user?.uid}
+              isOwner={isWalkOwner}
               onParticipantPress={handleParticipantPress}
             />
           </LinearGradient>

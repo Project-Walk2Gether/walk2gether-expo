@@ -191,7 +191,7 @@ const WalkCard: React.FC<Props> = ({
         {locationDisplay}
 
         {/* Participants section */}
-        <YStack gap="$3">
+        <YStack gap="$3" pt="$2">
           {/* Show participants section for all users, it will render the appropriate view internally */}
           <ParticipantsSection walk={walk} currentUserUid={user?.uid} />
 
