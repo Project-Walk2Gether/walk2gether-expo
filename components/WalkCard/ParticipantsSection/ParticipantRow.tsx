@@ -46,14 +46,14 @@ export const ParticipantRow: React.FC<Props> = ({
   const getStatusIcon = () => {
     switch (status) {
       case "accepted":
-        return <WalkIcon size={18} color={COLORS.primary} />;
+        return <WalkIcon size={16} color={COLORS.primary} />;
       case "invited":
-        return <Mail size={18} color="$gray10" />;
+        return <Mail size={16} color="$gray10" />;
       case "notified":
-        return <Bell size={18} color="$gray10" />;
+        return <Bell size={16} color="$gray10" />;
       case "denied":
       case "cancelled":
-        return <X size={18} color="$red10" />;
+        return <X size={16} color="$red10" />;
       default:
         return null;
     }

@@ -44,6 +44,21 @@ const WalkCard: React.FC<Props> = ({
   } = useLocation();
   const { user } = useAuth();
   const isMine = user?.uid === walk.createdByUid;
+
+  // Get owner display name from participantsById if available
+  const getOwnerName = () => {
+    if (
+      walk.participantsById &&
+      walk.createdByUid &&
+      walk.participantsById[walk.createdByUid]
+    ) {
+      return (
+        walk.participantsById[walk.createdByUid].displayName || "the organizer"
+      );
+    }
+    return "the organizer";
+  };
+  const ownerName = getOwnerName();
   const status = getWalkStatus(walk);
 
   // Get the participant document for the current user (if they exist as a participant)
@@ -55,7 +70,8 @@ const WalkCard: React.FC<Props> = ({
   const hasRequested = !!participantDoc;
   const isApproved =
     participantDoc?.acceptedAt !== null &&
-    participantDoc?.acceptedAt !== undefined;
+    participantDoc?.acceptedAt !== undefined &&
+    !participantDoc?.cancelledAt;
   const isCancelled =
     participantDoc?.cancelledAt !== null &&
     participantDoc?.cancelledAt !== undefined;
@@ -127,6 +143,8 @@ const WalkCard: React.FC<Props> = ({
       borderTopRightRadius={18}
       animation="bouncy"
       overflow="hidden"
+      // Reduce opacity for cancelled walks
+      opacity={!isMine && isCancelled ? 0.7 : 1}
     >
       {/* Attachments Carousel - Not pressable */}
       {showAttachments && <WalkAttachmentsCarousel walk={walk} />}
@@ -192,6 +210,21 @@ const WalkCard: React.FC<Props> = ({
 
         {/* Participants section */}
         <YStack gap="$2" pt="$2">
+          {/* If user has cancelled their participation */}
+          {isCancelled && (
+            <XStack
+              backgroundColor="$gray4"
+              paddingHorizontal="$3"
+              paddingVertical="$2"
+              borderRadius="$3"
+              alignItems="center"
+              gap="$1"
+            >
+              <Text fontSize={12} fontWeight="600" color="$gray9">
+                You've told {ownerName} you can't make it
+              </Text>
+            </XStack>
+          )}
           {/* Show participants section for all users, it will render the appropriate view internally */}
           <ParticipantsSection walk={walk} currentUserUid={user?.uid} />
 
@@ -247,11 +280,11 @@ const WalkCard: React.FC<Props> = ({
                   </Text>
                 </XStack>
               )}
-
-              {/* Show join button for neighborhood walks if user hasn't requested or request was cancelled/rejected */}
-              {/* Don't show if the user is already approved */}
-              {(!hasRequested || isCancelled || isRejected) &&
+              {/* Show join button for neighborhood walks if user hasn't requested or request was rejected */}
+              {/* Don't show if the user is already approved or has cancelled */}
+              {(!hasRequested || isRejected) &&
                 !isApproved &&
+                !isCancelled &&
                 walkIsNeighborhoodWalk(walk) &&
                 !isInvited &&
                 status !== "past" && (

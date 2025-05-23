@@ -36,12 +36,13 @@ export const formatGuestParticipantMessage = (
     allParticipantNames.push(ownerName);
   }
 
-  // Check if current user is a participant
+  // Check if current user is a participant (accepted but not cancelled)
   const isCurrentUserParticipant =
     currentUserUid &&
     walk.participantsById &&
     walk.participantsById[currentUserUid] &&
-    walk.participantsById[currentUserUid].acceptedAt;
+    walk.participantsById[currentUserUid].acceptedAt &&
+    !walk.participantsById[currentUserUid].cancelledAt;
   
   // For friend walks, if the current user is invited but not yet a participant, 
   // show "[ownerName] invited you"
