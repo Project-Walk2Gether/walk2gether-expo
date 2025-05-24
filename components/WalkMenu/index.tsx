@@ -1,10 +1,14 @@
 import { ConfirmationDialog } from "@/components/ConfirmationDialog";
+import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { MenuItem, useMenu } from "@/context/MenuContext";
-import { firestore_instance } from "@/config/firebase";
 import { COLORS } from "@/styles/colors";
-import { cancelParticipation, restoreParticipation } from "@/utils/participantManagement";
+import {
+  cancelParticipation,
+  restoreParticipation,
+} from "@/utils/participantManagement";
+import { doc, getDoc } from "@react-native-firebase/firestore";
 import {
   Edit3,
   LogOut,
@@ -12,7 +16,6 @@ import {
   Trash,
   UserPlus,
 } from "@tamagui/lucide-icons";
-import { doc, getDoc } from "@react-native-firebase/firestore";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "tamagui";
@@ -41,35 +44,35 @@ export default function WalkMenu({
 
   // Check if the current user is the walk owner
   const isWalkOwner = user?.uid === walk.createdByUid;
-  
+
   // Check if the user has already cancelled their participation
   useEffect(() => {
     if (!user?.uid || !walk.id || isWalkOwner) {
       setLoading(false);
       return;
     }
-    
+
     const checkParticipationStatus = async () => {
       try {
         const participantDocRef = doc(
           firestore_instance,
           `walks/${walk.id}/participants/${user.uid}`
         );
-        
+
         const participantSnapshot = await getDoc(participantDocRef);
-        
+
         if (participantSnapshot.exists()) {
           const participantData = participantSnapshot.data();
           setUserHasCancelled(participantData?.cancelledAt ? true : false);
         }
-        
+
         setLoading(false);
       } catch (error) {
         console.error("Error checking participation status:", error);
         setLoading(false);
       }
     };
-    
+
     checkParticipationStatus();
   }, [user?.uid, walk.id, isWalkOwner]);
 
@@ -89,7 +92,7 @@ export default function WalkMenu({
         if (userHasCancelled) {
           // User wants to rejoin the walk
           const success = await restoreParticipation(walk.id, user.uid);
-          
+
           if (success) {
             setUserHasCancelled(false);
             showMessage("You're now attending this walk", "success");
@@ -99,7 +102,7 @@ export default function WalkMenu({
         } else {
           // User wants to cancel participation
           const success = await cancelParticipation(walk.id, user.uid);
-          
+
           if (success) {
             setUserHasCancelled(true);
             showMessage("You're no longer attending this walk", "success");
@@ -174,7 +177,16 @@ export default function WalkMenu({
     }
 
     showMenu("Walk Options", menuItems);
-  }, [walk.id, showMenu, router, onActionPress, hideInviteOption, isWalkOwner, userHasCancelled, loading]);
+  }, [
+    walk.id,
+    showMenu,
+    router,
+    onActionPress,
+    hideInviteOption,
+    isWalkOwner,
+    userHasCancelled,
+    loading,
+  ]);
 
   return (
     <>
@@ -189,21 +201,28 @@ export default function WalkMenu({
       <ConfirmationDialog
         open={confirmDialogOpen}
         onOpenChange={setConfirmDialogOpen}
-        title={isWalkOwner 
-          ? "Cancel Walk" 
-          : userHasCancelled 
-            ? "Rejoin Walk" 
-            : "Cancel Participation"}
-        description={isWalkOwner 
-          ? "Are you sure you want to cancel this walk? This action cannot be undone." 
-          : userHasCancelled
+        title={
+          isWalkOwner
+            ? "Cancel Walk"
+            : userHasCancelled
+            ? "Rejoin Walk"
+            : "Cancel Participation"
+        }
+        description={
+          isWalkOwner
+            ? "Are you sure you want to cancel this walk? This action cannot be undone."
+            : userHasCancelled
             ? "Would you like to join this walk again?"
-            : "Are you sure you can no longer make it to this walk?"}
-        confirmText={isWalkOwner 
-          ? "Cancel Walk" 
-          : userHasCancelled 
-            ? "Yes, I Can Make It" 
-            : "I Can't Make It"}
+            : "Are you sure you can no longer make it to this walk?"
+        }
+        confirmText={
+          isWalkOwner
+            ? "Yes, cancel"
+            : userHasCancelled
+            ? "Yes, I can make it"
+            : "I can't make it"
+        }
+        cancelText="No, keep it"
         onConfirm={handleConfirmAction}
         destructive={isWalkOwner || !userHasCancelled}
       />
