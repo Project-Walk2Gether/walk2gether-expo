@@ -6,28 +6,18 @@ import { db } from "@/config/firebase";
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { useDoc } from "@/utils/firestore";
 import { doc, updateDoc } from "@react-native-firebase/firestore";
-import {
-  Stack,
-  useGlobalSearchParams,
-  useLocalSearchParams,
-  useRouter,
-} from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { Alert } from "react-native";
 import { ScrollView } from "tamagui";
-import { Walk } from "walk2gether-shared";
+import { Walk, WithId } from "walk2gether-shared";
 
 export default function EditWalkScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const { doc: walk } = useDoc<WithId<Walk>>(`walks/${id}`);
 
-  console.log({
-    local: useLocalSearchParams(),
-    global: useGlobalSearchParams(),
-  });
-  const { doc: walk } = useDoc<Walk>(`walks/${id}`);
-
-  const handleSubmit = async (values: Walk) => {
+  const handleSubmit = async (values: WithId<Walk>) => {
     try {
       if (!walk) return;
 

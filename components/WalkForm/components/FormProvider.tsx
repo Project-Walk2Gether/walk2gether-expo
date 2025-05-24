@@ -1,9 +1,9 @@
 import { Formik, FormikProps } from "formik";
 import React from "react";
-import { ActivityIndicator } from "react-native";
-import { Button, XStack, YStack } from "tamagui";
+import { XStack, YStack } from "tamagui";
+import { ActionButton } from "@/components/ActionButton";
 
-interface FormProviderProps<T> {
+interface FormProviderProps<T extends object> {
   initialValues: T;
   validationSchema: any;
   onSubmit: (values: T) => Promise<void>;
@@ -12,7 +12,7 @@ interface FormProviderProps<T> {
   children: (formikProps: FormikProps<T>) => React.ReactNode;
 }
 
-export default function FormProvider<T>({
+export default function FormProvider<T extends object>({
   initialValues,
   validationSchema,
   onSubmit,
@@ -35,21 +35,14 @@ export default function FormProvider<T>({
             flexDirection="row"
             justifyContent="space-between"
             marginTop="$4"
+            width="100%"
           >
-            <Button
-              size="$4"
+            <ActionButton
               onPress={() => formikProps.handleSubmit()}
-              theme="blue"
-              flex={1}
-              marginHorizontal="$1"
+              label={submitButtonText}
+              loading={formikProps.isSubmitting}
               disabled={formikProps.isSubmitting}
-            >
-              {formikProps.isSubmitting ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                submitButtonText
-              )}
-            </Button>
+            />
           </XStack>
         </YStack>
       )}
