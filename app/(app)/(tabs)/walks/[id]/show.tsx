@@ -22,12 +22,10 @@ import HeaderBackButton from "@/components/HeaderBackButton";
 import WalkMenu from "@/components/WalkMenu";
 import LiveWalkMap from "@/components/WalkScreen/components/LiveWalkMap";
 import ParticipantsList from "@/components/WalkScreen/components/ParticipantsList";
-import WalkStats from "@/components/WalkScreen/components/WalkStats";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
 import { getWalkStatus } from "@/utils/walkUtils";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { LinearGradient } from "expo-linear-gradient";
 import { KeyboardAvoidingView } from "react-native";
 import { Text, View, YStack } from "tamagui";
 import { Message, ParticipantWithRoute, Walk } from "walk2gether-shared";
@@ -52,7 +50,7 @@ export default function WalkScreen() {
 
   // Define snap points for the chat bottom sheet (30% and 100% of screen height)
   // Get collapsed height for calculations (30% of screen height)
-  const collapsedHeight = 130;
+  const collapsedHeight = 188;
   const chatSnapPoints = useMemo(() => [collapsedHeight, "100%"], []);
 
   // Function to handle when message form takes focus
@@ -132,20 +130,18 @@ export default function WalkScreen() {
         options={{
           title: getWalkTitle(walk, user?.uid),
           headerLeft: () => <HeaderBackButton />,
-          headerRight: isWalkOwner
-            ? () => (
-                <WalkMenu
-                  walk={walk}
-                  afterDelete={() => {
-                    if (router.canGoBack()) {
-                      router.back();
-                    } else {
-                      router.push("/");
-                    }
-                  }}
-                />
-              )
-            : undefined,
+          headerRight: () => (
+            <WalkMenu
+              walk={walk}
+              afterDelete={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.push("/");
+                }
+              }}
+            />
+          ),
         }}
       />
       {/* Main container */}
@@ -154,30 +150,11 @@ export default function WalkScreen() {
         <View flex={1} pb={collapsedHeight - 30}>
           <LiveWalkMap walkId={id} />
           {/* Walk stats will only show when the walk has ended */}
-          {walk.endedAt && (
+          {/* {walk.endedAt && (
             <View position="absolute" top={10} left={0} right={0} zIndex={10}>
               <WalkStats walk={walk} />
             </View>
-          )}
-          <LinearGradient
-            colors={["rgba(0,0,0,0.9)", "rgba(0,0,0,0.7)"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              paddingVertical: 10,
-            }}
-          >
-            <ParticipantsList
-              status={status}
-              participants={participants}
-              currentUserId={user?.uid}
-              isOwner={isWalkOwner}
-              onParticipantPress={handleParticipantPress}
-            />
-          </LinearGradient>
+          )} */}
         </View>
         <BottomSheet
           ref={chatBottomSheetRef}
@@ -209,7 +186,7 @@ export default function WalkScreen() {
         >
           <BottomSheetScrollView
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ paddingTop: 20, zIndex: 1000000 }}
+            contentContainerStyle={{ paddingTop: 28, zIndex: 1000000 }}
           >
             <View position="absolute" top={0} left={0} right={0} h={30}>
               <Text
@@ -223,6 +200,13 @@ export default function WalkScreen() {
                 Chat
               </Text>
             </View>
+            <ParticipantsList
+              status={status}
+              participants={participants}
+              currentUserId={user?.uid}
+              isOwner={isWalkOwner}
+              onParticipantPress={handleParticipantPress}
+            />
             <MessageList
               ref={messageListRef}
               messages={messages}
@@ -244,7 +228,7 @@ export default function WalkScreen() {
             zIndex: 3,
           }}
         >
-          <YStack borderTopWidth={1} borderTopColor="$gray4" pt="$2" gap="$2">
+          <YStack borderTopWidth={1} borderTopColor="$gray4">
             <MessageForm
               onSendMessage={handleSendMessage}
               keyboardVerticalOffset={90}

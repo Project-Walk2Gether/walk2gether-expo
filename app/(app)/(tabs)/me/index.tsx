@@ -338,22 +338,23 @@ export default function MeScreen() {
         <Separator borderColor="$gray5" />
 
         <ActionRow
-          icon={<AlertTriangle size={24} color="#DC2626" opacity={0.8} />}
-          label="Delete My Account"
-          onPress={() => router.push("/me/delete-account")}
+          icon={<LogOut color={COLORS.error} />}
+          label="Sign Out"
+          onPress={handleSignOut}
           isLast={true}
         />
       </Card>
 
-      <YStack mt="$4" mb="$4">
+      <YStack mt={100}>
         <Button
           size="$4"
-          theme="red"
-          icon={<LogOut />}
-          onPress={handleSignOut}
+          chromeless
+          color="#DC2626"
+          icon={<AlertTriangle size={20} color="#DC2626" />}
+          onPress={() => router.push("/me/delete-account")}
           fontWeight="600"
         >
-          Sign Out
+          Delete My Account
         </Button>
       </YStack>
     </Screen>

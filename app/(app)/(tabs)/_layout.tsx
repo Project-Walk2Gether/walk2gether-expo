@@ -31,7 +31,6 @@ export default function TabLayout() {
     <>
       {/* Feature Tour */}
       <Tour isVisible={showTour} onDismiss={handleDismissTour} />
-
       <Tabs
         initialRouteName="walks"
         screenOptions={{
