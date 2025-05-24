@@ -3,6 +3,7 @@ import { Screen } from "@/components/UI";
 import ActionRow from "@/components/UI/ActionRow";
 import { PlaceData } from "@/components/UI/PlacesAutocomplete";
 import { StatelessAvatar } from "@/components/UserAvatar";
+import EditButton from "@/components/EditButton";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUpdates } from "@/context/UpdatesContext";
@@ -219,21 +220,7 @@ export default function MeScreen() {
                 borderWidth={3}
                 backgroundColor={COLORS.primary}
               />
-              <View
-                position="absolute"
-                right={0}
-                bottom={0}
-                backgroundColor={COLORS.primary}
-                width={36}
-                height={36}
-                borderRadius={18}
-                justifyContent="center"
-                alignItems="center"
-                borderWidth={2}
-                borderColor="white"
-              >
-                <Pencil size={18} color="white" />
-              </View>
+              <EditButton backgroundColor={COLORS.primary} />
             </View>
           }
         />
@@ -248,6 +235,7 @@ export default function MeScreen() {
         backgroundColor="white"
         mb="$3"
         borderRadius={16}
+        position="relative"
       >
         <YStack px="$4" py="$3">
           {location && (
@@ -259,6 +247,11 @@ export default function MeScreen() {
             {aboutMe || "Add some details about yourself..."}
           </Text>
         </YStack>
+        <EditButton 
+          backgroundColor="#888888" 
+          onPress={handleEditProfile}
+          size={32} 
+        />
       </Card>
 
       {/* Actions Section */}
@@ -275,14 +268,6 @@ export default function MeScreen() {
           icon={<Clock />}
           label="My Walk History"
           onPress={() => router.push("/me/history")}
-        />
-
-        <Separator borderColor="$gray5" />
-
-        <ActionRow
-          icon={<Pencil />}
-          label="Edit Profile"
-          onPress={handleEditProfile}
         />
 
         <Separator borderColor="$gray5" />
