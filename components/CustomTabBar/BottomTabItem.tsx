@@ -1,3 +1,4 @@
+import { COLORS } from "@/styles/colors";
 import React from "react";
 import { Pressable } from "react-native";
 import { Text, View } from "tamagui";
@@ -23,7 +24,7 @@ const BottomTabItem: React.FC<Props> = ({
   tourRefName,
 }) => {
   const [, setRef] = useDynamicRefs();
-  const color = isActive ? "$blue9" : "$gray9";
+  const color = isActive ? COLORS.primary : "$gray9";
 
   return (
     <Pressable

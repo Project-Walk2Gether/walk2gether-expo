@@ -33,7 +33,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = (props) => {
     <XStack
       alignItems="center"
       paddingBottom={insets.bottom ? insets.bottom : 10}
-      paddingTop={6}
+      paddingTop={14}
       paddingHorizontal={8}
       borderTopColor="$gray5"
       borderTopWidth={1}
