@@ -1,8 +1,13 @@
-import { differenceInSeconds, format } from "date-fns";
+import { MapPin } from "@tamagui/lucide-icons";
+import { differenceInSeconds } from "date-fns";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import { Text, XStack, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
+import { ActiveWalkRow } from "./ActiveWalkRow";
+import { CompletedWalkRow } from "./CompletedWalkRow";
+import { ScheduledWalkRow } from "./ScheduledWalkRow";
+import { TimerRow } from "./TimerRow";
 
 interface Props {
   walk: Walk;
@@ -52,9 +57,10 @@ export default function WalkTimer({ walk }: Props) {
       if (endTime && startTime) {
         const durationSeconds = differenceInSeconds(endTime, startTime);
         return (
-          <Text color="white" fontSize="$3" fontWeight="bold">
-            Duration: {formatTime(durationSeconds)}
-          </Text>
+          <CompletedWalkRow
+            durationSeconds={durationSeconds}
+            formatTime={formatTime}
+          />
         );
       }
     }
@@ -66,9 +72,10 @@ export default function WalkTimer({ walk }: Props) {
       if (startTime) {
         const elapsedSeconds = differenceInSeconds(currentTime, startTime);
         return (
-          <Text color="white" fontSize="$3" fontWeight="bold">
-            Walk time: {formatTime(elapsedSeconds)}
-          </Text>
+          <ActiveWalkRow
+            elapsedSeconds={elapsedSeconds}
+            formatTime={formatTime}
+          />
         );
       }
     }
@@ -81,14 +88,10 @@ export default function WalkTimer({ walk }: Props) {
       if (endTime && startTime) {
         const durationSeconds = differenceInSeconds(endTime, startTime);
         return (
-          <XStack alignItems="center" gap="$1">
-            <Text color="white" fontSize="$3" fontWeight="bold">
-              Walk completed:
-            </Text>
-            <Text color="white" fontSize="$3">
-              {formatTime(durationSeconds)}
-            </Text>
-          </XStack>
+          <CompletedWalkRow
+            durationSeconds={durationSeconds}
+            formatTime={formatTime}
+          />
         );
       }
     }
@@ -97,29 +100,17 @@ export default function WalkTimer({ walk }: Props) {
     if (walkDate && walkDate > currentTime) {
       const timeUntilWalk = differenceInSeconds(walkDate, currentTime);
       return (
-        <XStack justifyContent="space-between" width="100%" alignItems="center">
-          <Text color="white" fontSize="$3" fontWeight="bold">
-            Starting in: {formatTime(timeUntilWalk)}
-          </Text>
-          <Text color="white" fontSize="$2">
-            {format(walkDate, "MMM d, h:mm a")}
-          </Text>
-        </XStack>
+        <TimerRow
+          timeUntilWalk={timeUntilWalk}
+          walkDate={walkDate}
+          formatTime={formatTime}
+        />
       );
     }
 
     // If the walk date has passed but it hasn't started
     if (walkDate && walkDate <= currentTime && !hasStarted) {
-      return (
-        <XStack alignItems="center" gap="$1">
-          <Text color="white" fontSize="$3" fontWeight="bold">
-            Scheduled to start:
-          </Text>
-          <Text color="white" fontSize="$3">
-            {format(walkDate, "h:mm a")}
-          </Text>
-        </XStack>
-      );
+      return <ScheduledWalkRow walkDate={walkDate} />;
     }
 
     // Default case
@@ -136,7 +127,8 @@ export default function WalkTimer({ walk }: Props) {
     if (!hasLocationNotes || hasStarted) return null;
 
     return (
-      <XStack alignItems="center" gap="$1">
+      <XStack mt="$2" alignItems="center" gap="$2">
+        <MapPin size="$1" color="white" />
         <Text color="white" fontWeight="bold" fontSize="$2">
           Meetup notes:
         </Text>
