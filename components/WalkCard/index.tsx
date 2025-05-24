@@ -2,23 +2,12 @@ import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
-import {
-  getDistanceToLocation,
-  openLocationInMaps,
-} from "@/utils/locationUtils";
 import { getWalkTitle } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
-import {
-  Calendar,
-  CheckCircle,
-  Hand,
-  Navigation,
-  Pin,
-  Timer,
-} from "@tamagui/lucide-icons";
+import { Calendar, CheckCircle, Hand, Timer } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React from "react";
-import { Button, Card, Text, XStack, YStack } from "tamagui";
+import { Card, Text, XStack, YStack } from "tamagui";
 import {
   Participant,
   Walk,
@@ -28,8 +17,11 @@ import {
 import { UserAvatar } from "../UserAvatar";
 import WalkAttachmentsCarousel from "../WalkAttachmentsCarousel";
 import WalkMenu from "../WalkMenu";
+import { CardHeader } from "./CardHeader";
 import { IconTextRow } from "./IconTextRow";
-import { ParticipantsSection } from "./ParticipantsSection";
+import { LocationDisplay } from "./LocationDisplay";
+import { ParticipantsDisplay } from "./ParticipantsDisplay";
+import { WalkCardButton } from "./WalkCardButton";
 
 // Props interface for WalkCard
 interface Props {
@@ -94,81 +86,7 @@ const WalkCard: React.FC<Props> = ({
       ? !!walk.participantsById[user.uid] &&
         walk.participantsById[user.uid].sourceType !== "requested"
       : false;
-  // Calculate the distance and prepare the location display text
-  const locationDisplay = (() => {
-    if (walkIsNeighborhoodWalk(walk)) return null;
-
-    const locationName = walk.currentLocation?.name || "";
-    let displayContent;
-
-    if (coords) {
-      const distance = getDistanceToLocation({
-        targetLocation: walk.currentLocation,
-        userCoords: coords,
-        loading: locationLoading,
-        error: locationError,
-      });
-
-      if (distance) {
-        displayContent = (
-          <>
-            {locationName}{" "}
-            <Text fontSize={13} color="#888" fontWeight="500">
-              ({distance})
-            </Text>
-          </>
-        );
-      } else {
-        displayContent = locationName;
-      }
-    } else {
-      displayContent = locationName;
-    }
-
-    if (!displayContent) return null;
-
-    // Function to handle navigation to the location
-    const handleNavigate = () => {
-      if (walk.currentLocation?.latitude && walk.currentLocation?.longitude) {
-        openLocationInMaps(
-          walk.currentLocation.latitude,
-          walk.currentLocation.longitude,
-          walk.currentLocation.name
-        );
-      }
-    };
-
-    return (
-      <YStack gap="$1">
-        <IconTextRow
-          icon={<Pin size={16} color="#666" />}
-          text={displayContent}
-          fontSize={14}
-          color="#666"
-          gap={6}
-          textProps={{ flexShrink: 1 }}
-        />
-        {/* Only show the Navigate button if the user has accepted the invitation */}
-        {(isApproved || isMine) && (
-          <Button
-            size="$2"
-            onPress={handleNavigate}
-            accessibilityLabel="Navigate to location"
-            icon={<Navigation size={14} color="white" />}
-            backgroundColor={COLORS.primary}
-            mt="$2"
-            opacity={0.9}
-            alignSelf="flex-start"
-            paddingHorizontal={10}
-          >
-            <Text color="white" fontSize={12} fontWeight="500">
-              Navigate
-            </Text>
-          </Button>
-        )}
-      </YStack>
-    );
-  })();
+  // Use the extracted LocationDisplay component
 
   return (
     <Card
@@ -191,65 +109,56 @@ const WalkCard: React.FC<Props> = ({
 
       {/* Card Content - Pressable */}
       <YStack
-        gap="$2"
         pb="$3"
-        px="$3"
+        px="$4"
         pt="$2"
         pressStyle={{ scale: 0.98 }}
         onPress={onPress}
       >
-        <XStack alignItems="center" justifyContent="space-between">
-          <IconTextRow
-            icon={<UserAvatar uid={walk.createdByUid} size={32} />}
-            text={getWalkTitle(walk, user?.uid)}
-            fontSize={18}
-            fontWeight="600"
-            color="$gray12"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            flex={1}
-          />
-
-          {/* Simple menu button that triggers the global menu context */}
-          {isMine && (
-            <WalkMenu walk={walk} hideInviteOption={hideInviteOption} />
-          )}
-        </XStack>
-
-        <XStack alignItems="center" gap={6} justifyContent="space-between">
-          <IconTextRow
-            icon={<Calendar size={16} color="#666" />}
-            text={format(walk.date.toDate(), "EEE, MMM d 'at' h:mm a")}
-            fontSize={14}
-            color="#666"
-            gap={6}
-          />
-          {status === "active" && (
-            <XStack
-              backgroundColor="#4caf50"
-              paddingHorizontal={8}
-              paddingVertical={4}
-              borderRadius={4}
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Text fontSize={12} color="white" fontWeight="500">
-                Happening now!
-              </Text>
-            </XStack>
-          )}
-        </XStack>
-        <IconTextRow
-          icon={<Timer size={16} color="#666" />}
-          text={`${walk.durationMinutes} minutes`}
-          fontSize={14}
-          color="#666"
-          gap={6}
+        <CardHeader
+          icon={<UserAvatar uid={walk.createdByUid} size={32} />}
+          title={getWalkTitle(walk, user?.uid)}
+          action={
+            isMine && (
+              <WalkMenu walk={walk} hideInviteOption={hideInviteOption} />
+            )
+          }
         />
-        {locationDisplay}
-
+        <IconTextRow
+          icon={<Calendar size={16} color="#999" />}
+          text={format(walk.date.toDate(), "EEE, MMM d 'at' h:mm a")}
+          right={
+            status === "active" ? (
+              <XStack
+                paddingHorizontal={8}
+                paddingVertical={4}
+                borderRadius={4}
+                alignItems="center"
+                justifyContent="center"
+                borderColor="#4caf50"
+                borderWidth={1}
+              >
+                <Text fontSize={12} color="#4caf50" fontWeight="500">
+                  Happening now!
+                </Text>
+              </XStack>
+            ) : undefined
+          }
+        />
+        <IconTextRow
+          icon={<Timer size={16} color="#999" />}
+          text={`${walk.durationMinutes} minutes`}
+        />
+        <LocationDisplay
+          walk={walk}
+          userCoords={coords}
+          locationLoading={locationLoading}
+          locationError={locationError}
+          isApproved={isApproved}
+          isMine={isMine}
+        />
         {/* Participants section */}
-        <YStack gap="$2" pt="$2">
+        <YStack gap="$2">
           {/* If user has cancelled their participation */}
           {isCancelled && (
             <XStack
@@ -265,42 +174,39 @@ const WalkCard: React.FC<Props> = ({
               </Text>
             </XStack>
           )}
-          {/* Show participants section for all users, it will render the appropriate view internally */}
-          <ParticipantsSection walk={walk} currentUserUid={user?.uid} />
+
+          {/* Unified participants display component */}
+          <ParticipantsDisplay
+            walk={walk}
+            currentUserUid={user?.uid}
+            isMine={isMine}
+          />
 
           {/* Show action buttons for non-owners when showActions is true */}
           {!isMine && showActions ? (
             <>
               {/* If user is approved - show "See walk details" button */}
               {isApproved && (
-                <Button
-                  backgroundColor={COLORS.primary}
-                  size="$3"
-                  flex={1}
-                  mt="$2"
+                <WalkCardButton
+                  label="See walk details"
                   onPress={onPress}
                   icon={<CheckCircle color="white" size={16} />}
-                >
-                  <Text fontSize={12} fontWeight="bold" color="white">
-                    See walk details
-                  </Text>
-                </Button>
+                  size="$3"
+                  fontWeight="bold"
+                  backgroundColor={COLORS.primary}
+                />
               )}
 
               {/* If user has been invited but hasn't responded */}
               {isInvited && !isApproved && !isRejected && !isCancelled && (
-                <Button
-                  backgroundColor={COLORS.primary}
-                  size="$3"
-                  flex={1}
-                  mt="$2"
+                <WalkCardButton
+                  label="Respond to invitation"
                   onPress={onPress}
                   icon={<Hand color="white" size={16} />}
-                >
-                  <Text fontSize={12} fontWeight="bold" color="white">
-                    Respond to invitation
-                  </Text>
-                </Button>
+                  size="$3"
+                  fontWeight="bold"
+                  backgroundColor={COLORS.primary}
+                />
               )}
 
               {/* If user has requested to join and it's rejected */}
@@ -328,18 +234,14 @@ const WalkCard: React.FC<Props> = ({
                 walkIsNeighborhoodWalk(walk) &&
                 !isInvited &&
                 status !== "past" && (
-                  <Button
-                    backgroundColor={COLORS.primary}
-                    size="$3"
-                    flex={1}
-                    mt="$2"
+                  <WalkCardButton
+                    label="Join this walk"
                     onPress={onPress}
                     icon={<Hand color="white" size={16} />}
-                  >
-                    <Text fontSize={12} fontWeight="bold" color="white">
-                      Join this walk
-                    </Text>
-                  </Button>
+                    size="$3"
+                    fontWeight="bold"
+                    backgroundColor={COLORS.primary}
+                  />
                 )}
             </>
           ) : null}

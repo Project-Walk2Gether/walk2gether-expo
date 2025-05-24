@@ -11,7 +11,11 @@ interface TypeSelectionProps {
   totalSteps?: number;
 }
 
-export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue, currentStep, totalSteps }) => {
+export const TypeSelection: React.FC<TypeSelectionProps> = ({
+  onContinue,
+  currentStep,
+  totalSteps,
+}) => {
   const { formData, updateFormData } = useWalkForm();
 
   // When a type is selected, update the form data and proceed
@@ -34,7 +38,7 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue, curren
           icon="people-outline"
           color="#5A67F2"
           backgroundColor="#E7E9FE"
-          description="Schedule a walk with a friend in the future"
+          description="Schedule a walk with a friend"
           selected={formData.type === "friends"}
           onSelect={setSelectedWalkType}
         />
@@ -44,7 +48,7 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({ onContinue, curren
           icon="home-outline"
           color="#47C97E"
           backgroundColor="#E4F6ED"
-          description="Start a walk in your neighborhood now"
+          description="Start a walk in your neighborhood"
           selected={formData.type === "neighborhood"}
           onSelect={setSelectedWalkType}
         />

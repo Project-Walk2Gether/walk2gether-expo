@@ -204,10 +204,6 @@ export const InviteSelection: React.FC<Props> = ({
 
   // Generate and share the invitation link
   const getInvitationLink = () => {
-    console.log("[InviteSelection] Getting invitation link...");
-    console.log("[InviteSelection] User data:", JSON.stringify(userData || {}));
-    console.log("[InviteSelection] Effective walk ID:", effectiveWalkId);
-
     // Need user's invitation code and walk ID to generate a valid link
     if (!userData?.friendInvitationCode) {
       console.warn(
@@ -258,7 +254,7 @@ export const InviteSelection: React.FC<Props> = ({
       // On iOS, the url parameter is used for the share sheet, while message is the actual content
       // On Android, message is used directly
       const result = await Share.share({
-        message: `Join my walk! ${link}`,
+        message: `I am using the Walk2Gether app to organize my walk. You should check it out. ${link}`,
         title: "Invite friends to Walk2Gether",
         // Don't include url parameter to avoid duplicate links
       });
@@ -287,7 +283,8 @@ export const InviteSelection: React.FC<Props> = ({
     console.log(
       "[InviteSelection] handleSubmit - Submitting participant selection"
     );
-    // Should confirm and then show the next screen if all is well
+
+    // Should confirm and then update participants
     if (!effectiveWalkId || !userData) {
       showMessage(
         "Unable to update participants. Missing walk ID or user data.",
@@ -298,12 +295,15 @@ export const InviteSelection: React.FC<Props> = ({
 
     // Check if we should proceed to the next screen or show a confirmation
     const handleProceed = () => {
-      if (participantUids.length === 0) {
+      if (
+        participantUids.length === 0 &&
+        (friendships.length > 0 || nearbyUserIds.length > 0)
+      ) {
         // Show a confirmation dialog if no users are selected
         Alert.alert(
           "No Participants Selected",
           isNeighborhoodWalk
-            ? "Your walk will be visible to users in your area. You can also invite specific friends later."
+            ? "Are you sure you want to continue without inviting any neighbors?"
             : "Are you sure you want to continue without inviting any friends?",
           [
             {
@@ -324,41 +324,44 @@ export const InviteSelection: React.FC<Props> = ({
 
     // Submit participants function to avoid duplicating code
     const submitParticipants = async () => {
-      console.log("[InviteSelection] submitParticipants - Starting submission");
-      console.log("[InviteSelection] Walk ID:", effectiveWalkId);
-      console.log(
-        "[InviteSelection] Participant UIDs:",
-        JSON.stringify(participantUids)
-      );
-      console.log(
-        "[InviteSelection] Current user data:",
-        JSON.stringify(userData || {})
-      );
-
       setIsSubmitting(true);
 
       try {
-        console.log("[InviteSelection] Calling updateParticipants...");
-        // Update the participants collection with the selected user IDs
-        await updateParticipants(
-          effectiveWalkId as string,
-          participantUids,
-          userData
+        // Wrap the updateParticipants call in a try/catch to catch any synchronous errors
+        try {
+          // Update the participants collection with the selected user IDs
+          await updateParticipants(
+            effectiveWalkId as string,
+            participantUids,
+            userData
+          );
+          console.log(
+            "[InviteSelection] updateParticipants call completed successfully"
+          );
+        } catch (innerError) {
+          console.error(
+            "[InviteSelection] ERROR in updateParticipants call:",
+            innerError
+          );
+          throw innerError; // Re-throw to be caught by outer try/catch
+        }
+
+        console.log(
+          "[InviteSelection] updateParticipants successful, calling onContinue"
         );
-        console.log("[InviteSelection] updateParticipants successful!");
 
         // Call the onContinue prop to advance to the next screen
-        console.log(
-          "[InviteSelection] Calling onContinue to advance to next screen"
-        );
         onContinue();
       } catch (error) {
-        console.error("[InviteSelection] ERROR updating participants:", error);
+        console.error("[InviteSelection] ERROR in submission process:", error);
         console.error(
           "[InviteSelection] Error details:",
-          JSON.stringify(error)
+          error?.toString ? error.toString() : JSON.stringify(error)
         );
-        showMessage("Failed to update participants", "error");
+        showMessage(
+          "Failed to update participants. Please try again.",
+          "error"
+        );
       } finally {
         console.log("[InviteSelection] Setting isSubmitting to false");
         setIsSubmitting(false);

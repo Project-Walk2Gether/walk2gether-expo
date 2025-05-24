@@ -20,6 +20,7 @@ import {
   YStack,
 } from "tamagui";
 import WizardWrapper from "./WizardWrapper";
+// Note: We're using the default export here (no named exports)
 
 interface Props {
   onContinue: () => void;

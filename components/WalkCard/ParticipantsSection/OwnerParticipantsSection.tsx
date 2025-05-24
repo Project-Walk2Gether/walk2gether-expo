@@ -47,7 +47,7 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
   });
 
   return (
-    <YStack borderTopWidth={1} borderTopColor="$gray4" pt={12} gap={"$2"}>
+    <YStack gap={"$2"}>
       {/* Accepted participants */}
       {acceptedParticipants.length > 0 && (
         <XStack alignItems="center" gap={8}>

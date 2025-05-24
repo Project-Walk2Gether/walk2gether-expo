@@ -35,6 +35,7 @@ import {
   Spinner,
   Text,
   View,
+  XStack,
   YStack,
 } from "tamagui";
 
@@ -305,25 +306,33 @@ export default function MeScreen() {
         <ActionRow
           icon={
             isCheckingForUpdate ? (
-              <Spinner size="small" color={COLORS.primary} />
+              <Spinner
+                size="small"
+                color={isUpdateAvailable ? "white" : COLORS.primary}
+              />
             ) : (
-              <Info size={24} color={COLORS.textSecondary} />
+              <Info
+                size={24}
+                color={isUpdateAvailable ? "white" : COLORS.textSecondary}
+              />
             )
           }
           title="Version"
           secondaryText={appVersion}
+          onPress={isUpdateAvailable ? applyUpdate : undefined}
           action={
-            isUpdateAvailable && (
-              <Button
-                size="$2"
-                bg={COLORS.accent1}
-                onPress={applyUpdate}
-                icon={<Download size={16} />}
-              >
-                Update
-              </Button>
-            )
+            isUpdateAvailable ? (
+              <XStack alignItems="center" space="$2">
+                <Download size={16} color="white" />
+                <Text color="white" fontWeight="500">
+                  Apply the latest update
+                </Text>
+              </XStack>
+            ) : undefined
           }
+          backgroundColor={isUpdateAvailable ? COLORS.accent1 : undefined}
+          titleColor={isUpdateAvailable ? "white" : undefined}
+          secondaryTextColor={isUpdateAvailable ? "white" : undefined}
         />
 
         <Separator borderColor="$gray5" />

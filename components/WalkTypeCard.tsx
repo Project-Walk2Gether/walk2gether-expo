@@ -54,7 +54,7 @@ export default function WalkTypeCard({
       shadowRadius={selected ? 6 : 4}
       elevation={selected ? 6 : 0}
     >
-      <XStack gap="$4" padding="$4" alignItems="center">
+      <XStack gap="$3" padding="$3" alignItems="center">
         <View
           width={50}
           height={50}

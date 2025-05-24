@@ -1,77 +1,90 @@
 import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
-import React from "react";
+import React, { memo } from "react";
 import { Card, Text, XStack, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
 import { UserAvatar } from "./UserAvatar";
+import WalkIcon from "./WalkIcon";
 
 interface Props {
   friendship: Friendship;
   onPress?: () => void;
 }
 
-export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
-  const { user } = useAuth();
+// Helper function to format timestamp, moved outside of any component
+const formatTimestamp = (timestamp: any): string => {
+  if (!timestamp || !timestamp.toDate) return "";
 
-  // Find the ID of the user that isn't the current user
-  const friendId = user?.uid
-    ? friendship.uids.find((uid) => uid !== user.uid)
-    : null;
+  const date = timestamp.toDate();
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-  // Get friend data directly from the denormalized friendship document
-  const friendData =
-    friendId && friendship.userDataByUid
-      ? friendship.userDataByUid[friendId]
-      : null;
-
-  // Format the timestamp for display
-  const formatTimestamp = (timestamp: any): string => {
-    if (!timestamp || !timestamp.toDate) return "";
-
-    const date = timestamp.toDate();
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (dayDiff === 0) {
-      // Today, show time
-      return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } else if (dayDiff === 1) {
-      return "Yesterday";
-    } else if (dayDiff < 7) {
-      // Show day of week
-      return [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ][date.getDay()];
-    } else {
-      // Show date
-      return date.toLocaleDateString([], { month: "short", day: "numeric" });
-    }
-  };
-
-  // Handle case where friend data is not found
-  if (!friendData) {
-    return (
-      <Card padding="$4" marginVertical="$2" backgroundColor="$red3">
-        <Text color="$red10">Friend data not found</Text>
-      </Card>
-    );
+  if (dayDiff === 0) {
+    // Today, show time
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } else if (dayDiff === 1) {
+    return "Yesterday";
+  } else if (dayDiff < 7) {
+    // Show day of week
+    return [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ][date.getDay()];
+  } else {
+    // Show date
+    return date.toLocaleDateString([], { month: "short", day: "numeric" });
   }
+};
 
+// Separate component for when the friend is setting up
+const SetupPendingCard = memo(() => {
+  return (
+    <Card
+      padding="$4"
+      marginVertical="$2"
+      backgroundColor="$blue2"
+      alignItems="center"
+      gap="$2"
+    >
+      <WalkIcon size={40} color={COLORS.primary} opacity={0.8} />
+      <YStack alignItems="center" gap="$1">
+        <Text fontWeight="bold" color="$blue10">
+          Friend is Setting Up
+        </Text>
+        <Text color="$blue8" textAlign="center">
+          A friend has accepted your invitation but hasn't completed their
+          account setup in the Walk2Gether app yet.
+        </Text>
+      </YStack>
+    </Card>
+  );
+});
+
+// Separate component for when the friend data is available
+const FriendDataCard = memo(({ 
+  friendship, 
+  friendId, 
+  friendData, 
+  onPress 
+}: { 
+  friendship: Friendship; 
+  friendId: string | null; 
+  friendData: any; 
+  onPress?: () => void; 
+}) => {
   const lastMessageTime = friendship.lastMessageAt
     ? formatTimestamp(friendship.lastMessageAt)
     : "";
-
-  // Check if there are unread messages (we'll need to implement this later)
+    
   return (
     <Card
       padding="$2"
@@ -123,6 +136,36 @@ export const FriendshipCard: React.FC<Props> = ({ friendship, onPress }) => {
       </XStack>
     </Card>
   );
-};
+});
+
+// Main component that chooses which card to render
+export const FriendshipCard: React.FC<Props> = memo(({ friendship, onPress }) => {
+  const { user } = useAuth();
+
+  // Find the ID of the user that isn't the current user
+  const friendId = user?.uid
+    ? friendship.uids.find((uid) => uid !== user.uid)
+    : null;
+
+  // Get friend data directly from the denormalized friendship document
+  const friendData =
+    friendId && friendship.userDataByUid
+      ? friendship.userDataByUid[friendId]
+      : null;
+
+  // Render the appropriate card based on whether friend data exists
+  if (!friendData) {
+    return <SetupPendingCard />;
+  }
+
+  return (
+    <FriendDataCard 
+      friendship={friendship} 
+      friendId={friendId || null} 
+      friendData={friendData} 
+      onPress={onPress} 
+    />
+  );
+});
 
 export default FriendshipCard;

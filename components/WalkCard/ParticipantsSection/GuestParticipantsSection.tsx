@@ -48,7 +48,7 @@ export const GuestParticipantsSection: React.FC<Props> = ({
   );
 
   return (
-    <YStack borderTopWidth={1} borderTopColor="$gray4" mt={12} pt={12} gap={16}>
+    <YStack gap={16}>
       <XStack alignItems="center">
         {/* Only show avatars for participants (excluding organizer) */}
         <XStack justifyContent="flex-start" gap={-10} flexShrink={1}>

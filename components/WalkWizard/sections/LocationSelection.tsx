@@ -9,14 +9,15 @@ import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
 import { getDistanceMeters, getRegionForRadius } from "@/utils/geo";
 import { reverseGeocode } from "@/utils/locationUtils";
-import { findNearbyWalkers } from "@/utils/userSearch";
 import { writeLogIfEnabled } from "@/utils/logging";
+import { findNearbyWalkers } from "@/utils/userSearch";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, YStack } from "tamagui";
-import WizardWrapper from "./WizardWrapper";
+import WizardWrapper, { WizardWrapperHandle } from "./WizardWrapper";
 
 interface Props {
   onContinue: () => void;
@@ -66,6 +67,17 @@ export const LocationSelection: React.FC<Props> = ({
   const [pendingLocationRequest, setPendingLocationRequest] = useState(false);
   const mapRef = useRef<MapView>(null);
   const googlePlacesRef = useRef<GooglePlacesAutocompleteRef>(null);
+
+  // Reference to the WizardWrapper component to control scrolling
+  const wizardWrapperRef = useRef<WizardWrapperHandle>(null);
+  
+  // Function to handle focus on the meetup location input
+  const handleMeetupLocationFocus = () => {
+    // Scroll to the bottom of the scroll view when the meetup location input is focused
+    setTimeout(() => {
+      wizardWrapperRef.current?.scrollToEnd();
+    }, 100); // Small delay to ensure the keyboard is showing first
+  };
 
   // Listen for coordinate changes when a location request is pending
   useEffect(() => {
@@ -246,13 +258,14 @@ export const LocationSelection: React.FC<Props> = ({
 
   return (
     <WizardWrapper
+      ref={wizardWrapperRef}
       onContinue={handleContinue}
       onBack={onBack}
       currentStep={currentStep}
       totalSteps={totalSteps}
       continueDisabled={!formData.startLocation}
     >
-      <YStack gap="$4">
+      <YStack space="$4">
         <View zIndex={1}>
           <PlacesAutocomplete
             ref={googlePlacesRef}
@@ -285,18 +298,21 @@ export const LocationSelection: React.FC<Props> = ({
         </View>
         <LocationButton
           onPress={async () => {
-            writeLogIfEnabled({ 
-              message: "Location request started", 
-              metadata: { timestamp: new Date().toISOString() } 
+            writeLogIfEnabled({
+              message: "Location request started",
+              metadata: { timestamp: new Date().toISOString() },
             });
-            
+
             try {
               // Set the flag to indicate we're waiting for location coordinates
               setPendingLocationRequest(true);
               setIsReverseGeocoding(true);
-              writeLogIfEnabled({ 
-                message: "State flags set, about to call getLocation", 
-                metadata: { pendingLocationRequest: true, isReverseGeocoding: true } 
+              writeLogIfEnabled({
+                message: "State flags set, about to call getLocation",
+                metadata: {
+                  pendingLocationRequest: true,
+                  isReverseGeocoding: true,
+                },
               });
 
               // Call getLocation to update the location context
@@ -304,26 +320,28 @@ export const LocationSelection: React.FC<Props> = ({
               // when they are updated
               writeLogIfEnabled({ message: "Calling getLocation" });
               const location = await getLocation();
-              writeLogIfEnabled({ 
-                message: "getLocation completed successfully", 
-                metadata: { location } 
+              writeLogIfEnabled({
+                message: "getLocation completed successfully",
+                metadata: { location },
               });
               console.log({ location });
             } catch (error) {
-              const errorMessage = error instanceof Error ? error.message : String(error);
-              const errorStack = error instanceof Error ? error.stack : undefined;
-              writeLogIfEnabled({ 
-                message: "Error getting current location", 
-                metadata: { error: errorMessage, stack: errorStack } 
+              const errorMessage =
+                error instanceof Error ? error.message : String(error);
+              const errorStack =
+                error instanceof Error ? error.stack : undefined;
+              writeLogIfEnabled({
+                message: "Error getting current location",
+                metadata: { error: errorMessage, stack: errorStack },
               });
               console.error("Error getting current location:", error);
               setIsReverseGeocoding(false);
               setPendingLocationRequest(false);
             } finally {
               // Ensure flags are reset even if the code after getLocation() silently fails
-              writeLogIfEnabled({ 
-                message: "Location request completed (finally block)", 
-                metadata: { timestamp: new Date().toISOString() } 
+              writeLogIfEnabled({
+                message: "Location request completed (finally block)",
+                metadata: { timestamp: new Date().toISOString() },
               });
             }
           }}
@@ -464,6 +482,7 @@ export const LocationSelection: React.FC<Props> = ({
           onChangeText={setNotes}
           multiline
           numberOfLines={3}
+          onFocus={handleMeetupLocationFocus}
         />
       </YStack>
     </WizardWrapper>

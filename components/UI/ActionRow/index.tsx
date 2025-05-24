@@ -14,6 +14,9 @@ interface Props {
   children?: ReactNode;
   action?: ReactNode;
   isLast?: boolean;
+  backgroundColor?: string;
+  titleColor?: string;
+  secondaryTextColor?: string;
 }
 
 const ActionRow: React.FC<Props> = ({
@@ -27,6 +30,9 @@ const ActionRow: React.FC<Props> = ({
   children,
   action,
   isLast = false,
+  backgroundColor,
+  titleColor = COLORS.text,
+  secondaryTextColor = COLORS.textSecondary,
 }) => {
   const content = (
     <YStack
@@ -37,6 +43,7 @@ const ActionRow: React.FC<Props> = ({
       minHeight={50}
       borderBottomWidth={isLast ? 0 : 1}
       borderBottomColor={COLORS.border}
+      backgroundColor={backgroundColor}
     >
       {icon && <View mr="$3">{React.isValidElement(icon) && icon}</View>}
       <View flex={1} justifyContent="center">
@@ -48,10 +55,10 @@ const ActionRow: React.FC<Props> = ({
         {title && secondaryText && (
           <XStack flex={1} justifyContent="space-between" alignItems="center">
             <YStack>
-              <Text fontSize={12} fontWeight="bold" color={COLORS.text}>
+              <Text fontSize={12} fontWeight="bold" color={titleColor}>
                 {title}
               </Text>
-              <Text fontSize={16} color={COLORS.textSecondary}>
+              <Text fontSize={16} color={secondaryTextColor}>
                 {secondaryText}
               </Text>
             </YStack>
@@ -62,7 +69,7 @@ const ActionRow: React.FC<Props> = ({
         )}
         {!title && secondaryText && (
           <XStack flex={1} justifyContent="space-between" alignItems="center">
-            <Text fontSize={16} color={COLORS.textSecondary}>
+            <Text fontSize={16} color={secondaryTextColor}>
               {secondaryText}
             </Text>
             {action && (

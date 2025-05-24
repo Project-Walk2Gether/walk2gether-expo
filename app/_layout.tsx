@@ -1,17 +1,16 @@
 import { withErrorBoundary } from "@/components/ErrorBoundary";
 import { withAuthProvider } from "@/context/AuthContext";
-import { FlashMessageProvider } from "@/context/FlashMessageContext";
+import { withFlashMessage } from "@/context/FlashMessageProvider";
+import { withTamagui } from "@/context/TamaguiProvider";
+import { withUpdates } from "@/context/UpdatesContext";
 import { useAppStateUpdates } from "@/hooks/useAppStateUpdates";
 import { configureNotifications } from "@/utils/notifications";
 import { Stack } from "expo-router";
-import React, { ComponentType } from "react";
+import flowRight from "lodash/flowRight";
+import React from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { TamaguiProvider } from "tamagui";
-import "../config/emulators";
-import { tamaguiConfig } from "../tamagui.config";
-
-import { UpdatesProvider } from "@/context/UpdatesContext";
 import "react-native-get-random-values";
+import "../config/emulators";
 
 // https://github.com/FaridSafi/react-native-google-places-autocomplete#more-examples
 (navigator as any).geolocation = require("@react-native-community/geolocation");
@@ -19,68 +18,58 @@ import "react-native-get-random-values";
 // Configure notifications at the app initialization
 configureNotifications();
 
-function AppContent() {
-  // Use our custom hook to handle app state updates
+/**
+ * Main App component that wraps the entire application
+ */
+function App() {
+  // Use our custom hook to handle app state updates (includes update checking)
   useAppStateUpdates();
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen
-        name="(app)"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="join"
-        options={{
-          headerShown: false,
-          animation: "none",
-        }}
-      />
-      <Stack.Screen
-        name="auth"
-        options={{
-          headerShown: false,
-          animation: "none",
-        }}
-      />
-    </Stack>
-  );
-}
-
-// Higher-Order Component for TamaguiProvider
-export const withTamagui = <P extends object>(Component: ComponentType<P>) => {
-  return (props: P) => (
-    <TamaguiProvider config={tamaguiConfig}>
-      <Component {...props} />
-    </TamaguiProvider>
-  );
-};
-
-// Higher-Order Component for FlashMessageProvider
-export const withFlashMessage = <P extends object>(
-  Component: ComponentType<P>
-) => {
-  return (props: P) => (
-    <FlashMessageProvider>
-      <Component {...props} />
-    </FlashMessageProvider>
-  );
-};
-
-function RootLayout() {
-  return (
-    <GestureHandlerRootView>
-      <UpdatesProvider>
-        <AppContent />
-      </UpdatesProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen
+          name="(app)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="join"
+          options={{
+            headerShown: false,
+            animation: "none",
+          }}
+        />
+        <Stack.Screen
+          name="auth"
+          options={{
+            headerShown: false,
+            animation: "none",
+          }}
+        />
+      </Stack>
     </GestureHandlerRootView>
   );
 }
 
-// Export the RootLayout wrapped with all providers
-export default withTamagui(
-  withFlashMessage(withErrorBoundary(withAuthProvider(RootLayout)))
+/**
+ * Compose all HOCs into a single enhancer function
+ * This creates a wrapped component with all providers in the correct order:
+ * - withTamagui (outermost) - UI theme provider
+ * - withFlashMessage - Flash messages
+ * - withErrorBoundary - Error handling
+ * - withUpdates - OTA updates
+ * - withAuthProvider (innermost) - Authentication
+ */
+const enhance = flowRight(
+  withTamagui,
+  withFlashMessage,
+  withErrorBoundary, 
+  withUpdates,
+  withAuthProvider
 );
+
+// Export the App component wrapped with all providers
+export default enhance(App);

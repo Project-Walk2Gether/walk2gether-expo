@@ -127,15 +127,7 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
         setError("Error: " + err.message);
       } finally {
         // If we didn't find a location, reset loading state immediately
-        if (!locationFound.current) {
-          setLoading(false);
-        }
-        // Otherwise, set a backup timer to ensure loading is eventually reset
-        // This is a fallback in case the progress animation's onComplete doesn't fire
-        else {
-          // Set a maximum timeout to ensure loading state is reset even if animation fails
-          setTimeout(() => setLoading(false), expectedWaitTime + 1000);
-        }
+        setLoading(false);
       }
     }
     // Always try to detect location if we don't have one yet

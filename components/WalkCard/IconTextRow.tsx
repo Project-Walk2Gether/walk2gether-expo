@@ -5,50 +5,37 @@ interface Props {
   /**
    * The icon component to display
    */
-  icon: ReactNode;
-  
+  icon: React.ReactElement;
+
   /**
    * Text content to display next to the icon
    */
-  text: ReactNode;
-  
-  /**
-   * Optional gap between icon and text
-   * @default "$1.5"
-   */
-  gap?: string | number;
-  
-  /**
-   * Optional text style props
-   */
-  fontSize?: number;
-  fontWeight?: string;
-  color?: string;
-  
+  text: string | React.ReactNode;
+
   /**
    * Optional number of lines for text truncation
    */
   numberOfLines?: number;
+
+  /**
+   * Content to display after the text (like a button or badge)
+   */
+  afterContent?: ReactNode;
+
+  /**
+   * Content to display on the right side of the row (pushed to the far right)
+   */
+  right?: React.ReactElement;
   
   /**
-   * Optional ellipsis mode for text truncation
+   * Text color to use
    */
-  ellipsizeMode?: "head" | "middle" | "tail" | "clip";
+  color?: string;
   
   /**
-   * Optional flex value for the XStack
+   * Handler for when the row is pressed
    */
-  flex?: number;
-  
-  /**
-   * Optional additional props to pass to the XStack
-   */
-  xStackProps?: React.ComponentProps<typeof XStack>;
-  
-  /**
-   * Optional additional props to pass to the Text component
-   */
-  textProps?: React.ComponentProps<typeof Text>;
+  onPress?: () => void;
 }
 
 /**
@@ -57,35 +44,36 @@ interface Props {
 export const IconTextRow: React.FC<Props> = ({
   icon,
   text,
-  gap = "$1.5",
-  fontSize = 14,
-  fontWeight = "400",
-  color = "$gray12",
+  afterContent,
+  right,
   numberOfLines,
-  ellipsizeMode,
-  flex,
-  xStackProps,
-  textProps,
+  color = "#555",
+  onPress,
 }) => {
   return (
     <XStack 
       alignItems="center" 
-      gap={gap} 
-      flex={flex}
-      {...xStackProps}
+      gap="$2" 
+      minHeight={30}
+      onPress={onPress}
+      pressStyle={onPress ? { opacity: 0.7 } : undefined}
+      hoverStyle={onPress ? { opacity: 0.9 } : undefined}
     >
-      {icon}
-      <Text
-        fontSize={fontSize}
-        fontWeight={fontWeight}
-        color={color}
-        numberOfLines={numberOfLines}
-        ellipsizeMode={ellipsizeMode}
-        flex={numberOfLines ? 1 : undefined}
-        {...textProps}
-      >
-        {text}
-      </Text>
+      <XStack alignItems="center" gap="$2" flex={right ? 1 : undefined}>
+        {icon}
+        <Text
+          fontSize={14}
+          fontWeight="400"
+          color={color}
+          numberOfLines={numberOfLines}
+          ellipsizeMode="tail"
+          flex={numberOfLines && !afterContent ? 1 : undefined}
+        >
+          {text}
+        </Text>
+        {afterContent}
+      </XStack>
+      {right}
     </XStack>
   );
 };

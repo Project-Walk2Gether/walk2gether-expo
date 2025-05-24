@@ -6,7 +6,7 @@ import { useDoc } from "@/utils/firestore";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
-import { Text } from "tamagui";
+import { Text, Button, XStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
 
 export default function InviteScreen() {
@@ -76,8 +76,7 @@ export default function InviteScreen() {
     <>
       <Stack.Screen
         options={{
-          title:
-            walk.type === "neighborhood"
+          headerTitle: walk?.type === "neighborhood" 
               ? "Notify Neighbors"
               : "Invite Friends",
           headerRight: () => <HeaderCloseButton />,
@@ -87,7 +86,20 @@ export default function InviteScreen() {
       {/* Render the InviteSelection component directly */}
       {walk && (
         <InviteSelection
-          onContinue={() => router.back()} // Close the screen when Done is pressed
+          onContinue={() => {
+            console.log('[InviteScreen] onContinue called, attempting navigation');
+            try {
+              if (router.canGoBack()) {
+                console.log('[InviteScreen] Can go back, using router.back()');
+                router.back();
+              } else {
+                console.log('[InviteScreen] Cannot go back, navigating to walks list');
+                router.push('/walks');
+              }
+            } catch (error) {
+              console.error('[InviteScreen] Error during navigation:', error);
+            }
+          }}
           walkId={id} // Pass the walk ID from the route params
           walkType={walk.type} // Pass the walk type
           invitationCode={walk.invitationCode} // Pass the walk's invitation code
