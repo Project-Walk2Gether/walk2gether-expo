@@ -2,12 +2,19 @@ import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
+import { calculateDisplayAvatars } from "@/utils/participantAvatars";
 import { getWalkTitle } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
-import { Calendar, CheckCircle, Hand, Timer } from "@tamagui/lucide-icons";
+import {
+  Calendar,
+  CheckCircle,
+  Hand,
+  SquareArrowOutUpRight,
+  Timer,
+} from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React from "react";
-import { Card, Text, XStack, YStack } from "tamagui";
+import { Card, Text, View, XStack, YStack } from "tamagui";
 import {
   Participant,
   Walk,
@@ -86,6 +93,32 @@ const WalkCard: React.FC<Props> = ({
       ? !!walk.participantsById[user.uid] &&
         walk.participantsById[user.uid].sourceType !== "requested"
       : false;
+
+  // Check if the current user has accepted the invitation (logic moved from ParticipantsDisplay)
+  const currentUserHasAccepted = React.useMemo(() => {
+    if (!user?.uid || isMine) return true; // Owner or no user ID - not relevant
+
+    // If the user has a participant record with participantsById
+    if (walk.participantsById && walk.participantsById[user.uid]) {
+      const participant = walk.participantsById[user.uid] as Participant;
+      return (
+        participant.acceptedAt !== undefined && participant.acceptedAt !== null
+      );
+    }
+
+    return false; // No participant record found
+  }, [user?.uid, isMine, walk.participantsById]);
+
+  // Calculate display avatars using the utility function
+  const { displayAvatars, overflow, hasNonOwnerParticipants } =
+    React.useMemo(() => {
+      return calculateDisplayAvatars(walk, user?.uid, isMine);
+    }, [walk, user?.uid, isMine]);
+
+  // Determine if we should show the participants display
+  const shouldShowParticipantsDisplay =
+    isMine || (currentUserHasAccepted && hasNonOwnerParticipants);
+
   // Use the extracted LocationDisplay component
 
   return (
@@ -102,7 +135,7 @@ const WalkCard: React.FC<Props> = ({
       animation="bouncy"
       overflow="hidden"
       // Reduce opacity for cancelled walks
-      opacity={!isMine && isCancelled ? 0.7 : 1}
+      opacity={!isMine && isCancelled ? 0.85 : 1}
     >
       {/* Attachments Carousel - Not pressable */}
       {showAttachments && <WalkAttachmentsCarousel walk={walk} />}
@@ -157,6 +190,17 @@ const WalkCard: React.FC<Props> = ({
           isApproved={isApproved}
           isMine={isMine}
         />
+
+        {/* You're going section - only shows for participants who aren't the owner */}
+        {isApproved && !isMine && (
+          <IconTextRow
+            icon={<CheckCircle size={16} color="#4CAF50" />}
+            text="You're going"
+            textColor="#4CAF50"
+            textWeight="500"
+          />
+        )}
+
         {/* Participants section */}
         <YStack gap="$2">
           {/* If user has cancelled their participation */}
@@ -175,22 +219,26 @@ const WalkCard: React.FC<Props> = ({
             </XStack>
           )}
 
-          {/* Unified participants display component */}
-          <ParticipantsDisplay
-            walk={walk}
-            currentUserUid={user?.uid}
-            isMine={isMine}
-          />
+          {/* Unified participants display component - only render if conditions are met */}
+          {shouldShowParticipantsDisplay && (
+            <ParticipantsDisplay
+              walk={walk}
+              currentUserUid={user?.uid}
+              isMine={isMine}
+              displayAvatars={displayAvatars}
+              overflow={overflow}
+            />
+          )}
 
           {/* Show action buttons for non-owners when showActions is true */}
-          {!isMine && showActions ? (
-            <>
+          {!isMine && showActions && !isCancelled ? (
+            <View mt="$3">
               {/* If user is approved - show "See walk details" button */}
               {isApproved && (
                 <WalkCardButton
                   label="See walk details"
                   onPress={onPress}
-                  icon={<CheckCircle color="white" size={16} />}
+                  icon={<SquareArrowOutUpRight color="white" size={16} />}
                   size="$3"
                   fontWeight="bold"
                   backgroundColor={COLORS.primary}
@@ -243,7 +291,7 @@ const WalkCard: React.FC<Props> = ({
                     backgroundColor={COLORS.primary}
                   />
                 )}
-            </>
+            </View>
           ) : null}
         </YStack>
       </YStack>

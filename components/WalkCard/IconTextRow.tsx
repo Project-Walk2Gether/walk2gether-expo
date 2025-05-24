@@ -26,12 +26,22 @@ interface Props {
    * Content to display on the right side of the row (pushed to the far right)
    */
   right?: React.ReactElement;
-  
+
   /**
    * Text color to use
    */
   color?: string;
   
+  /**
+   * Text color to use specifically for the text (overrides color)
+   */
+  textColor?: string;
+  
+  /**
+   * Font weight for the text
+   */
+  textWeight?: string;
+
   /**
    * Handler for when the row is pressed
    */
@@ -48,23 +58,18 @@ export const IconTextRow: React.FC<Props> = ({
   right,
   numberOfLines,
   color = "#555",
+  textColor,
+  textWeight = "400",
   onPress,
 }) => {
   return (
-    <XStack 
-      alignItems="center" 
-      gap="$2" 
-      minHeight={30}
-      onPress={onPress}
-      pressStyle={onPress ? { opacity: 0.7 } : undefined}
-      hoverStyle={onPress ? { opacity: 0.9 } : undefined}
-    >
+    <XStack alignItems="center" gap="$2" minHeight={30} onPress={onPress}>
       <XStack alignItems="center" gap="$2" flex={right ? 1 : undefined}>
         {icon}
         <Text
           fontSize={14}
-          fontWeight="400"
-          color={color}
+          fontWeight={textWeight}
+          color={textColor || color}
           numberOfLines={numberOfLines}
           ellipsizeMode="tail"
           flex={numberOfLines && !afterContent ? 1 : undefined}

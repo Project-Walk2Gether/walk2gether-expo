@@ -67,16 +67,18 @@ export const LocationDisplay: React.FC<Props> = ({
     }
   };
 
+  const showNavigateButton = (isApproved || isMine) && walk.currentLocation;
+
   // Display the location information
   return (
     <YStack gap="$1.5">
       <IconTextRow
-        onPress={handleNavigate}
+        onPress={showNavigateButton ? handleNavigate : undefined}
         icon={<Navigation size={16} color="#999" />}
         text={
           <YStack>
             <Text color="#666">{displayText}</Text>
-            {(isApproved || isMine) && (
+            {showNavigateButton && (
               <XStack gap="$1">
                 <Text color="#666">Navigate in Maps</Text>
                 <ArrowRight size={16} color="#999" />
