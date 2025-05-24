@@ -24,11 +24,15 @@ import {
   Input,
   Label,
   Text,
-  View,
   XStack,
   YStack,
 } from "tamagui";
-import { Participant, Walk, WithId } from "walk2gether-shared";
+import {
+  Participant,
+  Walk,
+  walkIsNeighborhoodWalk,
+  WithId,
+} from "walk2gether-shared";
 import QuoteWithImage from "./QuoteWithImage";
 import { BrandGradient } from "./UI";
 import WalkCard from "./WalkCard";
@@ -50,18 +54,12 @@ export default function RequestToJoinScreen({
   const [introduction, setIntroduction] = useState("");
   const [saveToProfile, setSaveToProfile] = useState(false);
   const router = useRouter();
-
   const { doc: participantDoc } = useDoc<Participant>(
     `walks/${walk.id}/participants/${user?.uid}`
   );
   const requestSent = !!participantDoc;
   const requestCancelled = participantDoc?.cancelledAt !== undefined;
   const isActivePending = requestSent && !requestCancelled;
-
-  // Check if user is friends with the walk organizer
-  const isFriendWithOrganizer = friendships.some((friendship) => {
-    return friendship.uids.includes(walk.createdByUid);
-  });
 
   // Set navigation header options
   useEffect(() => {
@@ -76,6 +74,7 @@ export default function RequestToJoinScreen({
     if (!user || !walk?.id) return;
 
     setLoading(true);
+
     try {
       // Create a request document for the user
       const participantId = user.uid; // Use the user's ID as the request ID
@@ -88,6 +87,11 @@ export default function RequestToJoinScreen({
       // For consistency, we also auto-accept friend walks if the user is friends with organizer
       const isAutoAccepted = true; // Previously was isFriendWithOrganizer
 
+      // Only include introduction for neighborhood walks
+      const introductionValue = walkIsNeighborhoodWalk(walk)
+        ? introduction.trim()
+        : "";
+
       const participant: Participant = {
         userUid: user.uid,
         displayName: userData?.name || "Anonymous",
@@ -99,7 +103,7 @@ export default function RequestToJoinScreen({
           timestamp: Timestamp.now(),
         },
         route: null,
-        introduction: introduction.trim(), // Add the introduction
+        introduction: introductionValue, // Only include introduction for neighborhood walks
         status: isAutoAccepted ? "arrived" : "pending", // Set status to arrived if auto-accepted
         navigationMethod: "driving",
         sourceType: "requested", // Adding the required sourceType field
@@ -112,7 +116,13 @@ export default function RequestToJoinScreen({
       await setDoc(participantRef, participant, { merge: true });
 
       // If user chose to save introduction to profile, update user data
-      if (saveToProfile && introduction.trim() && userData) {
+      // Only applicable for neighborhood walks
+      if (
+        walkIsNeighborhoodWalk(walk) &&
+        saveToProfile &&
+        introduction.trim() &&
+        userData
+      ) {
         try {
           const userRef = doc(firestore_instance, `users/${user.uid}`);
           await updateDoc(userRef, {
@@ -131,7 +141,11 @@ export default function RequestToJoinScreen({
         }
       }
 
-      router.push(`/walks/${walk.id}`);
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace("/");
+      }
     } catch (error) {
       console.error("Error requesting to join:", error);
       Alert.alert("Error", "Failed to send join request. Please try again.");
@@ -177,8 +191,6 @@ export default function RequestToJoinScreen({
           <Card
             elevate
             bordered
-            width="100%"
-            maxWidth={400}
             p={0}
             br={18}
             bg="#fff"
@@ -188,15 +200,13 @@ export default function RequestToJoinScreen({
             shadowOffset={{ width: 0, height: 2 }}
             overflow="hidden"
           >
-            <YStack gap="$4" ai="center" p="$5">
+            <YStack gap="$4" ai="center" p="$4">
               {isActivePending ? (
                 <>
                   <Text fontSize="$4" textAlign="center" color="$gray11">
                     You've successfully joined this walk!
                   </Text>
-                  <View style={{ maxHeight: 300 }}>
-                    <WalkCard walk={walk} showActions={false} />
-                  </View>
+                  <WalkCard walk={walk} showActions={false} />
                 </>
               ) : requestCancelled ? (
                 <>
@@ -211,7 +221,6 @@ export default function RequestToJoinScreen({
                     color="white"
                     onPress={handleRequestToJoin}
                     disabled={loading}
-                    mt="$4"
                   >
                     {loading ? (
                       <ActivityIndicator color="white" />
@@ -222,52 +231,52 @@ export default function RequestToJoinScreen({
                 </>
               ) : (
                 <>
-                  <Text fontSize="$4" textAlign="center" color="$gray11">
-                    You can join this walk immediately. Click the button below
-                    to participate.
-                  </Text>
-                  <View style={{ maxHeight: 300 }}>
-                    <WalkCard walk={walk} showActions={false} />
-                  </View>
+                  <WalkCard walk={walk} showActions={false} />
 
-                  <YStack gap="$2" w="100%" mt="$2">
-                    <Label htmlFor="introduction" fontSize="$3" color="$gray11">
-                      Introduce Yourself (optional)
-                    </Label>
-                    <Input
-                      id="introduction"
-                      size="$4"
-                      placeholder="Hi, I'm excited to join this walk..."
-                      value={introduction}
-                      onChangeText={setIntroduction}
-                      multiline
-                      numberOfLines={3}
-                      autoCorrect
-                      textAlignVertical="top"
-                    />
-
-                    <XStack alignItems="center" gap="$2" marginTop="$1">
-                      <Checkbox
-                        id="save-to-profile"
-                        size="$4"
-                        checked={saveToProfile}
-                        onCheckedChange={(checked) =>
-                          setSaveToProfile(!!checked)
-                        }
-                      >
-                        <Checkbox.Indicator>
-                          <Check />
-                        </Checkbox.Indicator>
-                      </Checkbox>
+                  {walkIsNeighborhoodWalk(walk) && (
+                    <YStack gap="$2" w="100%" mt="$2">
                       <Label
-                        htmlFor="save-to-profile"
-                        fontSize="$2"
+                        htmlFor="introduction"
+                        fontSize="$3"
                         color="$gray11"
                       >
-                        Save to my profile for future walks
+                        Introduce Yourself (optional)
                       </Label>
-                    </XStack>
-                  </YStack>
+                      <Input
+                        id="introduction"
+                        size="$4"
+                        placeholder="Hi, I'm excited to join this walk..."
+                        value={introduction}
+                        onChangeText={setIntroduction}
+                        multiline
+                        numberOfLines={3}
+                        autoCorrect
+                        textAlignVertical="top"
+                      />
+
+                      <XStack alignItems="center" gap="$2" marginTop="$1">
+                        <Checkbox
+                          id="save-to-profile"
+                          size="$4"
+                          checked={saveToProfile}
+                          onCheckedChange={(checked) =>
+                            setSaveToProfile(!!checked)
+                          }
+                        >
+                          <Checkbox.Indicator>
+                            <Check />
+                          </Checkbox.Indicator>
+                        </Checkbox>
+                        <Label
+                          htmlFor="save-to-profile"
+                          fontSize="$2"
+                          color="$gray11"
+                        >
+                          Save to my profile for future walks
+                        </Label>
+                      </XStack>
+                    </YStack>
+                  )}
 
                   <Button
                     size="$5"
@@ -276,12 +285,13 @@ export default function RequestToJoinScreen({
                     color="white"
                     onPress={handleRequestToJoin}
                     disabled={loading}
-                    mt="$4"
                   >
                     {loading ? (
                       <ActivityIndicator color="white" />
-                    ) : (
+                    ) : walkIsNeighborhoodWalk(walk) ? (
                       "Join This Walk"
+                    ) : (
+                      "Accept Invitation"
                     )}
                   </Button>
                 </>
