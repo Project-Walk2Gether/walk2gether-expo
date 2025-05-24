@@ -15,35 +15,34 @@ export function categorizeParticipants(
   currentUserUid?: string
 ) {
   // Convert to array and add id property
-  const allParticipants = Object.entries(participantsById).map(([id, data]) => {
-    const participant = data as Participant;
-    return { id, ...participant } as WithId<Participant>;
-  });
+  const allParticipants = Object.entries(participantsById).map(
+    ([id, participant]) => ({ id, ...participant } as WithId<Participant>)
+  );
+
+  // First, exclude the current user from all participants
+  const participantsExceptMe = currentUserUid
+    ? allParticipants.filter((p) => p.id !== currentUserUid)
+    : allParticipants;
 
   // Filter participants into different categories
-  const cancelledParticipants = allParticipants.filter(
-    (p) => p.cancelledAt && p.userUid !== currentUserUid
+  const cancelledParticipants = participantsExceptMe.filter(
+    (p) => p.cancelledAt
   );
 
-  const deniedParticipants = allParticipants.filter(
-    (p) => p.deniedAt && !p.cancelledAt && p.userUid !== currentUserUid
+  const deniedParticipants = participantsExceptMe.filter(
+    (p) => p.deniedAt && !p.cancelledAt
   );
 
-  const acceptedParticipants = allParticipants.filter(
-    (p) =>
-      p.acceptedAt &&
-      !p.cancelledAt &&
-      !p.deniedAt &&
-      p.userUid !== currentUserUid
+  const acceptedParticipants = participantsExceptMe.filter(
+    (p) => p.acceptedAt && !p.cancelledAt && !p.deniedAt
   );
 
-  const requestedParticipants = allParticipants.filter(
+  const requestedParticipants = participantsExceptMe.filter(
     (p) =>
       p.sourceType === "requested" &&
       !p.acceptedAt &&
       !p.deniedAt &&
-      !p.cancelledAt &&
-      p.userUid !== currentUserUid
+      !p.cancelledAt
   );
 
   // Split invited participants based on walk type
@@ -51,25 +50,23 @@ export function categorizeParticipants(
 
   // For friends walks: invited participants
   const invitedParticipants = isFriendsWalk
-    ? allParticipants.filter(
+    ? participantsExceptMe.filter(
         (p) =>
           p.sourceType === "invited" &&
           !p.acceptedAt &&
           !p.deniedAt &&
-          !p.cancelledAt &&
-          p.userUid !== currentUserUid
+          !p.cancelledAt
       )
     : [];
 
   // For neighborhood walks: notified participants
   const notifiedParticipants = !isFriendsWalk
-    ? allParticipants.filter(
+    ? participantsExceptMe.filter(
         (p) =>
           p.sourceType === "invited" &&
           !p.acceptedAt &&
           !p.deniedAt &&
-          !p.cancelledAt &&
-          p.userUid !== currentUserUid
+          !p.cancelledAt
       )
     : [];
 
@@ -83,6 +80,7 @@ export function categorizeParticipants(
 
   return {
     allParticipants,
+    participantsExceptMe,
     acceptedParticipants,
     requestedParticipants,
     invitedParticipants,

@@ -1,3 +1,6 @@
+import { useFlashMessage } from "@/context/FlashMessageContext";
+import { openLocationInMaps } from "@/utils/locationUtils";
+import { ArrowRight } from "@tamagui/lucide-icons";
 import React from "react";
 import { View } from "react-native";
 import { Marker } from "react-native-maps";
@@ -10,16 +13,31 @@ interface MeetupSpotProps {
     longitude: number;
   };
   title?: string;
+  locationName?: string;
 }
 
 const MeetupSpot: React.FC<MeetupSpotProps> = ({
   coordinate,
   title = "MEETUP SPOT",
+  locationName,
 }) => {
+  const { showMessage } = useFlashMessage();
+
+  // Function to handle navigation to the meetup spot
+  const handleNavigate = () => {
+    showMessage("Navigating to meetup spot...");
+    openLocationInMaps(
+      coordinate.latitude,
+      coordinate.longitude,
+      locationName || title
+    );
+  };
   return (
     <Marker
       coordinate={coordinate}
-      anchor={{ x: 0.5, y: 0.95 }}
+      anchor={{ x: 0.5, y: 1 }}
+      centerOffset={{ x: 0, y: -18 }}
+      onPress={handleNavigate}
       tracksViewChanges={false}
     >
       <YStack alignItems="center">
@@ -41,9 +59,17 @@ const MeetupSpot: React.FC<MeetupSpotProps> = ({
             elevation: 5,
           }}
         >
-          <Text fontSize={14} fontWeight="bold" color={COLORS.text}>
-            {title}
-          </Text>
+          <YStack alignItems="center" gap="$1">
+            <Text fontSize={14} fontWeight="bold" color={COLORS.text}>
+              {title}
+            </Text>
+            <XStack gap="$1" alignItems="center">
+              <Text fontSize={12} color={COLORS.primary} fontWeight="500">
+                Tap to navigate
+              </Text>
+              <ArrowRight size={14} color={COLORS.primary} />
+            </XStack>
+          </YStack>
         </XStack>
 
         {/* Pin head and stem */}

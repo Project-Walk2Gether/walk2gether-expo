@@ -1,6 +1,9 @@
 import { ActionButton } from "@/components/ActionButton";
 import { auth_instance, crashlytics_instance } from "@/config/firebase";
-import { useFlashMessage, type MessageType } from "@/context/FlashMessageContext";
+import {
+  useFlashMessage,
+  type MessageType,
+} from "@/context/FlashMessageContext";
 import { COLORS } from "@/styles/colors";
 import { writeLogIfEnabled } from "@/utils/logging";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,7 +21,10 @@ interface State {
   error: false | Error;
 }
 
-export class ErrorBoundary extends React.Component<Props & { showMessage?: (message: string, type?: MessageType) => void }, State> {
+export class ErrorBoundary extends React.Component<
+  Props & { showMessage?: (message: string, type?: MessageType) => void },
+  State
+> {
   state: { error: false | Error } = {
     error: false,
   };
@@ -55,7 +61,6 @@ export class ErrorBoundary extends React.Component<Props & { showMessage?: (mess
 
   render() {
     if (this.state.error) {
-      console.log({ error: this.state.error });
       const errorMessage =
         typeof this.state.error === "object" && this.state.error?.message
           ? this.state.error.message

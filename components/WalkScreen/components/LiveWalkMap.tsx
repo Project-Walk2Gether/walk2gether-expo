@@ -231,13 +231,15 @@ export default function LiveWalkMap({
             pinColor="#4CAF50" // Green color for start point
           />
         )}
-        {walk?.startLocation ? (
+        {/* Only show MeetupSpot if the walk hasn't started yet */}
+        {walk?.startLocation && !hasWalkStarted ? (
           <MeetupSpot
             coordinate={{
               latitude: walk.startLocation.latitude,
               longitude: walk.startLocation.longitude,
             }}
             title="Meetup Spot"
+            locationName={walk.startLocation.name}
           />
         ) : null}
         {/* 2 & 3. Render all participants (current user and others) */}

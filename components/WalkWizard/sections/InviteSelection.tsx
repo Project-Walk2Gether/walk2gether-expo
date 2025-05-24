@@ -13,7 +13,7 @@ import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { Share2, Users } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
-import { Alert, Clipboard, Share } from "react-native";
+import { Alert, Share } from "react-native";
 import { Button, Spinner, Text, YStack } from "tamagui";
 import { Friendship, UserData } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
@@ -35,23 +35,15 @@ export const InviteSelection: React.FC<Props> = ({
   totalSteps,
   walkId,
   walkType,
-  invitationCode,
 }) => {
-  const walkFormContext = useMaybeWalkForm();
+  const maybeWalkFormContext = useMaybeWalkForm();
   const { user } = useAuth();
   const { userData } = useUserData();
   const { showMessage } = useFlashMessage();
 
   // Use either the provided walkId or get it from the context
-  const effectiveWalkId = walkId || walkFormContext!.createdWalkId;
-  const effectiveWalkType = walkType || walkFormContext!.formData?.type;
-
-  // Use the invitation code from props or context
-  // We'll keep the existing code generation mechanism intact
-  const effectiveInvitationCode =
-    invitationCode || walkFormContext?.formData?.invitationCode;
-
-  console.log({ effectiveWalkId, effectiveWalkType, effectiveInvitationCode });
+  const effectiveWalkId = (walkId || maybeWalkFormContext!.createdWalkId)!;
+  const effectiveWalkType = (walkType || maybeWalkFormContext!.formData?.type)!;
 
   // State variables
   const [participantUids, setParticipantUids] = useState<string[]>([]);
@@ -93,6 +85,7 @@ export const InviteSelection: React.FC<Props> = ({
   // State for nearby users in neighborhood walks
   const [nearbyUserIds, setNearbyUserIds] = useState<string[]>([]);
   const [isLoadingNearbyUsers, setIsLoadingNearbyUsers] = useState(false);
+  const [shareSuccessful, setShareSuccessful] = useState(false);
 
   // Fetch nearby users for neighborhood walks
   useEffect(() => {
@@ -205,18 +198,8 @@ export const InviteSelection: React.FC<Props> = ({
   // Generate and share the invitation link
   const getInvitationLink = () => {
     // Need user's invitation code and walk ID to generate a valid link
-    if (!userData?.friendInvitationCode) {
-      console.warn(
-        "[InviteSelection] ERROR: No friend invitation code available"
-      );
-      return "";
-    }
-    if (!effectiveWalkId) {
-      console.warn(
-        "[InviteSelection] ERROR: No walk ID available for invitation link"
-      );
-      return "";
-    }
+    if (!userData?.friendInvitationCode)
+      throw new Error("No friend invitation code available");
 
     // Properly encode URL parameters to prevent encoding issues
     const userCode = encodeURIComponent(userData.friendInvitationCode);
@@ -262,28 +245,17 @@ export const InviteSelection: React.FC<Props> = ({
       console.log("[InviteSelection] Share result:", JSON.stringify(result));
 
       if (result.action === Share.sharedAction) {
-        console.log("[InviteSelection] Link successfully shared");
-        // Success - link has been shared
+        setShareSuccessful(true);
       } else {
-        // Fallback for web or devices where Sharing is not available
-        console.log(
-          "[InviteSelection] Share action not completed, copying to clipboard"
-        );
-        Clipboard.setString(link);
-        showMessage("Invitation link copied to clipboard", "success");
-        console.log("[InviteSelection] Link copied to clipboard");
+        showMessage("Failed to share invitation link", "error");
       }
     } catch (error) {
       console.error("[InviteSelection] ERROR sharing link:", error);
-      showMessage("Could not share the invitation link", "error");
+      showMessage(`Could not share the invitation link: ${error}`, "error");
     }
   };
 
   const handleSubmit = async () => {
-    console.log(
-      "[InviteSelection] handleSubmit - Submitting participant selection"
-    );
-
     // Should confirm and then update participants
     if (!effectiveWalkId || !userData) {
       showMessage(
@@ -297,11 +269,12 @@ export const InviteSelection: React.FC<Props> = ({
     const handleProceed = () => {
       if (
         participantUids.length === 0 &&
-        (friendships.length > 0 || nearbyUserIds.length > 0)
+        (friendships.length > 0 || nearbyUserIds.length > 0) &&
+        !shareSuccessful
       ) {
         // Show a confirmation dialog if no users are selected
         Alert.alert(
-          "No Participants Selected",
+          "No-one invited yet",
           isNeighborhoodWalk
             ? "Are you sure you want to continue without inviting any neighbors?"
             : "Are you sure you want to continue without inviting any friends?",
@@ -409,7 +382,6 @@ export const InviteSelection: React.FC<Props> = ({
                   <UserList
                     users={usersList}
                     onSelectUser={handleUserToggle}
-                    searchEnabled={true}
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
                     selectedUserIds={participantUids}
@@ -466,7 +438,7 @@ export const InviteSelection: React.FC<Props> = ({
                     >
                       {isNeighborhoodWalk
                         ? "Invite another neighbor"
-                        : "Invite a new friend to Walk2Gether"}
+                        : "Invite a new friend"}
                     </Button>
                   </YStack>
                 </>

@@ -72,11 +72,7 @@ TaskManager.defineTask(
         console.error("Error getting task options:", e);
       }
 
-      console.log("Sending background location");
-
       const { walkId, userId } = taskOptions;
-
-      console.log({ walkId, userId });
 
       // Use auth instance if userId isn't available in options
       const uid = userId; //|| auth_instance.currentUser?.uid;

@@ -75,17 +75,17 @@ export const NotificationsProvider: React.FC<Props> = ({ children }) => {
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log("Notification response:", response);
-        
+
         // Handle navigation if URL is provided in the notification data
         const url = response.notification.request.content.data?.url;
-        if (url && typeof url === 'string') {
+        if (url && typeof url === "string") {
           // Use router to navigate to the specified URL
           try {
-            const router = require('expo-router');
+            const router = require("expo-router");
             router.router.push(url);
             console.log(`Navigated to ${url} from notification`);
           } catch (error) {
-            console.error('Error navigating from notification:', error);
+            console.error("Error navigating from notification:", error);
           }
         }
       });
@@ -220,8 +220,6 @@ export const NotificationsProvider: React.FC<Props> = ({ children }) => {
     // Check all possible paths for project ID
     const projectId = Constants.expoConfig!.extra!.eas!.projectId;
 
-    console.log({ projectId });
-
     if (!isDevice) {
       console.warn("Using simulator - push notifications won't work");
       return null;
@@ -247,15 +245,18 @@ export const NotificationsProvider: React.FC<Props> = ({ children }) => {
       const errorObj = error as Error;
       const errorDetails = {
         error,
-        message: errorObj.message || 'Unknown error message',
-        name: errorObj.name || 'Unknown error type',
-        stack: errorObj.stack || 'No stack trace available',
-        projectId: projectId || 'Not provided',
+        message: errorObj.message || "Unknown error message",
+        name: errorObj.name || "Unknown error type",
+        stack: errorObj.stack || "No stack trace available",
+        projectId: projectId || "Not provided",
         isDevice,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
-      console.log('Detailed error information:', JSON.stringify(errorDetails, null, 2));
+      console.log(
+        "Detailed error information:",
+        JSON.stringify(errorDetails, null, 2)
+      );
 
       writeLogIfEnabled({
         message: "Error getting push token",

@@ -93,8 +93,6 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({
     []
   );
 
-  console.log({ isOpen });
-
   // Effect to handle opening and closing the sheet
   React.useEffect(() => {
     if (isOpen) {

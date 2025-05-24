@@ -1,7 +1,10 @@
+import {
+  PlaceData,
+  PlacesAutocomplete,
+} from "@/components/UI/PlacesAutocomplete";
 import React, { useEffect, useRef } from "react";
-import { PlacesAutocomplete, PlaceData } from "@/components/UI/PlacesAutocomplete";
 import MapView, { Marker } from "react-native-maps";
-import { H4, Text, YStack } from "tamagui";
+import { H4, YStack } from "tamagui";
 import { Location } from "walk2gether-shared";
 
 interface LocationFieldProps {
@@ -19,8 +22,6 @@ export default function LocationField({
   touched,
   googleApiKey,
 }: LocationFieldProps) {
-  console.log({ value });
-
   const mapRef = useRef<MapView>(null);
   const region = value
     ? {
@@ -44,15 +45,17 @@ export default function LocationField({
       longitude: placeData.longitude,
     });
   };
-  
+
   // Convert Location to PlaceData for our component
-  const placeDataValue = value ? {
-    name: value.name || '',
-    placeId: value.placeId || '',
-    latitude: value.latitude,
-    longitude: value.longitude,
-    description: value.name || '',
-  } : null;
+  const placeDataValue = value
+    ? {
+        name: value.name || "",
+        placeId: value.placeId || "",
+        latitude: value.latitude,
+        longitude: value.longitude,
+        description: value.name || "",
+      }
+    : null;
 
   return (
     <>

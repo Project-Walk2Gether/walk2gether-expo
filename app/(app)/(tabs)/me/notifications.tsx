@@ -108,8 +108,6 @@ export default function NotificationsScreen() {
   ) => {
     const value = preferences[key];
 
-    console.log({ info: info.label, value });
-
     return (
       <Card key={key} backgroundColor="white" mb="$3" borderRadius={16}>
         <XStack

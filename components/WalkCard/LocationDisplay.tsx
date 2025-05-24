@@ -1,10 +1,6 @@
-import {
-  getDistanceToLocation,
-  openLocationInMaps,
-} from "@/utils/locationUtils";
-import { ArrowRight, Navigation } from "@tamagui/lucide-icons";
+import { getDistanceToLocation } from "@/utils/locationUtils";
+import { Navigation } from "@tamagui/lucide-icons";
 import React from "react";
-import { Text, XStack, YStack } from "tamagui";
 import { Walk, WithId, walkIsNeighborhoodWalk } from "walk2gether-shared";
 import { IconTextRow } from "./IconTextRow";
 
@@ -56,37 +52,11 @@ export const LocationDisplay: React.FC<Props> = ({
   // If we don't have any location to display, return null
   if (!locationName) return null;
 
-  // Function to handle navigation to the location
-  const handleNavigate = () => {
-    if (walk.currentLocation?.latitude && walk.currentLocation?.longitude) {
-      openLocationInMaps(
-        walk.currentLocation.latitude,
-        walk.currentLocation.longitude,
-        walk.currentLocation.name
-      );
-    }
-  };
-
-  const showNavigateButton = (isApproved || isMine) && walk.currentLocation;
-
   // Display the location information
   return (
-    <YStack gap="$1.5">
-      <IconTextRow
-        onPress={showNavigateButton ? handleNavigate : undefined}
-        icon={<Navigation size={16} color="#999" />}
-        text={
-          <YStack>
-            <Text color="#666">{displayText}</Text>
-            {showNavigateButton && (
-              <XStack gap="$1">
-                <Text color="#666">Navigate in Maps</Text>
-                <ArrowRight size={16} color="#999" />
-              </XStack>
-            )}
-          </YStack>
-        }
-      />
-    </YStack>
+    <IconTextRow
+      icon={<Navigation size={16} color="#999" />}
+      text={displayText}
+    />
   );
 };

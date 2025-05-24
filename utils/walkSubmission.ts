@@ -131,7 +131,6 @@ export async function createWalkFromForm({
       updatedAt: Timestamp.now(),
     };
 
-    console.log({ organizerParticipant });
     await setDoc(participantRef, organizerParticipant);
 
     // Create participant documents for invited users

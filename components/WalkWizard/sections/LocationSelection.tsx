@@ -15,7 +15,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, YStack } from "tamagui";
 import WizardWrapper, { WizardWrapperHandle } from "./WizardWrapper";
 
@@ -70,7 +69,7 @@ export const LocationSelection: React.FC<Props> = ({
 
   // Reference to the WizardWrapper component to control scrolling
   const wizardWrapperRef = useRef<WizardWrapperHandle>(null);
-  
+
   // Function to handle focus on the meetup location input
   const handleMeetupLocationFocus = () => {
     // Scroll to the bottom of the scroll view when the meetup location input is focused
@@ -187,8 +186,6 @@ export const LocationSelection: React.FC<Props> = ({
         googlePlacesRef.current.setAddressText(newLocation.name);
       }
 
-      console.log({ newLocation });
-
       return newLocation;
     } catch (error) {
       console.error("Error handling location coordinates:", error);
@@ -253,8 +250,6 @@ export const LocationSelection: React.FC<Props> = ({
       onContinue();
     }
   };
-
-  console.log({ pendingLocationRequest, isReverseGeocoding });
 
   return (
     <WizardWrapper
@@ -324,7 +319,6 @@ export const LocationSelection: React.FC<Props> = ({
                 message: "getLocation completed successfully",
                 metadata: { location },
               });
-              console.log({ location });
             } catch (error) {
               const errorMessage =
                 error instanceof Error ? error.message : String(error);

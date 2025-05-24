@@ -12,6 +12,7 @@ import {
 } from "walk2gether-shared";
 import { IconTextRow } from "./IconTextRow";
 import { WalkCardButton } from "./WalkCardButton";
+import { OwnerParticipantsSection } from "./ParticipantsSection/OwnerParticipantsSection";
 
 interface Props {
   walk: WithId<Walk>;
@@ -115,71 +116,40 @@ export const ParticipantsDisplay: React.FC<Props> = ({
 
   // Show owner view
   if (isOwner) {
-    // If there are no participants besides the owner, show the waiting section
-    if (!hasNonOwnerParticipants) {
+    // If the owner view has no participants and there's an invite button
+    if (!hasNonOwnerParticipants && isFriendsWalk && isMine) {
       return (
         <YStack gap={12}>
           <IconTextRow
             icon={<Users size={16} color="#999" />}
-            text={`Waiting for ${
-              isFriendsWalk ? "your friend" : "neighbors"
-            } to join`}
+            text={`Waiting for ${isFriendsWalk ? "your friend" : "neighbors"} to join`}
             right={
-              isFriendsWalk && isMine ? (
-                <WalkCardButton
-                  label="Invite"
-                  onPress={handleInvite}
-                  icon={<Users size={14} color="white" />}
-                  size="$2"
-                  backgroundColor={COLORS.primary}
-                  fontWeight="500"
-                />
-              ) : undefined
+              <WalkCardButton
+                label="Invite"
+                onPress={handleInvite}
+                icon={<Users size={14} color="white" />}
+                size="$2"
+                backgroundColor={COLORS.primary}
+                fontWeight="500"
+              />
             }
           />
         </YStack>
       );
     }
+    
+    // Otherwise use the full OwnerParticipantsSection
     return (
-      <YStack gap={"$2"}>
-        {/* Accepted participants */}
-        {acceptedParticipants.length > 0 && (
-          <XStack alignItems="center" gap={8}>
-            <XStack flex={1} alignItems="center">
-              <Text fontSize={14} color="#666">
-                {acceptedParticipants.length === 1
-                  ? "1 person is"
-                  : `${acceptedParticipants.length} people are`}{" "}
-                joining you
-              </Text>
-            </XStack>
-          </XStack>
-        )}
-
-        {/* No participants yet */}
-        {acceptedParticipants.length === 0 &&
-          ((isFriendsWalk && invitedParticipants.length === 0) ||
-            (!isFriendsWalk && notifiedParticipants.length === 0)) &&
-          requestedParticipants.length === 0 && (
-            <XStack alignItems="center" gap={8}>
-              <Text fontSize={14} color="#666">
-                {isFriendsWalk ? "Just you so far" : "No neighbors joined yet"}
-              </Text>
-            </XStack>
-          )}
-
-        {/* Waiting for responses - friends walk only */}
-        {acceptedParticipants.length === 0 &&
-          isFriendsWalk &&
-          invitedParticipants.length > 0 && (
-            <XStack alignItems="center" gap={8}>
-              <Text fontSize={14} color="#666">
-                Waiting for a response from {invitedParticipants.length} invited{" "}
-                {invitedParticipants.length === 1 ? "friend" : "friends"}
-              </Text>
-            </XStack>
-          )}
-      </YStack>
+      <OwnerParticipantsSection
+        walk={walk}
+        currentUserUid={currentUserUid}
+        acceptedParticipants={acceptedParticipants}
+        requestedParticipants={requestedParticipants}
+        invitedParticipants={invitedParticipants}
+        notifiedParticipants={notifiedParticipants}
+        deniedParticipants={[]} // We don't have this in our current categorization
+        cancelledParticipants={[]} // We don't have this in our current categorization
+      />
     );
   }
 
