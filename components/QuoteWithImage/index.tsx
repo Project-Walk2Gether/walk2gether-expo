@@ -2,7 +2,7 @@ import { useQuoteOfTheDay } from "@/utils/quotes";
 import { Quote as QuoteIcon } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
 import { Image } from "react-native";
-import { Card, Text, XStack, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 
 interface Props {
   imageSize?: number;
@@ -36,50 +36,37 @@ export default function QuoteWithImage({ imageSize = 200 }: Props) {
       enterStyle={{ opacity: 0, scale: 0.9 }}
       exitStyle={{ opacity: 0, scale: 0.9 }}
     >
-      <Card
-        elevate
-        backgroundColor="rgba(255, 255, 255, 0.9)"
-        padding="$4"
-        marginVertical="$2"
-        borderRadius={20}
-        shadowColor="#000"
-        shadowOpacity={0.1}
-        shadowRadius={10}
-        shadowOffset={{ width: 0, height: 3 }}
-        borderColor="$borderColorFocus"
-        borderWidth={1}
-      >
-        <YStack gap="$3">
-          <XStack
-            alignItems="center"
-            justifyContent="flex-start"
-            marginBottom="$2"
-          >
-            <QuoteIcon size={22} color="#6d4c2b" />
-          </XStack>
-          <Text
-            fontSize={18}
-            fontStyle="italic"
-            fontWeight="500"
-            color="#444"
-            lineHeight={26}
-            textAlign="center"
-          >
-            "{quote.text}"
-          </Text>
+      {/* Removed Card component and elevation for a more subtle appearance */}
+      <YStack padding="$3" marginVertical="$2" opacity={0.9} gap="$3">
+        <XStack
+          alignItems="center"
+          justifyContent="flex-start"
+          marginBottom="$1"
+        >
+          <QuoteIcon size={18} color="rgba(109, 76, 43, 0.7)" />
+        </XStack>
+        <Text
+          fontSize={16}
+          fontStyle="italic"
+          fontWeight="400"
+          color="rgba(0, 0, 0, 0.8)"
+          lineHeight={24}
+          textAlign="center"
+        >
+          "{quote.text}"
+        </Text>
 
-          {quote.author && (
-            <Text
-              fontSize={16}
-              color="#666"
-              alignSelf="flex-end"
-              fontWeight="500"
-            >
-              — {quote.author}
-            </Text>
-          )}
-        </YStack>
-      </Card>
+        {quote.author && (
+          <Text
+            fontSize={14}
+            color="rgba(30, 30, 30, 0.8)"
+            alignSelf="flex-end"
+            fontWeight="400"
+          >
+            — {quote.author}
+          </Text>
+        )}
+      </YStack>
 
       <YStack
         animation="bouncy"
