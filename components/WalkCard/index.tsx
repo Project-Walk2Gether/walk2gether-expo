@@ -148,21 +148,24 @@ const WalkCard: React.FC<Props> = ({
           gap={6}
           textProps={{ flexShrink: 1 }}
         />
-        <Button
-          size="$2"
-          onPress={handleNavigate}
-          accessibilityLabel="Navigate to location"
-          icon={<Navigation size={14} color="white" />}
-          backgroundColor={COLORS.primary}
-          mt="$2"
-          opacity={0.9}
-          alignSelf="flex-start"
-          paddingHorizontal={10}
-        >
-          <Text color="white" fontSize={12} fontWeight="500">
-            Navigate
-          </Text>
-        </Button>
+        {/* Only show the Navigate button if the user has accepted the invitation */}
+        {(isApproved || isMine) && (
+          <Button
+            size="$2"
+            onPress={handleNavigate}
+            accessibilityLabel="Navigate to location"
+            icon={<Navigation size={14} color="white" />}
+            backgroundColor={COLORS.primary}
+            mt="$2"
+            opacity={0.9}
+            alignSelf="flex-start"
+            paddingHorizontal={10}
+          >
+            <Text color="white" fontSize={12} fontWeight="500">
+              Navigate
+            </Text>
+          </Button>
+        )}
       </YStack>
     );
   })();

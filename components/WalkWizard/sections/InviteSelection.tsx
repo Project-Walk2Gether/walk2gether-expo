@@ -204,59 +204,89 @@ export const InviteSelection: React.FC<Props> = ({
 
   // Generate and share the invitation link
   const getInvitationLink = () => {
-    // Need user's invitation code and walk invitation code to generate a valid link
+    console.log("[InviteSelection] Getting invitation link...");
+    console.log("[InviteSelection] User data:", JSON.stringify(userData || {}));
+    console.log("[InviteSelection] Effective walk ID:", effectiveWalkId);
+
+    // Need user's invitation code and walk ID to generate a valid link
     if (!userData?.friendInvitationCode) {
-      console.warn("No friend invitation code available");
+      console.warn(
+        "[InviteSelection] ERROR: No friend invitation code available"
+      );
       return "";
     }
-
-    if (!effectiveInvitationCode) {
-      console.warn("No walk invitation code available");
+    if (!effectiveWalkId) {
+      console.warn(
+        "[InviteSelection] ERROR: No walk ID available for invitation link"
+      );
       return "";
     }
 
     // Properly encode URL parameters to prevent encoding issues
     const userCode = encodeURIComponent(userData.friendInvitationCode);
-    const walkCode = encodeURIComponent(effectiveInvitationCode);
 
-    console.log({ userCode, walkCode });
-
-    // Use the properly encoded parameters in the URL
-    return `https://projectwalk2gether.org/join?code=${userCode}&walk=${walkCode}`;
+    // Use the walk ID directly as the walk parameter
+    // This is more reliable than using the invitation code
+    const inviteLink = `https://projectwalk2gether.org/join?code=${userCode}&walk=${effectiveWalkId}`;
+    console.log("[InviteSelection] Generated invitation link:", inviteLink);
+    console.log("[InviteSelection] Params:", {
+      userCode,
+      walkId: effectiveWalkId,
+    });
+    return inviteLink;
   };
 
   // Handle sharing the invitation link
   const handleShareLink = async () => {
+    console.log(
+      "[InviteSelection] handleShareLink - Attempting to share invitation link"
+    );
     const link = getInvitationLink();
+
     if (!link) {
+      console.error(
+        "[InviteSelection] ERROR: Unable to generate invitation link"
+      );
       showMessage("Unable to generate invitation link", "error");
       return;
     }
 
     try {
-      // Use React Native's Share API which properly handles text content
+      console.log("[InviteSelection] About to share link:", link);
+
+      // Only provide the link as the message to avoid duplication
+      // On iOS, the url parameter is used for the share sheet, while message is the actual content
+      // On Android, message is used directly
       const result = await Share.share({
-        message: link,
-        title: "Invite friends to walk",
-        url: link, // fallback for iOS
+        message: `Join my walk! ${link}`,
+        title: "Invite friends to Walk2Gether",
+        // Don't include url parameter to avoid duplicate links
       });
 
+      console.log("[InviteSelection] Share result:", JSON.stringify(result));
+
       if (result.action === Share.sharedAction) {
+        console.log("[InviteSelection] Link successfully shared");
         // Success - link has been shared
       } else {
         // Fallback for web or devices where Sharing is not available
+        console.log(
+          "[InviteSelection] Share action not completed, copying to clipboard"
+        );
         Clipboard.setString(link);
         showMessage("Invitation link copied to clipboard", "success");
-
-        // Success - link has been copied to clipboard
+        console.log("[InviteSelection] Link copied to clipboard");
       }
     } catch (error) {
-      console.error("Error sharing link:", error);
+      console.error("[InviteSelection] ERROR sharing link:", error);
       showMessage("Could not share the invitation link", "error");
     }
   };
 
   const handleSubmit = async () => {
+    console.log(
+      "[InviteSelection] handleSubmit - Submitting participant selection"
+    );
     // Should confirm and then show the next screen if all is well
     if (!effectiveWalkId || !userData) {
       showMessage(
@@ -294,22 +324,43 @@ export const InviteSelection: React.FC<Props> = ({
 
     // Submit participants function to avoid duplicating code
     const submitParticipants = async () => {
+      console.log("[InviteSelection] submitParticipants - Starting submission");
+      console.log("[InviteSelection] Walk ID:", effectiveWalkId);
+      console.log(
+        "[InviteSelection] Participant UIDs:",
+        JSON.stringify(participantUids)
+      );
+      console.log(
+        "[InviteSelection] Current user data:",
+        JSON.stringify(userData || {})
+      );
+
       setIsSubmitting(true);
 
       try {
+        console.log("[InviteSelection] Calling updateParticipants...");
         // Update the participants collection with the selected user IDs
         await updateParticipants(
           effectiveWalkId as string,
           participantUids,
           userData
         );
+        console.log("[InviteSelection] updateParticipants successful!");
 
         // Call the onContinue prop to advance to the next screen
+        console.log(
+          "[InviteSelection] Calling onContinue to advance to next screen"
+        );
         onContinue();
       } catch (error) {
-        console.error("Error updating participants:", error);
+        console.error("[InviteSelection] ERROR updating participants:", error);
+        console.error(
+          "[InviteSelection] Error details:",
+          JSON.stringify(error)
+        );
         showMessage("Failed to update participants", "error");
       } finally {
+        console.log("[InviteSelection] Setting isSubmitting to false");
         setIsSubmitting(false);
       }
     };

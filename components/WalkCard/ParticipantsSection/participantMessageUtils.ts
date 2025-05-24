@@ -60,7 +60,13 @@ export const formatGuestParticipantMessage = (
       return `You and ${ownerName} on the walk`;
     } else {
       // Only the owner is going
-      return `Be the first to join ${ownerName}`;
+      if (isFriendsWalk) {
+        // For friend walks, show the invitation message
+        return `${ownerName} invited you`;
+      } else {
+        // For neighborhood walks, keep the original message
+        return `Be the first to join ${ownerName}`;
+      }
     }
   } else {
     // Create participants list based on whether current user is included
