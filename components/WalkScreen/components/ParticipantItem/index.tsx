@@ -29,7 +29,6 @@ export default function ParticipantItem({
     return (
       <XStack
         padding="$2"
-        margin="$1"
         gap="$2"
         alignItems="center"
         pressStyle={{ scale: 0.98 }}

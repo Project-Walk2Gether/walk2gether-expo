@@ -1,6 +1,7 @@
 import { getWalkStatus } from "@/utils/walkUtils";
 import React from "react";
 import { FlatList } from "react-native";
+import { View } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
 import ParticipantItem from "./ParticipantItem";
 
@@ -67,17 +68,6 @@ export default function ParticipantsList({
     return a.displayName.localeCompare(b.displayName);
   });
 
-  const renderItem = ({ item }: { item: ParticipantWithRoute }) => {
-    return (
-      <ParticipantItem
-        participant={item}
-        walkStatus={status}
-        currentUserId={currentUserId}
-        onPress={onParticipantPress}
-      />
-    );
-  };
-
   // Define a type that extends ParticipantWithRoute to include our flag
   type ExtendedParticipant = ParticipantWithRoute & {
     isInvitedParticipant?: boolean;
@@ -121,6 +111,7 @@ export default function ParticipantsList({
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ paddingHorizontal: 8 }}
+      ItemSeparatorComponent={() => <View w={6} />}
     />
   );
 }

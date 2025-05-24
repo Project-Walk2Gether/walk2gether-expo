@@ -22,6 +22,7 @@ import HeaderBackButton from "@/components/HeaderBackButton";
 import WalkMenu from "@/components/WalkMenu";
 import LiveWalkMap from "@/components/WalkScreen/components/LiveWalkMap";
 import ParticipantsList from "@/components/WalkScreen/components/ParticipantsList";
+import WalkTimer from "@/components/WalkTimer";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
 import { getWalkStatus } from "@/utils/walkUtils";
@@ -149,6 +150,7 @@ export default function WalkScreen() {
         {/* Map and Participants container - with padding to account for collapsed bottom sheet */}
         <View flex={1} pb={collapsedHeight - 30}>
           <LiveWalkMap walkId={id} />
+          <WalkTimer walk={walk} />
           {/* Walk stats will only show when the walk has ended */}
           {/* {walk.endedAt && (
             <View position="absolute" top={10} left={0} right={0} zIndex={10}>
