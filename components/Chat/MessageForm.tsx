@@ -156,7 +156,7 @@ export default function MessageForm({
                 buttonProps: {
                   backgroundColor: COLORS.primary,
                   color: COLORS.textOnDark,
-                }
+                },
               },
               {
                 label: "Select photos",
@@ -165,7 +165,7 @@ export default function MessageForm({
                 buttonProps: {
                   backgroundColor: COLORS.primary,
                   color: COLORS.textOnDark,
-                }
+                },
               },
             ]}
             trigger={
