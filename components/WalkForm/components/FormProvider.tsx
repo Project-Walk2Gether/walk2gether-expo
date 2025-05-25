@@ -1,7 +1,7 @@
+import PrimaryButton from "@/components/PrimaryButton";
 import { Formik, FormikProps } from "formik";
 import React from "react";
 import { XStack, YStack } from "tamagui";
-import { ActionButton } from "@/components/ActionButton";
 
 interface FormProviderProps<T extends object> {
   initialValues: T;
@@ -37,12 +37,13 @@ export default function FormProvider<T extends object>({
             marginTop="$4"
             width="100%"
           >
-            <ActionButton
+            <PrimaryButton
               onPress={() => formikProps.handleSubmit()}
-              label={submitButtonText}
-              loading={formikProps.isSubmitting}
               disabled={formikProps.isSubmitting}
-            />
+              width="100%"
+            >
+              {formikProps.isSubmitting ? "Saving..." : submitButtonText}
+            </PrimaryButton>
           </XStack>
         </YStack>
       )}
