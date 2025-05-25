@@ -1,7 +1,8 @@
+import { FormControl } from "@/components/FormControl";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import React, { useState } from "react";
-import { Button, Card, H4, Text, XStack, YStack } from "tamagui";
+import { Button, Card, Text, XStack, YStack } from "tamagui";
 
 interface DurationFieldProps {
   value: number; // Duration in minutes
@@ -31,18 +32,16 @@ export default function DurationField({
   const minuteOptions = [0, 15, 30, 45];
 
   return (
-    <YStack>
-      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">
-        Duration
-      </H4>
-      <Button
-        size="$4"
-        onPress={() => setShowPicker(!showPicker)}
-        icon={<Ionicons name="time-outline" size={18} />}
-        theme="gray"
-      >
-        {formatDuration(value)}
-      </Button>
+    <FormControl label="Duration" error={error} touched={touched}>
+      <YStack>
+        <Button
+          size="$4"
+          onPress={() => setShowPicker(!showPicker)}
+          icon={<Ionicons name="time-outline" size={18} />}
+          theme="gray"
+        >
+          {formatDuration(value)}
+        </Button>
 
       {showPicker && (
         <Card
@@ -105,11 +104,7 @@ export default function DurationField({
         </Card>
       )}
 
-      {error && touched && (
-        <Text color="red" fontSize="$2" marginTop="$1">
-          {error}
-        </Text>
-      )}
-    </YStack>
+      </YStack>
+    </FormControl>
   );
 }

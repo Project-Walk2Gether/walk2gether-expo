@@ -1,9 +1,10 @@
+import { FormControl } from "@/components/FormControl";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { Calendar, Clock } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import { Platform } from "react-native";
-import { Button, Card, H4, Text, XStack, YStack } from "tamagui";
+import { Button, Card, Text, XStack, YStack } from "tamagui";
 
 interface DateTimeFieldProps {
   value: Timestamp;
@@ -42,29 +43,27 @@ export default function DateTimeField({
   };
 
   return (
-    <YStack>
-      <H4 fontSize="$4" fontWeight="bold" marginBottom="$2">
-        Date & Time
-      </H4>
-      <XStack gap="$2">
-        <Button
-          size="$4"
-          onPress={() => openPicker("date")}
-          icon={<Calendar size="$1" />}
-          theme="gray"
-        >
-          {formatDate(value)}
-        </Button>
+    <FormControl label="Date & Time" error={error} touched={touched}>
+      <YStack>
+        <XStack gap="$2">
+          <Button
+            size="$4"
+            onPress={() => openPicker("date")}
+            icon={<Calendar size="$1" />}
+            theme="gray"
+          >
+            {formatDate(value)}
+          </Button>
 
-        <Button
-          size="$4"
-          onPress={() => openPicker("time")}
-          icon={<Clock size="$1" />}
-          theme="gray"
-        >
-          {formatTime(value)}
-        </Button>
-      </XStack>
+          <Button
+            size="$4"
+            onPress={() => openPicker("time")}
+            icon={<Clock size="$1" />}
+            theme="gray"
+          >
+            {formatTime(value)}
+          </Button>
+        </XStack>
 
       {pickerMode === "date" && (
         <Card
@@ -131,11 +130,7 @@ export default function DateTimeField({
         </Card>
       )}
 
-      {error && touched && (
-        <Text color="red" fontSize="$2" marginTop="$1">
-          {error}
-        </Text>
-      )}
-    </YStack>
+      </YStack>
+    </FormControl>
   );
 }
