@@ -1,10 +1,11 @@
-import { Calendar, CalendarClock, CheckCircle, Clock, MapPin } from "@tamagui/lucide-icons";
-import { differenceInSeconds, format } from "date-fns";
+import { differenceInSeconds } from "date-fns";
 import { LinearGradient } from "expo-linear-gradient";
+
 import React, { useEffect, useState } from "react";
 import { Text, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
-import { WalkInfoRow, Section } from "./WalkInfoRow";
+import { LocationRow } from "./LocationRow";
+import { TimeRow } from "./TimeRow";
 
 interface Props {
   walk: Walk;
@@ -53,14 +54,13 @@ export default function WalkInfo({ walk }: Props) {
 
       if (endTime && startTime) {
         const durationSeconds = differenceInSeconds(endTime, startTime);
-        const sections: Section[] = [
-          {
-            icon: <CheckCircle size="$1" color="white" />,
-            label: "Walk completed",
-            value: formatTime(durationSeconds)
-          }
-        ];
-        return <WalkInfoRow sections={sections} />;
+        return (
+          <TimeRow 
+            type="completed"
+            durationSeconds={durationSeconds}
+            formatTime={formatTime}
+          />
+        );
       }
     }
 
@@ -70,45 +70,38 @@ export default function WalkInfo({ walk }: Props) {
 
       if (startTime) {
         const elapsedSeconds = differenceInSeconds(currentTime, startTime);
-        const sections: Section[] = [
-          {
-            icon: <Clock size="$1" color="white" />,
-            label: "Walk time",
-            value: formatTime(elapsedSeconds)
-          }
-        ];
-        return <WalkInfoRow sections={sections} />;
+        return (
+          <TimeRow 
+            type="active"
+            elapsedSeconds={elapsedSeconds}
+            formatTime={formatTime}
+          />
+        );
       }
     }
 
     // If the walk is in the future
     if (walkDate && walkDate > currentTime) {
       const timeUntilWalk = differenceInSeconds(walkDate, currentTime);
-      const sections: Section[] = [
-        {
-          icon: <Clock size="$1" color="white" />,
-          label: "Starting in",
-          value: formatTime(timeUntilWalk)
-        },
-        {
-          icon: <Calendar size="$1" color="white" />,
-          label: format(walkDate, "MMM d, h:mm a"),
-          fontWeight: "normal"
-        }
-      ];
-      return <WalkInfoRow sections={sections} justifyContent="space-between" />;
+      return (
+        <TimeRow 
+          type="countdown"
+          walkDate={walkDate}
+          timeUntilWalk={timeUntilWalk}
+          formatTime={formatTime}
+        />
+      );
     }
 
     // If the walk date has passed but it hasn't started
     if (walkDate && walkDate <= currentTime && !hasStarted) {
-      const sections: Section[] = [
-        {
-          icon: <CalendarClock size="$1" color="white" />,
-          label: "Scheduled to start",
-          value: format(walkDate, "h:mm a")
-        }
-      ];
-      return <WalkInfoRow sections={sections} />;
+      return (
+        <TimeRow 
+          type="scheduled"
+          walkDate={walkDate}
+          formatTime={formatTime}
+        />
+      );
     }
 
     // Default case
@@ -124,15 +117,14 @@ export default function WalkInfo({ walk }: Props) {
     // Only show meetup notes if they exist AND the walk hasn't started yet
     if (!hasLocationNotes || hasStarted) return null;
 
-    const sections: Section[] = [
-      {
-        icon: <MapPin size="$1" color="white" />,
-        label: "Meetup notes",
-        value: walk.startLocation?.notes || "",
-        fontWeight: "normal"
-      }
-    ];
-    return <WalkInfoRow sections={sections} />;
+    return (
+      <LocationRow 
+        locationName={walk.startLocation?.name}
+        notes={walk.startLocation?.notes}
+        latitude={walk.startLocation?.latitude}
+        longitude={walk.startLocation?.longitude}
+      />
+    );
   };
 
   return (
@@ -144,7 +136,7 @@ export default function WalkInfo({ walk }: Props) {
         paddingVertical: 12,
       }}
     >
-      <YStack paddingHorizontal={16} space="$1">
+      <YStack gap="$2" paddingHorizontal={16}>
         {renderTimerContent()}
         {renderLocationNotes()}
       </YStack>

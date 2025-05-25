@@ -233,13 +233,10 @@ export default function LiveWalkMap({
         )}
         {/* Only show MeetupSpot if the walk hasn't started yet */}
         {walk?.startLocation && !hasWalkStarted ? (
-          <MeetupSpot
-            coordinate={{
-              latitude: walk.startLocation.latitude,
-              longitude: walk.startLocation.longitude,
-            }}
-            title="Meetup Spot"
-            locationName={walk.startLocation.name}
+          <MeetupSpot 
+            location={walk.startLocation} 
+            isWalkOwner={isWalkOwner} 
+            walkId={walkId} 
           />
         ) : null}
         {/* 2 & 3. Render all participants (current user and others) */}
