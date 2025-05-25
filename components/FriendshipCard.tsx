@@ -70,102 +70,106 @@ const SetupPendingCard = memo(() => {
 });
 
 // Separate component for when the friend data is available
-const FriendDataCard = memo(({ 
-  friendship, 
-  friendId, 
-  friendData, 
-  onPress 
-}: { 
-  friendship: Friendship; 
-  friendId: string | null; 
-  friendData: any; 
-  onPress?: () => void; 
-}) => {
-  const lastMessageTime = friendship.lastMessageAt
-    ? formatTimestamp(friendship.lastMessageAt)
-    : "";
-    
-  return (
-    <Card
-      padding="$2"
-      pr="$4"
-      marginVertical="$2"
-      backgroundColor="white"
-      onPress={onPress}
-      animation="bouncy"
-      pressStyle={{ scale: 0.98, opacity: 0.9 }}
-      overflow="hidden"
-    >
-      <XStack alignItems="center" gap="$3">
-        {/* Friend's Avatar */}
-        <UserAvatar
-          uid={friendId || ""}
-          size={60}
-          backgroundColor={COLORS.primary}
-        />
+const FriendDataCard = memo(
+  ({
+    friendship,
+    friendId,
+    friendData,
+    onPress,
+  }: {
+    friendship: Friendship;
+    friendId: string | null;
+    friendData: any;
+    onPress?: () => void;
+  }) => {
+    const lastMessageTime = friendship.lastMessageAt
+      ? formatTimestamp(friendship.lastMessageAt)
+      : "";
 
-        {/* Friend's Info */}
-        <YStack flex={1} justifyContent="center">
-          <Text fontWeight="bold" fontSize="$5">
-            {friendData.name || "Unknown"}
-          </Text>
+    return (
+      <Card
+        padding="$2"
+        pr="$4"
+        marginVertical="$2"
+        backgroundColor="white"
+        onPress={onPress}
+        animation="bouncy"
+        pressStyle={{ scale: 0.98, opacity: 0.9 }}
+        overflow="hidden"
+      >
+        <XStack alignItems="center" gap="$3">
+          {/* Friend's Avatar */}
+          <UserAvatar
+            uid={friendId || ""}
+            size={60}
+            backgroundColor={COLORS.primary}
+          />
 
-          {/* Show placeholder if no messages yet */}
-          <Text color="$gray10" numberOfLines={1} opacity={0.8}>
-            {friendship.lastMessageAt
-              ? friendship.lastMessagePreview
-              : "No messages yet"}
-          </Text>
-
-          {/* Display total miles walked together */}
-          {friendship.totalMilesWalked ? (
-            <Text color="$green9" numberOfLines={1} fontWeight="500">
-              Walked 2gether: {friendship.totalMilesWalked.toFixed(1)} miles
+          {/* Friend's Info */}
+          <YStack flex={1} justifyContent="center">
+            <Text fontWeight="bold" fontSize="$5">
+              {friendData.name || "Unknown"}
             </Text>
-          ) : null}
-        </YStack>
 
-        {/* Timestamp and unread count */}
-        <YStack alignItems="flex-end" justifyContent="center">
-          {friendship.lastMessageAt && (
-            <Text color="$gray9" fontSize="$2">
-              {lastMessageTime}
+            {/* Show placeholder if no messages yet */}
+            <Text color="$gray10" numberOfLines={1} opacity={0.8}>
+              {friendship.lastMessageAt
+                ? friendship.lastMessagePreview
+                : "No messages yet"}
             </Text>
-          )}
-        </YStack>
-      </XStack>
-    </Card>
-  );
-});
+
+            {/* Display total miles walked together */}
+            {friendship.totalMilesWalked ? (
+              <Text color="$green9" numberOfLines={1} fontWeight="500">
+                Walked 2gether: {friendship.totalMilesWalked.toFixed(1)} miles
+              </Text>
+            ) : null}
+          </YStack>
+
+          {/* Timestamp and unread count */}
+          <YStack alignItems="flex-end" justifyContent="center">
+            {friendship.lastMessageAt && (
+              <Text color="$gray9" fontSize="$2">
+                {lastMessageTime}
+              </Text>
+            )}
+          </YStack>
+        </XStack>
+      </Card>
+    );
+  }
+);
 
 // Main component that chooses which card to render
-export const FriendshipCard: React.FC<Props> = memo(({ friendship, onPress }) => {
-  const { user } = useAuth();
+export const FriendshipCard: React.FC<Props> = memo(
+  ({ friendship, onPress }) => {
+    const { user } = useAuth();
 
-  // Find the ID of the user that isn't the current user
-  const friendId = user?.uid
-    ? friendship.uids.find((uid) => uid !== user.uid)
-    : null;
-
-  // Get friend data directly from the denormalized friendship document
-  const friendData =
-    friendId && friendship.userDataByUid
-      ? friendship.userDataByUid[friendId]
+    // Find the ID of the user that isn't the current user
+    const friendId = user?.uid
+      ? friendship.uids.find((uid) => uid !== user.uid)
       : null;
 
-  // Render the appropriate card based on whether friend data exists
-  if (!friendData) {
-    return <SetupPendingCard />;
-  }
+    // Get friend data directly from the denormalized friendship document
+    const friendData =
+      friendId && friendship.userDataByUid
+        ? friendship.userDataByUid[friendId]
+        : null;
 
-  return (
-    <FriendDataCard 
-      friendship={friendship} 
-      friendId={friendId || null} 
-      friendData={friendData} 
-      onPress={onPress} 
-    />
-  );
-});
+    // Render the appropriate card based on whether friend data exists
+    if (!friendData) {
+      return <SetupPendingCard />;
+    }
+
+    return (
+      <FriendDataCard
+        friendship={friendship}
+        friendId={friendId || null}
+        friendData={friendData}
+        onPress={onPress}
+      />
+    );
+  }
+);
 
 export default FriendshipCard;
