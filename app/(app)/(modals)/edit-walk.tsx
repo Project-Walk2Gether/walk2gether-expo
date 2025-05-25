@@ -4,6 +4,7 @@ import HeaderCloseButton from "@/components/HeaderCloseButton";
 import WalkForm from "@/components/WalkForm";
 import { db } from "@/config/firebase";
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
+import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useDoc } from "@/utils/firestore";
 import { doc, updateDoc } from "@react-native-firebase/firestore";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -16,6 +17,7 @@ export default function EditWalkScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { doc: walk } = useDoc<WithId<Walk>>(`walks/${id}`);
+  const { showMessage } = useFlashMessage();
 
   const handleSubmit = async (values: WithId<Walk>) => {
     try {
@@ -24,7 +26,7 @@ export default function EditWalkScreen() {
       const walkRef = doc(db, "walks", walk.id!);
       await updateDoc(walkRef, values);
 
-      Alert.alert("Success", "Walk updated successfully!");
+      showMessage("Walk updated successfully!", "success");
       router.back();
     } catch (error) {
       console.error("Error updating walk:", error);
