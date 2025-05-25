@@ -1,6 +1,9 @@
+import HeaderBackButton from "@/components/HeaderBackButton";
+import QuoteWithImage from "@/components/QuoteWithImage";
+import { BrandGradient } from "@/components/UI";
+import WalkCard from "@/components/WalkCard";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
-import { useFriends } from "@/context/FriendsContext";
 import { useLocation } from "@/context/LocationContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
@@ -13,7 +16,7 @@ import {
   updateDoc,
 } from "@react-native-firebase/firestore";
 import { Check } from "@tamagui/lucide-icons";
-import { useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -33,27 +36,22 @@ import {
   walkIsNeighborhoodWalk,
   WithId,
 } from "walk2gether-shared";
-import QuoteWithImage from "./QuoteWithImage";
-import { BrandGradient } from "./UI";
-import WalkCard from "./WalkCard";
 
-interface RequestToJoinScreenProps {
-  walk: WithId<Walk>;
-}
-
-export default function RequestToJoinScreen({
-  walk,
-}: RequestToJoinScreenProps) {
+export default function WalkViewInvitationScreen() {
+  const { id } = useLocalSearchParams();
+  const { doc: walk } = useDoc<WithId<Walk>>(`walks/${id}`);
   const navigation = useNavigation();
   const { user } = useAuth();
   const { userData, updateUserData } = useUserData();
   const { userLocation } = useLocation();
-  const { friendships } = useFriends();
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
   const [introduction, setIntroduction] = useState("");
   const [saveToProfile, setSaveToProfile] = useState(false);
   const router = useRouter();
+
+  if (!walk) return null;
+
   const { doc: participantDoc } = useDoc<Participant>(
     `walks/${walk.id}/participants/${user?.uid}`
   );
@@ -67,6 +65,7 @@ export default function RequestToJoinScreen({
       title: isActivePending
         ? "You've joined this walk!"
         : `Join ${walk.organizerName}'s walk`,
+      headerLeft: () => <HeaderBackButton />,
     });
   }, [navigation, walk.organizerName, isActivePending]);
 
@@ -187,7 +186,10 @@ export default function RequestToJoinScreen({
         showsVerticalScrollIndicator={true}
         alwaysBounceVertical={true}
       >
-        <YStack p="$4" ai="center" gap="$6">
+        <YStack p="$4" gap="$6">
+          {/* Always render the WalkCard at the top level */}
+          <WalkCard walk={walk} showActions={false} />
+
           <Card
             elevate
             bordered
@@ -206,33 +208,25 @@ export default function RequestToJoinScreen({
                   <Text fontSize="$4" textAlign="center" color="$gray11">
                     You've successfully joined this walk!
                   </Text>
-                  <WalkCard walk={walk} showActions={false} />
                 </>
               ) : requestCancelled ? (
                 <>
-                  <Text fontSize="$4" textAlign="center" color="$gray11">
-                    You can join this walk if you'd like to participate.
-                  </Text>
-
-                  <WalkCard walk={walk} showActions={false} />
-
                   <Button
                     bg={COLORS.primary}
                     color="white"
+                    w="100%"
                     onPress={handleRequestToJoin}
                     disabled={loading}
                   >
                     {loading ? (
                       <ActivityIndicator color="white" />
                     ) : (
-                      "Join This Walk"
+                      "Accept this invitation"
                     )}
                   </Button>
                 </>
               ) : (
                 <>
-                  <WalkCard walk={walk} showActions={false} />
-
                   {walkIsNeighborhoodWalk(walk) && (
                     <YStack gap="$2" w="100%" mt="$2">
                       <Label
