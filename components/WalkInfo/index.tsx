@@ -1,3 +1,4 @@
+import { COLORS } from "@/styles/colors";
 import { openLocationInMaps } from "@/utils/locationUtils";
 import { ArrowRight, Navigation } from "@tamagui/lucide-icons";
 import { differenceInSeconds, format } from "date-fns";
@@ -75,9 +76,7 @@ export default function WalkInfo({ walk }: Props) {
       const minutesAgo = Math.floor(
         differenceInSeconds(currentTime, walkDate) / 60
       );
-      return `Scheduled for ${minutesAgo} minute${
-        minutesAgo !== 1 ? "s" : ""
-      } ago`;
+      return `Starting ${minutesAgo} minute${minutesAgo !== 1 ? "s" : ""} ago`;
     }
 
     return "Loading...";
@@ -103,7 +102,7 @@ export default function WalkInfo({ walk }: Props) {
 
   return (
     <YStack
-      backgroundColor="#5b4c3e"
+      backgroundColor={COLORS.secondary}
       paddingVertical="$3"
       paddingHorizontal="$3"
       gap="$2"
@@ -155,32 +154,33 @@ export default function WalkInfo({ walk }: Props) {
         )}
       </XStack>
 
-      {/* Second XStack: empty space -> location info -> navigate button */}
-      <XStack justifyContent="space-between">
-        {/* Empty space with same fixed width as arrow */}
-        <XStack width={leftColumnWidth} />
+      {/* Second XStack: only shown before walk starts */}
+      {!hasStarted && (
+        <XStack justifyContent="space-between">
+          {/* Empty space with same fixed width as arrow */}
+          <XStack width={leftColumnWidth} />
 
-        {/* Location information */}
-        <YStack flex={1} gap="$1">
-          {walk.startLocation && (
-            <YStack>
-              <Text color="white" fontSize="$3">
-                {walk.startLocation.name || "Meeting point"}
-              </Text>
-              {walk.startLocation.notes && (
-                <Text color="white" fontSize="$2">
-                  {walk.startLocation.notes}
+          {/* Location information */}
+          <YStack flex={1} gap="$1">
+            {walk.startLocation && (
+              <YStack>
+                <Text color="white" fontSize="$3">
+                  {walk.startLocation.name || "Meeting point"}
                 </Text>
-              )}
-            </YStack>
-          )}
-        </YStack>
+                {walk.startLocation.notes && (
+                  <Text color="white" fontSize="$2">
+                    {walk.startLocation.notes}
+                  </Text>
+                )}
+              </YStack>
+            )}
+          </YStack>
 
-        {/* Navigate button - only show before the walk has started */}
+        {/* Navigate button - only shown before walk starts */}
         <YStack alignItems="flex-end" justifyContent="center">
-          {hasLocation && !hasStarted && (
+          {hasLocation && (
             <Button
-              size="$2"
+              size="$1"
               icon={<Navigation size={15} color="white" />}
               onPress={handleNavigate}
               backgroundColor="#4BB4E6"
@@ -191,6 +191,7 @@ export default function WalkInfo({ walk }: Props) {
           )}
         </YStack>
       </XStack>
+      )}
     </YStack>
   );
 }
