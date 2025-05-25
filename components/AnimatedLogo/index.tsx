@@ -8,7 +8,7 @@ import { logoColor } from "./color";
 
 const PULSE_DURATION = 200;
 const PULSE_SCALE = 1.3;
-const PULSE_DELAY = 100;
+const PULSE_DELAY = 500; // Very short pause after "2" starts before "Gether" begins
 const STARTING_DELAY = 2500;
 
 // Use actual viewBox widths for each SVG
@@ -88,21 +88,36 @@ export default function AnimatedLogo({ width = 168 }: { width?: number }) {
     ]);
 
   const runAnimation = () => {
-    Animated.sequence([
+    // Reset the underline progress
+    underlineProgress.setValue(0);
+
+    // Create a more natural spoken cadence
+    // "Walk" -> medium pause -> "2" -> overlap with "Gether"
+    const animation = Animated.sequence([
+      // First "Walk"
       spinPop(walkScale, walkRotate, 0),
-      Animated.delay(PULSE_DELAY),
-      spinPop(twoScale, twoRotate, 0),
-      Animated.delay(PULSE_DELAY),
+
+      // Start "2" animation
       Animated.parallel([
-        spinPop(getherScale, getherRotate, 0),
-        Animated.timing(underlineProgress, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: false,
-          easing: Easing.out(Easing.cubic),
-        }),
+        spinPop(twoScale, twoRotate, 0),
+
+        // Start "Gether" after a short delay while "2" is still animating
+        Animated.sequence([
+          Animated.delay(PULSE_DELAY),
+          Animated.parallel([
+            spinPop(getherScale, getherRotate, 0),
+            Animated.timing(underlineProgress, {
+              toValue: 1,
+              duration: 500,
+              useNativeDriver: false,
+              easing: Easing.out(Easing.cubic),
+            }),
+          ]),
+        ]),
       ]),
-    ]).start(() => {
+    ]);
+
+    animation.start(() => {
       setIsAnimating(false);
     });
   };
