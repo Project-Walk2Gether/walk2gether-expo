@@ -1,9 +1,9 @@
+import EditButton from "@/components/EditButton";
 import Menu from "@/components/Menu";
 import { Screen } from "@/components/UI";
 import ActionRow from "@/components/UI/ActionRow";
 import { PlaceData } from "@/components/UI/PlacesAutocomplete";
 import { StatelessAvatar } from "@/components/UserAvatar";
-import EditButton from "@/components/EditButton";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUpdates } from "@/context/UpdatesContext";
@@ -19,7 +19,6 @@ import {
   Download,
   Info,
   LogOut,
-  Pencil,
   Phone,
   QrCode,
   Trash,
@@ -220,7 +219,12 @@ export default function MeScreen() {
                 borderWidth={3}
                 backgroundColor={COLORS.primary}
               />
-              <EditButton backgroundColor={COLORS.primary} />
+              <EditButton
+                position="absolute"
+                right={0}
+                bottom={0}
+                backgroundColor={COLORS.primary}
+              />
             </View>
           }
         />
@@ -234,6 +238,8 @@ export default function MeScreen() {
         onPress={handleEditProfile}
         backgroundColor="white"
         mb="$3"
+        px="$2"
+        py="$2"
         borderRadius={16}
         position="relative"
       >
@@ -247,10 +253,13 @@ export default function MeScreen() {
             {aboutMe || "Add some details about yourself..."}
           </Text>
         </YStack>
-        <EditButton 
-          backgroundColor="#888888" 
+        <EditButton
+          backgroundColor="#888888"
           onPress={handleEditProfile}
-          size={32} 
+          size={32}
+          position="absolute"
+          right={-6}
+          top={-6}
         />
       </Card>
 
