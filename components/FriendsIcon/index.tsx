@@ -9,9 +9,9 @@ interface Props {
 }
 
 /**
- * WalkIcon component that renders the Walk2Gether app icon as an SVG
+ * FriendsIcon component that renders the Walk2Gether app icon as an SVG
  */
-const WalkIcon: React.FC<Props> = ({
+const FriendsIcon: React.FC<Props> = ({
   size = 24,
   color = "#000",
   opacity = 1,
@@ -37,4 +37,4 @@ const WalkIcon: React.FC<Props> = ({
   return <SvgXml xml={svgXml} width={size} height={size} opacity={opacity} />;
 };
 
-export default WalkIcon;
+export default FriendsIcon;

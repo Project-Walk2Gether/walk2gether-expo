@@ -4,6 +4,7 @@ import { KeyboardAvoidingView, Platform, ScrollView as RNScrollView } from "reac
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, View, XStack } from "tamagui";
 import { BrandGradient } from "../../UI";
+import PrimaryButton from "@/components/PrimaryButton";
 
 // Export the handle interface so it can be imported by other components
 export interface WizardWrapperHandle {
@@ -101,18 +102,14 @@ const WizardWrapper = forwardRef<WizardWrapperHandle, WizardWrapperProps>((
                 {backText}
               </Button>
             ) : null}
-            <Button
-              size="$5"
-              backgroundColor={
-                continueDisabled ? COLORS.disabled : COLORS.action
-              }
-              color={COLORS.textOnDark}
-              disabled={continueDisabled}
+            <PrimaryButton
               onPress={onContinue}
+              disabled={continueDisabled}
               flex={1}
+              size="$5"
             >
               {continueText}
-            </Button>
+            </PrimaryButton>
           </XStack>
         </View>
       )}
