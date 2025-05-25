@@ -5,13 +5,7 @@ import { useDoc } from "@/utils/firestore";
 import { calculateDisplayAvatars } from "@/utils/participantAvatars";
 import { getWalkTitle } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
-import {
-  Calendar,
-  CheckCircle,
-  Hand,
-  SquareArrowOutUpRight,
-  Timer,
-} from "@tamagui/lucide-icons";
+import { Calendar, CheckCircle, Hand, Timer } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React from "react";
 import { Card, Text, View, XStack, YStack } from "tamagui";
@@ -144,13 +138,16 @@ const WalkCard: React.FC<Props> = ({
       <YStack
         pb="$3"
         px="$4"
-        pt="$2"
+        pt="$3"
         pressStyle={{ scale: 0.98 }}
         onPress={onPress}
       >
         <CardHeader
-          icon={<UserAvatar uid={walk.createdByUid} size={32} />}
+          icon={<UserAvatar uid={walk.createdByUid} size={34} />}
           title={getWalkTitle(walk, user?.uid)}
+          walkType={walkIsNeighborhoodWalk(walk) ? "Neighborhood" : "Friends"}
+          isUserInitiator={isMine}
+          initiatorName={ownerName}
           action={
             isMine && (
               <WalkMenu walk={walk} hideInviteOption={hideInviteOption} />
@@ -206,12 +203,13 @@ const WalkCard: React.FC<Props> = ({
           {/* If user has cancelled their participation */}
           {isCancelled && (
             <XStack
-              backgroundColor="$gray4"
+              backgroundColor="$red4"
               paddingHorizontal="$3"
               paddingVertical="$2"
               borderRadius="$3"
               alignItems="center"
               gap="$1"
+              mt="$2"
             >
               <Text fontSize={12} fontWeight="600" color="$gray9">
                 You've told {ownerName} you can't make it
@@ -233,18 +231,6 @@ const WalkCard: React.FC<Props> = ({
           {/* Show action buttons for non-owners when showActions is true */}
           {!isMine && showActions && !isCancelled ? (
             <View mt="$3">
-              {/* If user is approved - show "See walk details" button */}
-              {isApproved && (
-                <WalkCardButton
-                  label="See walk details"
-                  onPress={onPress}
-                  icon={<SquareArrowOutUpRight color="white" size={16} />}
-                  size="$3"
-                  fontWeight="bold"
-                  backgroundColor={COLORS.primary}
-                />
-              )}
-
               {/* If user has been invited but hasn't responded */}
               {isInvited && !isApproved && !isRejected && !isCancelled && (
                 <WalkCardButton

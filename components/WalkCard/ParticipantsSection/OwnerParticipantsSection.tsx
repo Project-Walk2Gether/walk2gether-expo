@@ -6,7 +6,7 @@ import {
   WithId,
   walkIsFriendsWalk,
 } from "walk2gether-shared";
-import { ParticipantRow, formatNamesInSentenceCase } from "./ParticipantRow";
+import { ParticipantRow } from "./ParticipantRow";
 
 interface Props {
   walk: WithId<Walk>;
@@ -62,26 +62,12 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
           </XStack>
         )}
 
-      {/* Waiting for responses - friends walk only */}
-      {acceptedParticipants.length === 0 &&
-        isFriendsWalk &&
-        invitedParticipants.length > 0 && (
-          <XStack alignItems="center" gap={8}>
-            <Text fontSize={14} color="#666">
-              Waiting for a response from{" "}
-              {formatNamesInSentenceCase(
-                invitedParticipants.map((p) => p.displayName || "Someone")
-              )}
-            </Text>
-          </XStack>
-        )}
-
       {/* Invited friends */}
       {invitedParticipants.length > 0 && (
         <ParticipantRow
           participants={invitedParticipants}
           status="invited"
-          statusText="invited to join you"
+          statusText="has been invited"
         />
       )}
 

@@ -1,5 +1,7 @@
+import { House } from "@tamagui/lucide-icons";
 import React, { ReactNode } from "react";
-import { Text, XStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
+import WalkIcon from "../WalkIcon";
 
 interface Props {
   /**
@@ -16,34 +18,61 @@ interface Props {
    * Optional action component (like a menu)
    */
   action?: ReactNode;
+
+  /**
+   * Type of walk: "Friends" or "Neighborhood"
+   */
+  walkType: "Friends" | "Neighborhood";
+
+  /**
+   * Whether the current user is the initiator of the walk
+   */
+  isUserInitiator: boolean;
+
+  /**
+   * Name of the person who initiated the walk
+   */
+  initiatorName: string;
 }
 
 /**
  * A specialized header component for cards that displays an icon/avatar, title, and optional action
  */
-export const CardHeader: React.FC<Props> = ({ icon, title, action }) => {
+export const CardHeader: React.FC<Props> = ({
+  icon,
+  action,
+  walkType,
+  isUserInitiator,
+  initiatorName,
+}) => {
+  // Determine which icon to show based on walkType
+  const walkTypeIcon =
+    walkType === "Friends" ? (
+      <WalkIcon size={24} color="#000" />
+    ) : (
+      <House size={24} color="#000" />
+    );
+
   return (
-    <XStack
-      mx={-7}
-      alignItems="center"
-      justifyContent="space-between"
-      mb={12}
-      mt={4}
-    >
-      <XStack alignItems="center" gap="$1.5" flex={1}>
-        {icon}
-        <Text
-          fontSize={18}
-          fontWeight="$6"
-          color="$gray12"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          flex={1}
-        >
-          {title}
-        </Text>
+    <YStack mx={-4} mb={6}>
+      {/* Main Header with Walk Type and Menu/Avatar */}
+      <XStack justifyContent="space-between" alignItems="center" mb="$2">
+        <XStack flex={1} gap="$2" alignItems="center">
+          {walkTypeIcon}
+          <Text
+            fontSize={20}
+            fontWeight="700"
+            color="$gray12"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {isUserInitiator ? "My" : `${initiatorName}'s`} {walkType} Walk
+          </Text>
+        </XStack>
+
+        {/* Right side: menu for user's walks, avatar for others' walks */}
+        {isUserInitiator ? action : icon}
       </XStack>
-      {action}
-    </XStack>
+    </YStack>
   );
 };

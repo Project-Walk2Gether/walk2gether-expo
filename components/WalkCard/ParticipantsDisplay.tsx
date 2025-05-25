@@ -2,7 +2,7 @@ import { COLORS } from "@/styles/colors";
 import { categorizeParticipants } from "@/utils/participantFilters";
 import { Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
-import React, { useMemo } from "react";
+import React from "react";
 import { Avatar, Text, View, XStack, YStack } from "tamagui";
 import {
   Participant,
@@ -11,8 +11,8 @@ import {
   walkIsFriendsWalk,
 } from "walk2gether-shared";
 import { IconTextRow } from "./IconTextRow";
-import { WalkCardButton } from "./WalkCardButton";
 import { OwnerParticipantsSection } from "./ParticipantsSection/OwnerParticipantsSection";
+import { WalkCardButton } from "./WalkCardButton";
 
 interface Props {
   walk: WithId<Walk>;
@@ -67,6 +67,7 @@ export const ParticipantsDisplay: React.FC<Props> = ({
 
   // Process the participant data using our utility function
   const {
+    allParticipants,
     acceptedParticipants,
     requestedParticipants,
     invitedParticipants,
@@ -74,10 +75,10 @@ export const ParticipantsDisplay: React.FC<Props> = ({
   } = categorizeParticipants(participantsById, walk, currentUserUid);
 
   // Filter out the owner from the list of participants
-  const hasNonOwnerParticipants = acceptedParticipants.some(
+  const hasNonOwnerParticipants = allParticipants.some(
     (p) => p.userUid !== walk.createdByUid
   );
-  
+
   // Use passed-in displayAvatars and overflow if provided, otherwise use empty values
   const displayAvatars = passedDisplayAvatars || [];
   const overflow = passedOverflow || 0;
@@ -122,7 +123,9 @@ export const ParticipantsDisplay: React.FC<Props> = ({
         <YStack gap={12}>
           <IconTextRow
             icon={<Users size={16} color="#999" />}
-            text={`Waiting for ${isFriendsWalk ? "your friend" : "neighbors"} to join`}
+            text={`Waiting for ${
+              isFriendsWalk ? "your friend" : "neighbors"
+            } to join`}
             right={
               <WalkCardButton
                 label="Invite"
@@ -137,7 +140,7 @@ export const ParticipantsDisplay: React.FC<Props> = ({
         </YStack>
       );
     }
-    
+
     // Otherwise use the full OwnerParticipantsSection
     return (
       <OwnerParticipantsSection
