@@ -19,10 +19,10 @@ import MessageList, {
 // Removed StyleSheet import; using Tamagui for styles
 import FullScreenLoader from "@/components/FullScreenLoader";
 import HeaderBackButton from "@/components/HeaderBackButton";
+import WalkInfo from "@/components/WalkInfo";
 import WalkMenu from "@/components/WalkMenu";
 import LiveWalkMap from "@/components/WalkScreen/components/LiveWalkMap";
 import ParticipantsList from "@/components/WalkScreen/components/ParticipantsList";
-import WalkTimer from "@/components/WalkTimer";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
 import { getWalkStatus } from "@/utils/walkUtils";
@@ -149,7 +149,7 @@ export default function WalkScreen() {
       <View flex={1} backgroundColor="#fff">
         {/* Map and Participants container - with padding to account for collapsed bottom sheet */}
         <View flex={1} pb={collapsedHeight - 30}>
-          <WalkTimer walk={walk} />
+          <WalkInfo walk={walk} />
           <LiveWalkMap walkId={id} />
           {/* Walk stats will only show when the walk has ended */}
           {/* {walk.endedAt && (

@@ -1,19 +1,16 @@
-import { MapPin } from "@tamagui/lucide-icons";
-import { differenceInSeconds } from "date-fns";
+import { Calendar, CalendarClock, CheckCircle, Clock, MapPin } from "@tamagui/lucide-icons";
+import { differenceInSeconds, format } from "date-fns";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
-import { Text, XStack, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
-import { ActiveWalkRow } from "./ActiveWalkRow";
-import { CompletedWalkRow } from "./CompletedWalkRow";
-import { ScheduledWalkRow } from "./ScheduledWalkRow";
-import { TimerRow } from "./TimerRow";
+import { WalkInfoRow, Section } from "./WalkInfoRow";
 
 interface Props {
   walk: Walk;
 }
 
-export default function WalkTimer({ walk }: Props) {
+export default function WalkInfo({ walk }: Props) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Update the timer every second
@@ -56,12 +53,14 @@ export default function WalkTimer({ walk }: Props) {
 
       if (endTime && startTime) {
         const durationSeconds = differenceInSeconds(endTime, startTime);
-        return (
-          <CompletedWalkRow
-            durationSeconds={durationSeconds}
-            formatTime={formatTime}
-          />
-        );
+        const sections: Section[] = [
+          {
+            icon: <CheckCircle size="$1" color="white" />,
+            label: "Walk completed",
+            value: formatTime(durationSeconds)
+          }
+        ];
+        return <WalkInfoRow sections={sections} />;
       }
     }
 
@@ -71,46 +70,45 @@ export default function WalkTimer({ walk }: Props) {
 
       if (startTime) {
         const elapsedSeconds = differenceInSeconds(currentTime, startTime);
-        return (
-          <ActiveWalkRow
-            elapsedSeconds={elapsedSeconds}
-            formatTime={formatTime}
-          />
-        );
-      }
-    }
-
-    // If the walk has ended
-    if (hasEnded) {
-      const endTime = walk.endedAt?.toDate();
-      const startTime = walk.startedAt?.toDate();
-
-      if (endTime && startTime) {
-        const durationSeconds = differenceInSeconds(endTime, startTime);
-        return (
-          <CompletedWalkRow
-            durationSeconds={durationSeconds}
-            formatTime={formatTime}
-          />
-        );
+        const sections: Section[] = [
+          {
+            icon: <Clock size="$1" color="white" />,
+            label: "Walk time",
+            value: formatTime(elapsedSeconds)
+          }
+        ];
+        return <WalkInfoRow sections={sections} />;
       }
     }
 
     // If the walk is in the future
     if (walkDate && walkDate > currentTime) {
       const timeUntilWalk = differenceInSeconds(walkDate, currentTime);
-      return (
-        <TimerRow
-          timeUntilWalk={timeUntilWalk}
-          walkDate={walkDate}
-          formatTime={formatTime}
-        />
-      );
+      const sections: Section[] = [
+        {
+          icon: <Clock size="$1" color="white" />,
+          label: "Starting in",
+          value: formatTime(timeUntilWalk)
+        },
+        {
+          icon: <Calendar size="$1" color="white" />,
+          label: format(walkDate, "MMM d, h:mm a"),
+          fontWeight: "normal"
+        }
+      ];
+      return <WalkInfoRow sections={sections} justifyContent="space-between" />;
     }
 
     // If the walk date has passed but it hasn't started
     if (walkDate && walkDate <= currentTime && !hasStarted) {
-      return <ScheduledWalkRow walkDate={walkDate} />;
+      const sections: Section[] = [
+        {
+          icon: <CalendarClock size="$1" color="white" />,
+          label: "Scheduled to start",
+          value: format(walkDate, "h:mm a")
+        }
+      ];
+      return <WalkInfoRow sections={sections} />;
     }
 
     // Default case
@@ -126,17 +124,15 @@ export default function WalkTimer({ walk }: Props) {
     // Only show meetup notes if they exist AND the walk hasn't started yet
     if (!hasLocationNotes || hasStarted) return null;
 
-    return (
-      <XStack mt="$2" alignItems="center" gap="$2">
-        <MapPin size="$1" color="white" />
-        <Text color="white" fontWeight="bold" fontSize="$2">
-          Meetup notes:
-        </Text>
-        <Text color="white" fontSize="$2">
-          {walk.startLocation?.notes}
-        </Text>
-      </XStack>
-    );
+    const sections: Section[] = [
+      {
+        icon: <MapPin size="$1" color="white" />,
+        label: "Meetup notes",
+        value: walk.startLocation?.notes || "",
+        fontWeight: "normal"
+      }
+    ];
+    return <WalkInfoRow sections={sections} />;
   };
 
   return (
