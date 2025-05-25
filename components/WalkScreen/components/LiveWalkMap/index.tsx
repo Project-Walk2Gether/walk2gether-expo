@@ -31,8 +31,7 @@ export default function LiveWalkMap({
   const { user } = useAuth();
   const mapRef = useRef<MapView>(null);
   
-  // Get current user participant and participant status
-  const [userParticipant, setUserParticipant] = useState<any>(null);
+  // Get current user participant via memoization
   const [navigationMethod, setNavigationMethod] = useState<
     "walking" | "driving"
   >("walking");
@@ -46,26 +45,20 @@ export default function LiveWalkMap({
     user!.uid
   );
 
-  // Get and store current user participant data
-  useEffect(() => {
-    if (participants && user) {
-      const currentUserParticipant = participants.find(
-        (p) => p.id === user.uid
-      );
-      if (currentUserParticipant) {
-        setUserParticipant(currentUserParticipant);
-
-        // Set navigation method
-        if (currentUserParticipant.navigationMethod === "driving") {
-          setNavigationMethod("driving");
-          onNavigationMethodChange?.("driving");
-        } else {
-          setNavigationMethod("walking");
-          onNavigationMethodChange?.("walking");
-        }
-      }
-    }
+  // Memoize the current user participant data
+  const userParticipant = React.useMemo(() => {
+    if (!participants || !user) return null;
+    return participants.find(p => p.id === user.uid);
   }, [participants, user]);
+
+  // Set navigation method based on user participant
+  useEffect(() => {
+    if (userParticipant) {
+      const method = userParticipant.navigationMethod === "driving" ? "driving" : "walking";
+      setNavigationMethod(method);
+      onNavigationMethodChange?.(method);
+    }
+  }, [userParticipant, onNavigationMethodChange]);
 
   // Get walk data to access start location and check if user is owner
   const { doc: walk } = useDoc<Walk>(`walks/${walkId}`);

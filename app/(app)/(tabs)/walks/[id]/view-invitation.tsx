@@ -18,14 +18,14 @@ import {
 import { Check } from "@tamagui/lucide-icons";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, ScrollView } from "react-native";
+import { ActivityIndicator, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Button,
-  Card,
   Checkbox,
   Input,
   Label,
+  ScrollView,
   Text,
   XStack,
   YStack,
@@ -37,9 +37,24 @@ import {
   WithId,
 } from "walk2gether-shared";
 
-export default function WalkViewInvitationScreen() {
-  const { id } = useLocalSearchParams();
-  const { doc: walk } = useDoc<WithId<Walk>>(`walks/${id}`);
+// Higher Order Component that fetches the walk data
+function withWalkData<P extends { walk: WithId<Walk> }>(
+  Component: React.ComponentType<P>
+) {
+  return function WithWalkDataWrapper(props: Omit<P, "walk">) {
+    const { id } = useLocalSearchParams();
+    const { doc: walk } = useDoc<WithId<Walk>>(`walks/${id}`);
+
+    // Return null until we have the walk data
+    if (!walk) return null;
+
+    // Once we have the walk data, render the inner component with walk as prop
+    return <Component {...(props as P)} walk={walk} />;
+  };
+}
+
+// Inner component that expects the walk data to be passed as a prop
+function ViewWalkInvitationScreen({ walk }: { walk: WithId<Walk> }) {
   const navigation = useNavigation();
   const { user } = useAuth();
   const { userData, updateUserData } = useUserData();
@@ -49,8 +64,6 @@ export default function WalkViewInvitationScreen() {
   const [introduction, setIntroduction] = useState("");
   const [saveToProfile, setSaveToProfile] = useState(false);
   const router = useRouter();
-
-  if (!walk) return null;
 
   const { doc: participantDoc } = useDoc<Participant>(
     `walks/${walk.id}/participants/${user?.uid}`
@@ -181,117 +194,100 @@ export default function WalkViewInvitationScreen() {
       <ScrollView
         contentContainerStyle={{
           paddingBottom: insets.bottom,
-          paddingHorizontal: 16,
+          paddingHorizontal: "$2",
         }}
         showsVerticalScrollIndicator={true}
         alwaysBounceVertical={true}
       >
-        <YStack p="$4" gap="$6">
+        <YStack p="$4" gap="$4">
           {/* Always render the WalkCard at the top level */}
           <WalkCard walk={walk} showActions={false} />
 
-          <Card
-            elevate
-            bordered
-            p={0}
-            br={18}
-            bg="#fff"
-            shadowColor="#000"
-            shadowOpacity={0.08}
-            shadowRadius={12}
-            shadowOffset={{ width: 0, height: 2 }}
-            overflow="hidden"
-          >
-            <YStack gap="$4" ai="center" p="$4">
-              {isActivePending ? (
-                <>
-                  <Text fontSize="$4" textAlign="center" color="$gray11">
-                    You've successfully joined this walk!
-                  </Text>
-                </>
-              ) : requestCancelled ? (
-                <>
-                  <Button
-                    bg={COLORS.primary}
-                    color="white"
-                    w="100%"
-                    onPress={handleRequestToJoin}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <ActivityIndicator color="white" />
-                    ) : (
-                      "Accept this invitation"
-                    )}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  {walkIsNeighborhoodWalk(walk) && (
-                    <YStack gap="$2" w="100%" mt="$2">
+          <YStack gap="$4" ai="center">
+            {isActivePending ? (
+              <>
+                <Text fontSize="$4" textAlign="center" color="$gray11">
+                  You've successfully joined this walk!
+                </Text>
+              </>
+            ) : requestCancelled ? (
+              <>
+                <Button
+                  bg={COLORS.primary}
+                  color="white"
+                  w="100%"
+                  onPress={handleRequestToJoin}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    "Accept this invitation"
+                  )}
+                </Button>
+              </>
+            ) : (
+              <>
+                {walkIsNeighborhoodWalk(walk) && (
+                  <YStack gap="$2" w="100%" mt="$2">
+                    <Label htmlFor="introduction" fontSize="$3" color="$gray11">
+                      Introduce Yourself (optional)
+                    </Label>
+                    <Input
+                      id="introduction"
+                      size="$4"
+                      placeholder="Hi, I'm excited to join this walk..."
+                      value={introduction}
+                      onChangeText={setIntroduction}
+                      multiline
+                      numberOfLines={3}
+                      autoCorrect
+                      textAlignVertical="top"
+                    />
+
+                    <XStack alignItems="center" gap="$2" marginTop="$1">
+                      <Checkbox
+                        id="save-to-profile"
+                        size="$4"
+                        checked={saveToProfile}
+                        onCheckedChange={(checked) =>
+                          setSaveToProfile(!!checked)
+                        }
+                      >
+                        <Checkbox.Indicator>
+                          <Check />
+                        </Checkbox.Indicator>
+                      </Checkbox>
                       <Label
-                        htmlFor="introduction"
-                        fontSize="$3"
+                        htmlFor="save-to-profile"
+                        fontSize="$2"
                         color="$gray11"
                       >
-                        Introduce Yourself (optional)
+                        Save to my profile for future walks
                       </Label>
-                      <Input
-                        id="introduction"
-                        size="$4"
-                        placeholder="Hi, I'm excited to join this walk..."
-                        value={introduction}
-                        onChangeText={setIntroduction}
-                        multiline
-                        numberOfLines={3}
-                        autoCorrect
-                        textAlignVertical="top"
-                      />
+                    </XStack>
+                  </YStack>
+                )}
 
-                      <XStack alignItems="center" gap="$2" marginTop="$1">
-                        <Checkbox
-                          id="save-to-profile"
-                          size="$4"
-                          checked={saveToProfile}
-                          onCheckedChange={(checked) =>
-                            setSaveToProfile(!!checked)
-                          }
-                        >
-                          <Checkbox.Indicator>
-                            <Check />
-                          </Checkbox.Indicator>
-                        </Checkbox>
-                        <Label
-                          htmlFor="save-to-profile"
-                          fontSize="$2"
-                          color="$gray11"
-                        >
-                          Save to my profile for future walks
-                        </Label>
-                      </XStack>
-                    </YStack>
+                <Button
+                  size="$5"
+                  w="100%"
+                  bg={COLORS.primary}
+                  color="white"
+                  onPress={handleRequestToJoin}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="white" />
+                  ) : walkIsNeighborhoodWalk(walk) ? (
+                    "Join This Walk"
+                  ) : (
+                    "Accept Invitation"
                   )}
-
-                  <Button
-                    size="$5"
-                    w="100%"
-                    bg={COLORS.primary}
-                    color="white"
-                    onPress={handleRequestToJoin}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <ActivityIndicator color="white" />
-                    ) : walkIsNeighborhoodWalk(walk) ? (
-                      "Join This Walk"
-                    ) : (
-                      "Accept Invitation"
-                    )}
-                  </Button>
-                </>
-              )}
-            </YStack>
-          </Card>
+                </Button>
+              </>
+            )}
+          </YStack>
 
           {/* Subtle cancel request button (shown only when request is pending) */}
           {isActivePending && (
@@ -322,3 +318,5 @@ export default function WalkViewInvitationScreen() {
     </BrandGradient>
   );
 }
+
+export default withWalkData(ViewWalkInvitationScreen);

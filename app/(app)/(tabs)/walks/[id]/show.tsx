@@ -51,7 +51,7 @@ export default function WalkScreen() {
 
   // Define snap points for the chat bottom sheet (30% and 100% of screen height)
   // Get collapsed height for calculations (30% of screen height)
-  const collapsedHeight = 188;
+  const collapsedHeight = 158;
   const chatSnapPoints = useMemo(() => [collapsedHeight, "100%"], []);
 
   // Function to handle when message form takes focus
@@ -190,20 +190,8 @@ export default function WalkScreen() {
         >
           <BottomSheetScrollView
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ paddingTop: 28, zIndex: 1000000 }}
+            contentContainerStyle={{ zIndex: 1000000 }}
           >
-            <View position="absolute" top={0} left={0} right={0} h={30}>
-              <Text
-                textAlign="center"
-                fontSize="$5"
-                fontWeight="bold"
-                mx="$4"
-                mb="$2"
-                color="#4EB1BA"
-              >
-                Chat
-              </Text>
-            </View>
             <ParticipantsList
               status={status}
               participants={participants}

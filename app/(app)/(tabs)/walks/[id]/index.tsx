@@ -43,6 +43,6 @@ export default function WalkRouter() {
     return <Redirect href={`/walks/${id}/show`} />;
   } else {
     // Participant with pending/rejected request or non-participant - show request page
-    return <Redirect href={`/walks/${id}/request`} />;
+    return <Redirect href={`/walks/${id}/view-invitation`} />;
   }
 }

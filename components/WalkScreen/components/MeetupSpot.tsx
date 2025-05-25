@@ -1,7 +1,5 @@
-import { Info, Pencil } from "@tamagui/lucide-icons";
-import { router } from "expo-router";
-import React, { useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import React from "react";
+import { View } from "react-native";
 import { Marker } from "react-native-maps";
 import { Text, XStack, YStack } from "tamagui";
 import { COLORS } from "../../../styles/colors";
@@ -17,39 +15,8 @@ interface Props {
   walkId?: string;
 }
 
-const MeetupSpot: React.FC<Props> = ({
-  location,
-  isWalkOwner = false,
-  walkId,
-}) => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  // Format address to exclude city information
-  const formatAddress = (address: string | undefined): string => {
-    if (!address) return "Meetup Spot";
-
-    // Split by commas and only use the first part (usually street address)
-    const parts = address.split(",");
-    return parts[0].trim();
-  };
-
-  const address = formatAddress(location.name);
-  const notes = location.notes || "";
-
-  // Function to show the full notes in a dialog
-  const handlePress = () => {
-    setDialogOpen(true);
-  };
-
-  // Function to navigate to edit screen
-  const handleEditPress = () => {
-    if (walkId) {
-      router.push({
-        pathname: "/edit-walk",
-        params: { id: walkId },
-      });
-    }
-  };
+const MeetupSpot: React.FC<Props> = ({ location }) => {
+  const displayText = location.notes || "Meetup Spot";
 
   return (
     <Marker
@@ -59,7 +26,6 @@ const MeetupSpot: React.FC<Props> = ({
       }}
       anchor={{ x: 0.5, y: 1 }}
       centerOffset={{ x: 0, y: -18 }}
-      onPress={handlePress}
       tracksViewChanges={false}
     >
       <YStack alignItems="center">
@@ -76,68 +42,20 @@ const MeetupSpot: React.FC<Props> = ({
           shadowColor="#000"
           shadowOpacity={0.25}
           shadowRadius={3}
+          maxWidth={200}
           style={{
             shadowOffset: { width: 0, height: 2 },
             elevation: 5,
           }}
         >
-          <YStack alignItems="center" gap="$1" width="100%">
-            {/* Main display text - prioritize notes if available */}
-            <Text
-              fontSize={14}
-              fontWeight="bold"
-              color={COLORS.text}
-              textAlign="center"
-            >
-              {notes || address}
-            </Text>
-
-            {/* Action line */}
-            <XStack
-              gap="$1"
-              alignItems="center"
-              justifyContent="center"
-              width="100%"
-            >
-              <TouchableOpacity
-                onPress={handlePress}
-                style={{ flexDirection: "row", alignItems: "center" }}
-              >
-                <Text fontSize={12} color={COLORS.primary} fontWeight="bold">
-                  Meetup spot
-                </Text>
-                <Info
-                  size={14}
-                  color={COLORS.primary}
-                  style={{ marginLeft: 4 }}
-                />
-              </TouchableOpacity>
-
-              {/* Edit button for walk owner */}
-              {isWalkOwner && walkId ? (
-                <TouchableOpacity
-                  onPress={handleEditPress}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginLeft: 12,
-                    paddingLeft: 12,
-                    borderLeftWidth: 1,
-                    borderLeftColor: COLORS.border,
-                  }}
-                >
-                  <Text fontSize={12} color={COLORS.action} fontWeight="bold">
-                    Edit
-                  </Text>
-                  <Pencil
-                    size={14}
-                    color={COLORS.action}
-                    style={{ marginLeft: 4 }}
-                  />
-                </TouchableOpacity>
-              ) : null}
-            </XStack>
-          </YStack>
+          <Text
+            fontSize={14}
+            fontWeight="bold"
+            color={COLORS.text}
+            textAlign="center"
+          >
+            {displayText}
+          </Text>
         </XStack>
 
         {/* Pin head and stem */}
