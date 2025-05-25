@@ -1,7 +1,12 @@
-import { Calendar, CalendarClock, CheckCircle, Clock } from "@tamagui/lucide-icons";
-import React from "react";
-import { XStack, Text, YStack } from "tamagui";
 import { getSmartDateFormat } from "@/utils/dateUtils";
+import {
+  Calendar,
+  CalendarClock,
+  CheckCircle,
+  Clock,
+} from "@tamagui/lucide-icons";
+import React from "react";
+import { Text, XStack, YStack } from "tamagui";
 
 interface Props {
   type: "scheduled" | "countdown" | "active" | "completed";
@@ -42,12 +47,17 @@ export function TimeRow({
 
     case "countdown":
       if (!walkDate || timeUntilWalk === undefined) return null;
+
+      // Determine if the walk was scheduled to start in the past
+      const isPastScheduledTime = timeUntilWalk < 0;
+      console.log({ timeUntilWalk, isPastScheduledTime });
+
       return (
         <XStack width="100%" justifyContent="space-between" alignItems="center">
           <XStack alignItems="center" gap="$2">
             <Clock size={15} color="white" />
             <Text color="white" fontSize="$3" fontWeight="bold">
-              Starting in:
+              {isPastScheduledTime ? "Scheduled to start:" : "Starting in:"}
             </Text>
             <Text color="white" fontSize="$3">
               {formatTime(timeUntilWalk)}
@@ -55,7 +65,7 @@ export function TimeRow({
           </XStack>
           <XStack alignItems="center" gap="$2">
             <Calendar size={15} color="white" />
-            <Text color="white" fontSize="$3">
+            <Text color="white" fontSize="$4">
               {getSmartDateFormat(walkDate)}
             </Text>
           </XStack>

@@ -1,18 +1,21 @@
 import { stopBackgroundLocationTracking } from "@/background/backgroundLocationTask";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { useLocation } from "@/context/LocationContext";
 import { useLocationTracking } from "@/hooks/useLocationTracking";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
+import { calculateOptimalRegion } from "@/utils/mapUtils";
 import { getWalkStatus } from "@/utils/walkUtils";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert } from "react-native";
+import { ActivityIndicator, Alert, Dimensions } from "react-native";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
-import { Button, Text, View } from "tamagui";
-import { ParticipantWithRoute, Walk } from "walk2gether-shared";
+import { Button, Text, View, XStack } from "tamagui";
+import { ParticipantWithRoute, UserData, Walk } from "walk2gether-shared";
+
 import MeetupSpot from "./MeetupSpot";
 import WalkStatusControls from "./WalkStatusControls";
 
@@ -67,6 +70,16 @@ export default function LiveWalkMap({
   // Get walk data to access start location and check if user is owner
   const { doc: walk } = useDoc<Walk>(`walks/${walkId}`);
 
+  // Get user data to check background location tracking preference
+  const { doc: userData } = useDoc<UserData>(
+    user?.uid ? `users/${user.uid}` : ""
+  );
+  const [isBackgroundTrackingEnabled, setIsBackgroundTrackingEnabled] =
+    useState<boolean>(true);
+
+  // Get access to location context for tracking functions
+  const locationContext = useLocation();
+
   // Check if current user is the walk owner
   const isWalkOwner = walk?.createdByUid === user?.uid;
 
@@ -81,8 +94,54 @@ export default function LiveWalkMap({
     onNavigationMethodChange?.(navigationMethod);
   }, [navigationMethod, onNavigationMethodChange]);
 
+  // Sync tracking preference with userData when it loads
+  useEffect(() => {
+    if (userData) {
+      // The property exists in the schema but might not be in every document yet
+      const trackingEnabled =
+        userData.backgroundLocationTrackingEnabled === undefined
+          ? true // default to true if not set
+          : userData.backgroundLocationTrackingEnabled;
+      setIsBackgroundTrackingEnabled(trackingEnabled);
+    }
+  }, [userData]);
+
+  // Toggle background location tracking and update user preference
+  const handleToggleBackgroundTracking = async () => {
+    if (!user?.uid) return;
+
+    const newValue = !isBackgroundTrackingEnabled;
+    setIsBackgroundTrackingEnabled(newValue);
+
+    // Update user preference in Firestore
+    try {
+      // Use setDoc from firebase directly to update the user document
+      const userDocRef = doc(firestore_instance, `users/${user.uid}`);
+      await setDoc(
+        userDocRef,
+        {
+          backgroundLocationTrackingEnabled: newValue,
+        },
+        { merge: true }
+      );
+
+      // If walk is active, restart tracking with new preference
+      if (walkId && locationContext && status === "active") {
+        // Stop current tracking and restart with new preference
+        await locationContext.stopWalkTracking();
+        await locationContext.startWalkTracking(walkId, undefined, newValue);
+      }
+    } catch (error) {
+      console.error("Error updating background tracking preference:", error);
+      // Revert state if update fails
+      setIsBackgroundTrackingEnabled(!newValue);
+    }
+  };
+
   // Handler for starting a walk (owner only)
   const handleStartWalk = async () => {
+    // When starting a walk, use the user's background tracking preference
+    const backgroundTrackingEnabled = isBackgroundTrackingEnabled;
     if (!walkId || !user?.uid || !isWalkOwner) return;
 
     try {
@@ -97,6 +156,15 @@ export default function LiveWalkMap({
         },
         { merge: true }
       );
+
+      // Start location tracking with the user's background tracking preference
+      if (locationContext) {
+        await locationContext.startWalkTracking(
+          walkId,
+          undefined,
+          backgroundTrackingEnabled
+        );
+      }
     } catch (error) {
       console.error("Error starting walk:", error);
       Alert.alert("Error", "Failed to start the walk. Please try again.");
@@ -209,12 +277,16 @@ export default function LiveWalkMap({
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={{ width: "100%", height: "100%", backgroundColor: "#dadada" }}
-        initialRegion={{
-          latitude: userLocation?.coords.latitude || 0,
-          longitude: userLocation?.coords.longitude || 0,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
+        initialRegion={calculateOptimalRegion(
+          userLocation
+            ? {
+                latitude: userLocation.coords.latitude,
+                longitude: userLocation.coords.longitude,
+              }
+            : undefined,
+          walk?.startLocation,
+          1.3 // 30% padding around the bounds
+        )}
         showsUserLocation={false}
         showsMyLocationButton={false}
       >
@@ -233,10 +305,10 @@ export default function LiveWalkMap({
         )}
         {/* Only show MeetupSpot if the walk hasn't started yet */}
         {walk?.startLocation && !hasWalkStarted ? (
-          <MeetupSpot 
-            location={walk.startLocation} 
-            isWalkOwner={isWalkOwner} 
-            walkId={walkId} 
+          <MeetupSpot
+            location={walk.startLocation}
+            isWalkOwner={isWalkOwner}
+            walkId={walkId}
           />
         ) : null}
         {/* 2 & 3. Render all participants (current user and others) */}
@@ -321,6 +393,40 @@ export default function LiveWalkMap({
           <Text fontSize={14} color={COLORS.text}>
             Getting your location...
           </Text>
+        </View>
+      )}
+
+      {/* Background Location Tracking Toggle */}
+      {status === "active" && hasWalkStarted && !hasWalkEnded && (
+        <View
+          position="absolute"
+          top={Dimensions.get("window").height * 0.1}
+          right={15}
+          zIndex={10}
+        >
+          <Button
+            size="$4"
+            borderRadius="$4"
+            backgroundColor={
+              isBackgroundTrackingEnabled ? COLORS.primary : "$gray8"
+            }
+            onPress={handleToggleBackgroundTracking}
+            shadowColor="#000"
+            shadowOffset={{ width: 0, height: 2 }}
+            shadowOpacity={0.25}
+            shadowRadius={3.84}
+            elevate
+          >
+            <XStack alignItems="center" space="$2">
+              <Text
+                color={isBackgroundTrackingEnabled ? "white" : "$gray12"}
+                fontSize={12}
+                fontWeight="bold"
+              >
+                {isBackgroundTrackingEnabled ? "Tracking On" : "Tracking Off"}
+              </Text>
+            </XStack>
+          </Button>
         </View>
       )}
 

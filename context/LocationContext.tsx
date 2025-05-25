@@ -44,7 +44,8 @@ interface LocationContextValue {
   locationTracking: boolean;
   startWalkTracking: (
     walkId: string,
-    estimatedEndTimeWithBuffer?: Date
+    estimatedEndTimeWithBuffer?: Date,
+    backgroundLocationTrackingEnabled?: boolean
   ) => Promise<boolean>;
   stopWalkTracking: () => Promise<void>;
   updateLocation: (location: Location.LocationObject) => Promise<void>;
@@ -310,7 +311,8 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
   // Start tracking location for a specific walk
   const startWalkTracking = async (
     walkId: string,
-    estimatedEndTimeWithBuffer?: Date
+    estimatedEndTimeWithBuffer?: Date,
+    backgroundLocationTrackingEnabled: boolean = true
   ) => {
     if (!walkId) {
       console.error("Cannot start tracking without walkId");
@@ -344,8 +346,8 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       setUserLocation(initialLocation);
       await updateLocation(initialLocation);
 
-      // Start background tracking if we have permission
-      if (backgroundGranted) {
+      // Start background tracking if we have permission and it's enabled by user preference
+      if (backgroundGranted && backgroundLocationTrackingEnabled) {
         await writeLogIfEnabled({
           message: `Starting background tracking for walkId: ${walkId}, userId: ${userId}`,
         });

@@ -1,17 +1,25 @@
 import { COLORS } from "@/styles/colors";
+import { useAuth } from "@/context/AuthContext";
 import { openLocationInMaps } from "@/utils/locationUtils";
+import { useDoc } from "@/utils/firestore";
 import { ArrowRight, Navigation } from "@tamagui/lucide-icons";
 import { differenceInSeconds, format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { Button, Text, XStack, YStack } from "tamagui";
-import { Walk } from "walk2gether-shared";
+import { Participant, Walk } from "walk2gether-shared";
 
 interface Props {
   walk: Walk;
 }
 
 export default function WalkInfo({ walk }: Props) {
+  const { user } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Get the participant document for the current user
+  const { doc: participantDoc } = useDoc<Participant>(
+    user?.uid ? `walks/${walk.id}/participants/${user.uid}` : undefined
+  );
 
   // Update the timer every second
   useEffect(() => {
@@ -50,7 +58,7 @@ export default function WalkInfo({ walk }: Props) {
 
       if (endTime && startTime) {
         const durationSeconds = differenceInSeconds(endTime, startTime);
-        return `Completed in ${formatTime(durationSeconds)}`;
+        return `Walked for ${formatTime(durationSeconds)}`;
       }
     }
 
@@ -67,6 +75,7 @@ export default function WalkInfo({ walk }: Props) {
     // If the walk is in the future
     if (walkDate && walkDate > currentTime) {
       const timeUntilWalk = differenceInSeconds(walkDate, currentTime);
+      console.log({ timeUntilWalk });
       return `Starting in ${formatTime(timeUntilWalk)}`;
     }
 
@@ -76,7 +85,15 @@ export default function WalkInfo({ walk }: Props) {
       const minutesAgo = Math.floor(
         differenceInSeconds(currentTime, walkDate) / 60
       );
-      return `Starting ${minutesAgo} minute${minutesAgo !== 1 ? "s" : ""} ago`;
+      
+      // Show "Scheduled to start now" when it's exactly the scheduled time
+      if (minutesAgo === 0) {
+        return "Scheduled to start now";
+      }
+      
+      return `Scheduled to start ${minutesAgo} min${
+        minutesAgo !== 1 ? "s" : ""
+      } ago`;
     }
 
     return "Loading...";
@@ -85,6 +102,9 @@ export default function WalkInfo({ walk }: Props) {
   // Check if navigation is possible
   const hasLocation =
     !!walk.startLocation?.latitude && !!walk.startLocation?.longitude;
+    
+  // Check if the user has arrived
+  const hasArrived = participantDoc?.status === "arrived";
 
   // Function to navigate to the location
   const handleNavigate = () => {
@@ -156,41 +176,36 @@ export default function WalkInfo({ walk }: Props) {
 
       {/* Second XStack: only shown before walk starts */}
       {!hasStarted && (
-        <XStack justifyContent="space-between">
-          {/* Empty space with same fixed width as arrow */}
-          <XStack width={leftColumnWidth} />
-
+        <YStack gap="$2">
           {/* Location information */}
-          <YStack flex={1} gap="$1">
-            {walk.startLocation && (
-              <YStack>
-                <Text color="white" fontSize="$3">
-                  {walk.startLocation.name || "Meeting point"}
-                </Text>
-                {walk.startLocation.notes && (
-                  <Text color="white" fontSize="$2">
-                    {walk.startLocation.notes}
-                  </Text>
-                )}
-              </YStack>
-            )}
-          </YStack>
 
-        {/* Navigate button - only shown before walk starts */}
-        <YStack alignItems="flex-end" justifyContent="center">
-          {hasLocation && (
+          {walk.startLocation && (
+            <YStack>
+              <Text color="white" fontSize="$3">
+                {walk.startLocation.name || "Meeting point"}
+              </Text>
+              {walk.startLocation.notes && (
+                <Text color="white" fontSize="$2">
+                  {walk.startLocation.notes}
+                </Text>
+              )}
+            </YStack>
+          )}
+
+          {/* Navigate button - only shown before walk starts and if user hasn't arrived */}
+          {hasLocation && !hasArrived && (
             <Button
-              size="$1"
-              icon={<Navigation size={15} color="white" />}
+              w="70%"
+              icon={<Navigation color="white" />}
               onPress={handleNavigate}
               backgroundColor="#4BB4E6"
               color="white"
+              fontWeight="bold"
             >
               Navigate
             </Button>
           )}
         </YStack>
-      </XStack>
       )}
     </YStack>
   );
