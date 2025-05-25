@@ -19,7 +19,7 @@ export const BRAND_COLORS = {
   beigeDark: "#B8A99A", // Darker beige
 
   // Green colors from logo
-  greenDark: "#1B6356", // Dark green from figure
+  greenDark: "#4A7A70", // Softer, desaturated green
   greenLight: "#5DB176", // Light green from figure
 
   // More subtle green variants
@@ -47,11 +47,11 @@ export const GRADIENTS = {
     BRAND_COLORS.redMedium,
     BRAND_COLORS.redDark,
   ],
-  // Main gradient based on current implementation
+  // Main gradient with a more natural, earthy tone that's less bright
   main: [
-    BRAND_COLORS.tealBlue,
-    BRAND_COLORS.tealGreen,
-    BRAND_COLORS.lightGreen,
+    BRAND_COLORS.greenDark,
+    BRAND_COLORS.greenMuted,
+    BRAND_COLORS.greenSoft,
   ],
 
   // Subtle modern gradient (light beige to soft green)

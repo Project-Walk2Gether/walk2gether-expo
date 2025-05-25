@@ -193,7 +193,7 @@ export default function MeScreen() {
   }
 
   return (
-    <Screen title="" useTopInsets gradientVariant="modern">
+    <Screen title="" useTopInsets gradientVariant="main">
       <YStack alignItems="center" mb="$6">
         <Menu
           title="Profile Picture"
@@ -245,10 +245,23 @@ export default function MeScreen() {
       >
         <YStack px="$4" py="$3">
           {location && (
-            <Text fontSize={16} opacity={0.9} mb="$2">
-              {location.name}
-            </Text>
+            <>
+              <Text
+                fontSize={16}
+                fontWeight="bold"
+                color={COLORS.primary}
+                mb="$1"
+              >
+                My location
+              </Text>
+              <Text fontSize={16} opacity={0.9} mb="$3">
+                {location.name}
+              </Text>
+            </>
           )}
+          <Text fontWeight="bold" fontSize="$4" color={COLORS.primary} mb="$1">
+            About me
+          </Text>
           <Text fontSize={16} color={COLORS.text} opacity={aboutMe ? 1 : 0.7}>
             {aboutMe || "Add some details about yourself..."}
           </Text>
@@ -342,7 +355,6 @@ export default function MeScreen() {
       <YStack mt={100}>
         <Button
           size="$4"
-          chromeless
           color="#DC2626"
           icon={<AlertTriangle size={20} color="#DC2626" />}
           onPress={() => router.push("/me/delete-account")}
