@@ -48,9 +48,9 @@ export const ParticipantRow: React.FC<Props> = ({
       case "accepted":
         return <WalkIcon size={16} color={COLORS.primary} />;
       case "invited":
-        return <Mail size={16} color="$gray10" />;
+        return <Mail size={16} color="#444" />;
       case "notified":
-        return <Bell size={16} color="$gray10" />;
+        return <Bell size={16} color="#444" />;
       case "denied":
       case "cancelled":
         return <X size={16} color="$red10" />;

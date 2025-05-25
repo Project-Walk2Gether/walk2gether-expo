@@ -9,8 +9,6 @@ interface Props {
   userCoords?: { latitude: number; longitude: number } | null;
   locationLoading?: boolean;
   locationError?: string | undefined;
-  isApproved?: boolean;
-  isMine?: boolean;
 }
 
 /**
@@ -21,8 +19,6 @@ export const LocationDisplay: React.FC<Props> = ({
   userCoords,
   locationLoading,
   locationError,
-  isApproved = false,
-  isMine = false,
 }) => {
   if (walkIsNeighborhoodWalk(walk)) return null;
 
@@ -55,7 +51,7 @@ export const LocationDisplay: React.FC<Props> = ({
   // Display the location information
   return (
     <IconTextRow
-      icon={<Navigation size={16} color="#999" />}
+      icon={<Navigation size={16} color="#444" />}
       text={displayText}
     />
   );

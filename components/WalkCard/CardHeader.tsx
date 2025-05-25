@@ -54,7 +54,7 @@ export const CardHeader: React.FC<Props> = ({
     );
 
   return (
-    <YStack mx={-4} mb={6}>
+    <YStack mx={-4} mb={3}>
       {/* Main Header with Walk Type and Menu/Avatar */}
       <XStack justifyContent="space-between" alignItems="center" mb="$2">
         <XStack flex={1} gap="$2" alignItems="center">

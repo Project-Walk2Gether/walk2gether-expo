@@ -31,12 +31,12 @@ interface Props {
    * Text color to use
    */
   color?: string;
-  
+
   /**
    * Text color to use specifically for the text (overrides color)
    */
   textColor?: string;
-  
+
   /**
    * Font weight for the text
    */
@@ -57,7 +57,7 @@ export const IconTextRow: React.FC<Props> = ({
   afterContent,
   right,
   numberOfLines,
-  color = "#555",
+  color = "#222",
   textColor,
   textWeight = "400",
   onPress,

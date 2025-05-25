@@ -56,7 +56,7 @@ export const OwnerParticipantsSection: React.FC<Props> = ({
           (!isFriendsWalk && notifiedParticipants.length === 0)) &&
         requestedParticipants.length === 0 && (
           <XStack alignItems="center" gap={8}>
-            <Text fontSize={14} color="#666">
+            <Text fontSize={14} color="#222">
               {isFriendsWalk ? "Just you so far" : "No neighbors joined yet"}
             </Text>
           </XStack>

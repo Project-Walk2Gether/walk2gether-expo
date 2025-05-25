@@ -1,12 +1,12 @@
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { COLORS } from "@/styles/colors";
+import { getSmartDateFormat } from "@/utils/dateUtils";
 import { useDoc } from "@/utils/firestore";
 import { calculateDisplayAvatars } from "@/utils/participantAvatars";
 import { getWalkTitle } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
 import { Calendar, CheckCircle, Hand, Timer } from "@tamagui/lucide-icons";
-import { format } from "date-fns";
 import React from "react";
 import { Text, View, XStack, YStack } from "tamagui";
 import {
@@ -17,8 +17,8 @@ import {
 } from "walk2gether-shared";
 import { UserAvatar } from "../UserAvatar";
 import WalkAttachmentsCarousel from "../WalkAttachmentsCarousel";
-import WalkMenu from "../WalkMenu";
 import WalkCardWrapper from "../WalkCardWrapper";
+import WalkMenu from "../WalkMenu";
 import { CardHeader } from "./CardHeader";
 import { IconTextRow } from "./IconTextRow";
 import { LocationDisplay } from "./LocationDisplay";
@@ -82,13 +82,6 @@ const WalkCard: React.FC<Props> = ({
   const isRejected =
     participantDoc?.deniedAt !== null && participantDoc?.deniedAt !== undefined;
 
-  // Check if the user is invited (in participantsById but not from a "requested" source)
-  const isInvited =
-    !isMine && !hasRequested && walk.participantsById && user?.uid
-      ? !!walk.participantsById[user.uid] &&
-        walk.participantsById[user.uid].sourceType !== "requested"
-      : false;
-
   // Check if the current user has accepted the invitation (logic moved from ParticipantsDisplay)
   const currentUserHasAccepted = React.useMemo(() => {
     if (!user?.uid || isMine) return true; // Owner or no user ID - not relevant
@@ -120,11 +113,7 @@ const WalkCard: React.FC<Props> = ({
   const walkType = walkIsNeighborhoodWalk(walk) ? "neighborhood" : "friends";
 
   return (
-    <YStack
-      marginVertical={10}
-      // Reduce opacity for cancelled walks
-      opacity={!isMine && isCancelled ? 0.85 : 1}
-    >
+    <YStack marginVertical={10} opacity={!isMine && isCancelled ? 0.85 : 1}>
       {/* Attachments Carousel - Not pressable */}
       {showAttachments && <WalkAttachmentsCarousel walk={walk} />}
 
@@ -148,8 +137,9 @@ const WalkCard: React.FC<Props> = ({
           }
         />
         <IconTextRow
-          icon={<Calendar size={16} color="#999" />}
-          text={format(walk.date.toDate(), "EEE, MMM d 'at' h:mm a")}
+          icon={<Calendar size={16} color="#444" />}
+          text={getSmartDateFormat(walk.date.toDate())}
+          textWeight="bold"
           right={
             status === "active" ? (
               <XStack
@@ -161,7 +151,7 @@ const WalkCard: React.FC<Props> = ({
                 borderColor="#4caf50"
                 borderWidth={1}
               >
-                <Text fontSize={12} color="#4caf50" fontWeight="500">
+                <Text fontSize={12} color="#0a5c0a" fontWeight="500">
                   Happening now!
                 </Text>
               </XStack>
@@ -169,7 +159,7 @@ const WalkCard: React.FC<Props> = ({
           }
         />
         <IconTextRow
-          icon={<Timer size={16} color="#999" />}
+          icon={<Timer size={16} color="#444" />}
           text={`${walk.durationMinutes} minutes`}
         />
         <LocationDisplay
@@ -177,17 +167,15 @@ const WalkCard: React.FC<Props> = ({
           userCoords={coords}
           locationLoading={locationLoading}
           locationError={locationError}
-          isApproved={isApproved}
-          isMine={isMine}
         />
 
         {/* You're going section - only shows for participants who aren't the owner */}
         {isApproved && !isMine && (
           <IconTextRow
             icon={<CheckCircle size={16} color="#4CAF50" />}
-            text="You're going"
+            text="You're going!"
             textColor="#4CAF50"
-            textWeight="500"
+            textWeight="bold"
           />
         )}
 
@@ -223,17 +211,19 @@ const WalkCard: React.FC<Props> = ({
 
           {/* Show action buttons for non-owners when showActions is true */}
           {!isMine && showActions && !isCancelled ? (
-            <View mt="$3">
-              {/* If user has been invited but hasn't responded */}
-              {isInvited && !isApproved && !isRejected && !isCancelled && (
-                <WalkCardButton
-                  label="Respond to invitation"
-                  onPress={onPress}
-                  icon={<Hand color="white" size={16} />}
-                  size="$3"
-                  fontWeight="bold"
-                  backgroundColor={COLORS.primary}
-                />
+            <>
+              {/* If user has not responded */}
+              {!isApproved && !isRejected && !isCancelled && (
+                <View mt="$3">
+                  <WalkCardButton
+                    label="Respond to invitation"
+                    onPress={onPress}
+                    icon={<Hand color="white" size={16} />}
+                    size="$3"
+                    fontWeight="bold"
+                    backgroundColor={COLORS.primary}
+                  />
+                </View>
               )}
 
               {/* If user has requested to join and it's rejected */}
@@ -259,7 +249,6 @@ const WalkCard: React.FC<Props> = ({
                 !isApproved &&
                 !isCancelled &&
                 walkIsNeighborhoodWalk(walk) &&
-                !isInvited &&
                 status !== "past" && (
                   <WalkCardButton
                     label="Join this walk"
@@ -270,7 +259,7 @@ const WalkCard: React.FC<Props> = ({
                     backgroundColor={COLORS.primary}
                   />
                 )}
-            </View>
+            </>
           ) : null}
         </YStack>
       </WalkCardWrapper>
