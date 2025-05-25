@@ -41,7 +41,7 @@ export const getParticipantStatusInfo = (
   // Determine status display text and color
   if (isCancelled) {
     return {
-      text: "Can't make it",
+      text: "Cancelled",
       color: "$gray9",
     };
   } else if (isArrived) {
@@ -71,14 +71,14 @@ export const getParticipantStatusInfo = (
   } else if (!isAccepted) {
     // Participants who requested to join but haven't been accepted yet
     return {
-      text: "Requested to join",
+      text: "Invited",
       color: "$purple9",
     };
   } else {
     // Only show these statuses for accepted participants
     if (walkStatus === "future") {
       return {
-        text: "Planning to join",
+        text: "Accepted",
         color: "$gray11",
       };
     } else if (walkStatus === "active") {
@@ -89,7 +89,7 @@ export const getParticipantStatusInfo = (
     } else {
       // Past walk
       return {
-        text: "Didn't attend",
+        text: "Couldn't make it",
         color: "$gray9",
       };
     }
