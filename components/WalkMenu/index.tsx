@@ -8,7 +8,12 @@ import {
   cancelParticipation,
   restoreParticipation,
 } from "@/utils/participantManagement";
-import { doc, getDoc } from "@react-native-firebase/firestore";
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  updateDoc,
+} from "@react-native-firebase/firestore";
 import {
   Edit3,
   LogOut,
@@ -76,56 +81,70 @@ export default function WalkMenu({
     checkParticipationStatus();
   }, [user?.uid, walk.id, isWalkOwner]);
 
-  const onActionPress = useCallback(() => {
-    // Open the confirmation dialog
-    setConfirmDialogOpen(true);
+  // Utility function to create a confirmation action
+  const createConfirmAction = useCallback((action: () => Promise<void>) => {
+    return () => {
+      setConfirmDialogOpen(true);
+      // Store the action to be executed on confirmation
+      setCurrentAction(() => action);
+    };
   }, []);
 
-  const handleConfirmAction = useCallback(async () => {
-    if (isWalkOwner) {
-      // Owner cancels the entire walk
-      await walk._ref.delete();
+  // State to store the current action to be executed on confirmation
+  const [currentAction, setCurrentAction] = useState<() => Promise<void>>(
+    () => async () => {}
+  );
+
+  // Individual action functions
+  const cancelWalk = useCallback(async () => {
+    try {
+      // Update walk with cancelledAt timestamp instead of deleting
+      // Use doc reference directly from firestore to avoid type issues
+      const walkDocRef = doc(firestore_instance, `walks/${walk.id}`);
+      await updateDoc(walkDocRef, {
+        cancelledAt: serverTimestamp(),
+      });
       showMessage("Walk has been cancelled", "success");
-    } else {
-      // Participant action depends on their current status
-      if (user?.uid && walk.id) {
-        if (userHasCancelled) {
-          // User wants to rejoin the walk
-          const success = await restoreParticipation(walk.id, user.uid);
 
-          if (success) {
-            setUserHasCancelled(false);
-            showMessage("You're now attending this walk", "success");
-          } else {
-            showMessage("Failed to rejoin the walk", "error");
-          }
-        } else {
-          // User wants to cancel participation
-          const success = await cancelParticipation(walk.id, user.uid);
-
-          if (success) {
-            setUserHasCancelled(true);
-            showMessage("You're no longer attending this walk", "success");
-          } else {
-            showMessage("Failed to cancel your participation", "error");
-          }
-        }
+      // If afterDelete is provided, call it after cancellation
+      if (afterDelete) {
+        afterDelete();
       }
+    } catch (error) {
+      console.error("Error cancelling walk:", error);
+      showMessage("Failed to cancel the walk", "error");
     }
+  }, [walk.id, showMessage, afterDelete]);
 
-    // If afterDelete is provided, call it after deletion/update
-    if (afterDelete && isWalkOwner) {
-      afterDelete();
+  const joinWalk = useCallback(async () => {
+    if (!user?.uid || !walk.id) return;
+
+    const success = await restoreParticipation(walk.id, user.uid);
+
+    if (success) {
+      setUserHasCancelled(false);
+      showMessage("You're now attending this walk", "success");
+    } else {
+      showMessage("Failed to rejoin the walk", "error");
     }
-  }, [
-    walk._ref,
-    walk.id,
-    afterDelete,
-    showMessage,
-    isWalkOwner,
-    user?.uid,
-    userHasCancelled,
-  ]);
+  }, [walk.id, user?.uid, showMessage]);
+
+  const leaveWalk = useCallback(async () => {
+    if (!user?.uid || !walk.id) return;
+
+    await cancelParticipation(walk.id, user.uid);
+
+    setUserHasCancelled(true);
+    showMessage(
+      `We've let ${walk.organizerName} know you can't make it`,
+      "success"
+    );
+  }, [walk.id, user?.uid, showMessage]);
+
+  // Handle the confirmation action
+  const handleConfirmAction = useCallback(async () => {
+    await currentAction();
+  }, [currentAction]);
 
   const handleShowMenu = useCallback(() => {
     // Use the MenuItem type from the MenuContext
@@ -156,7 +175,7 @@ export default function WalkMenu({
       menuItems.push({
         label: "Cancel Walk",
         icon: <Trash size="$1" />,
-        onPress: onActionPress,
+        onPress: createConfirmAction(cancelWalk),
         theme: "red",
       });
     } else if (!loading) {
@@ -166,7 +185,7 @@ export default function WalkMenu({
         menuItems.push({
           label: "I can make it",
           icon: <LogOut size="$1" />,
-          onPress: onActionPress,
+          onPress: createConfirmAction(joinWalk),
           theme: "green",
         });
       } else {
@@ -174,7 +193,7 @@ export default function WalkMenu({
         menuItems.push({
           label: "I can no longer make it",
           icon: <LogOut size="$1" />,
-          onPress: onActionPress,
+          onPress: createConfirmAction(leaveWalk),
           theme: "red",
         });
       }
@@ -185,7 +204,7 @@ export default function WalkMenu({
     walk.id,
     showMenu,
     router,
-    onActionPress,
+    createConfirmAction, // replaced onActionPress with createConfirmAction
     hideInviteOption,
     isWalkOwner,
     userHasCancelled,
