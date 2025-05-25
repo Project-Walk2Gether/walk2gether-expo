@@ -1,11 +1,9 @@
-import { differenceInSeconds } from "date-fns";
-import { LinearGradient } from "expo-linear-gradient";
-
+import { openLocationInMaps } from "@/utils/locationUtils";
+import { ArrowRight, Navigation } from "@tamagui/lucide-icons";
+import { differenceInSeconds, format } from "date-fns";
 import React, { useEffect, useState } from "react";
-import { Text, YStack } from "tamagui";
+import { Button, Text, XStack, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
-import { LocationRow } from "./LocationRow";
-import { TimeRow } from "./TimeRow";
 
 interface Props {
   walk: Walk;
@@ -42,11 +40,8 @@ export default function WalkInfo({ walk }: Props) {
     return `${minutes}m ${remainingSeconds}s`;
   };
 
-  // Check if there are meetup location notes to display
-  const hasLocationNotes = !!walk.startLocation?.notes;
-
-  // Calculate content based on walk state
-  const renderTimerContent = () => {
+  // Helper function to render the time information based on walk state
+  const getTimeDisplay = () => {
     // If the walk has ended
     if (hasEnded) {
       const endTime = walk.endedAt?.toDate();
@@ -54,13 +49,7 @@ export default function WalkInfo({ walk }: Props) {
 
       if (endTime && startTime) {
         const durationSeconds = differenceInSeconds(endTime, startTime);
-        return (
-          <TimeRow 
-            type="completed"
-            durationSeconds={durationSeconds}
-            formatTime={formatTime}
-          />
-        );
+        return `Completed in ${formatTime(durationSeconds)}`;
       }
     }
 
@@ -70,76 +59,138 @@ export default function WalkInfo({ walk }: Props) {
 
       if (startTime) {
         const elapsedSeconds = differenceInSeconds(currentTime, startTime);
-        return (
-          <TimeRow 
-            type="active"
-            elapsedSeconds={elapsedSeconds}
-            formatTime={formatTime}
-          />
-        );
+        return `Walk time: ${formatTime(elapsedSeconds)}`;
       }
     }
 
     // If the walk is in the future
     if (walkDate && walkDate > currentTime) {
       const timeUntilWalk = differenceInSeconds(walkDate, currentTime);
-      return (
-        <TimeRow 
-          type="countdown"
-          walkDate={walkDate}
-          timeUntilWalk={timeUntilWalk}
-          formatTime={formatTime}
-        />
-      );
+      return `Starting in ${formatTime(timeUntilWalk)}`;
     }
 
     // If the walk date has passed but it hasn't started
     if (walkDate && walkDate <= currentTime && !hasStarted) {
-      return (
-        <TimeRow 
-          type="scheduled"
-          walkDate={walkDate}
-          formatTime={formatTime}
-        />
+      // Calculate how long ago the walk was scheduled to start
+      const minutesAgo = Math.floor(
+        differenceInSeconds(currentTime, walkDate) / 60
       );
+      return `Scheduled for ${minutesAgo} minute${
+        minutesAgo !== 1 ? "s" : ""
+      } ago`;
     }
 
-    // Default case
-    return (
-      <Text color="white" fontSize="$3" fontWeight="bold">
-        Loading walk information...
-      </Text>
-    );
+    return "Loading...";
   };
 
-  // Render location notes if they exist (only before the walk has started)
-  const renderLocationNotes = () => {
-    // Only show meetup notes if they exist AND the walk hasn't started yet
-    if (!hasLocationNotes || hasStarted) return null;
+  // Check if navigation is possible
+  const hasLocation =
+    !!walk.startLocation?.latitude && !!walk.startLocation?.longitude;
 
-    return (
-      <LocationRow 
-        locationName={walk.startLocation?.name}
-        notes={walk.startLocation?.notes}
-        latitude={walk.startLocation?.latitude}
-        longitude={walk.startLocation?.longitude}
-      />
-    );
+  // Function to navigate to the location
+  const handleNavigate = () => {
+    if (walk.startLocation?.latitude && walk.startLocation?.longitude) {
+      openLocationInMaps(
+        walk.startLocation.latitude,
+        walk.startLocation.longitude,
+        walk.startLocation.name
+      );
+    }
   };
+
+  // Define a fixed width for the left column
+  const leftColumnWidth = 24;
 
   return (
-    <LinearGradient
-      colors={["rgba(0,0,0,0.9)", "rgba(0,0,0,0.7)"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}
-      style={{
-        paddingVertical: 12,
-      }}
+    <YStack
+      backgroundColor="#5b4c3e"
+      paddingVertical="$3"
+      paddingHorizontal="$3"
+      gap="$2"
+      borderRadius="$4"
     >
-      <YStack gap="$2" paddingHorizontal={16}>
-        {renderTimerContent()}
-        {renderLocationNotes()}
-      </YStack>
-    </LinearGradient>
+      {/* First XStack: arrow -> time display -> secondary time */}
+      <XStack alignItems="center" justifyContent="space-between">
+        {/* Arrow icon with fixed width */}
+        <XStack
+          width={leftColumnWidth}
+          alignItems="center"
+          justifyContent="flex-start"
+        >
+          <XStack
+            width={16}
+            height={16}
+            borderRadius={12}
+            backgroundColor="white"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <ArrowRight size={10} color="#5b4c3e" />
+          </XStack>
+        </XStack>
+
+        {/* Main time display (flexible width) */}
+        <Text flex={1} color="white" fontSize="$4" fontWeight="bold">
+          {getTimeDisplay()}
+        </Text>
+
+        {/* Secondary time display */}
+        {walkDate && (
+          <Text
+            pr="$1"
+            color="white"
+            fontSize="$4"
+            opacity={0.9}
+            textAlign="right"
+          >
+            {hasEnded && walk.startedAt && walk.endedAt
+              ? // For completed walks, show the full range
+                `${format(walk.startedAt.toDate(), "h:mm a")} - ${format(
+                  walk.endedAt.toDate(),
+                  "h:mm a"
+                )}`
+              : // For all other walks, show the start time
+                `${format(walkDate, "h:mm a")}`}
+          </Text>
+        )}
+      </XStack>
+
+      {/* Second XStack: empty space -> location info -> navigate button */}
+      <XStack justifyContent="space-between">
+        {/* Empty space with same fixed width as arrow */}
+        <XStack width={leftColumnWidth} />
+
+        {/* Location information */}
+        <YStack flex={1} gap="$1">
+          {walk.startLocation && (
+            <YStack>
+              <Text color="white" fontSize="$3">
+                {walk.startLocation.name || "Meeting point"}
+              </Text>
+              {walk.startLocation.notes && (
+                <Text color="white" fontSize="$2">
+                  {walk.startLocation.notes}
+                </Text>
+              )}
+            </YStack>
+          )}
+        </YStack>
+
+        {/* Navigate button - only show before the walk has started */}
+        <YStack alignItems="flex-end" justifyContent="center">
+          {hasLocation && !hasStarted && (
+            <Button
+              size="$2"
+              icon={<Navigation size={15} color="white" />}
+              onPress={handleNavigate}
+              backgroundColor="#4BB4E6"
+              color="white"
+            >
+              Navigate
+            </Button>
+          )}
+        </YStack>
+      </XStack>
+    </YStack>
   );
 }

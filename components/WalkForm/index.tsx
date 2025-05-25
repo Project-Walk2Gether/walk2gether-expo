@@ -1,14 +1,16 @@
+import { FormikErrors, FormikTouched } from "formik";
 import React from "react";
 import { YStack } from "tamagui";
-import { FormikErrors, FormikTouched } from "formik";
-import { Walk, NeighborhoodWalk, FriendsWalk, friendsWalkSchema, neighborhoodWalkSchema } from "walk2gether-shared";
+import { Walk, walkSchema } from "walk2gether-shared";
 import { WithId } from "walk2gether-shared/lib/utils/persisted";
 
 // Form components
-import FormProvider from "./components/FormProvider";
+import { FormControl } from "../FormControl";
+import LocationAutocomplete from "../LocationAutocomplete";
 import DateTimeField from "./components/DateTimeField";
 import DurationField from "./components/DurationField";
-import LocationAutocomplete from "../LocationAutocomplete";
+import FormProvider from "./components/FormProvider";
+import LocationNotesField from "./components/LocationNotesField";
 
 // Basic form values interface to export for use in other components
 type WalkType = "friends" | "neighborhood" | "meetup";
@@ -21,35 +23,16 @@ interface Props {
   googleApiKey: string;
 }
 
-// Type guard to check if a walk is a FriendsWalk
-function isFriendsWalk(walk: WithId<Walk>): walk is WithId<FriendsWalk> {
-  return walk.type === "friends";
-}
-
-// Type guard to check if a walk is a NeighborhoodWalk
-function isNeighborhoodWalk(walk: WithId<Walk>): walk is WithId<NeighborhoodWalk> {
-  return walk.type === "neighborhood";
-}
-
 export default function WalkForm({
   initialValues,
   onSubmit,
   submitButtonText,
   onCancel,
-  googleApiKey,
 }: Props) {
-  // Determine which form to show based on walk type
-  const type = initialValues.type as WalkType || "neighborhood";
-  
-  // Get the appropriate validation schema based on walk type
-  const validationSchema = type === "friends" ? friendsWalkSchema : neighborhoodWalkSchema;
-  
-  // Since we're only editing existing walks, we don't need to augment initialValues
-  
   return (
     <FormProvider
       initialValues={initialValues}
-      validationSchema={validationSchema}
+      validationSchema={walkSchema}
       onSubmit={onSubmit}
       submitButtonText={submitButtonText}
       onCancel={onCancel}
@@ -63,16 +46,52 @@ export default function WalkForm({
             error={errors.date as string | undefined}
             touched={!!touched.date}
           />
-          
+
           {/* Location field - common implementation with startLocation */}
-          <LocationAutocomplete
-            value={values.startLocation}
-            setFieldValue={setFieldValue}
-            touched={touched}
-            errors={errors}
-            placeholder="Enter a location for your walk"
-          />
-          
+          <FormControl label="Location">
+            <LocationAutocomplete
+              value={values.startLocation}
+              setFieldValue={(field, value) => {
+                // LocationAutocomplete sets 'location', but we need 'startLocation'
+                if (field === "location") {
+                  setFieldValue("startLocation", {
+                    ...value,
+                    // Preserve existing notes if any
+                    notes: values.startLocation?.notes || "",
+                  });
+                } else {
+                  setFieldValue(field, value);
+                }
+              }}
+              touched={{
+                location: touched.startLocation,
+              }}
+              errors={{
+                location: errors.startLocation,
+              }}
+              placeholder="Enter a location for your walk"
+            />
+          </FormControl>
+
+          {/* Location notes field - only show if a location is selected */}
+          {values.startLocation && (
+            <LocationNotesField
+              value={values.startLocation?.notes || ""}
+              onChange={(notes) => {
+                setFieldValue("startLocation", {
+                  ...values.startLocation,
+                  notes,
+                });
+              }}
+              error={
+                (errors.startLocation as FormikErrors<any>)?.notes as
+                  | string
+                  | undefined
+              }
+              touched={!!(touched.startLocation as FormikTouched<any>)?.notes}
+            />
+          )}
+
           {/* Duration field - common to both walk types */}
           <DurationField
             value={values.durationMinutes}

@@ -135,7 +135,7 @@ export function useQuery<T extends FirebaseFirestoreTypes.DocumentData>(
     return unsubscribe;
   }, [...deps]);
 
-  return { status, docs };
+  return { status, loading: status === "loading", docs };
 }
 
 /**

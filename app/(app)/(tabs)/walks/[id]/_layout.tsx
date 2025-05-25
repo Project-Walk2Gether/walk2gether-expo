@@ -4,19 +4,19 @@ import React from "react";
 export default function WalkStackLayout() {
   return (
     <>
-      <Stack
-        screenOptions={{
-          animation: "none",
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="edit" options={{ title: "Edit Walk" }} />
+      <Stack>
+        <Stack.Screen name="index" options={{ animation: "none" }} />
+        <Stack.Screen
+          name="edit"
+          options={{ title: "Edit Walk", presentation: "modal" }}
+        />
         <Stack.Screen name="view-invitation" />
         <Stack.Screen
           name="show"
           options={{
             title: "Let's walk2gether!",
             presentation: "modal",
+            animation: "none",
           }}
         />
         <Stack.Screen

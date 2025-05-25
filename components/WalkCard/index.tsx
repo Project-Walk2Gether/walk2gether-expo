@@ -8,7 +8,7 @@ import { getWalkStatus } from "@/utils/walkUtils";
 import { Calendar, CheckCircle, Hand, Timer } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React from "react";
-import { Card, Text, View, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
 import {
   Participant,
   Walk,
@@ -18,6 +18,7 @@ import {
 import { UserAvatar } from "../UserAvatar";
 import WalkAttachmentsCarousel from "../WalkAttachmentsCarousel";
 import WalkMenu from "../WalkMenu";
+import WalkCardWrapper from "../WalkCardWrapper";
 import { CardHeader } from "./CardHeader";
 import { IconTextRow } from "./IconTextRow";
 import { LocationDisplay } from "./LocationDisplay";
@@ -115,19 +116,12 @@ const WalkCard: React.FC<Props> = ({
 
   // Use the extracted LocationDisplay component
 
+  // Determine the walk type for color styling
+  const walkType = walkIsNeighborhoodWalk(walk) ? "neighborhood" : "friends";
+
   return (
-    <Card
-      borderRadius={14}
-      backgroundColor="#fff"
-      shadowColor="#000"
-      shadowOpacity={0.06}
-      shadowRadius={8}
-      shadowOffset={{ width: 0, height: 2 }}
+    <YStack
       marginVertical={10}
-      borderTopLeftRadius={18}
-      borderTopRightRadius={18}
-      animation="bouncy"
-      overflow="hidden"
       // Reduce opacity for cancelled walks
       opacity={!isMine && isCancelled ? 0.85 : 1}
     >
@@ -135,12 +129,11 @@ const WalkCard: React.FC<Props> = ({
       {showAttachments && <WalkAttachmentsCarousel walk={walk} />}
 
       {/* Card Content - Pressable */}
-      <YStack
-        pb="$3"
-        px="$4"
-        pt="$3"
-        pressStyle={{ scale: 0.98 }}
+      <WalkCardWrapper
+        type={walkType}
         onPress={onPress}
+        elevation={3}
+        animation={true}
       >
         <CardHeader
           icon={<UserAvatar uid={walk.createdByUid} size={34} />}
@@ -280,8 +273,8 @@ const WalkCard: React.FC<Props> = ({
             </View>
           ) : null}
         </YStack>
-      </YStack>
-    </Card>
+      </WalkCardWrapper>
+    </YStack>
   );
 };
 

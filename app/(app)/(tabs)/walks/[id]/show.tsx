@@ -149,8 +149,10 @@ export default function WalkScreen() {
       <View flex={1} backgroundColor="#fff">
         {/* Map and Participants container - with padding to account for collapsed bottom sheet */}
         <View flex={1} pb={collapsedHeight - 30}>
-          <WalkInfo walk={walk} />
           <LiveWalkMap walkId={id} />
+          <View position="absolute" top={"$2"} left={"$2"} right={"$2"}>
+            <WalkInfo walk={walk} />
+          </View>
           {/* Walk stats will only show when the walk has ended */}
           {/* {walk.endedAt && (
             <View position="absolute" top={10} left={0} right={0} zIndex={10}>

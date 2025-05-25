@@ -9,7 +9,7 @@ import { doc, updateDoc } from "@react-native-firebase/firestore";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { Alert } from "react-native";
-import { ScrollView } from "tamagui";
+import { ScrollView, Spacer } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
 
 export default function EditWalkScreen() {
@@ -36,16 +36,18 @@ export default function EditWalkScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerRight: () => <HeaderCloseButton /> }} />
+      <Stack.Screen
+        options={{
+          title: "Edit walk",
+          headerRight: () => <HeaderCloseButton />,
+        }}
+      />
       <ScrollView
         flex={1}
         backgroundColor="#f5f5f5"
-        p="$5"
+        p="$4"
         keyboardShouldPersistTaps="handled"
       >
-        {/* Copyable Walk ID field */}
-        <CopyableIdField id={walk.id} label="Walk ID" />
-
         <WalkForm
           initialValues={walk}
           onSubmit={handleSubmit}
@@ -53,6 +55,8 @@ export default function EditWalkScreen() {
           onCancel={() => router.back()}
           googleApiKey={GOOGLE_MAPS_API_KEY}
         />
+        <Spacer flexGrow={1} />
+        <CopyableIdField showFullId id={walk.id} label="Walk ID" />
       </ScrollView>
     </>
   );

@@ -11,10 +11,10 @@ interface Props {
   showFullId?: boolean;
 }
 
-export default function CopyableIdField({ 
-  id, 
-  label = "ID", 
-  showFullId = false 
+export default function CopyableIdField({
+  id,
+  label = "ID",
+  showFullId = false,
 }: Props) {
   const { showMessage } = useFlashMessage();
 
@@ -28,18 +28,16 @@ export default function CopyableIdField({
     }
   };
 
-  const displayId = showFullId ? id : `${id.substring(0, 10)}...${id.substring(id.length - 4)}`;
+  const displayId = showFullId
+    ? id
+    : `${id.substring(0, 10)}...${id.substring(id.length - 4)}`;
 
   return (
     <Pressable onPress={handleCopy}>
-      <Card
-        backgroundColor="$gray2"
-        padding="$3"
-        marginVertical="$2"
-      >
-        <XStack alignItems="center" gap="$2">
+      <Card backgroundColor="$gray2" padding="$3" marginVertical="$2">
+        <XStack flexGrow={1} alignItems="center" gap="$2">
           <Fingerprint size={20} color={COLORS.textSecondary} />
-          <Text fontSize="$2" fontWeight="600" color="$gray11">
+          <Text flexGrow={1} fontSize="$2" fontWeight="600" color="$gray11">
             {label}:
           </Text>
           <Text fontSize="$2" color="$gray10" flexShrink={1} numberOfLines={1}>

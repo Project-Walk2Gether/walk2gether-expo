@@ -1,18 +1,20 @@
 import { COLORS } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Card, Text, View, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
+import WalkCardWrapper from "./WalkCardWrapper";
 
 type WalkType = Walk["type"];
+type KnownWalkType = keyof typeof COLORS.walkTypes;
 
 interface Props {
   type: WalkType;
   title: string;
   description: string;
   icon: IoniconName;
-  color: string;
-  backgroundColor: string;
+  color?: string;
+  backgroundColor?: string;
   selected: boolean;
   onSelect: (type: WalkType) => void;
 }
@@ -23,6 +25,18 @@ type IoniconName =
   | "people-outline"
   | "home-outline"
   | "people";
+
+// Helper function to safely get the color for a walk type
+function getTypeColor(type: WalkType, fallbackColor?: string): string {
+  if (!type) return fallbackColor || COLORS.primary;
+  
+  // Check if the walk type is one we have defined colors for
+  const isKnownType = Object.keys(COLORS.walkTypes).includes(type);
+  if (isKnownType) {
+    return fallbackColor || COLORS.walkTypes[type as KnownWalkType].main;
+  }
+  return fallbackColor || COLORS.primary;
+}
 
 export default function WalkTypeCard({
   type,
@@ -35,35 +49,29 @@ export default function WalkTypeCard({
   onSelect,
 }: Props) {
   return (
-    <Card
-      animation="bouncy"
-      scale={0.98}
-      hoverStyle={{ scale: 1.02 }}
-      pressStyle={{ scale: 0.96 }}
-      elevate
-      size="$4"
+    <WalkCardWrapper
+      type={type}
+      color={color}
+      backgroundColor={backgroundColor}
+      selected={selected}
       onPress={() => onSelect(type)}
-      backgroundColor={selected ? color : backgroundColor}
-      borderRadius={16}
-      borderWidth={0}
-      borderLeftColor={color}
-      borderLeftWidth={6}
-      shadowColor="#000"
-      shadowOffset={{ width: 0, height: 2 }}
-      shadowOpacity={selected ? 0.15 : 0.1}
-      shadowRadius={selected ? 6 : 4}
-      elevation={selected ? 6 : 0}
+      paddingVertical="$3"
+      paddingHorizontal="$3"
     >
-      <XStack gap="$3" padding="$3" alignItems="center">
+      <XStack gap="$3" alignItems="center">
         <View
           width={50}
           height={50}
           borderRadius={12}
           justifyContent="center"
           alignItems="center"
-          backgroundColor={selected ? "white" : color + "30"}
+          backgroundColor={selected ? "white" : getTypeColor(type, color) + "30"}
         >
-          <Ionicons name={icon} size={28} color={selected ? color : color} />
+          <Ionicons 
+            name={icon} 
+            size={28} 
+            color={getTypeColor(type, color)} 
+          />
         </View>
 
         <YStack flexShrink={1}>
@@ -85,6 +93,6 @@ export default function WalkTypeCard({
           </Text>
         </YStack>
       </XStack>
-    </Card>
+    </WalkCardWrapper>
   );
 }

@@ -47,4 +47,16 @@ export const COLORS = {
   headerBackground: "#F5EFE6", // Soft cream parchment for headers
   tabBarBackground: "#F5EFE6", // Matching header background
   inactive: "#8C8C8C",        // Medium gray for inactive elements
+  
+  // Walk type colors
+  walkTypes: {
+    friends: {
+      main: "#5A67F2",          // Primary color for Friends walks
+      background: "#E7E9FE",    // Background color for Friends walks
+    },
+    neighborhood: {
+      main: "#47C97E",          // Primary color for Neighborhood walks
+      background: "#E4F6ED",    // Background color for Neighborhood walks
+    }
+  }
 };

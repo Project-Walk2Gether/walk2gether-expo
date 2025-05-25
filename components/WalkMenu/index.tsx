@@ -136,7 +136,11 @@ export default function WalkMenu({
       menuItems.push({
         label: "Edit Walk",
         icon: <Edit3 size="$1" color={COLORS.primary} />,
-        onPress: () => router.push(`/walks/${walk.id}/edit`),
+        onPress: () =>
+          router.push({
+            pathname: "/edit-walk",
+            params: { id: walk.id },
+          }),
       });
 
       // Only add the Invite Friends option if not hidden
