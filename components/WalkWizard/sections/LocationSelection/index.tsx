@@ -14,7 +14,6 @@ import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomp
 import LocationNotes from "./LocationNotes";
 import LocationSearchSection from "./LocationSearchSection";
 import MapSection from "./MapSection";
-import SavedLocationsList from "./SavedLocationsList";
 
 interface Props {
   onContinue: () => void;
@@ -155,12 +154,11 @@ export const LocationSelection: React.FC<Props> = ({
           }
         />
 
-        {/* Saved locations section */}
-        <SavedLocationsList
+        {/* <SavedLocationsList
           locations={savedLocations || []}
           loading={loadingSavedLocations}
           onSelectLocation={handleLocationCoordinates}
-        />
+        /> */}
 
         {/* Map section */}
         <MapSection
