@@ -125,7 +125,7 @@ export default function NeighborhoodWalkHowItWorksSection({
       </Card>
 
       <Spacer flexGrow={1} />
-      {userData?.hasCreatedNeighborhoodWalk || (
+      {userData?.hasCreatedNeighborhoodWalk && (
         <XStack gap="$2" alignItems="center">
           <Checkbox
             id="dontShowAgain"
