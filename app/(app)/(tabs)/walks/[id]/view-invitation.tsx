@@ -17,6 +17,7 @@ import {
 } from "@react-native-firebase/firestore";
 import { Check } from "@tamagui/lucide-icons";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { pickBy } from "lodash";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -69,20 +70,21 @@ function ViewWalkInvitationScreen({ walk }: { walk: WithId<Walk> }) {
     `walks/${walk.id}/participants/${user?.uid}`
   );
   const requestSent = !!participantDoc;
-  const requestCancelled = participantDoc?.cancelledAt !== undefined;
-  const isActivePending = requestSent && !requestCancelled;
+  const cantMakeIt = participantDoc?.cancelledAt !== undefined;
+  const isPending = requestSent && !cantMakeIt;
 
   // Set navigation header options
   useEffect(() => {
     navigation.setOptions({
-      title: isActivePending
+      title: isPending
         ? "You've joined this walk!"
         : `Join ${walk.organizerName}'s walk`,
       headerLeft: () => <HeaderBackButton />,
     });
-  }, [navigation, walk.organizerName, isActivePending]);
+  }, [navigation, walk.organizerName, isPending]);
 
-  const handleRequestToJoin = async () => {
+  // Common function to handle walk actions (accept or cancel)
+  const handleWalkAction = async (action: "accept" | "cancel") => {
     if (!user || !walk?.id) return;
 
     setLoading(true);
@@ -95,62 +97,73 @@ function ViewWalkInvitationScreen({ walk }: { walk: WithId<Walk> }) {
         `walks/${walk.id}/participants/${participantId}`
       );
 
-      // All neighborhood walk join requests are now auto-accepted
-      // For consistency, we also auto-accept friend walks if the user is friends with organizer
-      const isAutoAccepted = true; // Previously was isFriendWithOrganizer
-
-      // Only include introduction for neighborhood walks
-      const introductionValue = walkIsNeighborhoodWalk(walk)
-        ? introduction.trim()
-        : "";
-
-      const participant: Participant = {
+      // Prepare common participant data fields
+      const commonFields = {
         userUid: user.uid,
         displayName: userData?.name || "Anonymous",
         photoURL: userData?.profilePicUrl || null,
-        acceptedAt: isAutoAccepted ? Timestamp.now() : null,
-        lastLocation: {
-          latitude: userLocation?.coords.latitude || 0,
-          longitude: userLocation?.coords.longitude || 0,
-          timestamp: Timestamp.now(),
-        },
-        route: null,
-        introduction: introductionValue, // Only include introduction for neighborhood walks
-        status: isAutoAccepted ? "arrived" : "pending", // Set status to arrived if auto-accepted
-        navigationMethod: "driving",
-        sourceType: "requested", // Adding the required sourceType field
-        cancelledAt: deleteField() as any,
+        sourceType: "requested" as const,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
 
-      // Save participant document
-      await setDoc(participantRef, participant, { merge: true });
+      if (action === "accept") {
+        // Only include introduction for neighborhood walks
+        const introductionValue = walkIsNeighborhoodWalk(walk)
+          ? introduction.trim()
+          : "";
 
-      // If user chose to save introduction to profile, update user data
-      // Only applicable for neighborhood walks
-      if (
-        walkIsNeighborhoodWalk(walk) &&
-        saveToProfile &&
-        introduction.trim() &&
-        userData
-      ) {
-        try {
-          const userRef = doc(firestore_instance, `users/${user.uid}`);
-          await updateDoc(userRef, {
-            aboutMe: introduction.trim(),
-            updatedAt: Timestamp.now(),
-          });
+        // Update existing participant document with acceptance data
+        await updateDoc(participantRef, {
+          ...commonFields,
+          acceptedAt: Timestamp.now(),
+          lastLocation: userLocation
+            ? {
+                latitude: userLocation?.coords.latitude || 0,
+                longitude: userLocation?.coords.longitude || 0,
+                timestamp: Timestamp.now(),
+              }
+            : undefined,
+          route: null,
+          introduction: introductionValue, // Only include introduction for neighborhood walks
+          navigationMethod: "driving",
+          cancelledAt: deleteField(),
+          updatedAt: Timestamp.now(),
+        });
 
-          // Update local user data context
-          updateUserData({
-            ...userData,
-            aboutMe: introduction.trim(),
-          });
-        } catch (error) {
-          console.error("Error saving introduction to profile:", error);
-          // We don't want to fail the whole request if this part fails
+        // If user chose to save introduction to profile, update user data
+        // Only applicable for neighborhood walks
+        if (
+          walkIsNeighborhoodWalk(walk) &&
+          saveToProfile &&
+          introduction.trim() &&
+          userData
+        ) {
+          try {
+            const userRef = doc(firestore_instance, `users/${user.uid}`);
+            await updateDoc(userRef, {
+              aboutMe: introduction.trim(),
+              updatedAt: Timestamp.now(),
+            });
+
+            // Update local user data context
+            updateUserData({
+              ...userData,
+              aboutMe: introduction.trim(),
+            });
+          } catch (error) {
+            console.error("Error saving introduction to profile:", error);
+            // We don't want to fail the whole request if this part fails
+          }
         }
+      } else if (action === "cancel") {
+        // Update existing participant document with cancellation data
+        await updateDoc(participantRef, {
+          ...commonFields,
+          cancelledAt: Timestamp.now(),
+          acceptedAt: deleteField(),
+          updatedAt: Timestamp.now(),
+        });
       }
 
       if (router.canGoBack()) {
@@ -159,12 +172,16 @@ function ViewWalkInvitationScreen({ walk }: { walk: WithId<Walk> }) {
         router.replace("/");
       }
     } catch (error) {
-      console.error("Error requesting to join:", error);
-      Alert.alert("Error", "Failed to send join request. Please try again.");
+      const actionText = action === "accept" ? "join" : "cancel";
+      console.error(`Error ${actionText}ing walk:`, error);
+      Alert.alert("Error", `Failed to ${actionText} walk. Please try again.`);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleAcceptButtonPress = () => handleWalkAction("accept");
+  const handleCancelButtonPress = () => handleWalkAction("cancel");
 
   const handleCancelRequest = async () => {
     if (!user || !walk?.id || !participantDoc) return;
@@ -204,19 +221,19 @@ function ViewWalkInvitationScreen({ walk }: { walk: WithId<Walk> }) {
           <WalkCard walk={walk} showActions={false} />
 
           <YStack gap="$4" ai="center">
-            {isActivePending ? (
+            {isPending ? (
               <>
                 <Text fontSize="$4" textAlign="center" color="$gray11">
                   You've successfully joined this walk!
                 </Text>
               </>
-            ) : requestCancelled ? (
+            ) : cantMakeIt ? (
               <>
                 <Button
                   bg={COLORS.primary}
                   color="white"
                   w="100%"
-                  onPress={handleRequestToJoin}
+                  onPress={handleAcceptButtonPress}
                   disabled={loading}
                 >
                   {loading ? (
@@ -269,47 +286,43 @@ function ViewWalkInvitationScreen({ walk }: { walk: WithId<Walk> }) {
                   </YStack>
                 )}
 
-                <Button
-                  size="$5"
-                  w="100%"
-                  bg={COLORS.primary}
-                  color="white"
-                  onPress={handleRequestToJoin}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="white" />
-                  ) : walkIsNeighborhoodWalk(walk) ? (
-                    "Join This Walk"
-                  ) : (
-                    "Accept Invitation"
-                  )}
-                </Button>
+                <YStack space="$2" w="100%">
+                  <Button
+                    size="$5"
+                    w="100%"
+                    bg={COLORS.primary}
+                    color="white"
+                    onPress={handleAcceptButtonPress}
+                    disabled={loading}
+                    mb="$4"
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="white" />
+                    ) : walkIsNeighborhoodWalk(walk) ? (
+                      "Join This Walk"
+                    ) : (
+                      "Accept Invitation"
+                    )}
+                  </Button>
+
+                  <Button
+                    size="$5"
+                    w="100%"
+                    bg="rgba(255, 0, 0, 0.05)"
+                    color="$gray10"
+                    onPress={handleCancelButtonPress}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="$gray11" />
+                    ) : (
+                      "I can't make it"
+                    )}
+                  </Button>
+                </YStack>
               </>
             )}
           </YStack>
-
-          {/* Subtle cancel request button (shown only when request is pending) */}
-          {isActivePending && (
-            <Button
-              mt="$4"
-              mb="$2"
-              bg="transparent"
-              theme="red"
-              borderColor="$gray6"
-              borderWidth={1}
-              size="$3"
-              onPress={handleCancelRequest}
-              disabled={loading}
-              pressStyle={{ opacity: 0.7 }}
-            >
-              {loading ? (
-                <ActivityIndicator size="small" color={COLORS.textSecondary} />
-              ) : (
-                "I can no longer make it"
-              )}
-            </Button>
-          )}
 
           {/* Add motivational quote at the bottom */}
           <QuoteWithImage imageSize={200} />

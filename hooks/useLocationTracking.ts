@@ -1,12 +1,11 @@
 import { useLocation } from "@/context/LocationContext";
+import { useDoc } from "@/utils/firestore";
 import * as Location from "expo-location";
 import { useEffect, useRef } from "react";
-import { useDoc } from "@/utils/firestore";
 // Using FirebaseFirestoreTypes directly instead of a custom Walk type
+import { writeLogIfEnabled } from "@/utils/logging";
 import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
 import { UserData } from "walk2gether-shared";
-import { WithId } from "walk2gether-shared";
-import { writeLogIfEnabled } from "@/utils/logging";
 
 /**
  * Result type for the useLocationTracking hook
@@ -46,14 +45,16 @@ export function useLocationTracking(
   } = useLocation();
 
   // Fetch the walk data to get the estimatedEndTimeWithBuffer
-  const { doc: walk } = useDoc<FirebaseFirestoreTypes.DocumentData>(`walks/${walkId}`);
-  
+  const { doc: walk } = useDoc<FirebaseFirestoreTypes.DocumentData>(
+    `walks/${walkId}`
+  );
+
   // Fetch user data to check background location tracking preference
-  const { doc: userData } = useDoc<UserData>(userId ? `users/${userId}` : '');
+  const { doc: userData } = useDoc<UserData>(userId ? `users/${userId}` : "");
 
   // Keep track of whether we've already stopped tracking due to endedAt
   const endedAtDetected = useRef(false);
-  
+
   // Keep track of whether this component initiated the tracking
   const initiatedTracking = useRef(false);
 
@@ -72,17 +73,27 @@ export function useLocationTracking(
       // 1. The walk has ended (checked via endedAtDetected.current)
       // 2. The user has explicitly opted out of background tracking
       // 3. This component initiated the tracking (to prevent breaking other components' tracking)
-      const backgroundTrackingEnabled = userData?.backgroundLocationTrackingEnabled !== false;
-      
-      if (endedAtDetected.current || !backgroundTrackingEnabled || !initiatedTracking.current) {
-        console.log('Stopping location tracking on component unmount, conditions:', {
-          walkEnded: endedAtDetected.current,
-          backgroundTrackingEnabled,
-          initiatedTracking: initiatedTracking.current
-        });
+      const backgroundTrackingEnabled =
+        userData?.backgroundLocationTrackingEnabled !== false;
+
+      if (
+        endedAtDetected.current ||
+        !backgroundTrackingEnabled ||
+        !initiatedTracking.current
+      ) {
+        console.log(
+          "Stopping location tracking on component unmount, conditions:",
+          {
+            walkEnded: endedAtDetected.current,
+            backgroundTrackingEnabled,
+            initiatedTracking: initiatedTracking.current,
+          }
+        );
         stopTracking();
       } else {
-        console.log('Preserving background location tracking on component unmount');
+        console.log(
+          "Preserving background location tracking on component unmount"
+        );
       }
     };
   }, [walkId, userId, userData?.backgroundLocationTrackingEnabled]);
@@ -95,9 +106,9 @@ export function useLocationTracking(
     if (walk.endedAt) {
       endedAtDetected.current = true;
       writeLogIfEnabled({
-        message: `Stopping location tracking because walk ${walkId} has ended at ${walk.endedAt.toDate()}`
+        message: `Stopping location tracking because walk ${walkId} has ended at ${walk.endedAt.toDate()}`,
       });
-      
+
       console.log(`Walk ${walkId} has ended, stopping location tracking...`);
       stopTracking();
     }
@@ -106,12 +117,12 @@ export function useLocationTracking(
   // Start location tracking for this walk
   const startTracking = async () => {
     if (!walkId) return;
-    
+
     // Get the estimatedEndTimeWithBuffer from the walk data
     // If it exists, it's a Firebase Timestamp that needs to be converted to a JS Date
     const endTimeWithBuffer = walk?.estimatedEndTimeWithBuffer;
     const endTime = endTimeWithBuffer ? endTimeWithBuffer.toDate() : undefined;
-    
+
     await startWalkTracking(walkId, endTime);
   };
 

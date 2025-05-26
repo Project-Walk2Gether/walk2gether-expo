@@ -230,16 +230,16 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
     }
   };
 
-  // Get status button text based on the current status
-  const getStatusButtonText = () => {
-    // If the participant has cancelled
-    if (isCancelled) {
-      return "I can't make it";
+  // Get status text based on the current status
+  const getStatusText = () => {
+    // Show a different message when the walk has ended
+    if (walkEnded) {
+      return "Walk completed";
     }
-    
-    // If the walk has ended
-    if (walkEnded && status === "arrived") {
-      return "Walk ended";
+
+    // Show a different message when the participant has cancelled
+    if (isCancelled) {
+      return "Can't make it - Tap to change";
     }
 
     // Show "Walk started" when the walk has started and user has arrived or is the owner
@@ -280,45 +280,93 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
     }
   };
 
+  // Handle un-cancelling participation
+  const handleReactivateParticipation = async () => {
+    if (!userId || !walkId) return;
+
+    try {
+      // Update the participant doc to remove cancelledAt
+      const participantDocRef = doc(
+        firestore_instance,
+        `walks/${walkId}/participants/${userId}`
+      );
+
+      await setDoc(
+        participantDocRef,
+        {
+          cancelledAt: null,
+          status: "pending",
+        },
+        { merge: true }
+      );
+
+      // Show confirmation
+      Alert.alert(
+        "Great!",
+        "You're back in! The organizer will be notified you can make it."
+      );
+    } catch (error) {
+      console.error("Error reactivating participation:", error);
+      Alert.alert("Error", "Failed to update your participation status.");
+    }
+  };
+
   // Create menu items for the status menu
-  const statusMenuItems: MenuItem[] = [
-    // Only show the cancel option for non-owners
-    ...(isOwner
-      ? []
-      : [
-          {
-            label: "I can no longer make it",
-            onPress: handleCancelParticipation,
-            buttonProps: {
-              backgroundColor: "$red9",
-            },
-          } as MenuItem,
-        ]),
-    {
-      label: "Not on my way yet",
-      onPress: () => handleStatusChange("pending"),
-      buttonProps: {
-        backgroundColor: COLORS.primary,
-        color: COLORS.textOnDark,
+  let statusMenuItems: MenuItem[] = [];
+
+  // If the participant has cancelled, only show the "I can make it" option
+  if (isCancelled) {
+    statusMenuItems = [
+      {
+        label: "I can make it",
+        onPress: handleReactivateParticipation,
+        buttonProps: {
+          backgroundColor: "$green9",
+        },
+        icon: <Check size={16} color="white" />,
       },
-    },
-    {
-      label: "On my way!",
-      onPress: () => handleStatusChange("on-the-way"),
-      buttonProps: {
-        backgroundColor: "$green9",
+    ];
+  } else {
+    // Otherwise show all the regular options
+    statusMenuItems = [
+      // Only show the cancel option for non-owners
+      ...(isOwner
+        ? []
+        : [
+            {
+              label: "I can no longer make it",
+              onPress: handleCancelParticipation,
+              buttonProps: {
+                backgroundColor: "$red9",
+              },
+            } as MenuItem,
+          ]),
+      {
+        label: "Not on my way yet",
+        onPress: () => handleStatusChange("pending"),
+        buttonProps: {
+          backgroundColor: COLORS.primary,
+          color: COLORS.textOnDark,
+        },
       },
-      icon: <Check size={16} color="white" />,
-    },
-    {
-      label: "Arrived",
-      onPress: () => handleStatusChange("arrived"),
-      buttonProps: {
-        backgroundColor: "$blue9",
+      {
+        label: "On my way!",
+        onPress: () => handleStatusChange("on-the-way"),
+        buttonProps: {
+          backgroundColor: "$green9",
+        },
+        icon: <Check size={16} color="white" />,
       },
-      icon: <MapPin size={16} color="white" />,
-    },
-  ];
+      {
+        label: "Arrived",
+        onPress: () => handleStatusChange("arrived"),
+        buttonProps: {
+          backgroundColor: "$blue9",
+        },
+        icon: <MapPin size={16} color="white" />,
+      },
+    ];
+  };
 
   // Create the menu trigger button
   const menuTrigger = (
@@ -356,7 +404,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
         >
           <XStack alignItems="center" gap="$1">
             <Text textAlign="center" color="white" fontWeight="bold">
-              {getStatusButtonText()}
+              {getStatusText()}
             </Text>
           </XStack>
         </XStack>

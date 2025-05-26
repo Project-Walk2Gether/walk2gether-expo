@@ -87,8 +87,6 @@ export default function WalksScreen() {
           <FAB
             ref={setRef("startWalkFab") as any}
             text="Start a Walk"
-            right={16}
-            bottom={20}
             onPress={() => router.push("/new-walk")}
           />
         }

@@ -184,7 +184,7 @@ const WalkCard: React.FC<Props> = ({
           {/* If user has cancelled their participation */}
           {isCancelled && (
             <XStack
-              backgroundColor="$red4"
+              backgroundColor="$red7"
               paddingHorizontal="$3"
               paddingVertical="$2"
               borderRadius="$3"
@@ -192,7 +192,7 @@ const WalkCard: React.FC<Props> = ({
               gap="$1"
               mt="$2"
             >
-              <Text fontSize={12} fontWeight="600" color="$gray9">
+              <Text fontSize={12} fontWeight="600">
                 You've told {ownerName} you can't make it
               </Text>
             </XStack>

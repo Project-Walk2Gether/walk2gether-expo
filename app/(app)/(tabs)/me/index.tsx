@@ -250,7 +250,7 @@ export default function MeScreen() {
                 fontSize={16}
                 fontWeight="bold"
                 color={COLORS.primary}
-                mb="$1"
+                mb="$2"
               >
                 My location
               </Text>
@@ -259,7 +259,7 @@ export default function MeScreen() {
               </Text>
             </>
           )}
-          <Text fontWeight="bold" fontSize="$4" color={COLORS.primary} mb="$1">
+          <Text fontWeight="bold" fontSize="$4" color={COLORS.primary} mb="$2">
             About me
           </Text>
           <Text fontSize={16} color={COLORS.text} opacity={aboutMe ? 1 : 0.7}>
@@ -332,12 +332,12 @@ export default function MeScreen() {
               <XStack alignItems="center" space="$2">
                 <Download size={16} color="white" />
                 <Text color="white" fontWeight="500">
-                  Apply the latest update
+                  Tap to instant-update
                 </Text>
               </XStack>
             ) : undefined
           }
-          backgroundColor={isUpdateAvailable ? COLORS.accent1 : undefined}
+          backgroundColor={isUpdateAvailable ? COLORS.info : undefined}
           titleColor={isUpdateAvailable ? "white" : undefined}
           secondaryTextColor={isUpdateAvailable ? "white" : undefined}
         />
