@@ -8,12 +8,7 @@ import {
   cancelParticipation,
   restoreParticipation,
 } from "@/utils/participantManagement";
-import {
-  doc,
-  getDoc,
-  serverTimestamp,
-  updateDoc,
-} from "@react-native-firebase/firestore";
+import { deleteDoc, doc, getDoc } from "@react-native-firebase/firestore";
 import {
   Edit3,
   LogOut,
@@ -101,9 +96,7 @@ export default function WalkMenu({
       // Update walk with cancelledAt timestamp instead of deleting
       // Use doc reference directly from firestore to avoid type issues
       const walkDocRef = doc(firestore_instance, `walks/${walk.id}`);
-      await updateDoc(walkDocRef, {
-        cancelledAt: serverTimestamp(),
-      });
+      await deleteDoc(walkDocRef);
       showMessage("Walk has been cancelled", "success");
 
       // If afterDelete is provided, call it after cancellation

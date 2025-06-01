@@ -75,7 +75,7 @@ export default function NotificationPermissionsScreen() {
             width="100%"
             fontWeight="bold"
             mb="$2"
-            onPress={requestPermissions}
+            onPress={requestForegroundPermissionsAsync}
             disabled={loading}
           >
             {loading ? (
@@ -166,7 +166,7 @@ export default function NotificationPermissionsScreen() {
                 color={COLORS.text}
                 onPress={() => {
                   setShowConfirmation(false);
-                  requestPermissions();
+                  requestForegroundPermissionsAsync();
                 }}
                 variant="outlined"
                 borderRadius="$4"
