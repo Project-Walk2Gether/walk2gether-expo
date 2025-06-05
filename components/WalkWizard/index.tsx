@@ -15,6 +15,7 @@ import {
   DurationSelection,
   InviteSelection,
   LocationSelection,
+  QuoteSection,
   TimeSelection,
   TypeSelection,
 } from "./sections";
@@ -149,6 +150,12 @@ export function WalkWizard() {
         case "invite":
           return {
             component: InviteSelection,
+            onContinue: goToNextStep,
+            onBack: goToPreviousStep,
+          };
+        case "quote":
+          return {
+            component: QuoteSection,
             onContinue: goToNextStep, // This will close the wizard since it's the last step
             onBack: goToPreviousStep,
           };

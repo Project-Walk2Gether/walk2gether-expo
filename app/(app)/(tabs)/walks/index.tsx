@@ -123,7 +123,7 @@ export default function WalksScreen() {
         ) : (
           <EmptyMessage
             message="Ready to take the first step?"
-            subtitle="Start a walk with a friend or neighbor using the button below!"
+            subtitle={`Start a walk with a friend or neighbor using the button below! Or go to the Friends tab below to "Invite a Friend".`}
             icon={Footprints}
             iconSize={70}
             iconColor={COLORS.primary}

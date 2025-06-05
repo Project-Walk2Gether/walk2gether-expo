@@ -20,7 +20,7 @@ interface WizardStep {
 export type WalkFormData = Partial<Walk> & {
   // Include any additional fields needed for the form but not in the Walk type
   participantUids?: string[];
-  participantUids?: string[];
+  invitationCode?: string;
 };
 
 // Define a type for form errors with the same shape as the form data
@@ -125,10 +125,13 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
           key: "duration",
           title: "Set duration",
         },
-
         {
           key: "invite",
           title: "Invite",
+        },
+        {
+          key: "quote",
+          title: "You're all set!",
         },
       ];
     }
@@ -151,6 +154,10 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
       {
         key: "invite",
         title: "Invite",
+      },
+      {
+        key: "quote",
+        title: "You're all set!",
       },
     ];
   }, [formData.type, showHowItWorks]);

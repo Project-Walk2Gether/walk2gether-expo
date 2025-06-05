@@ -6,22 +6,28 @@ import { Text, XStack, YStack } from "tamagui";
 
 interface Props {
   imageSize?: number;
+  skipAnimation?: boolean;
 }
 
-export default function QuoteWithImage({ imageSize = 200 }: Props) {
+export default function QuoteWithImage({ imageSize = 200, skipAnimation = false }: Props) {
   // Fetch the quote using our custom hook
   const { quote } = useQuoteOfTheDay();
   // Animation state
-  const [showElements, setShowElements] = useState(false);
+  const [showElements, setShowElements] = useState(skipAnimation);
 
-  // Delay animation start by 1 second
+  // Delay animation start by 1 second if animation isn't skipped
   useEffect(() => {
+    if (skipAnimation) {
+      setShowElements(true);
+      return;
+    }
+    
     const timer = setTimeout(() => {
       setShowElements(true);
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [skipAnimation]);
 
   if (!quote) {
     return null;
