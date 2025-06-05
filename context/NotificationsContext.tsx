@@ -1,5 +1,6 @@
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { notificationErrorHandler } from "@/utils/errorReporting";
 import { writeLogIfEnabled } from "@/utils/logging";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import Constants from "expo-constants";
@@ -85,18 +86,19 @@ export const NotificationsProvider: React.FC<Props> = ({ children }) => {
             router.router.push(url);
             console.log(`Navigated to ${url} from notification`);
           } catch (error) {
-            console.error("Error navigating from notification:", error);
+            // Use our domain-specific error handler
+            notificationErrorHandler.reportNonFatalError(
+              error,
+              { notificationUrl: url, response: response }, 
+              "Failed to navigate from notification"
+            );
           }
         }
       });
 
     return () => {
-      notificationListener.current &&
-        Notifications.removeNotificationSubscription(
-          notificationListener.current
-        );
-      responseListener.current &&
-        Notifications.removeNotificationSubscription(responseListener.current);
+      notificationListener.current?.remove();
+      responseListener.current?.remove();
     };
   }, []);
 

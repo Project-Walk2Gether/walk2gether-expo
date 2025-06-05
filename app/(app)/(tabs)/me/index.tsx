@@ -34,7 +34,6 @@ import {
   Separator,
   Spinner,
   Text,
-  View,
   XStack,
   YStack,
 } from "tamagui";
@@ -211,21 +210,13 @@ export default function MeScreen() {
             },
           ]}
           trigger={
-            <View position="relative">
-              <StatelessAvatar
-                profilePicUrl={profilePicUrl}
-                name={name}
-                size={120}
-                borderWidth={3}
-                backgroundColor={COLORS.primary}
-              />
-              <EditButton
-                position="absolute"
-                right={0}
-                bottom={0}
-                backgroundColor={COLORS.primary}
-              />
-            </View>
+            <StatelessAvatar
+              profilePicUrl={profilePicUrl}
+              name={name}
+              size={120}
+              borderWidth={3}
+              backgroundColor={COLORS.primary}
+            />
           }
         />
         <H4 mt="$3" mb="$1" fontSize={26} fontWeight="bold">

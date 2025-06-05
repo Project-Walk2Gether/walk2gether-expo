@@ -1,11 +1,18 @@
+import { useErrorReporting } from "@/components/ErrorBoundary";
 import Menu, { MenuItem } from "@/components/Menu";
 import { firestore_instance } from "@/config/firebase";
 import { COLORS } from "@/styles/colors";
-import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
+import {
+  deleteField,
+  doc,
+  setDoc,
+  Timestamp,
+} from "@react-native-firebase/firestore";
 import { Car, Check, Footprints, MapPin } from "@tamagui/lucide-icons";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable } from "react-native";
 import { Button, Spinner, Switch, Text, XStack, YStack } from "tamagui";
+import { Participant } from "walk2gether-shared";
 import SlideAction from "./SlideToStart";
 
 type WalkStatusControlsProps = {
@@ -40,6 +47,8 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
   onStartWalk,
   onEndWalk,
 }) => {
+  // Get error reporting at the top level of the component
+  const { reportNonFatalError } = useErrorReporting();
   // Status state
   const [status, setStatus] = useState<"pending" | "on-the-way" | "arrived">(
     initialStatus
@@ -71,7 +80,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
       [
         {
           text: "No, I can still make it",
-          style: "cancel"
+          style: "cancel",
         },
         {
           text: "Yes, I can't make it",
@@ -97,12 +106,29 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
                 "Cancelled",
                 "You've let the organizer know you can no longer make it to this walk."
               );
-            } catch (error) {
-              console.error("Error cancelling participation:", error);
-              Alert.alert("Error", "Failed to cancel participation. Please try again.");
+            } catch (error: any) {
+              // Use the already declared reportNonFatalError from the top level
+              const errorMessage =
+                "Failed to cancel participation. Please try again.";
+
+              reportNonFatalError(
+                error instanceof Error
+                  ? error
+                  : new Error("Error cancelling participation"),
+                {
+                  walkId,
+                  userId,
+                  action: "cancelParticipation",
+                  participantStatus: "attendee",
+                },
+                errorMessage
+              );
+
+              // Still show the alert to the user
+              Alert.alert("Error", errorMessage);
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -122,20 +148,15 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
         `walks/${walkId}/participants/${userId}`
       );
 
-      await setDoc(
-        participantDocRef,
-        {
-          // Set the status field according to the schema
-          status: newStatus,
-          // Also update the timestamp when status changes
-          statusUpdatedAt: new Date().getTime(),
-          // Always ensure navigation method is set
-          navigationMethod: isDriving ? "driving" : "walking",
-          // Clear cancelledAt if present - this allows cancelled users to rejoin
-          cancelledAt: null,
-        },
-        { merge: true }
-      );
+      const update: Partial<Participant> = {
+        status: newStatus,
+        statusUpdatedAt: Timestamp.now(),
+        navigationMethod: isDriving ? "driving" : "walking",
+        // Clear cancelledAt if present - this allows cancelled users to rejoin
+        cancelledAt: deleteField() as any,
+      };
+
+      await setDoc(participantDocRef, update, { merge: true });
 
       // If user is walk owner and changing from "arrived" to another status,
       // reset the walk's startedAt property
@@ -214,7 +235,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
     if (isCancelled) {
       return "$red9";
     }
-    
+
     // Show a distinct color when the walk has started
     if (walkStarted && status === "arrived") {
       return "$purple9"; // Purple for walk started
@@ -366,7 +387,7 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
         icon: <MapPin size={16} color="white" />,
       },
     ];
-  };
+  }
 
   // Create the menu trigger button
   const menuTrigger = (
@@ -470,16 +491,12 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
 
   // Handle walk start action
   const handleStartWalk = () => {
-    if (onStartWalk) {
-      onStartWalk();
-    }
+    if (onStartWalk) onStartWalk();
   };
 
   // Handle walk end action
   const handleEndWalk = () => {
-    if (onEndWalk) {
-      onEndWalk();
-    }
+    if (onEndWalk) onEndWalk();
   };
 
   // Check if we should show the slider instead of regular button

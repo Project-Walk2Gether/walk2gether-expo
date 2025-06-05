@@ -181,7 +181,7 @@ export default function WalkInfo({ walk }: Props) {
           <YStack gap="$2">
             <XStack gap="$2" alignItems="center" flexShrink={1}>
               {walk.startLocation && (
-                <YStack flexShrink={1}>
+                <YStack flexGrow={1} flexShrink={1}>
                   <Text color="white" fontSize="$3">
                     {walk.startLocation.name || "Meeting point"}
                   </Text>

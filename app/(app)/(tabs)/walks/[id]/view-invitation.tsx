@@ -1,3 +1,4 @@
+import { useErrorReporting } from "@/components/ErrorBoundary";
 import HeaderBackButton from "@/components/HeaderBackButton";
 import QuoteWithImage from "@/components/QuoteWithImage";
 import { BrandGradient } from "@/components/UI";
@@ -54,7 +55,9 @@ function withWalkData<P extends { walk: WithId<Walk> }>(
 
 // Inner component that expects the walk data to be passed as a prop
 function ViewWalkInvitationScreen({ walk }: { walk: WithId<Walk> }) {
+  const { reportNonFatalError } = useErrorReporting();
   const navigation = useNavigation();
+  const router = useRouter();
   const { user } = useAuth();
   const { userData, updateUserData } = useUserData();
   const { userLocation } = useLocation();
@@ -62,8 +65,6 @@ function ViewWalkInvitationScreen({ walk }: { walk: WithId<Walk> }) {
   const insets = useSafeAreaInsets();
   const [introduction, setIntroduction] = useState("");
   const [saveToProfile, setSaveToProfile] = useState(false);
-  const router = useRouter();
-
   const { doc: participantDoc } = useDoc<Participant>(
     `walks/${walk.id}/participants/${user?.uid}`
   );
@@ -169,10 +170,19 @@ function ViewWalkInvitationScreen({ walk }: { walk: WithId<Walk> }) {
       } else {
         router.replace("/");
       }
-    } catch (error) {
+    } catch (error: any) {
       const actionText = action === "accept" ? "join" : "cancel";
-      console.error(`Error ${actionText}ing walk:`, error);
-      Alert.alert("Error", `Failed to ${actionText} walk. Please try again.`);
+      const errorMessage = `Failed to ${actionText} walk. Please try again.`;
+
+      // Report non-fatal error to Crashlytics with context
+      reportNonFatalError(
+        error,
+        { walkId: walk?.id, action, userId: user?.uid },
+        errorMessage
+      );
+
+      // Still show the alert to the user
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }

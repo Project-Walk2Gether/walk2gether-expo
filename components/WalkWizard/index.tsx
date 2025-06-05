@@ -2,6 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useWalkForm } from "@/context/WalkFormContext";
+import { useDoc } from "@/utils/firestore";
 import { useQuoteOfTheDay } from "@/utils/quotes";
 import { updateExistingWalk } from "@/utils/updateWalk";
 import { createWalkFromForm } from "@/utils/walkSubmission";
@@ -9,6 +10,7 @@ import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { Button, View, XStack } from "tamagui";
+import { Walk } from "walk2gether-shared";
 import {
   DurationSelection,
   InviteSelection,
@@ -206,6 +208,11 @@ export function WalkWizard() {
 
   // We're now using goToStepByKey from the WalkFormContext directly
 
+  // Fetch the created walk if we have an ID
+  const { doc: createdWalk } = useDoc<Walk>(
+    createdWalkId ? `walks/${createdWalkId}` : undefined
+  );
+
   // Render the appropriate step based on currentStep
   const renderStep = () => {
     if (currentStep >= wizardSteps.length) {
@@ -225,6 +232,9 @@ export function WalkWizard() {
           onBack={onBack}
           currentStep={currentStep + 1}
           totalSteps={wizardSteps.length}
+          walk={createdWalk} // Pass the walk object to all steps
+          walkId={createdWalkId} // Keep this for backwards compatibility
+          walkType={formData.type} // Keep this for backwards compatibility
         />
       );
     }

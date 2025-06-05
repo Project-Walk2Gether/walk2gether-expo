@@ -7,7 +7,7 @@ import {
 import { COLORS } from "@/styles/colors";
 import { writeLogIfEnabled } from "@/utils/logging";
 import { Ionicons } from "@expo/vector-icons";
-import { recordError } from "@react-native-firebase/crashlytics";
+import crashlytics from "@react-native-firebase/crashlytics";
 import { isDevice } from "expo-device";
 import * as Updates from "expo-updates";
 import React from "react";
@@ -33,20 +33,83 @@ export class ErrorBoundary extends React.Component<
     return { error };
   }
 
-  // This is the "soft" way to handle errors. We render a flash message, and log details.
-  catchError(error: Error, extraContext: any) {
+  // Legacy method - use reportNonFatalError instead
+  catchError = (error: Error, extraContext: any) => {
+    this.reportNonFatalError(error, extraContext, error.message);
+  }
+
+  // Report a non-fatal error to Crashlytics and show a user-friendly message
+  reportNonFatalError = (error: Error, extraContext?: Record<string, any>, userMessage?: string) => {
     console.error({ error, trace: error.stack });
-    if (this.props.showMessage) {
-      this.props.showMessage(error.message, "error");
+    
+    // Log to Crashlytics as non-fatal
+    try {
+      const crashlyticsInstance = crashlytics();
+      
+      // Set custom keys for debugging context
+      if (extraContext) {
+        Object.entries(extraContext).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            crashlyticsInstance.setAttribute(key, value);
+          } else {
+            crashlyticsInstance.setAttribute(key, JSON.stringify(value));
+          }
+        });
+      }
+      
+      // Record as non-fatal
+      crashlyticsInstance.recordError(error);
+    } catch (e) {
+      console.error('Failed to report error to Crashlytics:', e);
     }
+    
+    // Show user message if provided
+    if (this.props.showMessage) {
+      this.props.showMessage(userMessage || error.message, "error");
+    }
+    
+    // Log to console/file
     writeLogIfEnabled({
-      message: `ERROR: ${error.message}`,
+      message: `NON-FATAL ERROR: ${error.message}`,
       metadata: { error, ...extraContext },
     });
   }
 
-  componentDidCatch(error: any, _errorInfo: any) {
-    recordError(crashlytics_instance, error);
+  // Report a fatal error to Crashlytics and crash the component
+  reportFatalError = (error: Error, extraContext?: Record<string, any>) => {
+    console.error({ error, trace: error.stack });
+    
+    try {
+      const crashlyticsInstance = crashlytics();
+      
+      // Set custom keys for debugging context
+      if (extraContext) {
+        Object.entries(extraContext).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            crashlyticsInstance.setAttribute(key, value);
+          } else {
+            crashlyticsInstance.setAttribute(key, JSON.stringify(value));
+          }
+        });
+      }
+      
+      // Mark as fatal by setting state
+      this.setState({ error });
+    } catch (e) {
+      console.error('Failed to report fatal error to Crashlytics:', e);
+      // Still set error state even if reporting fails
+      this.setState({ error });
+    }
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    try {
+      const crashlyticsInstance = crashlytics();
+      crashlyticsInstance.setAttribute('react_component_stack', errorInfo?.componentStack || 'Unknown component stack');
+      crashlyticsInstance.recordError(error);
+    } catch (e) {
+      console.error('Failed to report error to Crashlytics:', e);
+    }
   }
 
   handleReset = () => {
@@ -144,7 +207,11 @@ export class ErrorBoundary extends React.Component<
       );
     } else {
       return (
-        <ErrorContext.Provider value={{ catchError: this.catchError }}>
+        <ErrorContext.Provider value={{
+          catchError: this.catchError,
+          reportNonFatalError: this.reportNonFatalError,
+          reportFatalError: this.reportFatalError
+        }}>
           {this.props.children}
         </ErrorContext.Provider>
       );
@@ -157,6 +224,21 @@ const ErrorBoundaryWithFlashMessage: React.FC<Props> = (props) => {
   const { showMessage } = useFlashMessage();
   return <ErrorBoundary showMessage={showMessage} {...props} />;
 };
+
+// Export hooks for easily using the error reporting functions
+export const useErrorReporting = () => {
+  const errorContext = React.useContext(ErrorContext);
+  if (!errorContext) {
+    throw new Error('useErrorReporting must be used within an ErrorBoundary');
+  }
+  return {
+    reportNonFatalError: errorContext.reportNonFatalError,
+    reportFatalError: errorContext.reportFatalError,
+    // Legacy method
+    catchError: errorContext.catchError
+  };
+};
+
 
 // Export a Higher-Order Component to wrap components with ErrorBoundary
 export function withErrorBoundary<P extends React.JSX.IntrinsicAttributes>(

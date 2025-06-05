@@ -189,7 +189,8 @@ export async function fetchDocsByIds<T extends DocumentData>(
   }
 
   // Process each batch
-  const results: Array<T & { id: string }> = [];
+  const results: Array<WithId<T>> = [];
+
   for (const batch of batches) {
     const batchResults = await fetchDocsByRefs<T>(batch);
     results.push(...batchResults);

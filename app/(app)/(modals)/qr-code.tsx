@@ -4,7 +4,7 @@ import { useUserData } from "@/context/UserDataContext";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Spinner, Text, YStack } from "tamagui";
+import { Spacer, Spinner, Text, YStack } from "tamagui";
 
 export default function QrCodeScreen() {
   const { userData, loading } = useUserData();
@@ -72,6 +72,7 @@ export default function QrCodeScreen() {
             ? "Invite a friend to this walk"
             : "Show this QR code to invite friends"}
         </Text>
+        <Spacer f={1} />
 
         <InvitationQRCode
           invitationCode={code}
@@ -79,6 +80,7 @@ export default function QrCodeScreen() {
           size={260}
           showText={true}
         />
+        <Spacer f={2} />
       </YStack>
     </>
   );

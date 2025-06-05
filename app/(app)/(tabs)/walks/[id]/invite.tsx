@@ -105,8 +105,7 @@ export default function InviteScreen() {
               console.error("[InviteScreen] Error during navigation:", error);
             }
           }}
-          walkId={id} // Pass the walk ID from the route params
-          walkType={walk.type} // Pass the walk type
+          walk={walk}
         />
       )}
     </>

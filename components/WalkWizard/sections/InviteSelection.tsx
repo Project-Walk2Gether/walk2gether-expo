@@ -1,4 +1,5 @@
 import { ContentCard } from "@/components/ContentCard";
+import { FormControl } from "@/components/FormControl";
 import UserList from "@/components/UserList";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
@@ -16,7 +17,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert, Share } from "react-native";
 import { Button, Spinner, Text, XStack, YStack } from "tamagui";
-import { Friendship, UserData, WithId } from "walk2gether-shared";
+import { Friendship, UserData, Walk, WithId } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
 
 interface Props {
@@ -24,8 +25,10 @@ interface Props {
   onBack?: () => void;
   currentStep?: number;
   totalSteps?: number;
-  walkId?: string; // Optional walkId for direct usage outside the wizard
-  walkType?: "friends" | "neighborhood" | "meetup"; // Optional walkType for direct usage
+  walk: WithId<Walk>; // Required walk object
+  // Keep these for backwards compatibility during migration
+  walkId?: string;
+  walkType?: "friends" | "neighborhood" | "meetup";
 }
 
 export const InviteSelection: React.FC<Props> = ({
@@ -33,6 +36,7 @@ export const InviteSelection: React.FC<Props> = ({
   onBack,
   currentStep,
   totalSteps,
+  walk,
   walkId,
   walkType,
 }) => {
@@ -42,23 +46,31 @@ export const InviteSelection: React.FC<Props> = ({
   const { showMessage } = useFlashMessage();
   const router = useRouter();
 
-  // Use either the provided walkId or get it from the context
-  const effectiveWalkId = (walkId || maybeWalkFormContext!.createdWalkId)!;
-  const effectiveWalkType = (walkType || maybeWalkFormContext!.formData?.type)!;
+  // Use either the provided walk object or fallback to walkId and walkType for backwards compatibility
+  const effectiveWalkId =
+    walk?.id || (walkId || maybeWalkFormContext?.createdWalkId)!;
+  const effectiveWalkType =
+    walk?.type || (walkType || maybeWalkFormContext?.formData?.type)!;
+
+  // Extract accepted user IDs from walk.participantsById
+  const acceptedUserIds = useMemo(() => {
+    if (!walk || !walk.participantsById) return [];
+    return Object.entries(walk.participantsById)
+      .filter(([_, participant]) => participant.acceptedAt !== null)
+      .map(([userId]) => userId);
+  }, [walk]);
 
   // State variables
-  const [participantUids, setParticipantUids] = useState<string[]>([]);
+  // Initialize participantUids with the keys from walk.participantsById
+  const [participantUids, setParticipantUids] = useState<string[]>(() => {
+    if (!walk || !walk.participantsById) return [];
+    return Object.keys(walk.participantsById);
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Using UserData & {id: string} instead of WithId<UserData> to avoid _ref requirement
   const [users, setUsers] = useState<WithId<UserData>[]>([]);
-
-  // Check participants if we have a created walk ID
-  const walkParticipantsCollection = effectiveWalkId
-    ? collection(firestore_instance, `walks/${effectiveWalkId}/participants`)
-    : undefined;
-  const { docs: walkParticipants } = useQuery(walkParticipantsCollection);
 
   // Determine walk type
   const isNeighborhoodWalk = effectiveWalkType === "neighborhood";
@@ -84,6 +96,9 @@ export const InviteSelection: React.FC<Props> = ({
   const [nearbyUserIds, setNearbyUserIds] = useState<string[]>([]);
   const [isLoadingNearbyUsers, setIsLoadingNearbyUsers] = useState(false);
   const [shareSuccessful, setShareSuccessful] = useState(false);
+
+  // No need for custom functions to check invitation status
+  // We'll pass the acceptedUserIds array to UserList instead
 
   // Fetch nearby users for neighborhood walks
   useEffect(() => {
@@ -402,6 +417,7 @@ export const InviteSelection: React.FC<Props> = ({
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
                     selectedUserIds={participantUids}
+                    acceptedUserIds={acceptedUserIds}
                     emptyMessage={
                       isFriendsWalk
                         ? "Your friends aren't on Walk2Gether yet. Add friends to invite them to your walk."
@@ -421,54 +437,57 @@ export const InviteSelection: React.FC<Props> = ({
                     </Text>
                   )}
 
-                  <YStack
-                    alignItems="center"
-                    marginTop="$4"
-                    paddingBottom="$2"
-                    gap="$4"
-                  >
-                    {users.length > 0 && !isNeighborhoodWalk && (
+                  {users.length > 0 && !isNeighborhoodWalk && (
+                    <YStack
+                      alignItems="center"
+                      marginTop="$4"
+                      paddingBottom="$2"
+                      gap="$4"
+                    >
                       <Text fontSize={14} color="$gray10" fontWeight="500">
                         Don't see your friend here yet?
                       </Text>
-                    )}
-                    <XStack gap="$3" width="100%" alignItems="center">
-                      <Button
-                        backgroundColor={COLORS.primary}
-                        color={COLORS.textOnDark}
-                        onPress={handleShareLink}
-                        size="$4"
-                        icon={<Share2 size={18} color="#fff" />}
-                        paddingHorizontal={16}
-                        borderRadius={8}
-                        hoverStyle={{ backgroundColor: "#6d4c2b" }}
-                        pressStyle={{ backgroundColor: "#4b2e13" }}
-                      >
-                        {isNeighborhoodWalk
-                          ? "Invite another neighbor"
-                          : "Invite a new friend"}
-                      </Button>
 
-                      <Button
-                        backgroundColor={COLORS.secondary}
-                        color={COLORS.textOnDark}
-                        onPress={() =>
-                          router.push({
-                            pathname: "/qr-code",
-                            params: { walkCode: effectiveWalkId },
-                          })
-                        }
-                        size="$4"
-                        icon={<QrCode size={18} color="#fff" />}
-                        paddingHorizontal={16}
-                        borderRadius={8}
-                        hoverStyle={{ backgroundColor: "#4a95c4" }}
-                        pressStyle={{ backgroundColor: "#2d7fb3" }}
-                      >
-                        QR code
-                      </Button>
-                    </XStack>
-                  </YStack>
+                      <FormControl label="Invite a new friend">
+                        <XStack gap="$3" width="100%" alignItems="center">
+                          <Button
+                            backgroundColor={COLORS.primary}
+                            color={COLORS.textOnDark}
+                            onPress={handleShareLink}
+                            size="$4"
+                            icon={<Share2 size={18} color="#fff" />}
+                            paddingHorizontal={16}
+                            borderRadius={8}
+                            hoverStyle={{ backgroundColor: "#6d4c2b" }}
+                            pressStyle={{ backgroundColor: "#4b2e13" }}
+                          >
+                            {isNeighborhoodWalk
+                              ? "Invite another neighbor"
+                              : "Send invitation"}
+                          </Button>
+
+                          <Button
+                            backgroundColor={COLORS.secondary}
+                            color={COLORS.textOnDark}
+                            onPress={() =>
+                              router.push({
+                                pathname: "/qr-code",
+                                params: { walkCode: effectiveWalkId },
+                              })
+                            }
+                            size="$4"
+                            icon={<QrCode size={18} color="#fff" />}
+                            paddingHorizontal={16}
+                            borderRadius={8}
+                            hoverStyle={{ backgroundColor: "#4a95c4" }}
+                            pressStyle={{ backgroundColor: "#2d7fb3" }}
+                          >
+                            QR code
+                          </Button>
+                        </XStack>
+                      </FormControl>
+                    </YStack>
+                  )}
                 </>
               )}
             </ContentCard>

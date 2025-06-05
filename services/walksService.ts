@@ -1,6 +1,6 @@
 import { db } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
-import { useQuery } from "@/utils/firestore";
+import { documentWithIdFromSnapshot, useQuery } from "@/utils/firestore";
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import {
   addDoc,
@@ -17,8 +17,7 @@ import {
 } from "@react-native-firebase/firestore";
 import { startOfDay } from "date-fns";
 import { useMemo } from "react";
-import { Walk, WithId } from "walk2gether-shared";
-import { DocumentReferenceLike } from "walk2gether-shared/lib/firestore/documentReference";
+import { Walk } from "walk2gether-shared";
 
 export function useUpcomingWalks() {
   const { user } = useAuth();
@@ -29,7 +28,6 @@ export function useUpcomingWalks() {
 
     return query(
       collection(db, "walks"),
-      where("active", "==", false),
       where("date", ">", midnightToday),
       orderBy("date", "asc"),
       limit(10)
@@ -55,7 +53,6 @@ export const createWalk = async (
     // Create the walk document
     const newWalk: Walk = {
       ...walkData,
-      active: false,
       createdByUid: user!.uid,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
@@ -64,14 +61,27 @@ export const createWalk = async (
     const walkRef = await addDoc(walksRef, newWalk);
     console.log("Walk created successfully:", walkRef.id);
     const walk = await getDoc(walkRef);
-    return {
-      id: walk.id,
-      ...walk.data(),
-      _ref: walkRef as DocumentReferenceLike<Walk>,
-    } as WithId<Walk>;
+    return documentWithIdFromSnapshot(walk);
   } catch (error) {
+    // Prepare the error context for better debugging
+    const errorContext = {
+      action: "createWalk",
+      userId: user?.uid || "unknown",
+    };
+
+    // Format error for throwing - make sure it's an Error object
+    const formattedError =
+      error instanceof Error
+        ? error
+        : new Error(`Error creating walk: ${error}`);
+
+    // Log to console, but Crashlytics will capture via higher level handler
     console.error("Error creating walk:", error);
-    throw error;
+
+    // Re-throw with context - will be caught by component using this service
+    // The error will have additional context when caught and reported
+    formattedError.name = "WalkServiceError";
+    throw formattedError;
   }
 };
 

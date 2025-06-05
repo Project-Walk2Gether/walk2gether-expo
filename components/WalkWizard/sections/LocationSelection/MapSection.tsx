@@ -1,10 +1,10 @@
-import React from 'react';
-import { ActivityIndicator } from 'react-native';
-import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { Text, View } from 'tamagui';
-import { COLORS } from '@/styles/colors';
-import { getRegionForRadius } from '@/utils/geo';
-import NearbyWalkersInfo from '@/components/NearbyWalkersInfo';
+import NearbyWalkersInfo from "@/components/NearbyWalkersInfo";
+import { COLORS } from "@/styles/colors";
+import { getRegionForRadius } from "@/utils/geo";
+import React from "react";
+import { ActivityIndicator } from "react-native";
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { Text, View } from "tamagui";
 
 interface Props {
   mapRef: React.RefObject<MapView>;
@@ -102,15 +102,27 @@ const MapSection: React.FC<Props> = ({
         )}
       </MapView>
 
-      <Text color="white" fontSize={14} fontWeight="500" textAlign="center">
-        Tap and hold on the map to choose a location
-      </Text>
+      <View
+        position="absolute"
+        bottom={10}
+        left={10}
+        right={10}
+        padding="$2"
+        backgroundColor="rgba(0, 0, 0, 0.6)"
+        borderRadius={8}
+        alignItems="center"
+        zIndex={2}
+      >
+        <Text color="white" fontSize={14} fontWeight="500" textAlign="center">
+          Tap and hold on the map to set location
+        </Text>
+      </View>
 
       {/* Display nearby walkers info for neighborhood walks */}
       {walkType === "neighborhood" && startLocation && (
         <View
           position="absolute"
-          bottom={10}
+          top={10}
           left={10}
           right={10}
           alignItems="center"
@@ -152,11 +164,7 @@ const MapSection: React.FC<Props> = ({
           alignItems="center"
           style={{ width: "100%", height: "100%" }}
         >
-          <Text
-            color={COLORS.textOnDark}
-            textAlign="center"
-            fontWeight="600"
-          >
+          <Text color={COLORS.textOnDark} textAlign="center" fontWeight="600">
             {locationError}
           </Text>
         </View>

@@ -28,7 +28,7 @@ export default function EditButton({
       alignItems="center"
       borderWidth={2}
       borderColor="white"
-      pressStyle={{ opacity: 0.8 }}
+      pressStyle={onPress ? { opacity: 0.8 } : undefined}
       onPress={onPress}
       {...rest}
     >

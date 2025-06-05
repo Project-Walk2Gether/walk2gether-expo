@@ -17,20 +17,6 @@ export const getParticipantStatusInfo = (
   participant: ParticipantWithRoute,
   walkStatus: WalkStatus
 ): ParticipantStatusInfo => {
-  // Debug logging for Michael 2089
-  if (participant.displayName?.includes("2089")) {
-    console.log("Michael 2089 DEBUG:", {
-      displayName: participant.displayName,
-      status: participant.status,
-      sourceType: participant.sourceType,
-      acceptedAt: participant.acceptedAt,
-      cancelledAt: participant.cancelledAt,
-      deniedAt: participant.deniedAt,
-      walkStatus,
-      participantData: participant,
-    });
-  }
-
   const isArrived = participant.status === "arrived";
   const isOnTheWay = participant.status === "on-the-way";
   const isCancelled = !!participant.cancelledAt;
@@ -78,7 +64,7 @@ export const getParticipantStatusInfo = (
     // Only show these statuses for accepted participants
     if (walkStatus === "future") {
       return {
-        text: "Accepted",
+        text: "All set!",
         color: "$gray11",
       };
     } else if (walkStatus === "active") {

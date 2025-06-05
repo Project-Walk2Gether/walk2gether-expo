@@ -1,7 +1,7 @@
 import LocationButton from "@/components/UI/LocationButton";
 import { useWalkForm } from "@/context/WalkFormContext";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Text, YStack } from "tamagui";
+import { YStack } from "tamagui";
 import WizardWrapper, { WizardWrapperHandle } from "../WizardWrapper";
 
 // Import custom hooks
@@ -153,14 +153,6 @@ export const LocationSelection: React.FC<Props> = ({
             locationLoading || isReverseGeocoding || pendingLocationRequest
           }
         />
-
-        {/* <SavedLocationsList
-          locations={savedLocations || []}
-          loading={loadingSavedLocations}
-          onSelectLocation={handleLocationCoordinates}
-        /> */}
-
-        <Text>Or long-press on the map to choose a location</Text>
 
         {/* Map section */}
         <MapSection

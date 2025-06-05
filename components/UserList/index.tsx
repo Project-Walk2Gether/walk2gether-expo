@@ -14,6 +14,8 @@ interface Props {
   selectedUserIds?: string[]; // For tracking selected users
   loading?: boolean;
   emptyMessage?: string;
+  // Array of user IDs who have accepted the invitation
+  acceptedUserIds?: string[];
 }
 
 export default function UserList({
@@ -25,6 +27,7 @@ export default function UserList({
   selectedUserIds = [], // Default to empty array
   loading = false,
   emptyMessage = "No users found.",
+  acceptedUserIds = [], // Default to empty array
 }: Props) {
   // Filter users if search is enabled and has query
   const filteredUsers = useMemo(() => {
@@ -120,12 +123,25 @@ export default function UserList({
                       backgroundColor={COLORS.primary}
                     />
                     
-                    <Text 
-                      fontSize={16}
-                      fontWeight={isSelected ? "600" : "400"}
-                    >
-                      {user.name}
-                    </Text>
+                    <YStack>
+                      <Text 
+                        fontSize={16}
+                        fontWeight={isSelected ? "600" : "400"}
+                      >
+                        {user.name}
+                      </Text>
+                      {acceptedUserIds.includes(user.id) && (
+                        <XStack paddingTop="$1">
+                          <Text 
+                            fontSize={12} 
+                            color="$green9"
+                            fontWeight="500"
+                          >
+                            Accepted
+                          </Text>
+                        </XStack>
+                      )}
+                    </YStack>
                   </XStack>
                 </XStack>
               </Card.Header>
