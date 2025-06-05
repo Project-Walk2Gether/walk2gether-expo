@@ -1,7 +1,7 @@
 import { COLORS } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
-import { Card, Input, Spinner, Text, XStack, YStack } from "tamagui";
+import { Card, Input, Spinner, Text, XStack, YStack, View } from "tamagui";
 import { UserData, WithId } from "walk2gether-shared";
 import { UserAvatar } from "../UserAvatar";
 
@@ -81,38 +81,51 @@ export default function UserList({
               key={user.id}
               pressStyle={{ opacity: 0.8 }}
               // Use backgroundColor to indicate selection state
-              backgroundColor={isSelected ? "$blue2" : "white"}
+              backgroundColor={isSelected ? "$blue3" : "white"}
               // Add a border when selected
               borderWidth={isSelected ? 2 : 1}
-              borderColor={isSelected ? "$blue8" : "$gray5"}
+              borderColor={isSelected ? "$blue9" : "$gray5"}
               onPress={() => onSelectUser(user)}
             >
+              {/* Absolutely positioned checkbox in top left corner */}
+              {isSelected && (
+                <XStack 
+                  position="absolute"
+                  top={-8}
+                  left={-8}
+                  zIndex={5}
+                  backgroundColor="white"
+                  borderRadius={14}
+                  width={28}
+                  height={28}
+                  alignItems="center"
+                  justifyContent="center"
+                  borderWidth={1}
+                  borderColor="$blue9"
+                >
+                  <Ionicons 
+                    name="checkmark-circle" 
+                    size={26} 
+                    color="$blue9" 
+                  />
+                </XStack>
+              )}
+              
               <Card.Header padded>
                 <XStack alignItems="center" justifyContent="space-between">
-                  <XStack alignItems="center" gap="$2">
-                    <XStack position="relative">
-                      <UserAvatar 
-                        uid={user.id} 
-                        size={36} 
-                        backgroundColor={COLORS.primary}
-                      />
-                      {isSelected && (
-                        <XStack 
-                          position="absolute" 
-                          right={-4} 
-                          bottom={-4} 
-                          backgroundColor="white" 
-                          borderRadius={10}
-                        >
-                          <Ionicons 
-                            name="checkmark-circle" 
-                            size={16} 
-                            color="#3f78e0" 
-                          />
-                        </XStack>
-                      )}
-                    </XStack>
-                    <Text>{user.name}</Text>
+                  <XStack alignItems="center" gap="$3">
+                    <UserAvatar 
+                      uid={user.id} 
+                      size={40} 
+                      backgroundColor={COLORS.primary}
+                    />
+                    
+                    <Text 
+                      fontSize={16}
+                      fontWeight={isSelected ? "600" : "400"}
+                    >
+                      {user.name}
+                    </Text>
                   </XStack>
                 </XStack>
               </Card.Header>

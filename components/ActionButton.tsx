@@ -29,7 +29,6 @@ export function ActionButton({
     <Button
       onPress={onPress}
       disabled={disabled || loading}
-      width="100%"
       height={55}
       backgroundColor={rest.theme ? undefined : "#4EB1BA"}
       borderRadius={10}

@@ -11,13 +11,11 @@ import { useDoc } from "@/utils/firestore";
 import {
   deleteField,
   doc,
-  setDoc,
   Timestamp,
   updateDoc,
 } from "@react-native-firebase/firestore";
 import { Check } from "@tamagui/lucide-icons";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { pickBy } from "lodash";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

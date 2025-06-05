@@ -164,27 +164,29 @@ export default function ReviewParticipantScreen() {
         ) : null}
 
         <YStack space="$4" marginTop="$4">
-          <Button
-            size="$5"
-            backgroundColor={COLORS.success}
-            color="white"
-            icon={<Check color="white" />}
-            onPress={handleApprove}
-            disabled={loading}
-          >
-            {loading ? "Approving..." : "Approve Participant"}
-          </Button>
-
-          <Button
-            size="$5"
-            backgroundColor="$red10"
-            color="white"
-            icon={<X color="white" />}
-            onPress={handleReject}
-            disabled={loading}
-          >
-            {loading ? "Declining..." : "Decline Participant"}
-          </Button>
+          {participant.deniedAt ? (
+            <Button
+              size="$5"
+              backgroundColor={COLORS.success}
+              color="white"
+              icon={<Check color="white" />}
+              onPress={handleApprove}
+              disabled={loading}
+            >
+              {loading ? "Approving..." : "Approve"}
+            </Button>
+          ) : (
+            <Button
+              size="$5"
+              backgroundColor="$red10"
+              color="white"
+              icon={<X color="white" />}
+              onPress={handleReject}
+              disabled={loading}
+            >
+              {loading ? "Declining..." : "Decline"}
+            </Button>
+          )}
         </YStack>
       </YStack>
     </ScrollView>

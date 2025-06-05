@@ -168,7 +168,6 @@ const WalkCard: React.FC<Props> = ({
           locationLoading={locationLoading}
           locationError={locationError}
         />
-
         {/* You're going section - only shows for participants who aren't the owner */}
         {isApproved && !isMine && (
           <IconTextRow
@@ -178,7 +177,6 @@ const WalkCard: React.FC<Props> = ({
             textWeight="bold"
           />
         )}
-
         {/* Participants section */}
         <YStack gap="$2">
           {/* If user has cancelled their participation */}

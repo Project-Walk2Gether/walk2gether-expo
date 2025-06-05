@@ -23,71 +23,19 @@ export default function ParticipantItem({
   onPress,
 }: Props) {
   const isCurrentUser = participant.userUid === currentUserId;
+  const isInvited = participant.isInvitedParticipant ?? false;
 
-  // Handle invited participants differently
-  if (participant.isInvitedParticipant) {
-    return (
-      <XStack
-        padding="$2"
-        gap="$2"
-        alignItems="center"
-        pressStyle={{ scale: 0.98 }}
-        animation="quick"
-        borderRadius="$4"
-        backgroundColor="white"
-        borderWidth={1}
-        borderColor="$blue7"
-        opacity={1}
-      >
-        {/* Avatar */}
-        <Avatar circular size="$3">
-          {participant.photoURL ? (
-            <Avatar.Image src={participant.photoURL} />
-          ) : (
-            <Avatar.Fallback
-              justifyContent="center"
-              alignItems="center"
-              backgroundColor={COLORS.primary}
-            >
-              <Text color="white" fontSize="$2">
-                {participant.displayName?.charAt(0).toUpperCase()}
-              </Text>
-            </Avatar.Fallback>
-          )}
-        </Avatar>
-        <YStack gap="$1">
-          {/* Top row: Name */}
-          <XStack alignItems="center" gap="$1">
-            <Text
-              fontSize="$2"
-              fontWeight="bold"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              flexShrink={1}
-            >
-              {isCurrentUser ? "You" : participant.displayName}
-            </Text>
-          </XStack>
+  // Determine status information
+  const statusInfo = isInvited
+    ? { text: "Waiting for response", color: "$blue9" }
+    : getParticipantStatusInfo(participant, walkStatus);
 
-          {/* Bottom row: Status text */}
-          <Text
-            fontSize="$1"
-            color="$blue9"
-            fontWeight="bold"
-            flexShrink={1}
-            numberOfLines={1}
-          >
-            Waiting for response
-          </Text>
-        </YStack>
-      </XStack>
-    );
-  }
+  // Determine border color and opacity
+  const borderColor = isInvited
+    ? "$blue7"
+    : getParticipantBorderColor(participant, isCurrentUser);
 
-  // Regular participant
-  const statusInfo = getParticipantStatusInfo(participant, walkStatus);
-  const statusText = statusInfo.text;
-  const statusColor = statusInfo.color;
+  const opacity = isInvited ? 1 : getParticipantOpacity(participant);
 
   // Only allow pressing participants that are not the current user
   const handlePress = () => {
@@ -100,17 +48,15 @@ export default function ParticipantItem({
     <XStack
       onPress={isCurrentUser ? undefined : handlePress}
       padding="$2"
-      margin="$1"
       gap="$2"
-      mb="$2"
       alignItems="center"
       pressStyle={{ scale: 0.98 }}
       animation="quick"
       borderRadius="$4"
       backgroundColor="white"
       borderWidth={1}
-      borderColor={getParticipantBorderColor(participant, isCurrentUser)}
-      opacity={getParticipantOpacity(participant)}
+      borderColor={borderColor}
+      opacity={opacity}
     >
       {/* Avatar */}
       <Avatar circular size="$3">
@@ -141,21 +87,22 @@ export default function ParticipantItem({
             {isCurrentUser ? "You" : participant.displayName}
           </Text>
         </XStack>
-        {/* Status text with ETA */}
+
+        {/* Status text */}
         <XStack alignItems="center" gap="$1">
           <Text
             fontSize="$1"
-            color={statusColor}
+            color={statusInfo.color}
             fontWeight="bold"
             flexShrink={1}
             numberOfLines={1}
           >
-            {statusText}
+            {statusInfo.text}
           </Text>
         </XStack>
 
-        {/* Introduction text if available */}
-        {participant.introduction && (
+        {/* Introduction text if available (only for regular participants) */}
+        {!isInvited && participant.introduction && (
           <Text
             fontSize="$1"
             color="$gray10"

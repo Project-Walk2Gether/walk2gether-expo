@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 // Using FirebaseFirestoreTypes directly instead of a custom Walk type
 import { writeLogIfEnabled } from "@/utils/logging";
 import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
-import { UserData } from "walk2gether-shared";
+import { Participant, WithId } from "walk2gether-shared";
 
 /**
  * Result type for the useLocationTracking hook
@@ -30,7 +30,8 @@ type LocationTrackingResult = {
  */
 export function useLocationTracking(
   walkId: string,
-  userId: string
+  userId: string,
+  currentUserParticipant: WithId<Participant> | null | undefined
 ): LocationTrackingResult {
   // Access the global location context
   const {
@@ -48,9 +49,6 @@ export function useLocationTracking(
   const { doc: walk } = useDoc<FirebaseFirestoreTypes.DocumentData>(
     `walks/${walkId}`
   );
-
-  // Fetch user data to check background location tracking preference
-  const { doc: userData } = useDoc<UserData>(userId ? `users/${userId}` : "");
 
   // Keep track of whether we've already stopped tracking due to endedAt
   const endedAtDetected = useRef(false);
@@ -73,19 +71,16 @@ export function useLocationTracking(
       // 1. The walk has ended (checked via endedAtDetected.current)
       // 2. The user has explicitly opted out of background tracking
       // 3. This component initiated the tracking (to prevent breaking other components' tracking)
-      const backgroundTrackingEnabled =
-        userData?.backgroundLocationTrackingEnabled !== false;
-
       if (
         endedAtDetected.current ||
-        !backgroundTrackingEnabled ||
+        !backgroundLocationPermission ||
         !initiatedTracking.current
       ) {
         console.log(
           "Stopping location tracking on component unmount, conditions:",
           {
             walkEnded: endedAtDetected.current,
-            backgroundTrackingEnabled,
+            backgroundLocationPermission,
             initiatedTracking: initiatedTracking.current,
           }
         );
@@ -96,7 +91,7 @@ export function useLocationTracking(
         );
       }
     };
-  }, [walkId, userId, userData?.backgroundLocationTrackingEnabled]);
+  }, [walkId, userId, backgroundLocationPermission]);
 
   // Monitor the walk's endedAt property and stop tracking when it's set
   useEffect(() => {

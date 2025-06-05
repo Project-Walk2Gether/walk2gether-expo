@@ -33,19 +33,13 @@ interface LocationContextValue {
   // Separated permission methods
   requestForegroundPermissions: () => Promise<boolean>;
   requestBackgroundPermissions: () => Promise<boolean>;
-  // Legacy method that requests both permissions (kept for backward compatibility)
-  requestPermissions: () => Promise<{
-    foreground: boolean;
-    background: boolean;
-  }>;
 
   // Walk tracking
   activeWalkId?: string;
   locationTracking: boolean;
   startWalkTracking: (
     walkId: string,
-    estimatedEndTimeWithBuffer?: Date,
-    backgroundLocationTrackingEnabled?: boolean
+    estimatedEndTimeWithBuffer?: Date
   ) => Promise<boolean>;
   stopWalkTracking: () => Promise<void>;
   updateLocation: (location: Location.LocationObject) => Promise<void>;
@@ -60,7 +54,6 @@ const LocationContext = createContext<LocationContextValue>({
   refresh: async () => null,
   requestForegroundPermissions: async () => false,
   requestBackgroundPermissions: async () => false,
-  requestPermissions: async () => ({ foreground: false, background: false }),
   startWalkTracking: async () => false,
   stopWalkTracking: async () => {},
   updateLocation: async () => {},
@@ -151,6 +144,8 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       const { status: foregroundStatus } =
         await Location.getForegroundPermissionsAsync();
 
+      console.log("Requesting background permissions");
+
       if (foregroundStatus !== "granted") {
         // Need foreground permission first
         const foregroundGranted = await requestForegroundPermissions();
@@ -192,30 +187,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // Legacy method for backward compatibility - requests both permissions
-  const requestPermissions = async () => {
-    try {
-      // Request foreground permission first
-      const foregroundGranted = await requestForegroundPermissions();
-
-      if (!foregroundGranted) {
-        return { foreground: false, background: false };
-      }
-
-      // Request background permission
-      const backgroundGranted = await requestBackgroundPermissions();
-
-      // Return combined results
-      return {
-        foreground: foregroundGranted,
-        background: backgroundGranted,
-      };
-    } catch (e) {
-      console.error("Error requesting permissions:", e);
-      return { foreground: false, background: false };
-    }
-  };
-
   // Mock location data for simulator
   const getMockLocation = (): Location.LocationObject => {
     // Return mock location data for San Francisco
@@ -227,9 +198,9 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
         accuracy: 5,
         altitudeAccuracy: 5,
         heading: 0,
-        speed: 0
+        speed: 0,
       },
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   };
 
@@ -239,22 +210,22 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     setError(undefined);
     try {
       // Check if running on a simulator
-      const isSimulator = await Device.isDevice === false;
-      
+      const isSimulator = (await Device.isDevice) === false;
+
       if (isSimulator) {
         // Use mock location data for simulator
         console.log("Using mock location for simulator");
         const mockLoc = getMockLocation();
-        
+
         setUserLocation(mockLoc);
         setCoords({
           latitude: mockLoc.coords.latitude,
           longitude: mockLoc.coords.longitude,
         });
-        
+
         return mockLoc;
       }
-      
+
       // For real devices, continue with normal flow
       // Check if we have permission first
       const { status } = await Location.getForegroundPermissionsAsync();
@@ -297,7 +268,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       if (activeWalkId && locationTracking && auth_instance.currentUser?.uid) {
         await updateLocation(loc);
       }
-      
+
       return loc;
     } catch (e: any) {
       console.warn("Location error:", e);
@@ -311,13 +282,14 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
   // Start tracking location for a specific walk
   const startWalkTracking = async (
     walkId: string,
-    estimatedEndTimeWithBuffer?: Date,
-    backgroundLocationTrackingEnabled: boolean = true
+    estimatedEndTimeWithBuffer?: Date
   ) => {
     if (!walkId) {
       console.error("Cannot start tracking without walkId");
       return false;
     }
+
+    console.log("Starting walk tracking for walkId: " + walkId);
 
     const userId = auth_instance.currentUser?.uid;
     if (!userId) {
@@ -328,14 +300,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       // Store the active walk
       setActiveWalkId(walkId);
-
-      // Make sure we have permissions - for walk tracking we need both
-      const foregroundGranted = await requestForegroundPermissions();
-      if (!foregroundGranted) {
-        return false;
-      }
-      const backgroundGranted = await requestBackgroundPermissions();
-
       // Stop any existing tracking
       await stopWalkTracking();
 
@@ -347,7 +311,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       await updateLocation(initialLocation);
 
       // Start background tracking if we have permission and it's enabled by user preference
-      if (backgroundGranted && backgroundLocationTrackingEnabled) {
+      if (backgroundLocationPermission) {
         await writeLogIfEnabled({
           message: `Starting background tracking for walkId: ${walkId}, userId: ${userId}`,
         });
@@ -435,7 +399,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
         refresh: getLocation,
         requestForegroundPermissions,
         requestBackgroundPermissions,
-        requestPermissions,
         startWalkTracking,
         stopWalkTracking,
         updateLocation,

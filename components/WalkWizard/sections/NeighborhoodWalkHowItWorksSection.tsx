@@ -85,7 +85,7 @@ export default function NeighborhoodWalkHowItWorksSection({
               <Bell size={16} color="white" />
             </View>
             <Text flex={1} fontSize="$5">
-              Choose if you would like to notify nearby Walk2Gether neighbors
+              Choose Walk2Gether neighbors to notify
             </Text>
           </XStack>
 
@@ -101,7 +101,7 @@ export default function NeighborhoodWalkHowItWorksSection({
               <Clock size={16} color="white" />
             </View>
             <Text flex={1} fontSize="$5">
-              Neighbors have 20 minutes to request to join your walk
+              Notified neighbors have 20 minutes to join
             </Text>
           </XStack>
 
@@ -117,8 +117,8 @@ export default function NeighborhoodWalkHowItWorksSection({
               <WalkIcon size={16} color="white" />
             </View>
             <Text flex={1} fontSize="$5">
-              If you accept, you'll share live locations to meet up and
-              walk2gether!
+              If one or more neighbors decide to join, live locations are shared
+              to meet up and walk2gether!
             </Text>
           </XStack>
         </YStack>

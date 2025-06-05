@@ -1,7 +1,7 @@
-import { COLORS } from "@/styles/colors";
 import { useAuth } from "@/context/AuthContext";
-import { openLocationInMaps } from "@/utils/locationUtils";
+import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
+import { openLocationInMaps } from "@/utils/locationUtils";
 import { ArrowRight, Navigation } from "@tamagui/lucide-icons";
 import { differenceInSeconds, format } from "date-fns";
 import React, { useEffect, useState } from "react";
@@ -85,12 +85,12 @@ export default function WalkInfo({ walk }: Props) {
       const minutesAgo = Math.floor(
         differenceInSeconds(currentTime, walkDate) / 60
       );
-      
+
       // Show "Scheduled to start now" when it's exactly the scheduled time
       if (minutesAgo === 0) {
         return "Scheduled to start now";
       }
-      
+
       return `Scheduled to start ${minutesAgo} min${
         minutesAgo !== 1 ? "s" : ""
       } ago`;
@@ -102,7 +102,7 @@ export default function WalkInfo({ walk }: Props) {
   // Check if navigation is possible
   const hasLocation =
     !!walk.startLocation?.latitude && !!walk.startLocation?.longitude;
-    
+
   // Check if the user has arrived
   const hasArrived = participantDoc?.status === "arrived";
 
@@ -121,90 +121,111 @@ export default function WalkInfo({ walk }: Props) {
   const leftColumnWidth = 24;
 
   return (
-    <YStack
-      backgroundColor={COLORS.secondary}
-      paddingVertical="$3"
-      paddingHorizontal="$3"
-      gap="$2"
-      borderRadius="$4"
-    >
-      {/* First XStack: arrow -> time display -> secondary time */}
-      <XStack alignItems="center" justifyContent="space-between">
-        {/* Arrow icon with fixed width */}
-        <XStack
-          width={leftColumnWidth}
-          alignItems="center"
-          justifyContent="flex-start"
-        >
+    <YStack gap="$3">
+      {/* Main Walk Info Card */}
+      <YStack
+        backgroundColor={COLORS.secondary}
+        paddingVertical="$3"
+        paddingHorizontal="$3"
+        gap="$2"
+        borderRadius="$4"
+      >
+        {/* First XStack: arrow -> time display -> secondary time */}
+        <XStack alignItems="center" justifyContent="space-between">
+          {/* Arrow icon with fixed width */}
           <XStack
-            width={16}
-            height={16}
-            borderRadius={12}
-            backgroundColor="white"
+            width={leftColumnWidth}
             alignItems="center"
-            justifyContent="center"
+            justifyContent="flex-start"
           >
-            <ArrowRight size={10} color="#5b4c3e" />
+            <XStack
+              width={16}
+              height={16}
+              borderRadius={12}
+              backgroundColor="white"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <ArrowRight size={10} color="#5b4c3e" />
+            </XStack>
           </XStack>
+
+          {/* Main time display (flexible width) */}
+          <Text flex={1} color="white" fontSize="$4" fontWeight="bold">
+            {getTimeDisplay()}
+          </Text>
+
+          {/* Secondary time display */}
+          {walkDate && (
+            <Text
+              pr="$1"
+              color="white"
+              fontSize="$4"
+              opacity={0.9}
+              textAlign="right"
+            >
+              {hasEnded && walk.startedAt && walk.endedAt
+                ? // For completed walks, show the full range
+                  `${format(walk.startedAt.toDate(), "h:mm a")} - ${format(
+                    walk.endedAt.toDate(),
+                    "h:mm a"
+                  )}`
+                : // For all other walks, show the start time
+                  `${format(walkDate, "h:mm a")}`}
+            </Text>
+          )}
         </XStack>
 
-        {/* Main time display (flexible width) */}
-        <Text flex={1} color="white" fontSize="$4" fontWeight="bold">
-          {getTimeDisplay()}
-        </Text>
-
-        {/* Secondary time display */}
-        {walkDate && (
-          <Text
-            pr="$1"
-            color="white"
-            fontSize="$4"
-            opacity={0.9}
-            textAlign="right"
-          >
-            {hasEnded && walk.startedAt && walk.endedAt
-              ? // For completed walks, show the full range
-                `${format(walk.startedAt.toDate(), "h:mm a")} - ${format(
-                  walk.endedAt.toDate(),
-                  "h:mm a"
-                )}`
-              : // For all other walks, show the start time
-                `${format(walkDate, "h:mm a")}`}
-          </Text>
-        )}
-      </XStack>
-
-      {/* Second XStack: only shown before walk starts */}
-      {!hasStarted && (
-        <YStack gap="$2">
-          {/* Location information */}
-
-          {walk.startLocation && (
-            <YStack>
-              <Text color="white" fontSize="$3">
-                {walk.startLocation.name || "Meeting point"}
-              </Text>
-              {walk.startLocation.notes && (
-                <Text color="white" fontSize="$2">
-                  {walk.startLocation.notes}
-                </Text>
+        {/* Location information: only shown before walk starts */}
+        {!hasStarted && (
+          <YStack gap="$2">
+            <XStack gap="$2" alignItems="center" flexShrink={1}>
+              {walk.startLocation && (
+                <YStack flexShrink={1}>
+                  <Text color="white" fontSize="$3">
+                    {walk.startLocation.name || "Meeting point"}
+                  </Text>
+                </YStack>
               )}
-            </YStack>
-          )}
 
-          {/* Navigate button - only shown before walk starts and if user hasn't arrived */}
-          {hasLocation && !hasArrived && (
-            <Button
-              w="70%"
-              icon={<Navigation color="white" />}
-              onPress={handleNavigate}
-              backgroundColor="#4BB4E6"
-              color="white"
-              fontWeight="bold"
-            >
-              Navigate
-            </Button>
-          )}
+              {/* Navigate button - only shown before walk starts and if user hasn't arrived */}
+              {hasLocation && !hasArrived && (
+                <Button
+                  flexShrink={0}
+                  size="$2"
+                  icon={<Navigation color="white" />}
+                  onPress={handleNavigate}
+                  backgroundColor="#4BB4E6"
+                  color="white"
+                  fontWeight="bold"
+                >
+                  Open in Maps
+                </Button>
+              )}
+            </XStack>
+          </YStack>
+        )}
+      </YStack>
+
+      {/* Meetup Spot Card - only shown if notes exist and walk hasn't started */}
+      {!hasStarted && walk.startLocation?.notes && (
+        <YStack
+          backgroundColor={COLORS.tertiary} // Use the app's blue color
+          paddingVertical="$3"
+          paddingHorizontal="$3"
+          gap="$2"
+          borderRadius="$4"
+          animation="bouncy" // Add subtle animation
+        >
+          <XStack gap="$2" alignItems="center">
+            <Text color="black" fontSize="$3">
+              Meetup Spot:
+            </Text>
+            {/* <Badge backgroundColor="#fff" textColor="#4BB4E6" label="Meetup spot" /> */}
+            <Text color="white" fontSize="$4" fontWeight="bold">
+              {walk.startLocation.notes}
+            </Text>
+          </XStack>
         </YStack>
       )}
     </YStack>

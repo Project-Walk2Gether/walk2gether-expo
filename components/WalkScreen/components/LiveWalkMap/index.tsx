@@ -1,18 +1,22 @@
 import { stopBackgroundLocationTracking } from "@/background/backgroundLocationTask";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { useLocation } from "@/context/LocationContext";
 import { useLocationTracking } from "@/hooks/useLocationTracking";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { useDoc } from "@/utils/firestore";
+import { calculateOptimalRegion } from "@/utils/mapUtils";
 import { getWalkStatus } from "@/utils/walkUtils";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
+import { addHours } from "date-fns";
 import * as Location from "expo-location";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Text, View } from "tamagui";
 import { ParticipantWithRoute, Walk } from "walk2gether-shared";
 import MeetupSpot from "../MeetupSpot";
+import RequestBackgroundLocationModal from "../RequestBackgroundLocationModal";
 import WalkStatusControls from "../WalkStatusControls";
 import LocationLoading from "./LocationLoading";
 import OfficialWalkRoute from "./OfficialWalkRoute";
@@ -30,7 +34,10 @@ export default function LiveWalkMap({
 }: Props) {
   const { user } = useAuth();
   const mapRef = useRef<MapView>(null);
-  
+  const { locationPermission, backgroundLocationPermission } = useLocation();
+  const [isBackgroundLocationModalOpen, setIsBackgroundLocationModalOpen] =
+    useState(false);
+
   // Get current user participant via memoization
   const [navigationMethod, setNavigationMethod] = useState<
     "walking" | "driving"
@@ -39,22 +46,24 @@ export default function LiveWalkMap({
   // Get walk participants
   const participants = useWalkParticipants(walkId);
 
-  // Use the location tracking hook
-  const { userLocation, locationPermission } = useLocationTracking(
-    walkId,
-    user!.uid
-  );
-
   // Memoize the current user participant data
-  const userParticipant = React.useMemo(() => {
+  const userParticipant = useMemo(() => {
     if (!participants || !user) return null;
-    return participants.find(p => p.id === user.uid);
+    return participants.find((p) => p.id === user.uid);
   }, [participants, user]);
+
+  // Use the location tracking hook
+  const { userLocation } = useLocationTracking(
+    walkId,
+    user!.uid,
+    userParticipant
+  );
 
   // Set navigation method based on user participant
   useEffect(() => {
     if (userParticipant) {
-      const method = userParticipant.navigationMethod === "driving" ? "driving" : "walking";
+      const method =
+        userParticipant.navigationMethod === "driving" ? "driving" : "walking";
       setNavigationMethod(method);
       onNavigationMethodChange?.(method);
     }
@@ -62,6 +71,9 @@ export default function LiveWalkMap({
 
   // Get walk data to access start location and check if user is owner
   const { doc: walk } = useDoc<Walk>(`walks/${walkId}`);
+
+  // Get access to location context for tracking functions
+  const locationContext = useLocation();
 
   // Check if current user is the walk owner
   const isWalkOwner = walk?.createdByUid === user?.uid;
@@ -77,8 +89,74 @@ export default function LiveWalkMap({
     onNavigationMethodChange?.(navigationMethod);
   }, [navigationMethod, onNavigationMethodChange]);
 
+  // Track the last background tracking state to prevent unnecessary updates
+  const lastTrackingState = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (
+      backgroundLocationPermission === false &&
+      userParticipant &&
+      ["on-the-way", "arrived"].includes(userParticipant.status)
+    ) {
+      setIsBackgroundLocationModalOpen(true);
+    }
+  }, [backgroundLocationPermission, userParticipant?.status]);
+
+  // Automatically update location tracking when the tracking preference changes
+  useEffect(() => {
+    // Skip if the tracking state hasn't changed from the last time we updated
+    if (lastTrackingState.current === backgroundLocationPermission) {
+      return;
+    }
+
+    // Only apply if we have a valid walkId, user, and the walk is active
+    if (
+      walkId &&
+      user?.uid &&
+      locationContext?.backgroundLocationPermission &&
+      status === "active" &&
+      hasWalkStarted &&
+      !hasWalkEnded
+    ) {
+      console.log(
+        "Updating location tracking to:",
+        backgroundLocationPermission
+      );
+      const updateTracking = async () => {
+        try {
+          // Update our ref to prevent infinite loops
+          lastTrackingState.current = backgroundLocationPermission;
+
+          // Stop current tracking and restart with new preference
+          console.log("Starting walk location tracking");
+          await locationContext.stopWalkTracking();
+          await locationContext.startWalkTracking(
+            walkId,
+            // TODO: use proper walk end time with buffer
+            addHours(new Date(), 1)
+          );
+        } catch (error) {
+          console.error("Error updating location tracking:", error);
+          // Reset the ref if there was an error
+          lastTrackingState.current = null;
+        }
+      };
+
+      updateTracking();
+    }
+  }, [
+    backgroundLocationPermission,
+    walkId,
+    user?.uid,
+    locationContext,
+    status,
+    hasWalkStarted,
+    hasWalkEnded,
+  ]);
+
   // Handler for starting a walk (owner only)
   const handleStartWalk = async () => {
+    // When starting a walk, use the user's background tracking preference
     if (!walkId || !user?.uid || !isWalkOwner) return;
 
     try {
@@ -93,6 +171,11 @@ export default function LiveWalkMap({
         },
         { merge: true }
       );
+
+      // Start location tracking with the user's background tracking preference
+      if (locationContext) {
+        await locationContext.startWalkTracking(walkId);
+      }
     } catch (error) {
       console.error("Error starting walk:", error);
       Alert.alert("Error", "Failed to start the walk. Please try again.");
@@ -139,9 +222,10 @@ export default function LiveWalkMap({
   }
 
   // Find the current user's participant for route rendering
-  const currentUserParticipant = user && participants 
-    ? participants.find((p) => p.id === user.uid) as ParticipantWithRoute 
-    : null;
+  const currentUserParticipant =
+    user && participants
+      ? (participants.find((p) => p.id === user.uid) as ParticipantWithRoute)
+      : null;
 
   return (
     <View flex={1} justifyContent="center" alignItems="center">
@@ -149,12 +233,15 @@ export default function LiveWalkMap({
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={{ width: "100%", height: "100%", backgroundColor: "#dadada" }}
-        initialRegion={{
-          latitude: userLocation?.coords.latitude || 0,
-          longitude: userLocation?.coords.longitude || 0,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
+        initialRegion={calculateOptimalRegion(
+          userLocation?.coords
+            ? {
+                latitude: userLocation.coords.latitude,
+                longitude: userLocation.coords.longitude,
+              }
+            : undefined,
+          walk?.startLocation
+        )}
         showsUserLocation={false}
         showsMyLocationButton={false}
       >
@@ -171,22 +258,22 @@ export default function LiveWalkMap({
             pinColor="#4CAF50" // Green color for start point
           />
         )}
-        
+
         {/* Only show MeetupSpot if the walk hasn't started yet */}
         {walk?.startLocation && !hasWalkStarted ? (
-          <MeetupSpot 
-            location={walk.startLocation} 
-            isWalkOwner={isWalkOwner} 
-            walkId={walkId} 
+          <MeetupSpot
+            location={walk.startLocation}
+            isWalkOwner={isWalkOwner}
+            walkId={walkId}
           />
         ) : null}
-        
+
         {/* Render all participants (current user and others) */}
         {status === "active" &&
           participants.map((p) => {
             if (!p.lastLocation) return null;
             const isCurrentUser = p.id === user?.uid;
-            
+
             return (
               <ParticipantMarker
                 key={p.id}
@@ -207,7 +294,9 @@ export default function LiveWalkMap({
       </MapView>
 
       {/* Location loading overlay */}
-      <LocationLoading isLoading={locationPermission === null || !userLocation} />
+      <LocationLoading
+        isLoading={locationPermission === null || !userLocation}
+      />
 
       {/* Controls rendered using absolute positioning */}
       {status === "active" && (
@@ -227,6 +316,10 @@ export default function LiveWalkMap({
           onEndWalk={handleEndWalk}
         />
       )}
+      <RequestBackgroundLocationModal
+        open={isBackgroundLocationModalOpen}
+        onOpenChange={setIsBackgroundLocationModalOpen}
+      />
     </View>
   );
 }

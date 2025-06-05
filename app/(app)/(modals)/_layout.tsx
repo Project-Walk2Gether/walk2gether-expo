@@ -22,8 +22,8 @@ export default function ModalsLayout() {
         <Stack.Screen
           name="review-participant"
           options={{
-            title: "Review Participant",
             headerShown: true,
+            title: "Review walker",
             headerLeft: () => <HeaderBackButton />,
           }}
         />

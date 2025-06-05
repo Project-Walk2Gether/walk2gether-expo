@@ -53,7 +53,7 @@ export default function EditWalkScreen() {
         <WalkForm
           initialValues={walk}
           onSubmit={handleSubmit}
-          submitButtonText="Update Walk"
+          submitButtonText="Save"
           onCancel={() => router.back()}
           googleApiKey={GOOGLE_MAPS_API_KEY}
         />

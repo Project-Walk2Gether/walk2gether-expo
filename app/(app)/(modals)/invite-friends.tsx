@@ -124,11 +124,11 @@ export default function InviteFriendsScreen() {
                   {/* Share section */}
                   <YStack gap="$2">
                     <Text fontSize="$4" fontWeight="500" color="#333">
-                      Share Invitation
+                      Send Invitation
                     </Text>
 
                     <Text fontSize="$2.5" color="#666">
-                      Tap the Share button below to invite friends using your
+                      Tap the Send button below to invite friends using your
                       device's sharing options (Messages, WhatsApp, Email, etc).
                     </Text>
 
@@ -143,7 +143,7 @@ export default function InviteFriendsScreen() {
                       marginTop="$3"
                       disabled={sharing}
                     >
-                      {sharing ? <Spinner color="white" /> : "Share Invitation"}
+                      {sharing ? <Spinner color="white" /> : "Send Invitation"}
                     </Button>
                   </YStack>
                 </YStack>

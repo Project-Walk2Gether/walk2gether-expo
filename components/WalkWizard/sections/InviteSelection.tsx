@@ -11,10 +11,11 @@ import { updateParticipants } from "@/utils/participantManagement";
 import { findNearbyWalkers } from "@/utils/userSearch";
 import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
-import { Share2, Users } from "@tamagui/lucide-icons";
+import { QrCode, Share2, Users } from "@tamagui/lucide-icons";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, Share } from "react-native";
-import { Button, Spinner, Text, YStack } from "tamagui";
+import { Button, Spinner, Text, XStack, YStack } from "tamagui";
 import { Friendship, UserData } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
 
@@ -25,7 +26,6 @@ interface Props {
   totalSteps?: number;
   walkId?: string; // Optional walkId for direct usage outside the wizard
   walkType?: "friends" | "neighborhood" | "meetup"; // Optional walkType for direct usage
-  invitationCode?: string; // Optional invitationCode for direct usage outside the wizard
 }
 
 export const InviteSelection: React.FC<Props> = ({
@@ -40,6 +40,7 @@ export const InviteSelection: React.FC<Props> = ({
   const { user } = useAuth();
   const { userData } = useUserData();
   const { showMessage } = useFlashMessage();
+  const router = useRouter();
 
   // Use either the provided walkId or get it from the context
   const effectiveWalkId = (walkId || maybeWalkFormContext!.createdWalkId)!;
@@ -79,8 +80,7 @@ export const InviteSelection: React.FC<Props> = ({
         )
       : undefined;
 
-  const { docs: friendships, status: friendshipsStatus } =
-    useQuery<Friendship>(friendshipsQuery);
+  const { docs: friendships } = useQuery<Friendship>(friendshipsQuery);
 
   // State for nearby users in neighborhood walks
   const [nearbyUserIds, setNearbyUserIds] = useState<string[]>([]);
@@ -425,21 +425,42 @@ export const InviteSelection: React.FC<Props> = ({
                         Don't see your friend here yet?
                       </Text>
                     )}
-                    <Button
-                      backgroundColor={COLORS.primary}
-                      color={COLORS.textOnDark}
-                      onPress={handleShareLink}
-                      size="$4"
-                      icon={<Share2 size={18} color="#fff" />}
-                      paddingHorizontal={16}
-                      borderRadius={8}
-                      hoverStyle={{ backgroundColor: "#6d4c2b" }}
-                      pressStyle={{ backgroundColor: "#4b2e13" }}
-                    >
-                      {isNeighborhoodWalk
-                        ? "Invite another neighbor"
-                        : "Invite a new friend"}
-                    </Button>
+                    <XStack gap="$3" width="100%" alignItems="center">
+                      <Button
+                        backgroundColor={COLORS.primary}
+                        color={COLORS.textOnDark}
+                        onPress={handleShareLink}
+                        size="$4"
+                        icon={<Share2 size={18} color="#fff" />}
+                        paddingHorizontal={16}
+                        borderRadius={8}
+                        hoverStyle={{ backgroundColor: "#6d4c2b" }}
+                        pressStyle={{ backgroundColor: "#4b2e13" }}
+                      >
+                        {isNeighborhoodWalk
+                          ? "Invite another neighbor"
+                          : "Invite a new friend"}
+                      </Button>
+
+                      <Button
+                        backgroundColor={COLORS.secondary}
+                        color={COLORS.textOnDark}
+                        onPress={() =>
+                          router.push({
+                            pathname: "/qr-code",
+                            params: { walkCode: effectiveWalkId },
+                          })
+                        }
+                        size="$4"
+                        icon={<QrCode size={18} color="#fff" />}
+                        paddingHorizontal={16}
+                        borderRadius={8}
+                        hoverStyle={{ backgroundColor: "#4a95c4" }}
+                        pressStyle={{ backgroundColor: "#2d7fb3" }}
+                      >
+                        QR code
+                      </Button>
+                    </XStack>
                   </YStack>
                 </>
               )}

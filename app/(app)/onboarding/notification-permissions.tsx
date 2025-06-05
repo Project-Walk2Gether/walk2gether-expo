@@ -75,7 +75,7 @@ export default function NotificationPermissionsScreen() {
             width="100%"
             fontWeight="bold"
             mb="$2"
-            onPress={requestForegroundPermissionsAsync}
+            onPress={requestPermissions}
             disabled={loading}
           >
             {loading ? (
@@ -157,7 +157,6 @@ export default function NotificationPermissionsScreen() {
                 color="white"
                 onPress={goToNextScreen}
                 borderRadius="$4"
-                padding="$2.5"
               >
                 Yes, skip for now
               </Button>
@@ -166,11 +165,10 @@ export default function NotificationPermissionsScreen() {
                 color={COLORS.text}
                 onPress={() => {
                   setShowConfirmation(false);
-                  requestForegroundPermissionsAsync();
+                  requestPermissions();
                 }}
                 variant="outlined"
                 borderRadius="$4"
-                padding="$2.5"
               >
                 No, enable notifications
               </Button>

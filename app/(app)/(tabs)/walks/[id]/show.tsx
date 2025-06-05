@@ -153,12 +153,6 @@ export default function WalkScreen() {
           <View position="absolute" top={"$4"} left={"$4"} right={"$4"}>
             <WalkInfo walk={walk} />
           </View>
-          {/* Walk stats will only show when the walk has ended */}
-          {/* {walk.endedAt && (
-            <View position="absolute" top={10} left={0} right={0} zIndex={10}>
-              <WalkStats walk={walk} />
-            </View>
-          )} */}
         </View>
         <BottomSheet
           ref={chatBottomSheetRef}

@@ -21,7 +21,6 @@ interface Props {
 
 const ActionRow: React.FC<Props> = ({
   icon,
-  iconColor = COLORS.primary,
   label,
   labelColor = COLORS.text,
   title,
@@ -62,9 +61,7 @@ const ActionRow: React.FC<Props> = ({
                 {secondaryText}
               </Text>
             </YStack>
-            {action && (
-              <View ml="$2">{action}</View>
-            )}
+            {action && <View ml="$2">{action}</View>}
           </XStack>
         )}
         {!title && secondaryText && (
@@ -72,9 +69,7 @@ const ActionRow: React.FC<Props> = ({
             <Text fontSize={16} color={secondaryTextColor}>
               {secondaryText}
             </Text>
-            {action && (
-              <View ml="$2">{action}</View>
-            )}
+            {action && <View ml="$2">{action}</View>}
           </XStack>
         )}
         {children}

@@ -1,13 +1,14 @@
 import HeaderCloseButton from "@/components/HeaderCloseButton";
 import InvitationQRCode from "@/components/InvitationQRCode";
 import { useUserData } from "@/context/UserDataContext";
-import { Stack } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Spinner, Text, YStack } from "tamagui";
 
 export default function QrCodeScreen() {
   const { userData, loading } = useUserData();
+  const { walkCode } = useLocalSearchParams<{ walkCode: string }>();
   const code = userData?.friendInvitationCode;
   const insets = useSafeAreaInsets();
 
@@ -67,10 +68,17 @@ export default function QrCodeScreen() {
           mb={24}
           textAlign="center"
         >
-          Show this QR code to invite friends
+          {walkCode
+            ? "Invite a friend to this walk"
+            : "Show this QR code to invite friends"}
         </Text>
 
-        <InvitationQRCode invitationCode={code} size={260} showText={true} />
+        <InvitationQRCode
+          invitationCode={code}
+          walkCode={walkCode}
+          size={260}
+          showText={true}
+        />
       </YStack>
     </>
   );
