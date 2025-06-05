@@ -398,7 +398,7 @@ export const InviteSelection: React.FC<Props> = ({
               icon={<Users size={20} color={COLORS.textOnLight} />}
               description={
                 isNeighborhoodWalk
-                  ? "Users in your area will be notified about your walk."
+                  ? "Walk2Gether neighbors in your area will be notified about your walk."
                   : "Choose friends to invite to your walk."
               }
             >

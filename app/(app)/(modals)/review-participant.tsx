@@ -7,7 +7,7 @@ import {
   serverTimestamp,
   updateDoc,
 } from "@react-native-firebase/firestore";
-import { Car, Check, X } from "@tamagui/lucide-icons";
+import { Car, Check, Footprints, X } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView } from "react-native";
@@ -127,7 +127,11 @@ export default function ReviewParticipantScreen() {
           <H5>{userData.name || "Unnamed Participant"}</H5>
 
           <XStack alignItems="center" space="$2">
-            <Car size="$1" color={COLORS.text} />
+            {participant.navigationMethod === "driving" ? (
+              <Car size="$1" color={COLORS.text} />
+            ) : (
+              <Footprints size="$1" color={COLORS.text} />
+            )}
             <Text>
               {participant.navigationMethod === "driving"
                 ? "Driving"
@@ -184,7 +188,7 @@ export default function ReviewParticipantScreen() {
               onPress={handleReject}
               disabled={loading}
             >
-              {loading ? "Declining..." : "Decline"}
+              {loading ? "Declining..." : "Remove from walk"}
             </Button>
           )}
         </YStack>

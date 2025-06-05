@@ -79,10 +79,11 @@ export interface Props {
 
 export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
   // Initialize form with a fresh invitation code on each form creation
-  const initializedFormData = {
+  const { userData } = useUserData();
+  const initializedFormData: WalkFormData = {
     ...initialFormData,
     date: Timestamp.now(),
-    invitationCode: generateInvitationCode(),
+    startLocation: userData?.location || undefined,
   };
   const [formData, setFormData] = useState<WalkFormData>(initializedFormData);
   const [currentStep, setCurrentStep] = useState(friendId ? 1 : 0);
@@ -92,9 +93,6 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
   const [systemErrors, setSystemErrors] = useState<string[]>([]);
   // Track if a walk has been created already
   const [createdWalkId, setCreatedWalkId] = useState<string | null>(null);
-
-  // Get the user data preference for showing how it works
-  const { userData } = useUserData();
   const showHowItWorks = useMemo(() => {
     return userData && !userData.neighborhoodWalksHowItWorksDontShowAgain;
   }, [userData]);

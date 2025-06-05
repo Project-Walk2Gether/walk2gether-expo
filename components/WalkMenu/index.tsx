@@ -158,7 +158,12 @@ export default function WalkMenu({
       // Only add the Invite Friends option if not hidden
       if (!hideInviteOption) {
         menuItems.push({
-          label: "Invite Friends",
+          label:
+            walk.type === "friends"
+              ? "Invite Friends"
+              : walk.type === "neighborhood"
+              ? "Invite Neighbors"
+              : "Invite",
           icon: <UserPlus size="$1" color={COLORS.primary} />,
           onPress: () => router.push(`/walks/${walk.id}/invite`),
         });
