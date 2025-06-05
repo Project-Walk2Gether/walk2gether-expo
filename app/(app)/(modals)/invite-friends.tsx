@@ -5,23 +5,22 @@ import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
 import { ExternalLink, Share2 } from "@tamagui/lucide-icons";
 import * as Clipboard from "expo-clipboard";
-import { Link, Stack } from "expo-router";
+import { Link, Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React from "react";
 import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  Share,
   TouchableWithoutFeedback,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Card, Spinner, Text, View, XStack, YStack } from "tamagui";
+import { Button, Card, Text, View, XStack, YStack } from "tamagui";
 
 export default function InviteFriendsScreen() {
   const insets = useSafeAreaInsets();
   const { userData } = useUserData();
-  const [sharing, setSharing] = useState(false);
+  const router = useRouter();
   const invitationCode = userData?.friendInvitationCode;
   const invitationUrl = `https://projectwalk2gether.org/join?code=${invitationCode}`;
   const message = `Want to walk with me using the Walk2Gether app? Use this link to add me as a friend! \n\n${invitationUrl}`;
@@ -39,23 +38,20 @@ export default function InviteFriendsScreen() {
     }
   };
 
-  const handleShare = async () => {
-    try {
-      setSharing(true);
-      const result = await Share.share({
-        message: message,
-        title: "Join me on Walk2Gether!",
-      });
+  const handleShare = () => {
+    // Navigate to custom share screen with necessary parameters
+    const defaultMessage =
+      "Want to walk with me using the Walk2Gether app? Use this link to add me as a friend!";
+    const title = "Join me on Walk2Gether!";
 
-      if (result.action === Share.sharedAction) {
-        showMessage("Invitation shared successfully!", "success");
-      }
-    } catch (error) {
-      console.error("Error sharing invitation:", error);
-      showMessage("Failed to share invitation", "error");
-    } finally {
-      setSharing(false);
-    }
+    router.push({
+      pathname: "/(app)/(modals)/custom-share",
+      params: {
+        link: encodeURIComponent(invitationUrl),
+        defaultMessage: encodeURIComponent(defaultMessage),
+        title: encodeURIComponent(title),
+      },
+    });
   };
 
   return (
@@ -138,12 +134,11 @@ export default function InviteFriendsScreen() {
                       color="white"
                       size="$4"
                       onPress={handleShare}
-                      icon={sharing ? undefined : Share2}
+                      icon={Share2}
                       height={50}
                       marginTop="$3"
-                      disabled={sharing}
                     >
-                      {sharing ? <Spinner color="white" /> : "Send Invitation"}
+                      Send Invitation
                     </Button>
                   </YStack>
                 </YStack>

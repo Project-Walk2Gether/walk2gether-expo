@@ -15,7 +15,7 @@ import { LinearGradient } from "@tamagui/linear-gradient";
 import { QrCode, Share2, Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Share } from "react-native";
+import { Alert } from "react-native";
 import { Button, Spinner, Text, XStack, YStack } from "tamagui";
 import { Friendship, UserData, Walk, WithId } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
@@ -257,7 +257,8 @@ export const InviteSelection: React.FC<Props> = ({
     }
 
     // Default message text that will be editable in the custom share screen
-    const defaultMessage = "I am using the Walk2Gether app to organize my walk. You should check it out.";
+    const defaultMessage =
+      "I’ve been using this walking app. You should check it out.";
     const title = "Invite friends to Walk2Gether";
 
     // Navigate to the custom share screen with necessary parameters
@@ -266,8 +267,8 @@ export const InviteSelection: React.FC<Props> = ({
       params: {
         link: encodeURIComponent(link),
         defaultMessage: encodeURIComponent(defaultMessage),
-        title: encodeURIComponent(title)
-      }
+        title: encodeURIComponent(title),
+      },
     });
 
     // Track that the user shared the invitation

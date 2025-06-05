@@ -207,7 +207,7 @@ export default function NotificationsScreen() {
                 </XStack>
 
                 <Text fontSize={16} mb="$3" color="$gray11">
-                  Notifications are currently disabled for Walk2gether.
+                  Notifications are currently disabled for Walk2Gether.
                 </Text>
 
                 <YStack>
@@ -246,7 +246,7 @@ export default function NotificationsScreen() {
           )}
 
           <Text fontSize={16} mb="$3">
-            Choose which notifications you'd like to receive from Walk2gether.
+            Choose which notifications you'd like to receive from Walk2Gether.
           </Text>
 
           {Object.entries(notificationPreferenceLabels).map(([key, info]) =>

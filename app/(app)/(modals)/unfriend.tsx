@@ -1,7 +1,10 @@
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { COLORS } from "@/styles/colors";
-import firestore, { doc, serverTimestamp } from "@react-native-firebase/firestore";
+import firestore, {
+  doc,
+  serverTimestamp,
+} from "@react-native-firebase/firestore";
 import { AlertTriangle, ArrowLeft, Flag } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -117,7 +120,7 @@ export default function UnfriendScreen() {
           </Text>
 
           <Text fontSize="$4" textAlign="center" color="$gray10">
-            You'll be disconnected from {friendName} on Walk2gether.
+            You'll be disconnected from {friendName} on Walk2Gether.
           </Text>
 
           <Text fontSize="$3" textAlign="center" color="$gray9" marginTop="$2">
@@ -150,7 +153,7 @@ export default function UnfriendScreen() {
               </Checkbox>
 
               <Label htmlFor="report-user" paddingLeft="$2">
-                <Text fontWeight="500">Report {friendName} to Walk2gether</Text>
+                <Text fontWeight="500">Report {friendName} to Walk2Gether</Text>
               </Label>
             </XStack>
 

@@ -48,7 +48,7 @@ export default function PrivacyPolicy() {
           <YStack gap="$2">
             <H3>Introduction</H3>
             <Paragraph>
-              Welcome to ProjectWalk2gether.org ("we," "our," or "us"). We
+              Welcome to ProjectWalk2Gether.org ("we," "our," or "us"). We
               respect your privacy and are committed to protecting your personal
               data. This privacy policy will inform you about how we look after
               your personal data when you visit our website and tell you about

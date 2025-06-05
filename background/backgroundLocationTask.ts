@@ -140,7 +140,7 @@ export const startBackgroundLocationTracking = async ({
     deferredUpdatesInterval: 30000, // 30 seconds
     deferredUpdatesDistance: 50, // 50 meters
     foregroundService: {
-      notificationTitle: "Walk2gether is tracking your location",
+      notificationTitle: "Walk2Gether is tracking your location",
       notificationBody:
         "This allows others to see your location during the walk",
       notificationColor: "#FF5E0E", // Use primary color
@@ -194,8 +194,10 @@ export const stopBackgroundLocationTracking = async () => {
       return true;
     } catch (error: any) {
       // Silently swallow E_TASK_NOT_FOUND errors
-      if (error?.message?.includes('E_TASK_NOT_FOUND')) {
-        console.log("Task was registered but not found when stopping - this is normal");
+      if (error?.message?.includes("E_TASK_NOT_FOUND")) {
+        console.log(
+          "Task was registered but not found when stopping - this is normal"
+        );
         return true;
       }
       // Re-throw other errors

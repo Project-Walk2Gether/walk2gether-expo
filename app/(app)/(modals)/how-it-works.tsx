@@ -40,7 +40,7 @@ export default function HowItWorksScreen() {
             textShadowOffset={{ width: 2, height: 2 }}
             textShadowRadius={3}
           >
-            Welcome to Walk2gether!
+            Welcome to Walk2Gether!
           </Text>
           <Text
             fontSize={18}
