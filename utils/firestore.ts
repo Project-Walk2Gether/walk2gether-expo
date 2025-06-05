@@ -8,7 +8,6 @@ import {
 } from "@react-native-firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { WithId } from "walk2gether-shared";
-import { DocumentReferenceLike } from "walk2gether-shared/lib/firestore/documentReference";
 
 type DocumentData = FirebaseFirestoreTypes.DocumentData;
 type DocumentReference<T> = FirebaseFirestoreTypes.DocumentReference<T>;
@@ -44,11 +43,11 @@ export function useDoc<T extends DocumentData>(docPath?: string) {
         const data = doc?.data() as T;
         if (!data) setDoc(null);
         else
-          setDoc({
-            ...data,
-            id: doc.id,
-            _ref: docRef as unknown as DocumentReferenceLike<T>,
-          });
+          setDoc(
+            documentWithIdFromSnapshot(
+              doc as FirebaseFirestoreTypes.DocumentSnapshot<T>
+            )
+          );
         setStatus("success");
       },
       (error) => {
@@ -121,11 +120,7 @@ export function useQuery<T extends FirebaseFirestoreTypes.DocumentData>(
         if (!snap) return;
         const docs = snap.docs as FirebaseFirestoreTypes.DocumentSnapshot<T>[];
         const extantDocs = docs.filter((doc) => doc.exists);
-        const data = extantDocs.map((doc) => ({
-          ...(doc.data() as T),
-          id: doc.id,
-          _ref: doc.ref as unknown as DocumentReferenceLike<T>,
-        }));
+        const data = extantDocs.map(documentWithIdFromSnapshot);
         setDocs(data);
         setStatus("success");
       },
@@ -145,7 +140,7 @@ export function useQuery<T extends FirebaseFirestoreTypes.DocumentData>(
  */
 export async function fetchDocsByRefs<T extends DocumentData>(
   refs: DocumentReference<T>[]
-): Promise<Array<T & { id: string }>> {
+): Promise<Array<WithId<T>>> {
   if (!refs || refs.length === 0) return [];
 
   const results = await Promise.all(
@@ -153,7 +148,7 @@ export async function fetchDocsByRefs<T extends DocumentData>(
       try {
         console.log("Getting: " + ref.path);
         const snap = await ref.get();
-        return snap.exists ? { id: ref.id, ...snap.data() } : null;
+        return snap.exists() ? documentWithIdFromSnapshot(snap) : null;
       } catch (error: any) {
         console.error("Error fetching doc", error);
         return null;
@@ -161,7 +156,7 @@ export async function fetchDocsByRefs<T extends DocumentData>(
     })
   );
 
-  return results.filter(Boolean) as Array<T & { id: string }>;
+  return results.filter(Boolean) as Array<WithId<T>>;
 }
 
 /**
@@ -174,7 +169,7 @@ export async function fetchDocsByRefs<T extends DocumentData>(
 export async function fetchDocsByIds<T extends DocumentData>(
   collectionPath: string,
   ids: string[]
-): Promise<Array<T & { id: string }>> {
+): Promise<Array<WithId<T>>> {
   if (!ids || ids.length === 0) return [];
 
   // Convert IDs to document references
@@ -201,4 +196,16 @@ export async function fetchDocsByIds<T extends DocumentData>(
   }
 
   return results;
+}
+
+export function documentWithIdFromSnapshot<T extends DocumentData>(
+  snapshot: FirebaseFirestoreTypes.DocumentSnapshot<T>
+): WithId<T> {
+  const data = snapshot.data()!;
+
+  return {
+    id: snapshot.id,
+    _ref: snapshot.ref as any,
+    ...data,
+  } as WithId<T>;
 }

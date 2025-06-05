@@ -13,10 +13,10 @@ import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { QrCode, Share2, Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Alert, Share } from "react-native";
 import { Button, Spinner, Text, XStack, YStack } from "tamagui";
-import { Friendship, UserData } from "walk2gether-shared";
+import { Friendship, UserData, WithId } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
 
 interface Props {
@@ -52,9 +52,7 @@ export const InviteSelection: React.FC<Props> = ({
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Using UserData & {id: string} instead of WithId<UserData> to avoid _ref requirement
-  const [usersList, setUsersList] = useState<Array<UserData & { id: string }>>(
-    []
-  );
+  const [users, setUsers] = useState<WithId<UserData>[]>([]);
 
   // Check participants if we have a created walk ID
   const walkParticipantsCollection = effectiveWalkId
@@ -152,9 +150,9 @@ export const InviteSelection: React.FC<Props> = ({
               "users",
               friendUserIds
             );
-            setUsersList(userDocs as Array<UserData & { id: string }>);
+            setUsers(userDocs);
           } else {
-            setUsersList([]);
+            setUsers([]);
           }
         } else if (isNeighborhoodWalk && nearbyUserIds.length > 0) {
           // For neighborhood walks, filter out current user
@@ -168,9 +166,9 @@ export const InviteSelection: React.FC<Props> = ({
               "users",
               filteredUserIds
             );
-            setUsersList(userDocs as Array<UserData & { id: string }>);
+            setUsers(userDocs);
           } else {
-            setUsersList([]);
+            setUsers([]);
           }
         }
       } catch (error) {
@@ -183,6 +181,25 @@ export const InviteSelection: React.FC<Props> = ({
 
     fetchUsers();
   }, [isFriendsWalk, isNeighborhoodWalk, friendships, nearbyUserIds, user]);
+
+  // Memoized participant count message
+  const getParticipantMessage = useMemo(() => {
+    if (isNeighborhoodWalk) {
+      if (isLoadingNearbyUsers) {
+        return "Finding neighbors nearby...";
+      } else if (participantUids.length > 0) {
+        return `${participantUids.length} ${
+          participantUids.length === 1 ? "neighbor" : "neighbors"
+        } will be notified`;
+      } else {
+        return "No neighbors found in your area";
+      }
+    } else {
+      return `${participantUids.length} ${
+        participantUids.length === 1 ? "friend" : "friends"
+      } selected`;
+    }
+  }, [isNeighborhoodWalk, isLoadingNearbyUsers, participantUids.length]);
 
   // Handle user selection/deselection
   const handleUserToggle = (user: UserData & { id: string }) => {
@@ -380,39 +397,29 @@ export const InviteSelection: React.FC<Props> = ({
               ) : (
                 <>
                   <UserList
-                    users={usersList}
+                    users={users}
                     onSelectUser={handleUserToggle}
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
                     selectedUserIds={participantUids}
                     emptyMessage={
                       isFriendsWalk
-                        ? "You don't have any friends yet. Add friends to invite them."
+                        ? "Your friends aren't on Walk2Gether yet. Add friends to invite them to your walk."
                         : "Neighbors in your area will be automatically notified when you create a walk."
                     }
                   />
-                  <Text
-                    fontSize={16}
-                    color={COLORS.textOnLight}
-                    marginTop="$2"
-                    textAlign="center"
-                    fontWeight="600"
-                    marginBottom="$2"
-                  >
-                    {isNeighborhoodWalk
-                      ? isLoadingNearbyUsers
-                        ? "Finding neighbors nearby..."
-                        : participantUids.length > 0
-                        ? `${participantUids.length} ${
-                            participantUids.length === 1
-                              ? "neighbor"
-                              : "neighbors"
-                          } will be notified`
-                        : "No neighbors found in your area"
-                      : `${participantUids.length} ${
-                          participantUids.length === 1 ? "friend" : "friends"
-                        } selected`}
-                  </Text>
+                  {users.length > 0 && (
+                    <Text
+                      fontSize={16}
+                      color={COLORS.textOnLight}
+                      marginTop="$2"
+                      textAlign="center"
+                      fontWeight="600"
+                      marginBottom="$2"
+                    >
+                      {getParticipantMessage}
+                    </Text>
+                  )}
 
                   <YStack
                     alignItems="center"
@@ -420,7 +427,7 @@ export const InviteSelection: React.FC<Props> = ({
                     paddingBottom="$2"
                     gap="$4"
                   >
-                    {usersList.length > 0 && !isNeighborhoodWalk && (
+                    {users.length > 0 && !isNeighborhoodWalk && (
                       <Text fontSize={14} color="$gray10" fontWeight="500">
                         Don't see your friend here yet?
                       </Text>
