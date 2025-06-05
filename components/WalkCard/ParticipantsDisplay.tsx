@@ -11,6 +11,7 @@ import {
   walkIsFriendsWalk,
 } from "walk2gether-shared";
 import { IconTextRow } from "./IconTextRow";
+import { OwnerFriendWalkParticipantsSection } from "./ParticipantsSection/OwnerFriendWalkParticipantsSection";
 import { OwnerParticipantsSection } from "./ParticipantsSection/OwnerParticipantsSection";
 import { WalkCardButton } from "./WalkCardButton";
 
@@ -141,9 +142,9 @@ export const ParticipantsDisplay: React.FC<Props> = ({
       );
     }
 
-    // Otherwise use the full OwnerParticipantsSection
+    // Use the new detailed participant view component for both friends and neighborhood walks
     return (
-      <OwnerParticipantsSection
+      <OwnerFriendWalkParticipantsSection
         walk={walk}
         currentUserUid={currentUserUid}
         acceptedParticipants={acceptedParticipants}
@@ -154,6 +155,9 @@ export const ParticipantsDisplay: React.FC<Props> = ({
         cancelledParticipants={[]} // We don't have this in our current categorization
       />
     );
+      
+    // Note: We're keeping the legacy OwnerParticipantsSection component for potential future use with other walk types
+    // But not using it in the main participant display flow now
   }
 
   // Show guest view
