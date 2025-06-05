@@ -248,43 +248,30 @@ export const InviteSelection: React.FC<Props> = ({
   };
 
   // Handle sharing the invitation link
-  const handleShareLink = async () => {
-    console.log(
-      "[InviteSelection] handleShareLink - Attempting to share invitation link"
-    );
+  const handleShareLink = () => {
     const link = getInvitationLink();
 
     if (!link) {
-      console.error(
-        "[InviteSelection] ERROR: Unable to generate invitation link"
-      );
       showMessage("Unable to generate invitation link", "error");
       return;
     }
 
-    try {
-      console.log("[InviteSelection] About to share link:", link);
+    // Default message text that will be editable in the custom share screen
+    const defaultMessage = "I am using the Walk2Gether app to organize my walk. You should check it out.";
+    const title = "Invite friends to Walk2Gether";
 
-      // Only provide the link as the message to avoid duplication
-      // On iOS, the url parameter is used for the share sheet, while message is the actual content
-      // On Android, message is used directly
-      const result = await Share.share({
-        message: `I am using the Walk2Gether app to organize my walk. You should check it out. ${link}`,
-        title: "Invite friends to Walk2Gether",
-        // Don't include url parameter to avoid duplicate links
-      });
-
-      console.log("[InviteSelection] Share result:", JSON.stringify(result));
-
-      if (result.action === Share.sharedAction) {
-        setShareSuccessful(true);
-      } else {
-        showMessage("Failed to share invitation link", "error");
+    // Navigate to the custom share screen with necessary parameters
+    router.push({
+      pathname: "/(app)/(modals)/custom-share",
+      params: {
+        link: encodeURIComponent(link),
+        defaultMessage: encodeURIComponent(defaultMessage),
+        title: encodeURIComponent(title)
       }
-    } catch (error) {
-      console.error("[InviteSelection] ERROR sharing link:", error);
-      showMessage(`Could not share the invitation link: ${error}`, "error");
-    }
+    });
+
+    // Track that the user shared the invitation
+    setShareSuccessful(true);
   };
 
   const handleSubmit = async () => {
