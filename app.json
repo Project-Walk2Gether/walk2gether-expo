@@ -2,7 +2,7 @@
   "expo": {
     "name": "Walk2Gether",
     "slug": "walkmate",
-    "version": "1.1.11",
+    "version": "1.1.12",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,7 +15,7 @@
     "scheme": "walk2gether",
     "assetBundlePatterns": ["**/*", "assets/animations/*.lottie"],
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "org.projectwalk2gether.walk2gether",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
