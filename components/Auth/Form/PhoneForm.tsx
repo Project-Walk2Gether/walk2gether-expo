@@ -69,7 +69,7 @@ export default function PhoneForm({ onPhoneVerified }: Props) {
           <ActionButton
             label="Send Code"
             onPress={handleSubmit}
-            disabled={!isValid || loading}
+            disabled={values.phoneNumber.length === 0 || loading}
           ></ActionButton>
         </YStack>
       )}
