@@ -2,7 +2,7 @@
   "expo": {
     "name": "Walk2Gether",
     "slug": "walkmate",
-    "version": "1.1.13",
+    "version": "1.1.15",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -19,13 +19,13 @@
       "bundleIdentifier": "org.projectwalk2gether.walk2gether",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Allow this app to access your location.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow this app to access your location when using the app to create walks in your local area.",
-        "NSLocationAlwaysUsageDescription": "We need your location to track your walks even when the app is in the background.",
+        "UIDeviceFamily": [1],
         "UIBackgroundModes": ["location", "fetch", "remote-notification"],
         "ITSAppUsesNonExemptEncryption": false,
-        "NSCameraUsageDescription": "This app uses the camera to take photos and videos for your walks, if you choose.",
-        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to select photos for your walks.",
+        "NSLocationWhenInUseUsageDescription": "Walk2Gether uses your location to help you discover nearby walks, navigate to meeting points, and share your position with friends during a walk to coordinate more easily.",
+        "NSLocationAlwaysUsageDescription": "Walk2Gether uses your location in the background to track your walks and update friends in real time, even when your screen is off or the app isn’t open.",
+        "NSCameraUsageDescription": "Walk2Gether uses the camera so you can take and share photos or videos from your walks.",
+        "NSPhotoLibraryUsageDescription": "Walk2Gether needs access to your photo library so you can choose and share images from your walks.",
         "CFBundleURLTypes": [
           {
             "CFBundleURLSchemes": [
