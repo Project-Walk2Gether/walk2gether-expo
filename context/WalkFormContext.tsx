@@ -80,10 +80,12 @@ export interface Props {
 export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
   // Initialize form with a fresh invitation code on each form creation
   const { userData } = useUserData();
+  // Initialize form data with default values and friendId if available
   const initializedFormData: WalkFormData = {
     ...initialFormData,
     date: Timestamp.now(),
     startLocation: userData?.location || undefined,
+    participantUids: friendId ? [friendId] : [],
   };
   const [formData, setFormData] = useState<WalkFormData>(initializedFormData);
   const [currentStep, setCurrentStep] = useState(friendId ? 1 : 0);

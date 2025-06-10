@@ -1,23 +1,22 @@
 import { ContentCard } from "@/components/ContentCard";
 import { FormControl } from "@/components/FormControl";
 import UserList from "@/components/UserList";
-import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useFriends } from "@/context/FriendsContext";
 import { useUserData } from "@/context/UserDataContext";
-import { useMaybeWalkForm } from "@/context/WalkFormContext";
+import { useMaybeWalkForm, useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
-import { fetchDocsByIds, useQuery } from "@/utils/firestore";
+import { fetchDocsByIds } from "@/utils/firestore";
 import { updateParticipants } from "@/utils/participantManagement";
 import { findNearbyWalkers } from "@/utils/userSearch";
-import { collection, query, where } from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { QrCode, Share2, Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert } from "react-native";
 import { Button, Spinner, Text, XStack, YStack } from "tamagui";
-import { Friendship, UserData, Walk, WithId } from "walk2gether-shared";
+import { UserData, Walk, WithId } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
 
 interface Props {
@@ -41,6 +40,8 @@ export const InviteSelection: React.FC<Props> = ({
   walkType,
 }) => {
   const maybeWalkFormContext = useMaybeWalkForm();
+  // Use form context for managing participantUids
+  const { formData, updateFormData } = useWalkForm();
   const { user } = useAuth();
   const { userData } = useUserData();
   const { showMessage } = useFlashMessage();
@@ -60,12 +61,8 @@ export const InviteSelection: React.FC<Props> = ({
       .map(([userId]) => userId);
   }, [walk]);
 
-  // State variables
-  // Initialize participantUids with the keys from walk.participantsById
-  const [participantUids, setParticipantUids] = useState<string[]>(() => {
-    if (!walk || !walk.participantsById) return [];
-    return Object.keys(walk.participantsById);
-  });
+  // State variables - no longer managing participantUids locally
+  // Using participantUids from form state instead
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,22 +72,11 @@ export const InviteSelection: React.FC<Props> = ({
   // Determine walk type
   const isNeighborhoodWalk = effectiveWalkType === "neighborhood";
   const isFriendsWalk = effectiveWalkType === "friends";
+  const { friendships } = useFriends();
 
   // Determine if user can continue
   // Disable continue button while submitting
   const continueDisabled = isSubmitting;
-
-  // Query friendships for current user where deletedAt is null (not deleted)
-  const friendshipsQuery =
-    user?.uid && isFriendsWalk
-      ? query(
-          collection(firestore_instance, "friendships"),
-          where("uids", "array-contains", user.uid),
-          where("deletedAt", "==", null)
-        )
-      : undefined;
-
-  const { docs: friendships } = useQuery<Friendship>(friendshipsQuery);
 
   // State for nearby users in neighborhood walks
   const [nearbyUserIds, setNearbyUserIds] = useState<string[]>([]);
@@ -129,9 +115,14 @@ export const InviteSelection: React.FC<Props> = ({
         setNearbyUserIds(userIds);
 
         // For neighborhood walks, automatically select all nearby users
-        if (userIds.length > 0) {
-          setParticipantUids(userIds);
-        }
+        const currentParticipants = formData.participantUids || [];
+        const uniqueParticipants = new Set([...currentParticipants]);
+        userIds.forEach((userId) => {
+          if (userId !== user?.uid) {
+            uniqueParticipants.add(userId);
+          }
+        });
+        updateFormData({ participantUids: Array.from(uniqueParticipants) });
       } catch (error) {
         console.error("Error finding nearby users:", error);
         showMessage("Failed to find nearby users", "error");
@@ -202,29 +193,28 @@ export const InviteSelection: React.FC<Props> = ({
     if (isNeighborhoodWalk) {
       if (isLoadingNearbyUsers) {
         return "Finding neighbors nearby...";
-      } else if (participantUids.length > 0) {
-        return `${participantUids.length} ${
-          participantUids.length === 1 ? "neighbor" : "neighbors"
+      } else if ((formData.participantUids?.length || 0) > 0) {
+        return `${formData.participantUids?.length || 0} ${
+          (formData.participantUids?.length || 0) === 1 ? "neighbor" : "neighbors"
         } will be notified`;
       } else {
         return "No neighbors found in your area";
       }
     } else {
-      return `${participantUids.length} ${
-        participantUids.length === 1 ? "friend" : "friends"
-      } selected`;
+      return `${formData.participantUids?.length || 0} ${(formData.participantUids?.length || 0) === 1 ? "friend" : "friends"} selected`;
     }
-  }, [isNeighborhoodWalk, isLoadingNearbyUsers, participantUids.length]);
+  }, [isNeighborhoodWalk, isLoadingNearbyUsers, formData.participantUids?.length]);
 
-  // Handle user selection/deselection
+  // Handle user selection/deselection - updating form state instead of local state
   const handleUserToggle = (user: UserData & { id: string }) => {
-    setParticipantUids((prev) => {
-      if (prev.includes(user.id)) {
-        return prev.filter((id) => id !== user.id);
-      } else {
-        return [...prev, user.id];
-      }
-    });
+    const currentUids = formData.participantUids || [];
+    // Create updated list of participant UIDs
+    const updatedUids = currentUids.includes(user.id)
+      ? currentUids.filter((uid) => uid !== user.id) // Remove user if already selected
+      : [...currentUids, user.id]; // Add user if not selected
+
+    // Update form state
+    updateFormData({ participantUids: updatedUids });
   };
 
   // Generate and share the invitation link
@@ -288,7 +278,7 @@ export const InviteSelection: React.FC<Props> = ({
     // Check if we should proceed to the next screen or show a confirmation
     const handleProceed = () => {
       if (
-        participantUids.length === 0 &&
+        formData.participantUids?.length === 0 &&
         (friendships.length > 0 || nearbyUserIds.length > 0) &&
         !shareSuccessful
       ) {
@@ -325,7 +315,7 @@ export const InviteSelection: React.FC<Props> = ({
           // Update the participants collection with the selected user IDs
           await updateParticipants(
             effectiveWalkId as string,
-            participantUids,
+            formData.participantUids || [],
             userData
           );
           console.log(
@@ -404,7 +394,7 @@ export const InviteSelection: React.FC<Props> = ({
                     onSelectUser={handleUserToggle}
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
-                    selectedUserIds={participantUids}
+                    selectedUserIds={formData.participantUids || []}
                     acceptedUserIds={acceptedUserIds}
                     emptyMessage={
                       isFriendsWalk

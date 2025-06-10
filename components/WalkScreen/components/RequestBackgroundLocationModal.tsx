@@ -96,6 +96,7 @@ export default function RequestBackgroundLocationModal({
           exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
           gap="$4"
           padding={0}
+          mx="$4"
           borderRadius={24}
         >
           <YStack space={20} alignItems="center" padding={24}>

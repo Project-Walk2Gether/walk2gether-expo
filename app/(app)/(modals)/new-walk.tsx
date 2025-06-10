@@ -6,6 +6,8 @@ export default function NewWalkScreen() {
   const params = useLocalSearchParams();
   const friendId = params.friendId as string | undefined;
 
+  console.log("friendId", friendId);
+
   return (
     <WalkFormProvider friendId={friendId}>
       <WalkWizard />
