@@ -1,6 +1,7 @@
-import { COLORS } from "@/styles/colors";
 import { useMenu } from "@/context/MenuContext";
+import { COLORS } from "@/styles/colors";
 import { Camera, ImagePlus, Send, X } from "@tamagui/lucide-icons";
+import * as Device from "expo-device";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
@@ -43,6 +44,9 @@ export default function MessageForm({
     ImagePicker.ImagePickerAsset[]
   >([]);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Check if the device has a camera
+  const hasCamera = Device.isDevice && Device.deviceType !== Device.DeviceType.DESKTOP;
 
   // Remove a specific image from the selection
   const removeImage = (index: number) => {
@@ -152,20 +156,26 @@ export default function MessageForm({
             backgroundColor="transparent"
             icon={<ImagePlus size="$1.5" color={COLORS.primary} />}
             onPress={() => {
-              showMenu("Add Photos", [
-                {
+              // Create menu items based on device capabilities
+              const menuItems = [];
+              
+              // Only include camera option if device has a camera
+              if (hasCamera) {
+                menuItems.push({
                   label: "Take a photo",
-                  icon: <Camera size="$1" color={COLORS.textOnDark} />,
+                  icon: <Camera size="$1" />,
                   onPress: () => handleImagePicker("camera"),
-                  theme: "blue",
-                },
-                {
-                  label: "Select photos",
-                  icon: <ImagePlus size="$1" color={COLORS.textOnDark} />,
-                  onPress: () => handleImagePicker("multiple"),
-                  theme: "blue",
-                },
-              ]);
+                });
+              }
+              
+              // Always include gallery option
+              menuItems.push({
+                label: "Select photos",
+                icon: <ImagePlus size="$1" />,
+                onPress: () => handleImagePicker("multiple"),
+              });
+              
+              showMenu("Add Photos", menuItems);
             }}
           />
 

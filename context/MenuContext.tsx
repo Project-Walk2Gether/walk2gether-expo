@@ -6,7 +6,6 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -70,9 +69,6 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({
   // Create refs for the bottom sheet
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  // Memoize the snap points
-  const snapPoints = useMemo(() => ["50%"], []);
-
   // Callbacks for sheet actions
   const handleSheetChanges = useCallback((index: number) => {
     if (index === -1) {
@@ -110,7 +106,6 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({
       <BottomSheet
         ref={bottomSheetRef}
         index={-1}
-        snapPoints={snapPoints}
         enablePanDownToClose
         enableDynamicSizing
         backdropComponent={renderBackdrop}
