@@ -12,7 +12,6 @@ import {
 } from "walk2gether-shared";
 import { IconTextRow } from "./IconTextRow";
 import { OwnerFriendWalkParticipantsSection } from "./ParticipantsSection/OwnerFriendWalkParticipantsSection";
-import { OwnerParticipantsSection } from "./ParticipantsSection/OwnerParticipantsSection";
 import { WalkCardButton } from "./WalkCardButton";
 
 interface Props {
@@ -37,35 +36,6 @@ export const ParticipantsDisplay: React.FC<Props> = ({
   const router = useRouter();
   const isFriendsWalk = walkIsFriendsWalk(walk);
   const isOwner = currentUserUid === walk.createdByUid;
-
-  // Check if the current user has accepted the invitation
-  const currentUserHasAccepted = React.useMemo(() => {
-    if (!currentUserUid || isOwner) return true; // Owner or no user ID - not relevant
-
-    // If the user has a participant record with participantsById
-    if (walk.participantsById && walk.participantsById[currentUserUid]) {
-      const participant = walk.participantsById[currentUserUid] as Participant;
-      return (
-        participant.acceptedAt !== undefined && participant.acceptedAt !== null
-      );
-    }
-
-    return false; // No participant record found
-  }, [currentUserUid, isOwner, walk.participantsById]);
-
-  // Create a safe version of participantsById that matches the expected type
-  const participantsById: Record<string, Participant> = {};
-
-  // Only proceed if we have participants
-  if (walk.participantsById) {
-    // Convert to the expected type structure
-    Object.entries(walk.participantsById).forEach(([id, participant]) => {
-      if (participant) {
-        participantsById[id] = participant as Participant;
-      }
-    });
-  }
-
   // Process the participant data using our utility function
   const {
     allParticipants,
@@ -73,7 +43,11 @@ export const ParticipantsDisplay: React.FC<Props> = ({
     requestedParticipants,
     invitedParticipants,
     notifiedParticipants,
-  } = categorizeParticipants(participantsById, walk, currentUserUid);
+  } = categorizeParticipants(
+    walk.participantsById as Record<string, Participant>,
+    walk,
+    currentUserUid
+  );
 
   // Filter out the owner from the list of participants
   const hasNonOwnerParticipants = allParticipants.some(
@@ -155,7 +129,7 @@ export const ParticipantsDisplay: React.FC<Props> = ({
         cancelledParticipants={[]} // We don't have this in our current categorization
       />
     );
-      
+
     // Note: We're keeping the legacy OwnerParticipantsSection component for potential future use with other walk types
     // But not using it in the main participant display flow now
   }

@@ -7,10 +7,12 @@ import {
   collection,
   doc,
   setDoc,
+  updateDoc,
 } from "@react-native-firebase/firestore";
 import { addMinutes } from "date-fns";
 import uuid from "react-native-uuid";
 import { Participant, UserData, Walk, WithId } from "walk2gether-shared";
+import { fetchDocsByIds } from "@/utils/firestore";
 
 interface CreateWalkParams {
   formData: WalkFormData;
@@ -117,6 +119,9 @@ export async function createWalkFromForm({
       `walks/${walkId}/participants/${userId}`
     );
 
+    // Initialize the participantsById object for the walk document
+    const participantsById: Record<string, Participant> = {};
+
     // Create the organizer participant
     const organizerParticipant: Participant = {
       userUid: userId,
@@ -131,16 +136,39 @@ export async function createWalkFromForm({
       updatedAt: Timestamp.now(),
     };
 
+    // Add organizer to participantsById
+    participantsById[userId] = organizerParticipant;
+
     await setDoc(participantRef, organizerParticipant);
 
     // Create participant documents for invited users
     const participantPromises: Promise<void>[] = [];
     const invitedUserIds = formData.participantUids || [];
+    
+    // Filter out the organizer from invitedUserIds
+    const filteredInvitedUserIds = invitedUserIds.filter(id => id !== userId);
+    
+    // Fetch user data for all invited participants
+    let userDataMap: Record<string, WithId<UserData>> = {};
+    
+    if (filteredInvitedUserIds.length > 0) {
+      try {
+        const userDocs = await fetchDocsByIds<UserData>("users", filteredInvitedUserIds);
+        
+        // Create a map of user IDs to user data
+        userDataMap = userDocs.reduce((acc, userData) => {
+          acc[userData.id] = userData;
+          return acc;
+        }, {} as Record<string, WithId<UserData>>);
+      } catch (error) {
+        console.error("Error fetching user data for invited participants:", error);
+      }
+    }
 
-    for (const invitedUserId of invitedUserIds) {
-      // Skip if this is the organizer (already added above)
-      if (invitedUserId === userId) continue;
-
+    for (const invitedUserId of filteredInvitedUserIds) {
+      // Get user data if available
+      const userData = userDataMap[invitedUserId];
+      
       const invitedParticipantRef = doc(
         firestore_instance,
         `walks/${walkId}/participants/${invitedUserId}`
@@ -148,8 +176,8 @@ export async function createWalkFromForm({
 
       const invitedParticipant: Participant = {
         userUid: invitedUserId,
-        displayName: "Invited User", // Will be updated when user accepts
-        photoURL: null,
+        displayName: userData?.name || "Invited User", // Use actual name from user data if available
+        photoURL: userData?.profilePicUrl || null,
         acceptedAt: null, // Not auto-approved
         deniedAt: null,
         cancelledAt: null,
@@ -161,6 +189,9 @@ export async function createWalkFromForm({
         updatedAt: Timestamp.now(),
       };
 
+      // Add participant to participantsById map
+      participantsById[invitedUserId] = invitedParticipant;
+      
       participantPromises.push(
         setDoc(invitedParticipantRef, invitedParticipant)
       );
@@ -170,6 +201,13 @@ export async function createWalkFromForm({
     if (participantPromises.length > 0) {
       await Promise.all(participantPromises);
     }
+    
+    // Update the walk document with participantsById data
+    // We need to properly cast the data for Firebase
+    const walkDataUpdate = {
+      participantsById: participantsById as FirebaseFirestoreTypes.DocumentData
+    };
+    await updateDoc(walkDocRef, walkDataUpdate);
 
     console.log(
       `Created walk with ${
