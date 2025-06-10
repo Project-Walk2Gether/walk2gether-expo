@@ -1,9 +1,9 @@
 import { FriendshipChat } from "@/components/Chat/FriendshipChat";
 import FullScreenLoader from "@/components/FullScreenLoader";
 import { NotFoundState } from "@/components/NotFoundState";
-import { useMenu } from "@/context/MenuContext";
 import { StatefulAvatarWithFullScreen } from "@/components/UserAvatar/StatefulAvatarWithFullScreen";
 import { useAuth } from "@/context/AuthContext";
+import { useMenu } from "@/context/MenuContext";
 import { useDoc } from "@/utils/firestore";
 import { ArrowLeft, UserMinus } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -11,7 +11,7 @@ import React, { useEffect } from "react";
 import { Button, Text, XStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
 
-export default function ChatDetailScreen() {
+export default function FriendshipScreen() {
   const params = useLocalSearchParams<{ id: string; friendName?: string }>();
   const friendshipId = params.id;
   const { user } = useAuth();

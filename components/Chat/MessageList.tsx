@@ -6,12 +6,12 @@ import React, {
 } from "react";
 import { ScrollView as RNScrollView } from "react-native";
 import { ScrollView, Spinner, Text, YStack } from "tamagui";
-import { Message as MessageType } from "walk2gether-shared";
-import MessageComponent from "./Message";
+import { Message as MessageType, Walk } from "walk2gether-shared";
+import { TimelineItem, TimelineItemType } from "./TimelineItem";
 import { MessageOptionsSheet } from "./MessageOptionsSheet";
 
 type Props = {
-  messages: MessageType[];
+  timeline: TimelineItemType[];
   loading?: boolean;
   onDeleteMessage?: (messageId: string) => Promise<void>;
   currentUserId: string;
@@ -23,7 +23,7 @@ export type MessageListRef = {
 };
 
 const MessageList = forwardRef<MessageListRef, Props>(
-  ({ messages, loading = false, onDeleteMessage, currentUserId }, ref) => {
+  ({ timeline, loading = false, onDeleteMessage, currentUserId }, ref) => {
     const scrollViewRef = useRef<RNScrollView | null>(null);
     const [selectedMessage, setSelectedMessage] = useState<MessageType | null>(
       null
@@ -74,19 +74,19 @@ const MessageList = forwardRef<MessageListRef, Props>(
                 scrollViewRef.current?.scrollToEnd({ animated: false })
               }
             >
-              {messages.length === 0 ? (
+              {timeline.length === 0 ? (
                 <YStack height={80} justifyContent="center" alignItems="center">
                   <Text color="#999" textAlign="center">
-                    No messages yet. Say hello!
+                    No messages or walks yet. Say hello or invite to a walk!
                   </Text>
                 </YStack>
               ) : (
-                messages.map((message) => (
-                  <MessageComponent
-                    key={message.id}
-                    message={message}
+                timeline.map((item, index) => (
+                  <TimelineItem
+                    key={item.type === 'message' ? `msg-${item.data.id}` : `walk-${item.data.id}`}
+                    item={item}
                     currentUserId={currentUserId}
-                    onLongPress={handleLongPress}
+                    onLongPress={item.type === 'message' ? handleLongPress : undefined}
                   />
                 ))
               )}

@@ -40,10 +40,35 @@ export default function WalkScreen() {
   // Get walk messages using the useQuery hook
   const messagesRef = collection(firestore_instance, `walks/${id}/messages`);
   const q = query(messagesRef, orderBy("createdAt", "asc"));
-  const { docs: messages } = useQuery<Message>(q);
+  const { docs: messagesData } = useQuery<Message>(q);
+  
+  // Convert messages to timeline format for MessageList component
+  const timeline = React.useMemo(() => {
+    return messagesData.map(message => ({
+      type: 'message' as const,
+      data: message
+    }));
+  }, [messagesData]);
 
   // Get all participants for the walk
   const participants = useWalkParticipants(id);
+  
+  // Handle message deletion
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!user?.uid || !id) return;
+    
+    try {
+      const messageRef = firestore_instance.doc(`walks/${id}/messages/${messageId}`);
+      const messageDoc = await messageRef.get();
+      
+      // Only allow users to delete their own messages
+      if (messageDoc.exists() && messageDoc.data()?.senderId === user.uid) {
+        await messageRef.delete();
+      }
+    } catch (error) {
+      console.error("Error deleting message:", error);
+    }
+  };
 
   // References for chat bottom sheet and message list
   const chatBottomSheetRef = useRef<BottomSheet>(null);
@@ -195,9 +220,10 @@ export default function WalkScreen() {
             />
             <MessageList
               ref={messageListRef}
-              messages={messages}
+              timeline={timeline}
               currentUserId={user?.uid || ""}
               loading={false}
+              onDeleteMessage={handleDeleteMessage}
             />
           </BottomSheetScrollView>
         </BottomSheet>

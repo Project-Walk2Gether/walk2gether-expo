@@ -12,7 +12,7 @@ import { Attachment, Message as MessageType } from "walk2gether-shared";
 interface Props {
   message: MessageType;
   currentUserId: string;
-  onLongPress: (message: MessageType) => void;
+  onLongPress?: (message: MessageType) => void;
 }
 
 export const formatMessageTime = (timestamp: any) => {
