@@ -525,7 +525,6 @@ export const WalkStatusControls: React.FC<WalkStatusControlsProps> = ({
           title="Update your status"
           items={statusMenuItems}
           trigger={menuTrigger}
-          snapPoints={[45]}
         />
 
         {/* Slide Action overlay */}

@@ -17,6 +17,7 @@ import {
 } from "@react-native-firebase/firestore";
 import { Check } from "@tamagui/lucide-icons";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { pickBy } from "lodash";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -113,22 +114,28 @@ function ViewWalkInvitationScreen({ walk }: { walk: WithId<Walk> }) {
           : "";
 
         // Update existing participant document with acceptance data
-        await updateDoc(participantRef, {
-          ...commonFields,
-          acceptedAt: Timestamp.now(),
-          lastLocation: userLocation
-            ? {
-                latitude: userLocation?.coords.latitude || 0,
-                longitude: userLocation?.coords.longitude || 0,
-                timestamp: Timestamp.now(),
-              }
-            : undefined,
-          route: null,
-          introduction: introductionValue, // Only include introduction for neighborhood walks
-          navigationMethod: "driving",
-          cancelledAt: deleteField(),
-          updatedAt: Timestamp.now(),
-        });
+        await updateDoc(
+          participantRef,
+          pickBy(
+            {
+              ...commonFields,
+              acceptedAt: Timestamp.now(),
+              lastLocation: userLocation
+                ? {
+                    latitude: userLocation?.coords.latitude || 0,
+                    longitude: userLocation?.coords.longitude || 0,
+                    timestamp: Timestamp.now(),
+                  }
+                : undefined,
+              route: null,
+              introduction: introductionValue, // Only include introduction for neighborhood walks
+              navigationMethod: "driving",
+              cancelledAt: deleteField(),
+              updatedAt: Timestamp.now(),
+            },
+            (value) => value !== undefined
+          )
+        );
 
         // If user chose to save introduction to profile, update user data
         // Only applicable for neighborhood walks
@@ -190,29 +197,6 @@ function ViewWalkInvitationScreen({ walk }: { walk: WithId<Walk> }) {
 
   const handleAcceptButtonPress = () => handleWalkAction("accept");
   const handleCancelButtonPress = () => handleWalkAction("cancel");
-
-  const handleCancelRequest = async () => {
-    if (!user || !walk?.id || !participantDoc) return;
-
-    setLoading(true);
-    try {
-      const participantRef = doc(
-        firestore_instance,
-        `walks/${walk.id}/participants/${user.uid}`
-      );
-
-      await updateDoc(participantRef, {
-        cancelledAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-        status: "pending",
-      });
-    } catch (error) {
-      console.error("Error cancelling join request:", error);
-      Alert.alert("Error", "Failed to cancel request. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <BrandGradient style={{ flex: 1 }} variant="modern">

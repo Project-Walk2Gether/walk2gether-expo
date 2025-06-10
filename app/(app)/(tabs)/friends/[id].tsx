@@ -1,7 +1,7 @@
 import { FriendshipChat } from "@/components/Chat/FriendshipChat";
 import FullScreenLoader from "@/components/FullScreenLoader";
-import Menu from "@/components/Menu";
 import { NotFoundState } from "@/components/NotFoundState";
+import { useMenu } from "@/context/MenuContext";
 import { StatefulAvatarWithFullScreen } from "@/components/UserAvatar/StatefulAvatarWithFullScreen";
 import { useAuth } from "@/context/AuthContext";
 import { useDoc } from "@/utils/firestore";
@@ -16,6 +16,7 @@ export default function ChatDetailScreen() {
   const friendshipId = params.id;
   const { user } = useAuth();
   const router = useRouter();
+  const { showMenu } = useMenu();
 
   // Use useDoc to directly load the friendship document by ID
   const { doc: friendship, status } = useDoc<Friendship>(
@@ -92,20 +93,21 @@ export default function ChatDetailScreen() {
         </XStack>
       ),
       headerRight: () => (
-        <Menu
-          title="Friendship Options"
-          items={[
-            {
-              label: "Something's wrong",
-              icon: <UserMinus size="$1" />,
-              onPress: handleNavigateToUnfriend,
-              buttonProps: {
-                color: "$red10",
-                backgroundColor: "$red3",
+        <Button
+          size="$2"
+          circular
+          chromeless
+          onPress={() => {
+            showMenu("Friendship Options", [
+              {
+                label: "Something's wrong",
+                icon: <UserMinus size="$1" />,
+                onPress: handleNavigateToUnfriend,
+                theme: "red",
               },
-            },
-          ]}
-          snapPoints={[25]}
+            ]);
+          }}
+          icon={<UserMinus size="$1" />}
         />
       ),
       headerStyle: {

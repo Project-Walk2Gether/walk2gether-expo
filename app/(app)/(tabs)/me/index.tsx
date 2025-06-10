@@ -1,11 +1,11 @@
 import EditButton from "@/components/EditButton";
-import Menu from "@/components/Menu";
 import { Screen } from "@/components/UI";
 import ActionRow from "@/components/UI/ActionRow";
 import { PlaceData } from "@/components/UI/PlacesAutocomplete";
 import { StatelessAvatar } from "@/components/UserAvatar";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useMenu } from "@/context/MenuContext";
 import { useUpdates } from "@/context/UpdatesContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
@@ -26,7 +26,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, Pressable } from "react-native";
 import {
   Button,
   Card,
@@ -47,6 +47,7 @@ export default function MeScreen() {
     checkForUpdate,
     isCheckingForUpdate,
   } = useUpdates();
+  const { showMenu } = useMenu();
   const router = useRouter();
   const [name, setName] = useState("");
   const [location, setLocation] = useState<PlaceData | null>(null);
@@ -193,32 +194,33 @@ export default function MeScreen() {
 
   return (
     <Screen title="" useTopInsets gradientVariant="main">
-      <YStack alignItems="center" mb="$6">
-        <Menu
-          title="Profile Picture"
-          snapPoints={[35, 25]}
-          items={[
-            {
-              label: "Change Picture",
-              icon: <Camera size={24} color={COLORS.primary} />,
-              onPress: handlePickImage,
-            },
-            {
-              label: "Remove Picture",
-              icon: <Trash size={24} color={"#ff3b30"} />,
-              onPress: handleRemoveImage,
-            },
-          ]}
-          trigger={
-            <StatelessAvatar
-              profilePicUrl={profilePicUrl}
-              name={name}
-              size={120}
-              borderWidth={3}
-              backgroundColor={COLORS.primary}
-            />
-          }
-        />
+      <YStack mt="$4" mb="$5" alignItems="center">
+        <Pressable
+          onPress={() => {
+            showMenu("Profile Picture", [
+              {
+                label: "Change Picture",
+                icon: <Camera size={24} color={COLORS.primary} />,
+                onPress: handlePickImage,
+                theme: "blue",
+              },
+              {
+                label: "Remove Picture",
+                icon: <Trash size={24} color="#ff3b30" />,
+                onPress: handleRemoveImage,
+                theme: "red",
+              },
+            ]);
+          }}
+        >
+          <StatelessAvatar
+            profilePicUrl={profilePicUrl}
+            name={name}
+            size={120}
+            borderWidth={3}
+            backgroundColor={COLORS.primary}
+          />
+        </Pressable>
         <H4 mt="$3" mb="$1" fontSize={26} fontWeight="bold">
           {name || "Your Name"}
         </H4>

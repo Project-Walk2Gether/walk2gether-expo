@@ -1,4 +1,5 @@
 import { COLORS } from "@/styles/colors";
+import { useMenu } from "@/context/MenuContext";
 import { Camera, ImagePlus, Send, X } from "@tamagui/lucide-icons";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
@@ -18,7 +19,6 @@ import {
   pickImage,
   uploadMessageAttachments,
 } from "../../utils/imageUpload";
-import Menu from "../Menu";
 
 type Props = {
   onSendMessage: (message: Partial<Message>) => void;
@@ -37,6 +37,7 @@ export default function MessageForm({
   senderId,
   onFocus,
 }: Props) {
+  const { showMenu } = useMenu();
   const [messageText, setMessageText] = useState("");
   const [selectedImages, setSelectedImages] = useState<
     ImagePicker.ImagePickerAsset[]
@@ -145,37 +146,27 @@ export default function MessageForm({
           alignItems="center"
           gap="$2"
         >
-          <Menu
-            title="Add Photos"
-            snapPoints={[30]}
-            items={[
-              {
-                label: "Take a photo",
-                icon: <Camera size="$1" color={COLORS.textOnDark} />,
-                onPress: () => handleImagePicker("camera"),
-                buttonProps: {
-                  backgroundColor: COLORS.primary,
-                  color: COLORS.textOnDark,
+          <Button
+            size="$3"
+            circular
+            backgroundColor="transparent"
+            icon={<ImagePlus size="$1.5" color={COLORS.primary} />}
+            onPress={() => {
+              showMenu("Add Photos", [
+                {
+                  label: "Take a photo",
+                  icon: <Camera size="$1" color={COLORS.textOnDark} />,
+                  onPress: () => handleImagePicker("camera"),
+                  theme: "blue",
                 },
-              },
-              {
-                label: "Select photos",
-                icon: <ImagePlus size="$1" color={COLORS.textOnDark} />,
-                onPress: () => handleImagePicker("multiple"),
-                buttonProps: {
-                  backgroundColor: COLORS.primary,
-                  color: COLORS.textOnDark,
+                {
+                  label: "Select photos",
+                  icon: <ImagePlus size="$1" color={COLORS.textOnDark} />,
+                  onPress: () => handleImagePicker("multiple"),
+                  theme: "blue",
                 },
-              },
-            ]}
-            trigger={
-              <Button
-                size="$3"
-                circular
-                backgroundColor="transparent"
-                icon={<ImagePlus size="$1.5" color={COLORS.primary} />}
-              />
-            }
+              ]);
+            }}
           />
 
           <Input

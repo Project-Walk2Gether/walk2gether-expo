@@ -9,7 +9,6 @@ import { calculateOptimalRegion } from "@/utils/mapUtils";
 import { getWalkStatus } from "@/utils/walkUtils";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { addHours } from "date-fns";
-import * as Location from "expo-location";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
@@ -34,7 +33,11 @@ export default function LiveWalkMap({
 }: Props) {
   const { user } = useAuth();
   const mapRef = useRef<MapView>(null);
-  const { locationPermission, backgroundLocationPermission } = useLocation();
+  const {
+    locationPermission,
+    backgroundLocationPermission,
+    requestForegroundPermissions,
+  } = useLocation();
   const [isBackgroundLocationModalOpen, setIsBackgroundLocationModalOpen] =
     useState(false);
 
@@ -210,11 +213,11 @@ export default function LiveWalkMap({
   // Render location permission denied message
   if (locationPermission === false) {
     return (
-      <View flex={1} justifyContent="center" alignItems="center">
+      <View p="$4" flex={1} justifyContent="center" alignItems="center">
         <Text color="red" marginBottom={16} textAlign="center">
           Location permission is required to participate in the walk.
         </Text>
-        <Button onPress={() => Location.requestForegroundPermissionsAsync()}>
+        <Button onPress={() => requestForegroundPermissions()}>
           Grant Permission
         </Button>
       </View>
