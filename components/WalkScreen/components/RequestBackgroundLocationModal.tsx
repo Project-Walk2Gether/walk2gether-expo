@@ -1,21 +1,20 @@
+import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { COLORS } from "@/styles/colors";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
-import { firestore_instance } from "@/config/firebase";
 import { MapPin } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
-import { StyleSheet } from "react-native";
-import { Button, Dialog, H3, Sheet, Text, View, XStack, YStack } from "tamagui";
+import { Button, Dialog, H3, Text, View, XStack, YStack } from "tamagui";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function RequestBackgroundLocationModal({ 
-  open, 
-  onOpenChange 
+export default function RequestBackgroundLocationModal({
+  open,
+  onOpenChange,
 }: Props) {
   const { user } = useAuth();
   const locationContext = useLocation();
@@ -24,7 +23,7 @@ export default function RequestBackgroundLocationModal({
   // Handle enabling background location tracking
   const handleEnableTracking = async () => {
     if (!locationContext) return;
-    
+
     setIsRequesting(true);
     try {
       // Use the context wrapper to request background permissions
@@ -42,7 +41,7 @@ export default function RequestBackgroundLocationModal({
           { merge: true }
         );
       }
-      
+
       // Close the modal
       onOpenChange(false);
     } catch (error) {
@@ -65,7 +64,7 @@ export default function RequestBackgroundLocationModal({
         { merge: true }
       );
     }
-    
+
     // Close the modal
     onOpenChange(false);
   };
@@ -111,18 +110,19 @@ export default function RequestBackgroundLocationModal({
             >
               <MapPin size={40} color="white" />
             </View>
-            
+
             {/* Title */}
             <H3 textAlign="center" fontSize={24}>
               Enable live tracking?
             </H3>
-            
+
             {/* Description */}
             <Text textAlign="center" fontSize={16} color="$gray11">
-              To keep others updated as you move, we need permission to track your
-              location in the background.
+              To keep others updated as you move, we need permission to track
+              your location in the background. Tap "Change to Always Allow" to
+              enable.
             </Text>
-            
+
             {/* Bullet points */}
             <YStack space={8} width="100%">
               <XStack space={8} alignItems="center">
@@ -138,7 +138,7 @@ export default function RequestBackgroundLocationModal({
                 </Text>
               </XStack>
             </YStack>
-            
+
             {/* Buttons */}
             <YStack space={12} width="100%" marginTop={12}>
               <Button
