@@ -195,15 +195,23 @@ export const InviteSelection: React.FC<Props> = ({
         return "Finding neighbors nearby...";
       } else if ((formData.participantUids?.length || 0) > 0) {
         return `${formData.participantUids?.length || 0} ${
-          (formData.participantUids?.length || 0) === 1 ? "neighbor" : "neighbors"
+          (formData.participantUids?.length || 0) === 1
+            ? "neighbor"
+            : "neighbors"
         } will be notified`;
       } else {
         return "No neighbors found in your area";
       }
     } else {
-      return `${formData.participantUids?.length || 0} ${(formData.participantUids?.length || 0) === 1 ? "friend" : "friends"} selected`;
+      return `${formData.participantUids?.length || 0} ${
+        (formData.participantUids?.length || 0) === 1 ? "friend" : "friends"
+      } selected`;
     }
-  }, [isNeighborhoodWalk, isLoadingNearbyUsers, formData.participantUids?.length]);
+  }, [
+    isNeighborhoodWalk,
+    isLoadingNearbyUsers,
+    formData.participantUids?.length,
+  ]);
 
   // Handle user selection/deselection - updating form state instead of local state
   const handleUserToggle = (user: UserData & { id: string }) => {
@@ -415,7 +423,7 @@ export const InviteSelection: React.FC<Props> = ({
                     </Text>
                   )}
 
-                  {users.length > 0 && !isNeighborhoodWalk && (
+                  {!isNeighborhoodWalk && (
                     <YStack
                       alignItems="center"
                       marginTop="$4"

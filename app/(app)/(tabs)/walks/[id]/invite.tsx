@@ -1,6 +1,7 @@
 import HeaderCloseButton from "@/components/HeaderCloseButton";
 import InviteSelection from "@/components/WalkWizard/sections/InviteSelection";
 import { useAuth } from "@/context/AuthContext";
+import { WalkFormProvider } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -84,29 +85,31 @@ export default function InviteScreen() {
           headerShadowVisible: false,
         }}
       />
-      {/* Render the InviteSelection component directly */}
+      {/* Wrap InviteSelection with WalkFormProvider */}
       {walk && (
-        <InviteSelection
-          onContinue={() => {
-            console.log(
-              "[InviteScreen] onContinue called, attempting navigation"
-            );
-            try {
-              if (router.canGoBack()) {
-                console.log("[InviteScreen] Can go back, using router.back()");
-                router.back();
-              } else {
-                console.log(
-                  "[InviteScreen] Cannot go back, navigating to walks list"
-                );
-                router.push("/walks");
+        <WalkFormProvider>
+          <InviteSelection
+            onContinue={() => {
+              console.log(
+                "[InviteScreen] onContinue called, attempting navigation"
+              );
+              try {
+                if (router.canGoBack()) {
+                  console.log("[InviteScreen] Can go back, using router.back()");
+                  router.back();
+                } else {
+                  console.log(
+                    "[InviteScreen] Cannot go back, navigating to walks list"
+                  );
+                  router.push("/walks");
+                }
+              } catch (error) {
+                console.error("[InviteScreen] Error during navigation:", error);
               }
-            } catch (error) {
-              console.error("[InviteScreen] Error during navigation:", error);
-            }
-          }}
-          walk={walk}
-        />
+            }}
+            walk={walk}
+          />
+        </WalkFormProvider>
       )}
     </>
   );
