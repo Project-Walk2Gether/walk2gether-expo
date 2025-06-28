@@ -7,12 +7,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:381508807420:android:ff0bc725c44b81c94f0579",
+        "mobilesdk_app_id": "1:381508807420:android:38648612c05dc0a64f0579",
         "android_client_info": {
-          "package_name": "com.torch_to_flame.walkmate"
+          "package_name": "org.projectwalk2gether.walk2gether"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "381508807420-vlb0g54m7sackf2mkqi27m9vr7vu5t64.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.projectwalk2gether.walk2gether",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "381508807420-gvp39urss7s5v7fdb0kq7dfrhok1a297.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDDylHVvoYaz0KcU4FSiF3gf-AowflQviI"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "381508807420-gvp39urss7s5v7fdb0kq7dfrhok1a297.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "381508807420-340q6u7ucjussfq7ip5c475r4v2hnibq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.torch-to-flame.walkmate"
+              }
+            }
+          ]
         }
       }
     }
