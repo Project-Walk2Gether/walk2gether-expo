@@ -87,7 +87,7 @@ export default function Auth() {
 
   return (
     <AuthScenicLayout
-      isAnimated={true}
+      // isAnimated={true}
       showLogo={
         <YStack gap="$2" mb="$2" width="100%" alignItems="center">
           <Text

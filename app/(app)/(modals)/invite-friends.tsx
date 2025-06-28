@@ -86,7 +86,7 @@ export default function InviteFriendsScreen() {
                       >
                         QR Code
                       </Text>
-                      <Text fontSize="$2.5" color="#666">
+                      <Text fontSize={15} color="#666">
                         Show this QR code to friends so they can scan it with
                         their phone camera to join.
                       </Text>
@@ -123,7 +123,7 @@ export default function InviteFriendsScreen() {
                       Send Invitation
                     </Text>
 
-                    <Text fontSize="$2.5" color="#666">
+                    <Text fontSize={15} color="#666">
                       Tap the Send button below to invite friends using your
                       device's sharing options (Messages, WhatsApp, Email, etc).
                     </Text>

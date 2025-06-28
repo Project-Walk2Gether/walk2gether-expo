@@ -5,9 +5,9 @@ import useChangeEffect from "@/utils/useChangeEffect";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Timestamp } from "@react-native-firebase/firestore";
 import React, { useState } from "react";
-import { TouchableOpacity } from "react-native";
+import { Platform, TouchableOpacity } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { Card, Text, View, XStack, YStack } from "tamagui";
+import { Button, Card, Text, View, XStack, YStack } from "tamagui";
 import WizardWrapper from "./WizardWrapper";
 
 interface TimeSelectionProps {
@@ -42,6 +42,10 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
   const [selectedTime, setSelectedTime] = useState<Date>(
     new Date(1970, 0, 1, initialDate.getHours(), initialDate.getMinutes(), 0, 0)
   );
+  
+  // Android-specific state for time picker
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const isAndroid = Platform.OS === "android";
 
   // Update formData.date (Firestore Timestamp) whenever date or time changes
   useChangeEffect(() => {
@@ -163,14 +167,47 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
 
             <Card backgroundColor="white" borderRadius={10} padding={10}>
               <View padding={10} alignItems="center">
-                <DateTimePicker
-                  value={selectedTime}
-                  mode="time"
-                  display="spinner"
-                  onChange={handleTimeChange}
-                  themeVariant="light"
-                  minuteInterval={5}
-                />
+                {isAndroid ? (
+                  <>
+                    <Text fontSize={16} fontWeight="500" marginBottom="$2">
+                      Selected Time: {selectedTime.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+                    <Button
+                      backgroundColor={COLORS.action}
+                      color="white"
+                      onPress={() => setShowTimePicker(true)}
+                      paddingHorizontal="$4"
+                      paddingVertical="$2"
+                      borderRadius={8}
+                    >
+                      Select Time
+                    </Button>
+                    {showTimePicker && (
+                      <DateTimePicker
+                        value={selectedTime}
+                        mode="time"
+                        is24Hour={false}
+                        onChange={(event, selectedTimeValue) => {
+                          setShowTimePicker(false);
+                          handleTimeChange(event, selectedTimeValue);
+                        }}
+                        minuteInterval={5}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <DateTimePicker
+                    value={selectedTime}
+                    mode="time"
+                    display="spinner"
+                    onChange={handleTimeChange}
+                    themeVariant="light"
+                    minuteInterval={5}
+                  />
+                )}
               </View>
             </Card>
           </>

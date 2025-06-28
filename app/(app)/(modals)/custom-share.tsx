@@ -91,7 +91,7 @@ export default function CustomShareScreen() {
                     Customize your invitation message
                   </Text>
 
-                  <Text fontSize="$2.5" color="#666">
+                  <Text fontSize="$2" color="#666">
                     Enter your personalized message below. The invitation link
                     will be added automatically.
                   </Text>
