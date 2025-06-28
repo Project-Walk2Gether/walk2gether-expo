@@ -1,9 +1,9 @@
 import { PhoneInputField } from "@/components/PhoneInputField";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
+import PhoneInput from "@linhnguyen96114/react-native-phone-input";
 import { Formik } from "formik";
 import { useCallback, useRef, useState } from "react";
-import PhoneInput from "react-native-phone-number-input";
 import { YStack } from "tamagui";
 import * as yup from "yup";
 import { ActionButton } from "../../ActionButton";
@@ -22,7 +22,7 @@ interface Props {
 
 export default function PhoneForm({ onPhoneVerified }: Props) {
   const [loading, setLoading] = useState(false);
-  const phoneInputRef = useRef<PhoneInput>(null);
+  const phoneInputRef = useRef<typeof PhoneInput>(null);
   const { showMessage } = useFlashMessage();
 
   const { sendPhoneVerificationCode } = useAuth();

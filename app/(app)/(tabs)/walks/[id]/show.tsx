@@ -28,6 +28,7 @@ import { COLORS } from "@/styles/colors";
 import { getWalkStatus } from "@/utils/walkUtils";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { KeyboardAvoidingView } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, YStack } from "tamagui";
 import { Message, ParticipantWithRoute, Walk } from "walk2gether-shared";
 
@@ -41,26 +42,28 @@ export default function WalkScreen() {
   const messagesRef = collection(firestore_instance, `walks/${id}/messages`);
   const q = query(messagesRef, orderBy("createdAt", "asc"));
   const { docs: messagesData } = useQuery<Message>(q);
-  
+
   // Convert messages to timeline format for MessageList component
   const timeline = React.useMemo(() => {
-    return messagesData.map(message => ({
-      type: 'message' as const,
-      data: message
+    return messagesData.map((message) => ({
+      type: "message" as const,
+      data: message,
     }));
   }, [messagesData]);
 
   // Get all participants for the walk
   const participants = useWalkParticipants(id);
-  
+
   // Handle message deletion
   const handleDeleteMessage = async (messageId: string) => {
     if (!user?.uid || !id) return;
-    
+
     try {
-      const messageRef = firestore_instance.doc(`walks/${id}/messages/${messageId}`);
+      const messageRef = firestore_instance.doc(
+        `walks/${id}/messages/${messageId}`
+      );
       const messageDoc = await messageRef.get();
-      
+
       // Only allow users to delete their own messages
       if (messageDoc.exists() && messageDoc.data()?.senderId === user.uid) {
         await messageRef.delete();
@@ -142,6 +145,8 @@ export default function WalkScreen() {
       },
     });
   };
+
+  const insets = useSafeAreaInsets();
 
   // We don't need to render a backdrop for this bottom sheet
 

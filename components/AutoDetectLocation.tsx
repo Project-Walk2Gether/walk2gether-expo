@@ -1,5 +1,6 @@
 import { useLocation } from "@/context/LocationContext";
 import { MapPin, X as XIcon } from "@tamagui/lucide-icons";
+import * as Device from "expo-device";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Text, XStack, YStack } from "tamagui";
@@ -28,34 +29,71 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
   const cancelLocationDetection = useRef<boolean>(false);
   const locationFound = useRef(false);
 
+  // Function to get mock location for simulators/emulators
+  const getMockSanFranciscoLocation = () => {
+    // Mock location data for San Francisco
+    return {
+      name: "123 Market Street, San Francisco, CA 94105",
+      placeId: "ChIJIQBpAG2ahYAR_6128GcTUEo", // A valid place ID for SF
+      latitude: 37.7935,
+      longitude: -122.3964,
+    };
+  };
+
   useEffect(() => {
     let cancelled = false;
 
     async function detectLocation() {
       // Reset the cancel flag
       cancelLocationDetection.current = false;
-      // Only proceed if location permission is granted
-      if (!locationPermission) {
-        // Request only foreground permissions instead of showing error
-        try {
-          const permissionGranted = await requestForegroundPermissions();
-          if (!permissionGranted || cancelLocationDetection.current) {
-            // User denied permission or operation was canceled, clear location
-            if (clearLocation) clearLocation();
-            return;
-          }
-        } catch (error) {
-          // Handle any errors during permission request
-          if (clearLocation) clearLocation();
-          return;
-        }
-      }
-
+      
       setLoading(true);
       setError(null);
       locationFound.current = false;
 
       try {
+        // Check if running on a simulator/emulator
+        const isSimulator = (await Device.isDevice) === false;
+
+        if (isSimulator) {
+          // Use mock location data for simulator/emulator
+          console.log("Using mock location for simulator/emulator");
+          
+          // Simulate a delay for a more realistic experience
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Check if operation was canceled during the delay
+          if (cancelLocationDetection.current) {
+            setLoading(false);
+            return;
+          }
+          
+          // Set mock location data
+          const mockLocation = getMockSanFranciscoLocation();
+          locationFound.current = true;
+          setProgress(100); // Complete the progress
+          setFieldValue("location", mockLocation);
+          return;
+        }
+        
+        // For real devices, continue with normal flow
+        // Only proceed if location permission is granted
+        if (!locationPermission) {
+          // Request only foreground permissions instead of showing error
+          try {
+            const permissionGranted = await requestForegroundPermissions();
+            if (!permissionGranted || cancelLocationDetection.current) {
+              // User denied permission or operation was canceled, clear location
+              if (clearLocation) clearLocation();
+              return;
+            }
+          } catch (error) {
+            // Handle any errors during permission request
+            if (clearLocation) clearLocation();
+            return;
+          }
+        }
+
         // Check if operation was canceled
         if (cancelLocationDetection.current) {
           setLoading(false);
