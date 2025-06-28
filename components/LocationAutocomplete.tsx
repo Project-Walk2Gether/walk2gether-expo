@@ -142,7 +142,7 @@ const LocationAutocomplete: React.FC<Omit<Props, "styles">> = ({
           selectionColor: COLORS.primary,
           returnKeyType: "search",
           style: styles.textInput,
-          placeholderTextColor: "#999",
+          placeholderTextColor: COLORS.textMuted,
         }}
       />
       {touched.location && errors.location && (

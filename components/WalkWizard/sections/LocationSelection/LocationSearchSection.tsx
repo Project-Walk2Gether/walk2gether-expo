@@ -1,8 +1,9 @@
-import React from 'react';
-import { View } from 'tamagui';
-import { PlacesAutocomplete } from '@/components/UI/PlacesAutocomplete';
-import { GOOGLE_MAPS_API_KEY } from '@/config/maps';
-import { GooglePlacesAutocompleteRef } from 'react-native-google-places-autocomplete';
+import { PlacesAutocomplete } from "@/components/UI/PlacesAutocomplete";
+import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
+import { COLORS } from "@/styles/colors";
+import React from "react";
+import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
+import { View } from "tamagui";
 
 interface Props {
   googlePlacesRef: React.RefObject<GooglePlacesAutocompleteRef>;
@@ -37,6 +38,9 @@ const LocationSearchSection: React.FC<Props> = ({
           )
         }
         googleApiKey={GOOGLE_MAPS_API_KEY}
+        textInputProps={{
+          placeholderTextColor: COLORS.textMuted,
+        }}
         textInputStyles={{
           borderRadius: 10,
           paddingHorizontal: 15,
