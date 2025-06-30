@@ -32,7 +32,7 @@ export function StatelessAvatar({
       borderColor="#fff"
       {...(onPress && { onPress, pressStyle: { opacity: 0.8 } })}
     >
-      <Avatar.Image src={profilePicUrl} />
+      {profilePicUrl?.length ? <Avatar.Image src={profilePicUrl} /> : null}
       <Avatar.Fallback
         backgroundColor={backgroundColor}
         alignItems="center"

@@ -5,14 +5,13 @@ import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
 import { Stack as ExpoStack, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { YStack } from "tamagui";
 import { Location, UserData } from "walk2gether-shared";
 
@@ -20,49 +19,7 @@ export default function EditProfileScreen() {
   const router = useRouter();
   const { userData, loading, updateUserData } = useUserData();
   const { showMessage } = useFlashMessage();
-  const insets = useSafeAreaInsets();
-
-  const [name, setName] = useState("");
-  const [aboutMe, setAboutMe] = useState("");
-  const [location, setLocation] = useState<PlaceData | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-
-  const handleSavePress = () => {
-    if (userData) {
-      handleSave({
-        name,
-        aboutMe,
-        location,
-      });
-    }
-  };
-
-  // Initialize form with user data
-  useEffect(() => {
-    if (userData) {
-      setName(userData.name || "");
-      setAboutMe(userData.aboutMe || "");
-
-      // Handle location differently based on what's stored in userData
-      if (userData.location) {
-        if (typeof userData.location === "string") {
-          // Legacy format: just a location string
-          setLocation({
-            name: userData.location,
-            placeId: "",
-            latitude: 0,
-            longitude: 0,
-          });
-        } else {
-          // New format: complete location object
-          setLocation(userData.location as PlaceData);
-        }
-      } else {
-        setLocation(null);
-      }
-    }
-  }, [userData]);
-
   const handleSave = async ({
     name: newName,
     aboutMe: newAboutMe,
@@ -79,6 +36,7 @@ export default function EditProfileScreen() {
       const formattedLocation: Location | null = newLocation
         ? {
             name: newLocation.name,
+            displayName: newLocation.displayName || newLocation.name, // Include displayName field
             placeId: newLocation.placeId || "", // Ensure placeId is never undefined
             latitude: newLocation.latitude,
             longitude: newLocation.longitude,

@@ -42,9 +42,11 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
       if (typeof userData.location === "string") {
         setLocation({
           name: userData.location,
+          displayName: userData.location, // For legacy string locations, use same value
           placeId: "",
           latitude: 0,
           longitude: 0,
+          description: userData.location,
         });
       } else {
         setLocation(userData.location as PlaceData);

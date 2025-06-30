@@ -159,6 +159,7 @@ export default function WalkScreen() {
     <>
       <Stack.Screen
         options={{
+          presentation: "containedModal",
           title: getWalkTitle(walk, user?.uid),
           headerLeft: () => <HeaderBackButton />,
           headerRight: () => (

@@ -1,14 +1,12 @@
-import {
-  PlaceData,
-  PlacesAutocomplete,
-} from "@/components/UI/PlacesAutocomplete";
 import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 import { COLORS } from "@/styles/colors";
+import { extractDisplayName } from "@/utils/locationUtils";
 import { ArrowLeft } from "@tamagui/lucide-icons";
 import React, { useRef } from "react";
 import { Keyboard } from "react-native";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
 import { Button, Text, YStack } from "tamagui";
+import { PlaceData, PlacesAutocomplete } from "./UI/PlacesAutocomplete";
 
 interface Props {
   value: any;
@@ -108,8 +106,14 @@ const LocationAutocomplete: React.FC<Omit<Props, "styles">> = ({
 
   // Handle selection of a place
   const handlePlaceSelect = (placeData: PlaceData) => {
+    console.log("LocationAutocomplete - Received place data:", JSON.stringify(placeData, null, 2));
+    
     const locationData = {
       name: placeData.name,
+      displayName: extractDisplayName(
+        placeData.addressComponents || [],
+        placeData.formattedAddress
+      ),
       placeId: placeData.placeId,
       latitude: placeData.latitude,
       longitude: placeData.longitude,

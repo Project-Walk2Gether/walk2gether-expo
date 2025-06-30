@@ -5,14 +5,19 @@ import {
   GooglePlacesAutocompleteRef,
   Place,
 } from "react-native-google-places-autocomplete";
+import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
+import { extractDisplayName } from "@/utils/locationUtils";
 import { Text, YStack } from "tamagui";
 
 export interface PlaceData {
   name: string;
+  displayName?: string; // City, state, country format for admin display
   placeId: string;
   latitude: number;
   longitude: number;
-  description?: string;
+  description: string;
+  addressComponents?: any[]; // Google Places API address components
+  formattedAddress?: string; // Google Places API formatted address
 }
 
 interface Props {
@@ -85,15 +90,23 @@ export const PlacesAutocomplete = React.forwardRef<
           fetchDetails={true}
           onPress={(data, details = null) => {
             if (details) {
-              onSelect({
-                name:
+              const locationName = 
                   data.description ||
                   data.structured_formatting?.main_text ||
-                  "Selected Location",
+                  "Selected Location";
+                
+              const extractedDisplayName = extractDisplayName(details.address_components, details.formatted_address);
+              console.log("PlacesAutocomplete - Selected location with displayName:", extractedDisplayName);
+              
+              onSelect({
+                name: locationName,
+                displayName: extractedDisplayName,
                 placeId: data.place_id || data.id,
                 latitude: details.geometry.location.lat,
                 longitude: details.geometry.location.lng,
                 description: data.description || details.formatted_address,
+                addressComponents: details.address_components,
+                formattedAddress: details.formatted_address,
               });
             }
           }}

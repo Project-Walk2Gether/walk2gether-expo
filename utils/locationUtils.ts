@@ -136,6 +136,59 @@ export const reverseGeocode = async (latitude: number, longitude: number) => {
  * @param longitude The longitude coordinate
  * @param label Optional label for the location
  */
+/**
+ * Extracts city, state, and country from Google Places address components
+ * for a clean admin display format
+ * 
+ * @param addressComponents Array of address components from Google Places API
+ * @returns Formatted string like "San Francisco, CA, USA" or fallback to formatted_address
+ */
+export const extractDisplayName = (addressComponents: any[], formattedAddress?: string): string => {
+  if (!addressComponents || addressComponents.length === 0) {
+    return formattedAddress || "Unknown Location";
+  }
+
+  let city = "";
+  let state = "";
+  let country = "";
+
+  // Parse address components to extract city, state, and country
+  for (const component of addressComponents) {
+    const types = component.types;
+    
+    // City (locality or administrative_area_level_3 as fallback)
+    if (types.includes("locality")) {
+      city = component.long_name;
+    } else if (!city && types.includes("administrative_area_level_3")) {
+      city = component.long_name;
+    }
+    
+    // State (administrative_area_level_1)
+    if (types.includes("administrative_area_level_1")) {
+      state = component.short_name; // Use short name for state abbreviation
+    }
+    
+    // Country
+    if (types.includes("country")) {
+      country = component.short_name; // Use short name for country code
+    }
+  }
+
+  // Build display name based on what we found
+  const parts = [];
+  if (city) parts.push(city);
+  if (state) parts.push(state);
+  if (country) parts.push(country);
+
+  // If we have at least city or state, use our formatted version
+  if (parts.length > 0) {
+    return parts.join(", ");
+  }
+
+  // Fallback to formatted address if we couldn't extract components
+  return formattedAddress || "Unknown Location";
+};
+
 export const openLocationInMaps = (
   latitude: number,
   longitude: number,

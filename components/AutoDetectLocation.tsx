@@ -1,4 +1,5 @@
 import { useLocation } from "@/context/LocationContext";
+import { extractDisplayName } from "@/utils/locationUtils";
 import { MapPin, X as XIcon } from "@tamagui/lucide-icons";
 import * as Device from "expo-device";
 import * as Location from "expo-location";
@@ -34,6 +35,7 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
     // Mock location data for San Francisco
     return {
       name: "123 Market Street, San Francisco, CA 94105",
+      displayName: "San Francisco, CA, US", // Admin display format
       placeId: "ChIJIQBpAG2ahYAR_6128GcTUEo", // A valid place ID for SF
       latitude: 37.7935,
       longitude: -122.3964,
@@ -46,7 +48,7 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
     async function detectLocation() {
       // Reset the cancel flag
       cancelLocationDetection.current = false;
-      
+
       setLoading(true);
       setError(null);
       locationFound.current = false;
@@ -58,16 +60,16 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
         if (isSimulator) {
           // Use mock location data for simulator/emulator
           console.log("Using mock location for simulator/emulator");
-          
+
           // Simulate a delay for a more realistic experience
           await new Promise(resolve => setTimeout(resolve, 1000));
-          
+
           // Check if operation was canceled during the delay
           if (cancelLocationDetection.current) {
             setLoading(false);
             return;
           }
-          
+
           // Set mock location data
           const mockLocation = getMockSanFranciscoLocation();
           locationFound.current = true;
@@ -75,7 +77,7 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
           setFieldValue("location", mockLocation);
           return;
         }
-        
+
         // For real devices, continue with normal flow
         // Only proceed if location permission is granted
         if (!locationPermission) {
@@ -154,6 +156,7 @@ const AutoDetectLocation: React.FC<AutoDetectLocationProps> = ({
 
           setFieldValue("location", {
             name: result.formatted_address,
+            displayName: extractDisplayName(result.address_components, result.formatted_address),
             placeId: result.place_id,
             latitude,
             longitude,
