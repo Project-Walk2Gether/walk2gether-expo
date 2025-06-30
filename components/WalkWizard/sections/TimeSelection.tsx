@@ -10,7 +10,7 @@ import { Calendar } from "react-native-calendars";
 import { Button, Card, Text, View, XStack, YStack } from "tamagui";
 import WizardWrapper from "./WizardWrapper";
 
-interface TimeSelectionProps {
+interface Props {
   onContinue: () => void;
   onBack?: () => void;
   onSubmit?: () => void;
@@ -18,7 +18,7 @@ interface TimeSelectionProps {
   totalSteps?: number;
 }
 
-export const TimeSelection: React.FC<TimeSelectionProps> = ({
+export const TimeSelection: React.FC<Props> = ({
   onContinue,
   onBack,
   onSubmit,
@@ -42,7 +42,7 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
   const [selectedTime, setSelectedTime] = useState<Date>(
     new Date(1970, 0, 1, initialDate.getHours(), initialDate.getMinutes(), 0, 0)
   );
-  
+
   // Android-specific state for time picker
   const [showTimePicker, setShowTimePicker] = useState(false);
   const isAndroid = Platform.OS === "android";
@@ -50,14 +50,26 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
   // Update formData.date (Firestore Timestamp) whenever date or time changes
   useChangeEffect(() => {
     if (timeOption === "future") {
+      console.log('useChangeEffect triggered with:');
+      console.log('selectedDate:', selectedDate.toISOString());
+      console.log('selectedTime:', selectedTime.toISOString());
+      console.log('timeOption:', timeOption);
       const combined = combineDateAndTime(selectedDate, selectedTime);
+      console.log('Combined date and time:', combined.toISOString());
       updateFormData({ date: Timestamp.fromDate(combined) });
+      console.log('Updated formData.date with timestamp');
     }
   }, [selectedDate, selectedTime, timeOption]);
 
   // Date picker only updates selectedDate
   const handleDateChange = (day: any) => {
-    setSelectedDate(new Date(day.timestamp));
+    console.log('handleDateChange called with:', day);
+    console.log('day.timestamp:', day.timestamp);
+    console.log('Creating new date from timestamp');
+    const newDate = new Date(day.timestamp);
+    console.log('New date object:', newDate.toISOString());
+    setSelectedDate(newDate);
+    console.log('selectedDate after update:', newDate.toISOString());
   };
 
   // Time picker only updates selectedTime
@@ -150,7 +162,10 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
               <View borderRadius={10} overflow="hidden" backgroundColor="white">
                 <Calendar
                   minDate={new Date().toISOString().split("T")[0]}
-                  onDayPress={handleDateChange}
+                  onDayPress={(day) => {
+                    console.log('Calendar onDayPress event:', day);
+                    handleDateChange(day);
+                  }}
                   theme={{
                     selectedDayBackgroundColor: COLORS.action,
                     todayTextColor: COLORS.action,
@@ -170,7 +185,8 @@ export const TimeSelection: React.FC<TimeSelectionProps> = ({
                 {isAndroid ? (
                   <>
                     <Text fontSize={16} fontWeight="500" marginBottom="$2">
-                      Selected Time: {selectedTime.toLocaleTimeString([], {
+                      Selected Time:{" "}
+                      {selectedTime.toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
