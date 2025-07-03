@@ -66,7 +66,7 @@ function App() {
 const enhance = flowRight(
   withTamagui,
   withFlashMessage,
-  withErrorBoundary, 
+  withErrorBoundary,
   withUpdates,
   withAuthProvider
 );

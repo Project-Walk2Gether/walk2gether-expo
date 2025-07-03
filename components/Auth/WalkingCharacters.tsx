@@ -2,6 +2,7 @@ import LottieView from "lottie-react-native";
 import React, { useEffect, useRef } from "react";
 import { Animated, Dimensions, View as RNView } from "react-native";
 import { YStack } from "tamagui";
+import { isDetox } from "../../utils/launchArgs";
 
 const { width } = Dimensions.get("window");
 
@@ -25,6 +26,10 @@ export default function WalkingCharacters({ style }: WalkingCharactersProps) {
   const position = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Skip animations in test environment to avoid flakiness and speed up tests
+    if (isDetox) {
+      return;
+    }
     // Create a sequence that moves characters across screen then resets position
     const walkAnimation = Animated.sequence([
       // Move across the screen

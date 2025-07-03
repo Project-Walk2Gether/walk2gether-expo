@@ -1,0 +1,20 @@
+appId: org.projectwalk2gether.walk2gether
+clearState: true
+---
+# Create a test user and get auth token
+- runScript:
+    file: "../scripts/maestro/call-test-api.js"
+    env:
+      endpoint: "/create-test-user"
+      data: '{"displayName":"Maestro Test User","phoneNumber":"+12003004000"}'
+
+# Start the app
+- clearKeychain
+- launchApp
+
+# Sign in with the auth token
+- openLink: "walk2gether://auth?token=${output.authToken}"
+- tapOn: "Walk2Gether"
+
+# Verify we're logged in (should bypass auth screen)
+- assertVisible: "Home"

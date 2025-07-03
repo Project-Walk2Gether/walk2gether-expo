@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { isDetox } from "../../utils/launchArgs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, View, YStack } from "tamagui";
 import Birds from "../Birds";
@@ -44,9 +45,9 @@ export default function AuthScenicLayout({
   const cloudsAnimation = useRef(new Animated.Value(-200)).current;
   const cloudsOpacity = useRef(new Animated.Value(isAnimated ? 0 : 1)).current;
 
-  // Run animations when component mounts if isAnimated is true
+  // Run animations when component mounts if isAnimated is true and not in test mode
   useEffect(() => {
-    if (isAnimated) {
+    if (isAnimated && !isDetox) {
       // Animate sun from left
       Animated.timing(sunAnimation, {
         toValue: 0,
@@ -128,7 +129,7 @@ export default function AuthScenicLayout({
             resizeMode: "cover",
           }}
         />
-        {showTree && (
+        {showTree && !isDetox ? (
           <LottieView
             style={{
               position: "absolute",
@@ -142,7 +143,17 @@ export default function AuthScenicLayout({
             loop
             speed={0.15}
           />
-        )}
+        ) : showTree ? (
+          <View
+            style={{
+              position: "absolute",
+              bottom: -120,
+              left: -370,
+              width: 750,
+              height: 750,
+            }}
+          />
+        ) : null}
         <WalkingCharacters
           style={{
             position: "absolute",
