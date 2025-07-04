@@ -1,4 +1,6 @@
 import WalkCard from "@/components/WalkCard";
+import { handleWalkPress } from "@/utils/navigationUtils";
+import { useRouter } from "expo-router";
 import React from "react";
 import { Message as MessageType, Walk, WithId } from "walk2gether-shared";
 import MessageComponent from "./Message";
@@ -18,6 +20,7 @@ export function TimelineItem({
   currentUserId,
   onLongPress,
 }: TimelineItemProps) {
+  const router = useRouter();
   if (item.type === "message") {
     return (
       <MessageComponent
@@ -29,9 +32,9 @@ export function TimelineItem({
   } else if (item.type === "walk") {
     return (
       <WalkCard
+        showActions
         walk={item.data as WithId<Walk>}
-        showActions={false}
-        onPress={undefined}
+        onPress={() => handleWalkPress(item.data as WithId<Walk>, router)}
       />
     );
   }

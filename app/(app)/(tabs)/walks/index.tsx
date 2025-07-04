@@ -8,6 +8,7 @@ import { useNotifications } from "@/context/NotificationsContext";
 import { useWalks } from "@/context/WalksContext";
 import { COLORS } from "@/styles/colors";
 import { syncWalkReminders } from "@/utils/notifications";
+import { handleWalkPress } from "@/utils/navigationUtils";
 import { Footprints } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -15,7 +16,7 @@ import React, { useEffect } from "react";
 import { FlatList, View } from "react-native";
 import { Text } from "tamagui";
 import useDynamicRefs from "use-dynamic-refs";
-import { Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
+import { Walk, WithId } from "walk2gether-shared";
 
 export default function WalksScreen() {
   const router = useRouter();
@@ -28,35 +29,14 @@ export default function WalksScreen() {
     if (permissionStatus?.granted) syncWalkReminders(upcomingWalks);
   }, [upcomingWalks, permissionStatus?.granted]);
 
-  // Custom handler for walk card navigation
-  const handleWalkPress = (walk: WithId<Walk>) => {
-    if (walkIsFriendsWalk(walk)) {
-      // For friends walks, check if participants exist
-      const hasParticipants =
-        walk.participantUids && walk.participantUids.length > 1; // More than just the creator
-
-      if (hasParticipants) {
-        // Friends walk with participants - go to show screen
-        router.push({ pathname: `/walks/[id]`, params: { id: walk.id } });
-      } else {
-        // Friends walk with no participants - go to invite screen
-        router.push({
-          pathname: `/walks/[id]/invite`,
-          params: { id: walk.id },
-        });
-      }
-    } else {
-      // Not a friends walk (neighborhood walk) - go to walk details
-      router.push({ pathname: `/walks/[id]`, params: { id: walk.id } });
-    }
-  };
+  // Using the shared walk navigation handler
 
   const renderWalkItem = ({ item }: { item: WithId<Walk> }) => (
     <WalkCard
       key={item.id}
       walk={item}
       showActions
-      onPress={() => handleWalkPress(item)}
+      onPress={() => handleWalkPress(item, router)}
     />
   );
 
