@@ -1,9 +1,9 @@
 import { COLORS } from "@/styles/colors";
 import PhoneInput, {
   PhoneInputProps,
+  PhoneInputRefType,
 } from "@linhnguyen96114/react-native-phone-input";
-import React, { forwardRef, useImperativeHandle } from "react";
-
+import React, { forwardRef } from "react";
 import { View } from "tamagui";
 import { FormControl } from "../FormControl";
 
@@ -19,13 +19,8 @@ interface Props {
   required?: boolean;
 }
 
-export const PhoneInputField = forwardRef<typeof PhoneInput, Props>(
+export const PhoneInputField = forwardRef<PhoneInputRefType, Props>(
   (props, ref) => {
-    const phoneInputRef = React.useRef(null);
-
-    // Forward the ref to the PhoneInput component
-    useImperativeHandle(ref, () => phoneInputRef.current!);
-
     const {
       defaultValue,
       defaultCode = "US",
@@ -52,7 +47,7 @@ export const PhoneInputField = forwardRef<typeof PhoneInput, Props>(
           overflow="hidden"
         >
           <PhoneInput
-            ref={phoneInputRef}
+            ref={ref}
             defaultValue={defaultValue}
             defaultCode={defaultCode}
             layout={layout}
@@ -85,6 +80,7 @@ export const PhoneInputField = forwardRef<typeof PhoneInput, Props>(
             }}
             textInputProps={{
               placeholderTextColor: COLORS.textMuted,
+              testID: "phone-input"
             }}
             codeTextStyle={{
               color: COLORS.text,
