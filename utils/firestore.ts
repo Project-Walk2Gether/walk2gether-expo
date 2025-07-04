@@ -2,6 +2,7 @@ import { db } from "@/config/firebase";
 import {
   doc as firebaseDoc,
   FirebaseFirestoreTypes,
+  getDoc,
   onSnapshot,
   serverTimestamp,
   updateDoc,
@@ -41,8 +42,11 @@ export function useDoc<T extends DocumentData>(docPath?: string) {
       (doc) => {
         console.log("doc snapshot " + logLabel);
         const data = doc?.data() as T;
-        if (!data) setDoc(null);
-        else
+
+        if (!data) {
+          console.log({ path: doc.ref.path, data });
+          setDoc(null);
+        } else
           setDoc(
             documentWithIdFromSnapshot(
               doc as FirebaseFirestoreTypes.DocumentSnapshot<T>
@@ -147,7 +151,7 @@ export async function fetchDocsByRefs<T extends DocumentData>(
     refs.map(async (ref) => {
       try {
         console.log("Getting: " + ref.path);
-        const snap = await ref.get();
+        const snap = await getDoc(ref);
         return snap.exists() ? documentWithIdFromSnapshot(snap) : null;
       } catch (error: any) {
         console.error("Error fetching doc", error);

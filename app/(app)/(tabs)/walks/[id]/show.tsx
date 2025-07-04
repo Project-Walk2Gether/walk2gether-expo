@@ -7,6 +7,7 @@ import { getWalkTitle } from "@/utils/walkType";
 import {
   addDoc,
   collection,
+  getDoc,
   orderBy,
   query,
   serverTimestamp,
@@ -62,7 +63,7 @@ export default function WalkScreen() {
       const messageRef = firestore_instance.doc(
         `walks/${id}/messages/${messageId}`
       );
-      const messageDoc = await messageRef.get();
+      const messageDoc = await getDoc(messageRef);
 
       // Only allow users to delete their own messages
       if (messageDoc.exists() && messageDoc.data()?.senderId === user.uid) {

@@ -1,7 +1,7 @@
 import { db } from "@/config/firebase";
-import { doc } from "@react-native-firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
+import { doc, getDoc } from "@react-native-firebase/firestore";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
@@ -38,7 +38,7 @@ export const TokenSignInForm: React.FC<TokenSignInFormProps> = ({
 
         // Check if the user has a profile
         const userDataDoc = doc(db, `users/${userCredential.user.uid}`);
-        const hasData = (await userDataDoc.get()).exists;
+        const hasData = (await getDoc(userDataDoc)).exists;
 
         if (!hasData) {
           router.replace("/onboarding/complete-your-profile");
