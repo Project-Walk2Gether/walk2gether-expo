@@ -3,7 +3,8 @@ import React from "react";
 import { FlatList } from "react-native";
 import { View } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
-import ParticipantItem from "./ParticipantItem";
+import ParticipantItem from "../ParticipantItem";
+import { sortParticipants } from "./sortParticipants";
 
 interface Props {
   status: ReturnType<typeof getWalkStatus>;
@@ -40,33 +41,7 @@ export default function ParticipantsList({
     : [];
 
   // Sort participants based on requirements
-  const sortedParticipants = [...confirmedParticipants].sort((a, b) => {
-    const aIsConfirmed = !!a.acceptedAt;
-    const bIsConfirmed = !!b.acceptedAt;
-    const aIsOwner = a.userUid === currentUserId;
-    const bIsOwner = b.userUid === currentUserId;
-
-    // First sort by confirmation status
-    if (aIsConfirmed && !bIsConfirmed) return -1;
-    if (!aIsConfirmed && bIsConfirmed) return 1;
-
-    // Among confirmed participants, owners first
-    if (aIsConfirmed && bIsConfirmed) {
-      if (aIsOwner && !bIsOwner) return -1;
-      if (!aIsOwner && bIsOwner) return 1;
-    }
-
-    // Then by status: arrived first
-    if (a.status === "arrived" && b.status !== "arrived") return -1;
-    if (b.status === "arrived" && a.status !== "arrived") return 1;
-
-    // Then on-the-way
-    if (a.status === "on-the-way" && b.status === "pending") return -1;
-    if (b.status === "on-the-way" && a.status === "pending") return 1;
-
-    // Alphabetically by name
-    return a.displayName.localeCompare(b.displayName);
-  });
+  const sortedParticipants = sortParticipants(confirmedParticipants, currentUserId);
 
   // Define a type that extends ParticipantWithRoute to include our flag
   type ExtendedParticipant = ParticipantWithRoute & {

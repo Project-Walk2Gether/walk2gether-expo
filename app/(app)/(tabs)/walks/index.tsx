@@ -7,8 +7,8 @@ import WalkCard from "@/components/WalkCard";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useWalks } from "@/context/WalksContext";
 import { COLORS } from "@/styles/colors";
-import { syncWalkReminders } from "@/utils/notifications";
 import { handleWalkPress } from "@/utils/navigationUtils";
+import { syncWalkReminders } from "@/utils/notifications";
 import { Footprints } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -28,8 +28,6 @@ export default function WalksScreen() {
   useEffect(() => {
     if (permissionStatus?.granted) syncWalkReminders(upcomingWalks);
   }, [upcomingWalks, permissionStatus?.granted]);
-
-  // Using the shared walk navigation handler
 
   const renderWalkItem = ({ item }: { item: WithId<Walk> }) => (
     <WalkCard

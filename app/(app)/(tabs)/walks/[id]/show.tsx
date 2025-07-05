@@ -177,7 +177,7 @@ export default function WalkScreen() {
 
   const status = getWalkStatus(walk);
 
-  console.log({ participants });
+  console.log({ participantsCount: participants.length });
 
   return (
     <>
@@ -239,7 +239,7 @@ export default function WalkScreen() {
         >
           <BottomSheetScrollView
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ zIndex: 1000000 }}
+            contentContainerStyle={{ zIndex: 1000000, paddingBottom: 100 }}
           >
             <ParticipantsList
               status={status}
@@ -256,8 +256,8 @@ export default function WalkScreen() {
               onDeleteMessage={handleDeleteMessage}
               onActiveRoundChange={setActiveRound}
             />
-
-            {/* Show upcoming rounds list only for meetup walks and only to walk owners */}
+            Show upcoming rounds list only for meetup walks and only to walk
+            owners
             {walk.type === "meetup" && isWalkOwner && (
               <UpcomingRoundsList
                 walkId={id}

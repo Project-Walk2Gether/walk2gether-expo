@@ -2,9 +2,14 @@ import WalkCard from "@/components/WalkCard";
 import { handleWalkPress } from "@/utils/navigationUtils";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Message as MessageType, Walk, WithId, Round as RoundType } from "walk2gether-shared";
+import {
+  Message as MessageType,
+  Round as RoundType,
+  Walk,
+  WithId,
+} from "walk2gether-shared";
 import MessageComponent from "./Message";
-import Round from "./Round";
+import Round from "./RoundCard";
 
 export type TimelineItemType =
   | { type: "message"; data: MessageType }
@@ -27,7 +32,7 @@ export function TimelineItem({
   onToggleActiveRound,
 }: TimelineItemProps) {
   const router = useRouter();
-  
+
   if (item.type === "message") {
     return (
       <MessageComponent
@@ -47,7 +52,7 @@ export function TimelineItem({
   } else if (item.type === "round") {
     const round = item.data as RoundType;
     const isActive = activeRound?.roundNumber === round.roundNumber;
-    
+
     return (
       <Round
         round={round}
