@@ -9,10 +9,7 @@ import functions, {
 import storage, {
   connectStorageEmulator,
 } from "@react-native-firebase/storage";
-import Constants from "expo-constants";
-
-export const emulatorsEnabled =
-  __DEV__ && Constants.expoConfig?.extra?.emulatorsEnabledInDev;
+import { emulatorsEnabled } from "./emulators";
 
 // Initialize Firebase services
 export const auth_instance = auth();
