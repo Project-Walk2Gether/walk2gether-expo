@@ -14,7 +14,7 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import { Attachment, Message } from "walk2gether-shared";
+import { Attachment, Message, Round as RoundType } from "walk2gether-shared";
 import {
   ImagePickerOption,
   pickImage,
@@ -28,6 +28,7 @@ type Props = {
   chatId: string;
   senderId: string;
   onFocus?: () => void;
+  activeRound?: RoundType | null;
 };
 
 export default function MessageForm({
@@ -37,6 +38,7 @@ export default function MessageForm({
   chatId,
   senderId,
   onFocus,
+  activeRound,
 }: Props) {
   const { showMenu } = useMenu();
   const [messageText, setMessageText] = useState("");
@@ -87,6 +89,9 @@ export default function MessageForm({
       const message: Partial<Message> = {
         message: messageText.trim(),
         attachments: attachments.length > 0 ? attachments : undefined,
+        // If there's an active round, this message is an answer to its question
+        roundId: activeRound ? `${activeRound.walkId}_${activeRound.roundNumber}` : undefined,
+        isRoundAnswer: !!activeRound,
       };
 
       onSendMessage(message);
@@ -181,12 +186,12 @@ export default function MessageForm({
 
           <Input
             flex={1}
-            placeholder="Type a message..."
+            placeholder={activeRound ? `Answer the question...` : "Type a message..."}
             value={messageText}
             onChangeText={setMessageText}
-            backgroundColor="white"
+            backgroundColor={activeRound ? "$blue2" : "white"}
             borderWidth={1}
-            borderColor="#e0e0e0"
+            borderColor={activeRound ? "$blue8" : "#e0e0e0"}
             borderRadius="$4"
             autoCapitalize="none"
             color={COLORS.text}
