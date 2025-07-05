@@ -20,9 +20,9 @@ interface Props {
   action?: ReactNode;
 
   /**
-   * Type of walk: "Friends" or "Neighborhood"
+   * Type of walk: "Friends", "Neighborhood", or "Meetup"
    */
-  walkType: "Friends" | "Neighborhood";
+  walkType: "Friends" | "Neighborhood" | "Meetup";
 
   /**
    * Whether the current user is the initiator of the walk
@@ -46,11 +46,14 @@ export const CardHeader: React.FC<Props> = ({
   initiatorName,
 }) => {
   // Determine which icon to show based on walkType
-  const walkTypeIcon =
+  const walkTypeIcon = 
     walkType === "Friends" ? (
       <WalkIcon size={24} color="#000" />
-    ) : (
+    ) : walkType === "Neighborhood" ? (
       <House size={24} color="#000" />
+    ) : (
+      // Meetup icon - using chat bubbles icon from Tamagui
+      <Text fontSize={24} color="#000">💬</Text>
     );
 
   return (

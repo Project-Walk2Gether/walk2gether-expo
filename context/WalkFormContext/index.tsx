@@ -10,7 +10,7 @@ import React, {
 } from "react";
 import { Walk } from "walk2gether-shared";
 import { WizardStep } from "./steps";
-import { getWalkTypeConfig, walkTypeConfigs } from "./walkTypes";
+import { getWalkTypeConfig } from "./walkTypes";
 
 // WizardStep is now imported from ./steps
 
@@ -104,34 +104,15 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
 
   // Define wizard steps based on the walk type
   const wizardSteps = useMemo<WizardStep[]>(() => {
-    console.log("wizardSteps useMemo:", {
-      currentType: formData.type,
-      showHowItWorks,
-      steps: formData.type
-        ? walkTypeConfigs[formData.type].getSteps(showHowItWorks ?? undefined)
-        : [{ key: "type", title: "Select walk type" }],
-    });
-
     // Get the steps for the selected walk type
     const walkTypeConfig = getWalkTypeConfig(formData.type);
     const steps = walkTypeConfig.getSteps(showHowItWorks ?? undefined);
-    console.log("Selected walk type steps:", {
-      type: formData.type,
-      steps,
-      currentStep,
-      totalSteps,
-    });
     return steps;
   }, [formData, showHowItWorks]); // Changed from [formData.type] to [formData] to ensure steps are recalculated properly
 
   const totalSteps = wizardSteps.length;
 
   const updateFormData = (newData: Partial<WalkFormData>) => {
-    console.log("updateFormData:", {
-      newData,
-      currentFormData: formData,
-      currentStep,
-    });
     setFormData((prevData) => ({
       ...prevData,
       ...newData,
@@ -152,11 +133,6 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
   const router = useRouter();
 
   const goToNextStep = () => {
-    console.log("goToNextStep called:", {
-      currentStep,
-      totalSteps,
-      wizardSteps,
-    });
     if (currentStep < totalSteps - 1) {
       // If there's a next step, go to it
       setCurrentStep(currentStep + 1);
@@ -239,7 +215,10 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
           ...Object.entries(defaultValues).reduce((acc, [key, value]) => {
             // Only set the value if it's not already set
             const typedKey = key as keyof typeof prev;
-            if (prev[typedKey] === undefined || (typedKey === 'topic' && formData.type === 'meetup')) {
+            if (
+              prev[typedKey] === undefined ||
+              (typedKey === "topic" && formData.type === "meetup")
+            ) {
               // Type assertion to handle the complex types
               (acc as any)[typedKey] = value;
             }

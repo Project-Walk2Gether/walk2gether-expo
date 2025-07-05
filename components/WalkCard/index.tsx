@@ -110,7 +110,7 @@ const WalkCard: React.FC<Props> = ({
   // Use the extracted LocationDisplay component
 
   // Determine the walk type for color styling
-  const walkType = walkIsNeighborhoodWalk(walk) ? "neighborhood" : "friends";
+  const walkType = walk.type;
 
   return (
     <YStack marginVertical={10} opacity={!isMine && isCancelled ? 0.85 : 1}>
@@ -127,7 +127,7 @@ const WalkCard: React.FC<Props> = ({
         <CardHeader
           icon={<UserAvatar uid={walk.createdByUid} size={34} />}
           title={getWalkTitle(walk, user?.uid)}
-          walkType={walkIsNeighborhoodWalk(walk) ? "Neighborhood" : "Friends"}
+          walkType={walk.type === "neighborhood" ? "Neighborhood" : walk.type === "meetup" ? "Meetup" : "Friends"}
           isUserInitiator={isMine}
           initiatorName={ownerName}
           action={
@@ -162,6 +162,13 @@ const WalkCard: React.FC<Props> = ({
           icon={<Timer size={16} color="#444" />}
           text={`${walk.durationMinutes} minutes`}
         />
+        {/* Show topic for meetup walks */}
+        {walk.type === "meetup" && walk.topic && (
+          <IconTextRow
+            icon={<Text fontSize={16} color="#444">💬</Text>}
+            text={`Topic: ${walk.topic}`}
+          />
+        )}
         <LocationDisplay
           walk={walk}
           userCoords={coords}

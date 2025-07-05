@@ -6,6 +6,8 @@ export const getWalkTypeLabel = (type: Walk["type"]) => {
       return "Friend Walk";
     case "neighborhood":
       return "Neighborhood Walk";
+    case "meetup":
+      return "Meetup Walk";
     default:
       return "Walk";
   }
@@ -25,9 +27,11 @@ export const getWalkTitle = (
   const isMine = walk.createdByUid === currentUserId;
 
   if (isMine) {
-    return `Your ${walk.type === "friends" ? "friend" : "neighborhood"} walk`;
+    return `Your ${getWalkTypeLabel(walk.type)} walk`;
   } else if (walk.type === "friends") {
     return `${walk.organizerName}'s friend walk`;
+  } else if (walk.type === "meetup") {
+    return `${walk.organizerName}'s meetup walk`;
   } else {
     return `${walk.organizerName}'s neighborhood walk`;
   }

@@ -1,4 +1,4 @@
-import { format, isThisWeek, isToday, isTomorrow } from "date-fns";
+import { format, isThisWeek, isToday, isTomorrow, differenceInSeconds } from "date-fns";
 
 /**
  * Format a date intelligently based on when it is
@@ -20,4 +20,24 @@ export function getSmartDateFormat(date: Date): string {
   } else {
     return `${format(date, "MMM d")} at ${format(date, "h:mm a")}`;
   }
+}
+
+/**
+ * Format the time left between two dates as a countdown string (MM:SS)
+ * 
+ * @param currentDate The current date
+ * @param targetDate The target date to count down to
+ * @returns A string in the format "MM:SS"
+ */
+export function formatTimeLeft(currentDate: Date, targetDate: Date): string {
+  const diffInSeconds = differenceInSeconds(targetDate, currentDate);
+  
+  if (diffInSeconds <= 0) {
+    return "00:00";
+  }
+  
+  const minutes = Math.floor(diffInSeconds / 60);
+  const seconds = diffInSeconds % 60;
+  
+  return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }

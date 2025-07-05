@@ -1,4 +1,5 @@
 import MessageForm from "@/components/Chat/MessageForm";
+import UpcomingRoundsList from "@/components/Chat/UpcomingRoundsList";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
@@ -13,7 +14,7 @@ import {
   serverTimestamp,
 } from "@react-native-firebase/firestore";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import MessageList, {
   MessageListRef,
 } from "../../../../../components/Chat/MessageList";
@@ -29,28 +30,49 @@ import { COLORS } from "@/styles/colors";
 import { getWalkStatus } from "@/utils/walkUtils";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { KeyboardAvoidingView } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, YStack } from "tamagui";
-import { Message, ParticipantWithRoute, Walk } from "walk2gether-shared";
+import {
+  MeetupWalk,
+  Message,
+  ParticipantWithRoute,
+  Round,
+  Walk,
+} from "walk2gether-shared";
 
 export default function WalkScreen() {
   const params = useLocalSearchParams();
   const id = params.id as string;
   const { user } = useAuth();
   const { userData } = useUserData();
-  const { doc: walk } = useDoc<Walk>(`walks/${id}`);
+  const { doc: walk } = useDoc<Walk | MeetupWalk>(`walks/${id}`);
   // Get walk messages using the useQuery hook
   const messagesRef = collection(firestore_instance, `walks/${id}/messages`);
   const q = query(messagesRef, orderBy("createdAt", "asc"));
   const { docs: messagesData } = useQuery<Message>(q);
 
-  // Convert messages to timeline format for MessageList component
+  // Get rounds for the walk
+  const roundsRef = collection(firestore_instance, `walks/${id}/rounds`);
+  const roundsQuery = query(roundsRef, orderBy("roundNumber", "asc"));
+  const { docs: roundsData } = useQuery<Round>(roundsQuery);
+
+  // Convert messages and rounds to timeline format for MessageList component
   const timeline = React.useMemo(() => {
-    return messagesData.map((message) => ({
+    // Create timeline items for messages
+    const messageItems = messagesData.map((message) => ({
       type: "message" as const,
       data: message,
     }));
-  }, [messagesData]);
+
+    // Create timeline items for rounds
+    const roundItems = roundsData.map((round) => ({
+      type: "round" as const,
+      data: round,
+    }));
+
+    // Combine and sort by timestamp (rounds should appear before messages)
+    // For simplicity, we'll just put all rounds at the beginning
+    return [...roundItems, ...messageItems];
+  }, [messagesData, roundsData]);
 
   // Get all participants for the walk
   const participants = useWalkParticipants(id);
@@ -78,6 +100,9 @@ export default function WalkScreen() {
   const chatBottomSheetRef = useRef<BottomSheet>(null);
   const messageListRef = useRef<MessageListRef>(null);
 
+  // State for active round
+  const [activeRound, setActiveRound] = useState<Round | null>(null);
+
   // Define snap points for the chat bottom sheet (30% and 100% of screen height)
   // Get collapsed height for calculations (30% of screen height)
   const collapsedHeight = 158;
@@ -101,33 +126,33 @@ export default function WalkScreen() {
   const handleSendMessage = ({
     message,
     attachments,
+    roundId,
+    isRoundAnswer,
   }: {
     message?: string;
     attachments?: any[];
+    roundId?: string;
+    isRoundAnswer?: boolean;
   }) => {
     // Require either text or attachments
     if (
       ((!message || !message.trim()) &&
         (!attachments || attachments.length === 0)) ||
-      !user ||
-      !id ||
-      !userData
+      !user?.uid
     )
       return;
 
     try {
-      const messagesRef = collection(
-        firestore_instance,
-        `walks/${id}/messages`
-      );
-      addDoc(messagesRef, {
+      addDoc(collection(firestore_instance, `walks/${id}/messages`), {
         senderId: user.uid,
-        senderName: userData.name || user.displayName || "Unknown User",
-        message: message || "",
+        senderName: userData?.name || "Unknown User",
+        message: message?.trim(),
         createdAt: serverTimestamp(),
         read: false,
         attachments: attachments || [],
         walkId: id, // Explicitly set the walkId for the message
+        roundId, // Include the round ID if this is a round answer
+        isRoundAnswer, // Flag to indicate this is an answer to a round question
       });
     } catch (error) {
       console.error("Error sending message:", error);
@@ -147,14 +172,12 @@ export default function WalkScreen() {
     });
   };
 
-  const insets = useSafeAreaInsets();
-
-  // We don't need to render a backdrop for this bottom sheet
-
   if (!walk) return <FullScreenLoader />;
   if (!id) return <Text>Invalid walk ID</Text>;
 
   const status = getWalkStatus(walk);
+
+  console.log({ participants });
 
   return (
     <>
@@ -231,7 +254,22 @@ export default function WalkScreen() {
               currentUserId={user?.uid || ""}
               loading={false}
               onDeleteMessage={handleDeleteMessage}
+              onActiveRoundChange={setActiveRound}
             />
+
+            {/* Show upcoming rounds list only for meetup walks and only to walk owners */}
+            {walk.type === "meetup" && isWalkOwner && (
+              <UpcomingRoundsList
+                walkId={id}
+                upcomingRounds={(walk as MeetupWalk).upcomingRounds || []}
+                onRoundActivated={(round) => {
+                  // When a round is activated, update the active round state
+                  setActiveRound(round);
+                }}
+                currentUserId={user?.uid}
+                isWalkOwner={isWalkOwner}
+              />
+            )}
           </BottomSheetScrollView>
         </BottomSheet>
 
@@ -257,6 +295,7 @@ export default function WalkScreen() {
               chatId={id}
               senderId={user?.uid || ""}
               onFocus={handleMessageFormFocus}
+              activeRound={activeRound}
             />
           </YStack>
         </KeyboardAvoidingView>

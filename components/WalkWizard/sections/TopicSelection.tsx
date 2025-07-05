@@ -34,18 +34,18 @@ export const TopicSelection: React.FC<Props> = ({
       continueText="Continue"
     >
       <YStack gap="$4">
-        <Text fontSize={24} fontWeight="600">
-          Topic for Your Meetup
-        </Text>
-        <Text fontSize={16} color="#555">
-          What would you like to discuss during your walk?
-        </Text>
         <Card
           backgroundColor="white"
           borderRadius={12}
           elevation={2}
           padding="$4"
         >
+          <Text mb="$3" fontSize={24} fontWeight="600">
+            Topic for Your Meetup
+          </Text>
+          <Text mb="$3" fontSize={16} color="#555">
+            What would you like to discuss during your walk?
+          </Text>
           <Input
             placeholder="Enter your topic..."
             value={formData.topic || ""}
