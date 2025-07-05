@@ -2,6 +2,7 @@ import { useWalkForm } from "@/context/WalkFormContext";
 import React from "react";
 import { YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
+import { COLORS } from "../../../styles/colors";
 import WalkTypeCard from "../../WalkTypeCard";
 import WizardWrapper from "./WizardWrapper";
 
@@ -18,10 +19,14 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({
 }) => {
   const { formData, updateFormData } = useWalkForm();
 
-  // When a type is selected, update the form data and proceed
+  // When a type is selected, update the form data and then advance to the next step
   const setSelectedWalkType = (type: Walk["type"]) => {
     updateFormData({ type });
-    onContinue();
+    // After a short delay, advance to the next step
+    // This gives time for the form state to update
+    setTimeout(() => {
+      onContinue();
+    }, 100);
   };
 
   return (
@@ -36,20 +41,27 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({
           type="friends"
           title="Friend Walk"
           icon="people-outline"
-          color="#5A67F2"
-          backgroundColor="#E7E9FE"
+          color={COLORS.walkTypes.friends.main}
+          backgroundColor={COLORS.walkTypes.friends.background}
           description="Schedule a walk with a friend"
-          selected={formData.type === "friends"}
           onSelect={setSelectedWalkType}
         />
         <WalkTypeCard
           type="neighborhood"
           title="Neighborhood Walk"
           icon="home-outline"
-          color="#47C97E"
-          backgroundColor="#E4F6ED"
+          color={COLORS.walkTypes.neighborhood.main}
+          backgroundColor={COLORS.walkTypes.neighborhood.background}
           description="Start a walk in your neighborhood"
-          selected={formData.type === "neighborhood"}
+          onSelect={setSelectedWalkType}
+        />
+        <WalkTypeCard
+          type="meetup"
+          title="Meetup Walk"
+          icon="chatbubbles-outline"
+          color={COLORS.walkTypes.meetup.main}
+          backgroundColor={COLORS.walkTypes.meetup.background}
+          description="Schedule a walk with a topic, and invite the public"
           onSelect={setSelectedWalkType}
         />
       </YStack>

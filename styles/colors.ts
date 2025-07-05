@@ -58,5 +58,9 @@ export const COLORS = {
       main: "#47C97E", // Primary color for Neighborhood walks
       background: "#E4F6ED", // Background color for Neighborhood walks
     },
+    meetup: {
+      main: "#FF6B6B", // Primary color for Meetup walks
+      background: "#FFE5E0", // Background color for Meetup walks
+    },
   },
 };

@@ -18,6 +18,7 @@ import {
   QuoteSection,
   TimeSelection,
   TypeSelection,
+  TopicSelection,
 } from "./sections";
 import NeighborhoodWalkHowItWorksSection from "./sections/NeighborhoodWalkHowItWorksSection";
 import { WizardHeader } from "./sections/WizardHeader";
@@ -138,6 +139,12 @@ export function WalkWizard() {
         case "location":
           return {
             component: LocationSelection,
+            onContinue: goToNextStep,
+            onBack: goToPreviousStep,
+          };
+        case "topic":
+          return {
+            component: TopicSelection,
             onContinue: goToNextStep,
             onBack: goToPreviousStep,
           };
