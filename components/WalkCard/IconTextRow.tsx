@@ -72,6 +72,7 @@ export const IconTextRow: React.FC<Props> = ({
           color={textColor || color}
           numberOfLines={numberOfLines}
           ellipsizeMode="tail"
+          flexShrink={1}
           flex={numberOfLines && !afterContent ? 1 : undefined}
         >
           {text}
