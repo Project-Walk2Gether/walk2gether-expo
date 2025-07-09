@@ -30,6 +30,14 @@ const MeetupSpot: React.FC<Props> = ({ location }) => {
     >
       <YStack alignItems="center">
         {/* Label */}
+        <Text
+          fontSize={12}
+          fontWeight="bold"
+          textTransform="uppercase"
+          color={COLORS.text}
+        >
+          {displayText}
+        </Text>
         <XStack
           backgroundColor="white"
           paddingHorizontal="$3"
@@ -48,12 +56,7 @@ const MeetupSpot: React.FC<Props> = ({ location }) => {
             elevation: 5,
           }}
         >
-          <Text
-            fontSize={14}
-            fontWeight="bold"
-            color={COLORS.text}
-            textAlign="center"
-          >
+          <Text fontSize={14} color={COLORS.text} textAlign="center">
             {displayText}
           </Text>
         </XStack>

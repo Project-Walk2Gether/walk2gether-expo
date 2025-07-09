@@ -206,28 +206,6 @@ export default function WalkInfo({ walk }: Props) {
           </YStack>
         )}
       </YStack>
-
-      {/* Meetup Spot Card - only shown if notes exist and walk hasn't started */}
-      {!hasStarted && walk.startLocation?.notes && (
-        <YStack
-          backgroundColor={COLORS.tertiary} // Use the app's blue color
-          paddingVertical="$3"
-          paddingHorizontal="$3"
-          gap="$2"
-          borderRadius="$4"
-          animation="bouncy" // Add subtle animation
-        >
-          <XStack gap="$2" alignItems="center">
-            <Text color="black" fontSize="$3">
-              Meetup Spot:
-            </Text>
-            {/* <Badge backgroundColor="#fff" textColor="#4BB4E6" label="Meetup spot" /> */}
-            <Text color="white" fontSize="$4" fontWeight="bold">
-              {walk.startLocation.notes}
-            </Text>
-          </XStack>
-        </YStack>
-      )}
     </YStack>
   );
 }
