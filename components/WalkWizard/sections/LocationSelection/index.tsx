@@ -1,6 +1,6 @@
 import LocationButton from "@/components/UI/LocationButton";
 import { useWalkForm } from "@/context/WalkFormContext";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { YStack } from "tamagui";
 import WizardWrapper, { WizardWrapperHandle } from "../WizardWrapper";
 
@@ -59,42 +59,30 @@ export const LocationSelection: React.FC<Props> = ({
   // Radius in meters for neighborhood walks
   const walkRadius = 700;
 
-  // Memoize location coordinates to prevent unnecessary recalculations for nearby walkers hook
-  const memoizedLocationCoords = useMemo(
-    () =>
-      formData.startLocation
-        ? {
-            latitude: formData.startLocation.latitude,
-            longitude: formData.startLocation.longitude,
-          }
-        : null,
-    [formData.startLocation?.latitude, formData.startLocation?.longitude]
-  );
+  // Extract location coordinates for nearby walkers hook
+  const locationCoords = formData.startLocation
+    ? {
+        latitude: formData.startLocation.latitude,
+        longitude: formData.startLocation.longitude,
+      }
+    : null;
 
-  // Memoize the complete startLocation object for the MapSection component
-  const memoizedStartLocation = useMemo(
-    () =>
-      formData.startLocation
-        ? {
-            latitude: formData.startLocation.latitude,
-            longitude: formData.startLocation.longitude,
-            name: formData.startLocation.name || "",
-          }
-        : null,
-    [
-      formData.startLocation?.latitude,
-      formData.startLocation?.longitude,
-      formData.startLocation?.name,
-    ]
-  );
+  // Extract startLocation object for the MapSection component
+  const startLocation = formData.startLocation
+    ? {
+        latitude: formData.startLocation.latitude,
+        longitude: formData.startLocation.longitude,
+        name: formData.startLocation.name || "",
+      }
+    : null;
 
-  // Memoize walk type to prevent unnecessary recalculations
-  const memoizedWalkType = useMemo(() => formData.type || "", [formData.type]);
+  // Get walk type
+  const walkType = formData.type || "";
 
   // Get nearby walkers info for neighborhood walks
   const { nearbyWalkers, isLoadingNearbyUsers } = useNearbyWalkers({
-    startLocation: memoizedLocationCoords,
-    walkType: memoizedWalkType,
+    startLocation: locationCoords,
+    walkType: walkType,
     radiusInMeters: walkRadius,
   });
 
@@ -144,7 +132,6 @@ export const LocationSelection: React.FC<Props> = ({
           }
           onSelect={handleLocationSelect}
         />
-
         {/* Current location button */}
         <LocationButton
           onPress={handleCurrentLocation}
@@ -157,8 +144,8 @@ export const LocationSelection: React.FC<Props> = ({
         {/* Map section */}
         <MapSection
           mapRef={mapRef as any}
-          startLocation={memoizedStartLocation}
-          walkType={memoizedWalkType}
+          startLocation={startLocation}
+          walkType={walkType}
           walkRadius={walkRadius}
           handleMapLongPress={handleMapLongPress}
           isReverseGeocoding={isReverseGeocoding}

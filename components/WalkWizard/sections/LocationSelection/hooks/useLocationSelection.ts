@@ -75,7 +75,8 @@ export const useLocationSelection = () => {
         );
 
         // If user is within 50 meters of the start location, they are considered "at location"
-        const isUserAtLocation = distance <= 50;
+        const isUserAtLocation = distance <= 200;
+        console.log("SETTING ownerIsInitiallyAtLocation", { isUserAtLocation });
         updateFormData({ ownerIsInitiallyAtLocation: isUserAtLocation });
       }
 
@@ -198,6 +199,31 @@ export const useLocationSelection = () => {
       setPendingLocationRequest(false);
     }
   }, [coords, pendingLocationRequest]);
+
+  // Check if user is at the selected location when the component loads
+  // or when user's coordinates or form location changes
+  const { formData } = useWalkForm();
+  const { startLocation } = formData;
+
+  useEffect(() => {
+    // Only run the check if we have both user coordinates and a start location
+    if (coords && startLocation?.latitude && startLocation?.longitude) {
+      const distance = getDistanceMeters(
+        coords.latitude,
+        coords.longitude,
+        startLocation.latitude,
+        startLocation.longitude
+      );
+
+      // If user is within 200 meters of the start location, they are considered "at location"
+      const isUserAtLocation = distance <= 200;
+      console.log("Initial location proximity check", {
+        isUserAtLocation,
+        distance,
+      });
+      updateFormData({ ownerIsInitiallyAtLocation: isUserAtLocation });
+    }
+  }, [coords, startLocation?.latitude, startLocation?.longitude]);
 
   return {
     mapRef,
