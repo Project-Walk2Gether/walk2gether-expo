@@ -93,7 +93,8 @@
     "tamagui": "1.126.9",
     "use-dynamic-refs": "github:JeongHwanMun/use-dynamic-refs",
     "walk2gether-shared": "github:Project-Walk2Gether/walk2gether-shared",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "expo-dev-client": "~5.2.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
