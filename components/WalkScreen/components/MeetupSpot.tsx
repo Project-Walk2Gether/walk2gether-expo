@@ -1,3 +1,4 @@
+import { Pin } from "@tamagui/lucide-icons";
 import React from "react";
 import { View } from "react-native";
 import { Marker } from "react-native-maps";
@@ -28,38 +29,38 @@ const MeetupSpot: React.FC<Props> = ({ location }) => {
       centerOffset={{ x: 0, y: -18 }}
       tracksViewChanges={false}
     >
-      <YStack alignItems="center">
-        {/* Label */}
-        <Text
-          fontSize={12}
-          fontWeight="bold"
-          textTransform="uppercase"
-          color={COLORS.text}
-        >
-          {displayText}
-        </Text>
-        <XStack
+      <YStack>
+        <YStack
           backgroundColor="white"
           paddingHorizontal="$3"
           paddingVertical="$2"
           borderRadius="$3"
-          alignItems="center"
-          marginBottom="$2"
-          borderWidth={2}
           borderColor={COLORS.success}
           shadowColor="#000"
           shadowOpacity={0.25}
           shadowRadius={3}
+          alignItems="center"
+          marginBottom="$2"
+          borderWidth={2}
           maxWidth={200}
+          zIndex={10}
           style={{
             shadowOffset: { width: 0, height: 2 },
             elevation: 5,
           }}
         >
+          {/* Label */}
+          <XStack gap="$2">
+            <Pin color="$black" size={14} />
+            <Text fontSize={11} fontWeight="bold" color={COLORS.text}>
+              MEETUP SPOT
+            </Text>
+          </XStack>
+
           <Text fontSize={14} color={COLORS.text} textAlign="center">
             {displayText}
           </Text>
-        </XStack>
+        </YStack>
 
         {/* Pin head and stem */}
         <View
@@ -67,26 +68,6 @@ const MeetupSpot: React.FC<Props> = ({ location }) => {
             alignItems: "center",
           }}
         >
-          {/* Pin head - large, unmissable circle */}
-          <View
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              backgroundColor: COLORS.success,
-              borderWidth: 4,
-              borderColor: "white",
-              alignItems: "center",
-              justifyContent: "center",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 3 },
-              shadowOpacity: 0.3,
-              shadowRadius: 4,
-              elevation: 6,
-              zIndex: 2,
-            }}
-          />
-
           {/* Pin stem */}
           <View
             style={{
@@ -96,7 +77,6 @@ const MeetupSpot: React.FC<Props> = ({ location }) => {
               borderBottomLeftRadius: 3,
               borderBottomRightRadius: 3,
               marginTop: -3,
-              zIndex: 1,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.2,
