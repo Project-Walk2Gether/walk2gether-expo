@@ -7,13 +7,15 @@ import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { useDoc } from "@/utils/firestore";
 import { calculateOptimalRegion } from "@/utils/mapUtils";
 import { getWalkStatus } from "@/utils/walkUtils";
+import { COLORS } from "@/styles/colors";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { addHours } from "date-fns";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Button, Text, View } from "tamagui";
+import { Button, Card, Text, View, XStack, YStack } from "tamagui";
 import { ParticipantWithRoute, Walk } from "walk2gether-shared";
+import { MapPin } from "@tamagui/lucide-icons";
 import MeetupSpot from "../MeetupSpot";
 import RequestBackgroundLocationModal from "../RequestBackgroundLocationModal";
 import WalkStatusControls from "../WalkStatusControls";
@@ -213,13 +215,72 @@ export default function LiveWalkMap({
   // Render location permission denied message
   if (locationPermission === false) {
     return (
-      <View p="$4" flex={1} justifyContent="center" alignItems="center">
-        <Text color="red" marginBottom={16} textAlign="center">
-          Location permission is required to participate in the walk.
-        </Text>
-        <Button onPress={() => requestForegroundPermissions()}>
-          Grant Permission
-        </Button>
+      <View flex={1} justifyContent="center" alignItems="center" p="$4">
+        <Card
+          backgroundColor={COLORS.walkTypes.friends.background}
+          padding="$6"
+          borderRadius="$5"
+          width="100%"
+          maxWidth={400}
+          elevate
+          bordered
+          borderColor="$borderColor"
+        >
+          <YStack alignItems="center" gap="$4">
+            {/* Icon and Title */}
+            <YStack alignItems="center" gap="$2">
+              <View
+                backgroundColor={COLORS.walkTypes.friends.main}
+                width={60}
+                height={60}
+                borderRadius={30}
+                justifyContent="center"
+                alignItems="center"
+                marginBottom="$2"
+              >
+                <MapPin size={30} color="white" />
+              </View>
+              <Text fontSize="$7" fontWeight="bold" textAlign="center">
+                Location Access Needed
+              </Text>
+            </YStack>
+            
+            {/* Explanation Text */}
+            <YStack gap="$3">
+              <Text 
+                fontSize="$5" 
+                color={COLORS.textSecondary} 
+                textAlign="center"
+                lineHeight={24}
+              >
+                To see the walk map and participate with friends, Walk2Gether needs access to your location.
+              </Text>
+              <Text 
+                fontSize="$5" 
+                color={COLORS.textSecondary} 
+                textAlign="center"
+                lineHeight={24}
+              >
+                This helps everyone see where you are during walks and ensures you can find the meetup spot.
+              </Text>
+            </YStack>
+            
+            {/* CTA Button */}
+            <Button 
+              onPress={() => requestForegroundPermissions()}
+              backgroundColor={COLORS.walkTypes.friends.main}
+              paddingHorizontal="$6"
+              paddingVertical="$3"
+              borderRadius="$6"
+              marginTop="$2"
+              pressStyle={{ opacity: 0.9 }}
+            >
+              <Text color="white" fontWeight="bold" fontSize="$5">
+                Enable Location Access
+              </Text>
+            </Button>
+          </YStack>
+        </Card>
       </View>
     );
   }
