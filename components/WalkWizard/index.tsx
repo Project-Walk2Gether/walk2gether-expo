@@ -17,8 +17,8 @@ import {
   LocationSelection,
   QuoteSection,
   TimeSelection,
-  TypeSelection,
   TopicSelection,
+  TypeSelection,
 } from "./sections";
 import NeighborhoodWalkHowItWorksSection from "./sections/NeighborhoodWalkHowItWorksSection";
 import { WizardHeader } from "./sections/WizardHeader";
@@ -52,7 +52,6 @@ export function WalkWizard() {
   const { advanceToNextQuote } = useQuoteOfTheDay();
 
   const handleSubmit = useCallback(async () => {
-    console.log("submitting");
     if (!userData) {
       showMessage("User data not found", "error");
       return;

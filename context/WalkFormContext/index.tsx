@@ -53,6 +53,8 @@ interface WalkFormContextType {
   // Track if a walk has been created already
   createdWalkId: string | null;
   setCreatedWalkId: React.Dispatch<React.SetStateAction<string | null>>;
+  // Close the entire walk form modal
+  closeWalkForm: () => void;
 }
 
 // Generate a random 6-character alphanumeric invitation code
@@ -87,7 +89,6 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
   const initializedFormData: WalkFormData = {
     ...initialFormData,
     date: Timestamp.now(),
-    startLocation: userData?.location || undefined,
     participantUids: friendId ? [friendId] : [],
   };
   const [formData, setFormData] = useState<WalkFormData>(initializedFormData);
@@ -231,6 +232,11 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
     }
   }, [formData.type]);
 
+  // Function to close the entire walk form modal
+  const closeWalkForm = () => {
+    router.back();
+  };
+
   return (
     <WalkFormContext.Provider
       value={{
@@ -253,6 +259,7 @@ export const WalkFormProvider: React.FC<Props> = ({ friendId, children }) => {
         setSystemErrors,
         createdWalkId,
         setCreatedWalkId,
+        closeWalkForm,
       }}
     >
       {children}

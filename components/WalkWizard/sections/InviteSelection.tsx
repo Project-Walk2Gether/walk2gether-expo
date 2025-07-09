@@ -4,8 +4,9 @@ import UserList from "@/components/UserList";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useFriends } from "@/context/FriendsContext";
-import { useUserData } from "@/context/UserDataContext";
 import { useMaybeWalkForm, useWalkForm } from "@/context/WalkFormContext";
+import { useUserData } from "@/context/UserDataContext";
+import firestore from "@react-native-firebase/firestore";
 import { COLORS } from "@/styles/colors";
 import { fetchDocsByIds } from "@/utils/firestore";
 import { updateParticipants } from "@/utils/participantManagement";
@@ -15,7 +16,7 @@ import { QrCode, Share2, Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert } from "react-native";
-import { Button, Spinner, Text, XStack, YStack } from "tamagui";
+import { Button, Spacer, Spinner, Text, XStack, YStack } from "tamagui";
 import { UserData, Walk, WithId } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
 
@@ -41,7 +42,7 @@ export const InviteSelection: React.FC<Props> = ({
 }) => {
   const maybeWalkFormContext = useMaybeWalkForm();
   // Use form context for managing participantUids
-  const { formData, updateFormData } = useWalkForm();
+  const { formData, updateFormData, closeWalkForm } = useWalkForm();
   const { user } = useAuth();
   const { userData } = useUserData();
   const { showMessage } = useFlashMessage();
@@ -273,6 +274,57 @@ export const InviteSelection: React.FC<Props> = ({
     setShareSuccessful(true);
   };
 
+  const handleCancelButtonPress = () => {
+    // Show confirmation dialog before canceling
+    Alert.alert(
+      "Cancel Walk",
+      "Are you sure you want to cancel this walk? This action cannot be undone.",
+      [
+        { text: "No", style: "cancel" },
+        { 
+          text: "Yes, Cancel Walk", 
+          style: "destructive",
+          onPress: () => {
+            // Delete the walk document if it exists
+            if (walk?._ref) {
+              walk._ref.delete()
+                .then(() => {
+                  // Close the entire walk form modal
+                  closeWalkForm();
+                })
+                .catch((error: Error) => {
+                  console.error("Error deleting walk:", error);
+                  showMessage(
+                    "Failed to cancel walk. Please try again.",
+                    "error"
+                  );
+                });
+            } else if (maybeWalkFormContext?.createdWalkId) {
+              // If we have a createdWalkId but no walk object, try to delete using the ID
+              firestore()
+                .collection("walks")
+                .doc(maybeWalkFormContext.createdWalkId)
+                .delete()
+                .then(() => {
+                  closeWalkForm();
+                })
+                .catch((error: Error) => {
+                  console.error("Error deleting walk:", error);
+                  showMessage(
+                    "Failed to cancel walk. Please try again.",
+                    "error"
+                  );
+                });
+            } else {
+              // If no walk document exists yet, just close the form
+              closeWalkForm();
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const handleSubmit = async () => {
     // Should confirm and then update participants
     if (!effectiveWalkId || !userData) {
@@ -478,6 +530,10 @@ export const InviteSelection: React.FC<Props> = ({
               )}
             </ContentCard>
           </YStack>
+          <Spacer flexGrow={1} />
+          <Button onPress={handleCancelButtonPress} theme={"red"}>
+            I changed my mind - cancel the walk
+          </Button>
         </YStack>
       </WizardWrapper>
     </LinearGradient>
