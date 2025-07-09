@@ -11,7 +11,6 @@ import {
   updateDoc,
 } from "@react-native-firebase/firestore";
 import { addMinutes } from "date-fns";
-import uuid from "react-native-uuid";
 import { Participant, UserData, Walk, WithId } from "walk2gether-shared";
 
 interface CreateWalkParams {
@@ -24,9 +23,6 @@ export async function createWalkFromForm({
   userData,
 }: CreateWalkParams): Promise<void | FirebaseFirestoreTypes.DocumentReference<Walk>> {
   try {
-    // Generate a unique invitation code
-    const invitationCode = uuid.v4().toString().slice(0, 8);
-
     if (
       !formData.date ||
       formData.durationMinutes === undefined ||
@@ -47,8 +43,7 @@ export async function createWalkFromForm({
     const estimatedEndTimeWithBuffer = addMinutes(estimatedEndTime, 60);
 
     // Create base walk payload with common fields for all walk types
-    const basePayload = {
-      active: false,
+    const basePayload: Walk = {
       date: formData.date,
       durationMinutes: formData.durationMinutes,
       organizerName: userData?.name || "",
@@ -57,9 +52,9 @@ export async function createWalkFromForm({
       // Location data - For friends walk, both start and current are the same initially
       startLocation: formData.startLocation,
       currentLocation: formData.startLocation,
+      ownerIsInitiallyAtLocation: !!formData.ownerIsInitiallyAtLocation,
 
       // Invitation details
-      invitationCode: invitationCode,
       participantUids: [...(formData.participantUids || []), userData.id],
 
       // Timestamp fields
@@ -72,10 +67,9 @@ export async function createWalkFromForm({
 
       // Required participant tracking fields
       participantsById: {},
-      approvedParticipantCount: 0,
-      pendingParticipantCount: 0,
-      rejectedParticipantCount: 0,
     };
+
+    console.log({ basePayload });
 
     // Add type-specific fields based on walk type
     let walkPayload;
