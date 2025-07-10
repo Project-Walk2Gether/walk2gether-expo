@@ -1,4 +1,5 @@
 import { COLORS } from "@/styles/colors";
+import ParticipantAvatar from "@/components/ParticipantAvatar";
 import {
   getParticipantBorderColor,
   getParticipantOpacity,
@@ -8,7 +9,7 @@ import { getWalkStatus } from "@/utils/walkUtils";
 import { Car, ChevronRight, Footprints } from "@tamagui/lucide-icons";
 import React from "react";
 import { Pressable } from "react-native";
-import { Avatar, Text, XStack, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
 
 interface Props {
@@ -66,21 +67,11 @@ export default function ParticipantItem({
         borderColor={showMarkOnTheWayButton ? COLORS.primary : borderColor}
       >
         {/* Avatar */}
-        <Avatar circular size="$3">
-          {participant.photoURL ? (
-            <Avatar.Image src={participant.photoURL} />
-          ) : (
-            <Avatar.Fallback
-              justifyContent="center"
-              alignItems="center"
-              backgroundColor={COLORS.primary}
-            >
-              <Text color="white" fontSize="$2">
-                {participant.displayName?.charAt(0).toUpperCase()}
-              </Text>
-            </Avatar.Fallback>
-          )}
-        </Avatar>
+        <ParticipantAvatar
+          photoURL={participant.photoURL}
+          displayName={participant.displayName}
+          size="$3"
+        />
         <YStack gap="$1">
         {/* Top row: Name */}
         <XStack alignItems="center" gap="$1">

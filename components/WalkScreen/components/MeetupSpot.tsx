@@ -17,8 +17,6 @@ interface Props {
 }
 
 const MeetupSpot: React.FC<Props> = ({ location }) => {
-  const displayText = location.notes || "Meetup Spot";
-
   return (
     <Marker
       coordinate={{
@@ -57,9 +55,11 @@ const MeetupSpot: React.FC<Props> = ({ location }) => {
             </Text>
           </XStack>
 
-          <Text fontSize={14} color={COLORS.text} textAlign="center">
-            {displayText}
-          </Text>
+          {location.notes ? (
+            <Text fontSize={14} color={COLORS.text} textAlign="center">
+              {location.notes}
+            </Text>
+          ) : null}
         </YStack>
 
         {/* Pin head and stem */}
@@ -73,10 +73,10 @@ const MeetupSpot: React.FC<Props> = ({ location }) => {
             style={{
               width: 6,
               height: 16,
-              backgroundColor: COLORS.success,
+              backgroundColor: "black",
               borderBottomLeftRadius: 3,
               borderBottomRightRadius: 3,
-              marginTop: -3,
+              marginTop: -5,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.2,

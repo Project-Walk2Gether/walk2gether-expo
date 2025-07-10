@@ -43,11 +43,6 @@ export default function LiveWalkMap({
   const [isBackgroundLocationModalOpen, setIsBackgroundLocationModalOpen] =
     useState(false);
 
-  // Get current user participant via memoization
-  const [navigationMethod, setNavigationMethod] = useState<
-    "walking" | "driving"
-  >("walking");
-
   // Get walk participants
   const participants = useWalkParticipants(walkId);
 
@@ -64,15 +59,8 @@ export default function LiveWalkMap({
     userParticipant
   );
 
-  // Set navigation method based on user participant
-  useEffect(() => {
-    if (userParticipant) {
-      const method =
-        userParticipant.navigationMethod === "driving" ? "driving" : "walking";
-      setNavigationMethod(method);
-      onNavigationMethodChange?.(method);
-    }
-  }, [userParticipant, onNavigationMethodChange]);
+  // Get current user participant via memoization
+  const navigationMethod = userParticipant?.navigationMethod;
 
   // Get walk data to access start location and check if user is owner
   const { doc: walk } = useDoc<Walk>(`walks/${walkId}`);
@@ -88,11 +76,6 @@ export default function LiveWalkMap({
   const hasWalkEnded = Boolean(walk?.endedAt);
 
   const status = walk ? getWalkStatus(walk) : "pending";
-
-  // Update parent component when navigation method changes
-  useEffect(() => {
-    onNavigationMethodChange?.(navigationMethod);
-  }, [navigationMethod, onNavigationMethodChange]);
 
   // Track the last background tracking state to prevent unnecessary updates
   const lastTrackingState = useRef<boolean | null>(null);
@@ -324,16 +307,14 @@ export default function LiveWalkMap({
         {status === "active" &&
           participants.map((p) => {
             if (!p.lastLocation) return null;
-            const isCurrentUser = p.id === user?.uid;
-
             return (
               <ParticipantMarker
                 key={p.id}
                 id={p.id}
                 displayName={p.displayName}
+                photoURL={p.photoURL}
                 latitude={p.lastLocation.latitude}
                 longitude={p.lastLocation.longitude}
-                isCurrentUser={isCurrentUser}
               />
             );
           })}
