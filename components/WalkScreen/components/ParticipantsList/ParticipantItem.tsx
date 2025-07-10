@@ -5,8 +5,9 @@ import {
   getParticipantStatusInfo,
 } from "@/utils/participantStatus";
 import { getWalkStatus } from "@/utils/walkUtils";
-import { Car, Footprints } from "@tamagui/lucide-icons";
+import { Car, ChevronRight, Footprints } from "@tamagui/lucide-icons";
 import React from "react";
+import { Pressable } from "react-native";
 import { Avatar, Text, XStack, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
 
@@ -38,42 +39,49 @@ export default function ParticipantItem({
 
   const opacity = isInvited ? 1 : getParticipantOpacity(participant);
 
-  // Only allow pressing participants that are not the current user
+  const notOnTheWay = participant.status === "pending";
+  const showMarkOnTheWayButton = notOnTheWay && isCurrentUser;
+
+  // Handle press event
   const handlePress = () => {
     onPress?.(participant);
   };
 
   return (
-    <XStack
+    <Pressable
       onPress={handlePress}
-      padding="$2"
-      gap="$2"
-      alignItems="center"
-      pressStyle={{ scale: 0.98 }}
-      animation="quick"
-      borderRadius="$4"
-      backgroundColor="white"
-      borderWidth={1}
-      borderColor={borderColor}
-      opacity={opacity}
+      disabled={!onPress}
+      style={({ pressed }: { pressed: boolean }) => ({
+        opacity: pressed ? 0.7 : 1,
+      })}
     >
-      {/* Avatar */}
-      <Avatar circular size="$3">
-        {participant.photoURL ? (
-          <Avatar.Image src={participant.photoURL} />
-        ) : (
-          <Avatar.Fallback
-            justifyContent="center"
-            alignItems="center"
-            backgroundColor={COLORS.primary}
-          >
-            <Text color="white" fontSize="$2">
-              {participant.displayName?.charAt(0).toUpperCase()}
-            </Text>
-          </Avatar.Fallback>
-        )}
-      </Avatar>
-      <YStack gap="$1">
+      <XStack
+        padding="$2"
+        gap="$2"
+        alignItems="center"
+        opacity={opacity}
+        backgroundColor={showMarkOnTheWayButton ? COLORS.primary : isCurrentUser ? "$backgroundHover" : "white"}
+        borderRadius="$4"
+        borderWidth={1}
+        borderColor={showMarkOnTheWayButton ? COLORS.primary : borderColor}
+      >
+        {/* Avatar */}
+        <Avatar circular size="$3">
+          {participant.photoURL ? (
+            <Avatar.Image src={participant.photoURL} />
+          ) : (
+            <Avatar.Fallback
+              justifyContent="center"
+              alignItems="center"
+              backgroundColor={COLORS.primary}
+            >
+              <Text color="white" fontSize="$2">
+                {participant.displayName?.charAt(0).toUpperCase()}
+              </Text>
+            </Avatar.Fallback>
+          )}
+        </Avatar>
+        <YStack gap="$1">
         {/* Top row: Name */}
         <XStack alignItems="center" gap="$1">
           <Text
@@ -82,28 +90,48 @@ export default function ParticipantItem({
             numberOfLines={1}
             ellipsizeMode="tail"
             flexShrink={1}
+            color={showMarkOnTheWayButton ? COLORS.textOnDark : undefined}
           >
             {isCurrentUser ? "You" : participant.displayName}
           </Text>
-        </XStack>
 
-        {/* Status text */}
-        <XStack alignItems="center" gap="$1">
           {participant.status === "on-the-way" &&
             (participant.navigationMethod === "driving" ? (
               <Car size={14} color={statusInfo.color} />
             ) : (
               <Footprints size={14} color={statusInfo.color} />
             ))}
+          {participant.status === "on-the-way" && (
+            <Text
+              fontSize="$1"
+              color={statusInfo.color}
+              fontWeight="bold"
+              flexShrink={1}
+              numberOfLines={1}
+            >
+              {participant.navigationMethod === "driving"
+                ? "(Driving)"
+                : "(Walking)"}
+            </Text>
+          )}
+        </XStack>
+
+        {/* Status text */}
+        <XStack alignItems="center" gap="$1">
           <Text
             fontSize="$1"
-            color={statusInfo.color}
+            color={showMarkOnTheWayButton ? COLORS.textOnDark : statusInfo.color}
             fontWeight="bold"
             flexShrink={1}
             numberOfLines={1}
           >
-            {statusInfo.text}
+            {showMarkOnTheWayButton
+              ? "Tell others I'm on the way"
+              : statusInfo.text}
           </Text>
+          {showMarkOnTheWayButton && (
+            <ChevronRight size={16} color={COLORS.textOnDark} />
+          )}
         </XStack>
 
         {/* Introduction text if available (only for regular participants) */}
@@ -121,7 +149,8 @@ export default function ParticipantItem({
             "{participant.introduction}"
           </Text>
         )}
-      </YStack>
-    </XStack>
+        </YStack>
+      </XStack>
+    </Pressable>
   );
 }

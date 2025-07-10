@@ -238,7 +238,8 @@ export default function WalkScreen() {
               contentContainerStyle={{ zIndex: 1000000, paddingBottom: 100 }}
             >
               <ParticipantsList
-                status={status}
+                walkId={walk.id}
+                walkStatus={status}
                 participants={participants}
                 currentUserId={user?.uid}
                 isOwner={isWalkOwner}

@@ -13,7 +13,6 @@ import { PortalItem } from "tamagui";
 
 export type SheetOptions = {
   title?: string;
-  minSnapPoint?: number;
   dismissOnSnapToBottom?: boolean;
   portalHostName?: string;
 };
@@ -60,20 +59,16 @@ export function SheetProvider({ children }: { children: ReactNode }) {
     if (!sheetContent && !isSheetOpen) {
       return null;
     }
-    
+
     const sheetComponent = (
       <Sheet
         ref={sheetRef}
         open={isSheetOpen}
         onOpenChange={setIsSheetOpen}
-        minSnapPoint={sheetOptions.minSnapPoint || 30}
         dismissOnSnapToBottom={sheetOptions.dismissOnSnapToBottom !== false}
         title={sheetOptions.title}
-        snapPoints={[sheetOptions.minSnapPoint || 30, 85]}
       >
-        <View style={{ flex: 1 }}>
-          {sheetContent}
-        </View>
+        <View style={{ flex: 1 }}>{sheetContent}</View>
       </Sheet>
     );
 

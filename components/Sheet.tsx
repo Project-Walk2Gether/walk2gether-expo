@@ -19,7 +19,6 @@ export interface SheetProps {
   title?: string;
   children: React.ReactNode;
   position?: number;
-  minSnapPoint?: number;
 }
 
 export interface SheetRef {
@@ -35,16 +34,11 @@ export const Sheet = forwardRef<SheetRef, SheetProps>(
       dismissOnSnapToBottom = true,
       title,
       children,
-      minSnapPoint,
     }: SheetProps,
     ref
   ) => {
     // Create ref for the bottom sheet
     const bottomSheetRef = useRef<BottomSheet>(null);
-
-    // Calculate snapPoints if minSnapPoint is provided
-    const calculatedSnapPoints =
-      snapPoints || (minSnapPoint ? [minSnapPoint, 85] : [50]);
 
     // Expose methods via ref
     useImperativeHandle(ref, () => ({
@@ -90,7 +84,6 @@ export const Sheet = forwardRef<SheetRef, SheetProps>(
       <BottomSheet
         ref={bottomSheetRef}
         index={open ? 0 : -1}
-        snapPoints={calculatedSnapPoints}
         enablePanDownToClose={dismissOnSnapToBottom}
         backdropComponent={renderBackdrop}
         enableDynamicSizing

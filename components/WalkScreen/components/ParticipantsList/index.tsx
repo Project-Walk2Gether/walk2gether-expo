@@ -1,13 +1,12 @@
-import { useMenu } from "@/context/MenuContext";
+import { useSheet } from "@/context/SheetContext";
 import { getWalkStatus } from "@/utils/walkUtils";
 import React, { useMemo, useState } from "react";
 import { FlatList } from "react-native";
 import { View } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
-import { useParticipantStatus } from "./hooks/useParticipantStatus";
+import WalkParticipantStatusControls from "../WalkParticipantStatusControls";
 import ParticipantItem from "./ParticipantItem";
 import { sortParticipants } from "./sortParticipants";
-import { getStatusMenuItems, StatusType } from "./utils/walkStatusUtils";
 
 interface Props {
   walkStatus: ReturnType<typeof getWalkStatus>;
@@ -15,13 +14,11 @@ interface Props {
   currentUserId?: string;
   isOwner: boolean;
   walkId: string;
-  walkStarted?: boolean;
   onParticipantPress?: (participant: ParticipantWithRoute) => void;
 }
 
 export default function ParticipantsList({
   walkId,
-  walkStarted,
   walkStatus,
   participants,
   currentUserId,
@@ -57,8 +54,7 @@ export default function ParticipantsList({
     () => participants.find((p) => p.userUid === currentUserId),
     [participants]
   );
-  const myParticipantStatus = myParticipant?.status;
-  const { showMenu } = useMenu();
+  const { showSheet, hideSheet } = useSheet();
 
   // Define a type that extends ParticipantWithRoute to include our flag
   type ExtendedParticipant = ParticipantWithRoute & {
@@ -80,48 +76,25 @@ export default function ParticipantsList({
   }
 
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const {
-    updateStatus,
-    updateNavigationMethod,
-    cancelParticipation,
-    reactivateParticipation,
-  } = useParticipantStatus({
-    walkId,
-    userId: currentUserId,
-    isOwner,
-    walkStarted,
-  });
-
-  // Handle status change
-  const handleStatusChange = async (newStatus: StatusType) => {
-    if (myParticipantStatus === newStatus) return; // Don't update if status is the same
-
-    setIsUpdatingStatus(true);
-
-    await updateStatus(
-      newStatus,
-      myParticipantStatus,
-      myParticipant?.navigationMethod!
-    );
-
-    setIsUpdatingStatus(false);
-  };
 
   const handleMeParticipantPress = () => {
     console.log("PRESSING");
     if (!myParticipant) return;
 
-    const status = myParticipant?.status;
+    const status = myParticipant?.status || "pending";
 
-    const statusMenuItems = getStatusMenuItems(
-      status,
-      !!myParticipant.cancelledAt,
-      isOwner,
-      handleStatusChange,
-      cancelParticipation,
-      reactivateParticipation
+    showSheet(
+      <WalkParticipantStatusControls
+        status={status}
+        isCancelled={!!myParticipant.cancelledAt}
+        isOwner={isOwner}
+        walkId={walkId}
+        userId={currentUserId}
+        navigationMethod={myParticipant.navigationMethod || "driving"}
+        onClose={hideSheet}
+      />,
+      { title: "Edit My Status" }
     );
-    showMenu("Edit my status", statusMenuItems);
   };
 
   return (
