@@ -114,14 +114,16 @@ export default function RequestBackgroundLocationModal({
 
             {/* Title */}
             <H3 textAlign="center" fontSize={24}>
-              Enable live tracking?
+              Change to Always Allow
             </H3>
 
             {/* Description */}
             <Text textAlign="center" fontSize={16} color="$gray11">
               To keep others updated as you move, we need permission to track
-              your location in the background. Tap "Change to Always Allow" to
-              enable.
+              your location in the background.
+            </Text>
+            <Text textAlign="center" fontSize={16} color="$gray11">
+              Tap "Change to Always Allow" to enable.
             </Text>
 
             {/* Bullet points */}

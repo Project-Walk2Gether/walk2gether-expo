@@ -1,15 +1,15 @@
 import { Walk } from "walk2gether-shared";
-import { WalkTypeConfig } from "./base";
 import { WizardStep } from "../steps";
+import { WalkTypeConfig } from "./base";
 import { friendsWalkConfig } from "./friends";
-import { neighborhoodWalkConfig } from "./neighborhood";
 import { meetupWalkConfig } from "./meetup";
+import { neighborhoodWalkConfig } from "./neighborhood";
 
 // Export all walk type configurations
-export { friendsWalkConfig } from "./friends";
-export { neighborhoodWalkConfig } from "./neighborhood";
-export { meetupWalkConfig } from "./meetup";
 export type { WalkTypeConfig } from "./base";
+export { friendsWalkConfig } from "./friends";
+export { meetupWalkConfig } from "./meetup";
+export { neighborhoodWalkConfig } from "./neighborhood";
 
 // Map of all walk type configurations by type
 export const walkTypeConfigs: Record<string, WalkTypeConfig> = {
@@ -21,7 +21,9 @@ export const walkTypeConfigs: Record<string, WalkTypeConfig> = {
 /**
  * Get the walk type configuration for a specific walk type
  */
-export function getWalkTypeConfig(type: Walk["type"] | undefined): WalkTypeConfig {
+export function getWalkTypeConfig(
+  type: Walk["type"] | undefined
+): WalkTypeConfig {
   // Default to friends walk if type is undefined
   const walkType = type || "friends";
   return walkTypeConfigs[walkType];
@@ -30,7 +32,10 @@ export function getWalkTypeConfig(type: Walk["type"] | undefined): WalkTypeConfi
 /**
  * Get the wizard steps for a specific walk type
  */
-export function getStepsForWalkType(type: Walk["type"] | undefined, showHowItWorks = false): WizardStep[] {
+export function getStepsForWalkType(
+  type: Walk["type"] | undefined,
+  showHowItWorks = false
+): WizardStep[] {
   // Default to friends walk if type is undefined
   const walkType = type || "friends";
   return walkTypeConfigs[walkType].getSteps(showHowItWorks);
@@ -39,7 +44,9 @@ export function getStepsForWalkType(type: Walk["type"] | undefined, showHowItWor
 /**
  * Get the default values for a specific walk type
  */
-export function getDefaultValuesForWalkType(type: Walk["type"] | undefined): Partial<Walk> {
+export function getDefaultValuesForWalkType(
+  type: Walk["type"] | undefined
+): Partial<Walk> {
   // Default to friends walk if type is undefined
   const walkType = type || "friends";
   return walkTypeConfigs[walkType].defaultValues;

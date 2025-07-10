@@ -1,7 +1,7 @@
-import React, { forwardRef } from 'react';
-import { Button, H4, Input, YStack } from 'tamagui';
-import BottomSheet from '@gorhom/bottom-sheet';
-import { COLORS } from './constants';
+import BottomSheet from "@gorhom/bottom-sheet";
+import React, { forwardRef } from "react";
+import { Button, H4, Input, YStack } from "tamagui";
+import { COLORS } from "./constants";
 
 interface Props {
   promptText: string;
@@ -14,7 +14,7 @@ export const EditPromptSheet = forwardRef<BottomSheet, Props>(
     return (
       <BottomSheet
         ref={ref}
-        index={-1}
+        index={0}
         snapPoints={["40%"]}
         enablePanDownToClose
         handleIndicatorStyle={{ backgroundColor: COLORS.text }}
@@ -22,7 +22,7 @@ export const EditPromptSheet = forwardRef<BottomSheet, Props>(
       >
         <YStack padding="$4" space="$4">
           <H4>Edit Question Prompt</H4>
-          
+
           <Input
             value={promptText}
             onChangeText={setPromptText}
@@ -36,12 +36,7 @@ export const EditPromptSheet = forwardRef<BottomSheet, Props>(
             paddingHorizontal="$3"
             paddingVertical="$2"
           />
-          
-          <Button
-            backgroundColor="$blue8"
-            color="white"
-            onPress={onSave}
-          >
+          <Button backgroundColor="$blue8" color="white" onPress={onSave}>
             Save
           </Button>
         </YStack>

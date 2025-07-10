@@ -23,8 +23,8 @@ export const NavigationToggle: React.FC<Props> = ({ isDriving, onToggle }) => {
           paddingVertical={4}
           paddingHorizontal={4}
         >
-          <Footprints size={16} color="white" />
-          <Text color="white" fontSize={12} marginLeft={2}>
+          <Footprints size={16} />
+          <Text fontSize={12} marginLeft={2}>
             Walking
           </Text>
         </XStack>
@@ -35,8 +35,7 @@ export const NavigationToggle: React.FC<Props> = ({ isDriving, onToggle }) => {
         size="$1"
         checked={isDriving}
         onCheckedChange={onToggle}
-        backgroundColor={isDriving ? "white" : "rgba(255,255,255,0.3)"}
-        borderColor="white"
+        backgroundColor={isDriving ? "white" : "rgba(100,100,100,0.3)"}
         hitSlop={10}
       >
         <Switch.Thumb
@@ -53,10 +52,10 @@ export const NavigationToggle: React.FC<Props> = ({ isDriving, onToggle }) => {
           paddingVertical={4}
           paddingHorizontal={4}
         >
-          <Text color="white" fontSize={12} marginRight={2}>
+          <Text fontSize={12} marginRight={2}>
             Driving
           </Text>
-          <Car size={16} color="white" />
+          <Car size={16} />
         </XStack>
       </Pressable>
     </XStack>

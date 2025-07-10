@@ -1,6 +1,6 @@
 import React from "react";
 import { YStack } from "tamagui";
-import SlideAction from "../SlideToStart";
+import SlideAction from "./SlideToStart";
 
 interface Props {
   showStartWalkSlider: boolean;
@@ -40,7 +40,7 @@ export const WalkActionSliders: React.FC<Props> = ({
           icon="play"
         />
       )}
-      
+
       {showEndWalkSlider && (
         <SlideAction
           onSlideComplete={onEndWalk}

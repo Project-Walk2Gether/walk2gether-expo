@@ -3,6 +3,7 @@ import UpcomingRoundsList from "@/components/Chat/UpcomingRoundsList";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
+import { WalkProvider } from "@/context/WalkContext";
 import { useDoc, useQuery } from "@/utils/firestore";
 import { getWalkTitle } from "@/utils/walkType";
 import {
@@ -126,13 +127,9 @@ export default function WalkScreen() {
   const handleSendMessage = ({
     message,
     attachments,
-    roundId,
-    isRoundAnswer,
   }: {
     message?: string;
     attachments?: any[];
-    roundId?: string;
-    isRoundAnswer?: boolean;
   }) => {
     // Require either text or attachments
     if (
@@ -151,8 +148,6 @@ export default function WalkScreen() {
         read: false,
         attachments: attachments || [],
         walkId: id, // Explicitly set the walkId for the message
-        roundId, // Include the round ID if this is a round answer
-        isRoundAnswer, // Flag to indicate this is an answer to a round question
       });
     } catch (error) {
       console.error("Error sending message:", error);
@@ -200,106 +195,104 @@ export default function WalkScreen() {
           ),
         }}
       />
-      {/* Main container */}
-      <View flex={1} backgroundColor="#fff">
-        {/* Map and Participants container - with padding to account for collapsed bottom sheet */}
-        <View flex={1} pb={collapsedHeight - 30}>
-          <LiveWalkMap walkId={id} />
-          <View position="absolute" top={"$4"} left={"$4"} right={"$4"}>
-            <WalkInfo walk={walk} />
+      <WalkProvider walk={walk}>
+        {/* Main container */}
+        <View flex={1} backgroundColor="#fff">
+          {/* Map and Participants container - with padding to account for collapsed bottom sheet */}
+          <View flex={1} pb={collapsedHeight - 30}>
+            <LiveWalkMap walkId={id} />
+            <View position="absolute" top={"$4"} left={"$4"} right={"$4"}>
+              <WalkInfo walk={walk} />
+            </View>
           </View>
-        </View>
-        <BottomSheet
-          ref={chatBottomSheetRef}
-          index={0}
-          snapPoints={chatSnapPoints}
-          handleStyle={{
-            backgroundColor: COLORS.chatBackground,
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
-          }}
-          handleIndicatorStyle={{
-            width: 40,
-            backgroundColor: "#4EB1BA",
-            opacity: 0.6,
-          }}
-          backgroundStyle={{
-            backgroundColor: COLORS.chatBackground,
-          }}
-          style={{
-            backgroundColor: COLORS.chatBackground,
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: -5 },
-            shadowOpacity: 0.1,
-            shadowRadius: 5,
-            elevation: 5,
-          }}
-        >
-          <BottomSheetScrollView
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ zIndex: 1000000, paddingBottom: 100 }}
+          <BottomSheet
+            ref={chatBottomSheetRef}
+            index={0}
+            snapPoints={chatSnapPoints}
+            handleStyle={{
+              backgroundColor: COLORS.chatBackground,
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+            }}
+            handleIndicatorStyle={{
+              width: 40,
+              backgroundColor: "#4EB1BA",
+              opacity: 0.6,
+            }}
+            backgroundStyle={{
+              backgroundColor: COLORS.chatBackground,
+            }}
+            style={{
+              backgroundColor: COLORS.chatBackground,
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: -5 },
+              shadowOpacity: 0.1,
+              shadowRadius: 5,
+              elevation: 5,
+            }}
           >
-            <ParticipantsList
-              status={status}
-              participants={participants}
-              currentUserId={user?.uid}
-              isOwner={isWalkOwner}
-              onParticipantPress={handleParticipantPress}
-            />
-            <MessageList
-              ref={messageListRef}
-              timeline={timeline}
-              currentUserId={user?.uid || ""}
-              loading={false}
-              onDeleteMessage={handleDeleteMessage}
-              onActiveRoundChange={setActiveRound}
-            />
-            Show upcoming rounds list only for meetup walks and only to walk
-            owners
-            {walk.type === "meetup" && isWalkOwner && (
-              <UpcomingRoundsList
-                walkId={id}
-                upcomingRounds={(walk as MeetupWalk).upcomingRounds || []}
-                onRoundActivated={(round) => {
-                  // When a round is activated, update the active round state
-                  setActiveRound(round);
-                }}
+            <BottomSheetScrollView
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ zIndex: 1000000, paddingBottom: 100 }}
+            >
+              <ParticipantsList
+                status={status}
+                participants={participants}
                 currentUserId={user?.uid}
-                isWalkOwner={isWalkOwner}
+                isOwner={isWalkOwner}
+                onParticipantPress={handleParticipantPress}
               />
-            )}
-          </BottomSheetScrollView>
-        </BottomSheet>
+              <MessageList
+                ref={messageListRef}
+                timeline={timeline}
+                currentUserId={user?.uid || ""}
+                loading={false}
+                onDeleteMessage={handleDeleteMessage}
+                onActiveRoundChange={setActiveRound}
+              />
+              {walk.type === "meetup" && isWalkOwner && (
+                <UpcomingRoundsList
+                  walkId={id}
+                  walk={walk}
+                  onRoundActivated={(round) => {
+                    // When a round is activated, update the active round state
+                    setActiveRound(round);
+                  }}
+                />
+              )}
+            </BottomSheetScrollView>
+          </BottomSheet>
 
-        <KeyboardAvoidingView
-          keyboardVerticalOffset={100}
-          behavior="padding"
-          style={{
-            position: "absolute",
-            backgroundColor: "white",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 3,
-          }}
-        >
-          <YStack borderTopWidth={1} borderTopColor="$gray4">
-            <MessageForm
-              onSendMessage={handleSendMessage}
-              keyboardVerticalOffset={90}
-              containerStyle={{
-                backgroundColor: COLORS.chatBackground,
-              }}
-              chatId={id}
-              senderId={user?.uid || ""}
-              onFocus={handleMessageFormFocus}
-              activeRound={activeRound}
-            />
-          </YStack>
-        </KeyboardAvoidingView>
-      </View>
+          <KeyboardAvoidingView
+            keyboardVerticalOffset={100}
+            behavior="padding"
+            style={{
+              position: "absolute",
+              backgroundColor: "white",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 3,
+            }}
+          >
+            <YStack borderTopWidth={1} borderTopColor="$gray4">
+              <MessageForm
+                onSendMessage={handleSendMessage}
+                keyboardVerticalOffset={90}
+                containerStyle={{
+                  backgroundColor: COLORS.chatBackground,
+                }}
+                chatId={id}
+                senderId={user?.uid || ""}
+                onFocus={handleMessageFormFocus}
+                activeRound={activeRound}
+              />
+            </YStack>
+          </KeyboardAvoidingView>
+        </View>
+      </WalkProvider>
     </>
   );
 }

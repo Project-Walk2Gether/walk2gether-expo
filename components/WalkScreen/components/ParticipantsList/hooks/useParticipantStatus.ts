@@ -1,14 +1,14 @@
 import { useErrorReporting } from "@/components/ErrorBoundary";
 import { firestore_instance } from "@/config/firebase";
-import { 
-  deleteField, 
-  doc, 
-  setDoc, 
-  Timestamp 
+import {
+  deleteField,
+  doc,
+  setDoc,
+  Timestamp,
 } from "@react-native-firebase/firestore";
 import { Alert } from "react-native";
 import { Participant } from "walk2gether-shared";
-import { StatusType } from "../utils/walkStatusUtils";
+import { StatusType } from "../../../utils/walkStatusUtils";
 
 interface UseParticipantStatusOptions {
   walkId: string;
@@ -85,7 +85,12 @@ export const useParticipantStatus = ({
 
         // If user is walk owner and changing from "arrived" to another status,
         // reset the walk's startedAt property
-        if (isOwner && currentStatus === "arrived" && newStatus !== "arrived" && walkStarted) {
+        if (
+          isOwner &&
+          currentStatus === "arrived" &&
+          newStatus !== "arrived" &&
+          walkStarted
+        ) {
           const walkDocRef = doc(firestore_instance, `walks/${walkId}`);
 
           await setDoc(
@@ -105,7 +110,9 @@ export const useParticipantStatus = ({
   /**
    * Update only the navigation method
    */
-  const updateNavigationMethod = async (navigationMethod: "walking" | "driving") => {
+  const updateNavigationMethod = async (
+    navigationMethod: "walking" | "driving"
+  ) => {
     if (!userId || !walkId) return false;
 
     return handleFirebaseOperation(
@@ -216,10 +223,10 @@ export const useParticipantStatus = ({
     );
   };
 
-  return { 
-    updateStatus, 
-    updateNavigationMethod, 
-    cancelParticipation, 
-    reactivateParticipation 
+  return {
+    updateStatus,
+    updateNavigationMethod,
+    cancelParticipation,
+    reactivateParticipation,
   };
 };

@@ -1,16 +1,11 @@
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetScrollView,
-} from "@gorhom/bottom-sheet";
 import React, {
   createContext,
-  useCallback,
+  ReactNode,
   useContext,
-  useRef,
   useState,
 } from "react";
-import { StyleSheet } from "react-native";
 import { Button, Text, YStack } from "tamagui";
+import { useSheet } from "./SheetContext";
 
 // Define the MenuItem type
 export interface MenuItem {
@@ -18,6 +13,7 @@ export interface MenuItem {
   icon?: React.ReactNode;
   onPress: () => void;
   theme?: "default" | "red" | "green" | "blue";
+  children?: ReactNode;
 }
 
 // Define the MenuContext type
@@ -41,17 +37,41 @@ export const useMenu = () => {
 export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [menuTitle, setMenuTitle] = useState("");
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const { showSheet, hideSheet, isSheetOpen } = useSheet();
 
   // Function to show the menu
   const showMenu = (title: string, items: MenuItem[]) => {
     setMenuTitle(title);
     setMenuItems(items);
-    setIsOpen(true);
+    
+    // Use the SheetContext to show the menu content
+    showSheet(
+      <MenuContent 
+        title={title} 
+        items={items} 
+        onClose={hideSheet} 
+      />,
+      { title }
+    );
   };
 
+  return (
+    <MenuContext.Provider value={{ showMenu }}>
+      {children}
+    </MenuContext.Provider>
+  );
+};
+
+// MenuContent component to be displayed in the sheet
+interface MenuContentProps {
+  title: string;
+  items: MenuItem[];
+  onClose: () => void;
+}
+
+const MenuContent: React.FC<MenuContentProps> = ({ title, items, onClose }) => {
   // Get button theme styles
   const getButtonStyles = (theme: MenuItem["theme"]) => {
     switch (theme) {
@@ -66,92 +86,23 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // Create refs for the bottom sheet
-  const bottomSheetRef = useRef<BottomSheet>(null);
-
-  // Callbacks for sheet actions
-  const handleSheetChanges = useCallback((index: number) => {
-    if (index === -1) {
-      setIsOpen(false);
-    }
-  }, []);
-
-  // Backdrop component for the bottom sheet
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        opacity={0.5}
-      />
-    ),
-    []
-  );
-
-  // Effect to handle opening and closing the sheet
-  React.useEffect(() => {
-    if (isOpen) {
-      bottomSheetRef.current?.expand();
-    } else {
-      bottomSheetRef.current?.close();
-    }
-  }, [isOpen]);
-
   return (
-    <MenuContext.Provider value={{ showMenu }}>
-      {children}
-
-      {/* The BottomSheet component that displays the menu */}
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={-1}
-        enablePanDownToClose
-        enableDynamicSizing
-        backdropComponent={renderBackdrop}
-        onChange={handleSheetChanges}
-        handleIndicatorStyle={styles.indicator}
-        backgroundStyle={styles.bottomSheetBackground}
-      >
-        <BottomSheetScrollView contentContainerStyle={styles.scrollContent}>
-          <Text fontSize="$6" fontWeight="600" textAlign="center">
-            {menuTitle}
-          </Text>
-
-          <YStack gap="$4" padding="$2" marginTop="$2">
-            {menuItems.map((item, index) => (
-              <Button
-                key={`menu-item-${index}`}
-                size="$4"
-                onPress={() => {
-                  setIsOpen(false);
-                  setTimeout(() => item.onPress(), 300); // Small delay to let sheet close
-                }}
-                icon={item.icon}
-                {...getButtonStyles(item.theme)}
-              >
-                {item.label}
-              </Button>
-            ))}
-          </YStack>
-        </BottomSheetScrollView>
-      </BottomSheet>
-    </MenuContext.Provider>
+    <YStack gap="$4" padding="$4" paddingTop="$2">
+      {items.map((item, index) => (
+        <Button
+          key={`menu-item-${index}`}
+          size="$4"
+          onPress={() => {
+            onClose();
+            setTimeout(() => item.onPress(), 300); // Small delay to let sheet close
+          }}
+          icon={item.icon}
+          iconAfter={item.children}
+          {...getButtonStyles(item.theme)}
+        >
+          {item.label}
+        </Button>
+      ))}
+    </YStack>
   );
 };
-
-// Styles for the bottom sheet
-const styles = StyleSheet.create({
-  bottomSheetBackground: {
-    backgroundColor: "white",
-  },
-  indicator: {
-    backgroundColor: "#CDCDCD",
-    width: 40,
-    height: 4,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 24,
-  },
-});

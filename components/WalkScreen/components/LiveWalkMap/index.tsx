@@ -4,21 +4,21 @@ import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { useLocationTracking } from "@/hooks/useLocationTracking";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
+import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
 import { calculateOptimalRegion } from "@/utils/mapUtils";
 import { getWalkStatus } from "@/utils/walkUtils";
-import { COLORS } from "@/styles/colors";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
+import { MapPin } from "@tamagui/lucide-icons";
 import { addHours } from "date-fns";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Button, Card, Text, View, XStack, YStack } from "tamagui";
+import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import { Button, Card, Text, View, YStack } from "tamagui";
 import { ParticipantWithRoute, Walk } from "walk2gether-shared";
-import { MapPin } from "@tamagui/lucide-icons";
 import MeetupSpot from "../MeetupSpot";
 import RequestBackgroundLocationModal from "../RequestBackgroundLocationModal";
-import WalkStatusControls from "../WalkStatusControls";
+import { WalkActionSliders } from "../WalkActionSliders";
 import LocationLoading from "./LocationLoading";
 import OfficialWalkRoute from "./OfficialWalkRoute";
 import ParticipantMarker from "./ParticipantMarker";
@@ -244,29 +244,31 @@ export default function LiveWalkMap({
                 Location Access Needed
               </Text>
             </YStack>
-            
+
             {/* Explanation Text */}
             <YStack gap="$3">
-              <Text 
-                fontSize="$5" 
-                color={COLORS.textSecondary} 
+              <Text
+                fontSize="$5"
+                color={COLORS.textSecondary}
                 textAlign="center"
                 lineHeight={24}
               >
-                To see the walk map and participate with friends, Walk2Gether needs access to your location.
+                To see the walk map and participate with friends, Walk2Gether
+                needs access to your location.
               </Text>
-              <Text 
-                fontSize="$5" 
-                color={COLORS.textSecondary} 
+              <Text
+                fontSize="$5"
+                color={COLORS.textSecondary}
                 textAlign="center"
                 lineHeight={24}
               >
-                This helps everyone see where you are during walks and ensures you can find the meetup spot.
+                This helps everyone see where you are during walks and ensures
+                you can find the meetup spot.
               </Text>
             </YStack>
-            
+
             {/* CTA Button */}
-            <Button 
+            <Button
               onPress={() => requestForegroundPermissions()}
               backgroundColor={COLORS.walkTypes.friends.main}
               paddingHorizontal="$6"
@@ -309,22 +311,8 @@ export default function LiveWalkMap({
         showsUserLocation={false}
         showsMyLocationButton={false}
       >
-        {/* 1. Render walk start point marker */}
-        {walk && walk.startLocation && (
-          <Marker
-            coordinate={{
-              latitude: walk.startLocation.latitude,
-              longitude: walk.startLocation.longitude,
-            }}
-            title={`Start: ${walk.startLocation.name || "Meetup Point"}`}
-            description="Walk meetup point"
-            // Use a distinct color for the start point
-            pinColor="#4CAF50" // Green color for start point
-          />
-        )}
-
         {/* Only show MeetupSpot if the walk hasn't started yet */}
-        {walk?.startLocation && !hasWalkStarted ? (
+        {walk?.startLocation ? (
           <MeetupSpot
             location={walk.startLocation}
             isWalkOwner={isWalkOwner}
@@ -364,18 +352,11 @@ export default function LiveWalkMap({
 
       {/* Controls rendered using absolute positioning */}
       {status === "active" && (
-        <WalkStatusControls
-          walkId={walkId}
-          userId={user?.uid}
-          initialStatus={userParticipant?.status || "pending"}
-          initialNavigationMethod={navigationMethod}
+        <WalkActionSliders
+          status={userParticipant?.status}
           isOwner={isWalkOwner}
           walkStarted={hasWalkStarted}
           walkEnded={hasWalkEnded}
-          isCancelled={!!userParticipant?.cancelledAt}
-          onNavigationMethodChange={(isDriving) =>
-            setNavigationMethod(isDriving ? "driving" : "walking")
-          }
           onStartWalk={handleStartWalk}
           onEndWalk={handleEndWalk}
         />

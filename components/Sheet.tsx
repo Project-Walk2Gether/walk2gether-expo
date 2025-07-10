@@ -1,6 +1,15 @@
-import { useMaybeModalScreenContext } from "@/context"s/ModalScreenContext";
-import React from "react";
-import { H3, Sheet as TamaguiSheet } from "tamagui";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
+import React, {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+} from "react";
+import { StyleSheet } from "react-native";
+import { H3 } from "tamagui";
 
 export interface SheetProps {
   open: boolean;
@@ -10,45 +19,114 @@ export interface SheetProps {
   title?: string;
   children: React.ReactNode;
   position?: number;
+  minSnapPoint?: number;
 }
 
-export function Sheet({
-  open,
-  onOpenChange,
-  snapPoints = [50],
-  dismissOnSnapToBottom = true,
-  title,
-  children,
-  position,
-}: SheetProps) {
-  const portalHostName = useMaybeModalScreenContext()?.portalHostName;
-
-  return (
-    <TamaguiSheet
-      modal={!portalHostName}
-      open={open}
-      onOpenChange={onOpenChange}
-      snapPoints={snapPoints}
-      dismissOnSnapToBottom={dismissOnSnapToBottom}
-      position={position}
-      {...(portalHostName ? { portal: { name: portalHostName } } : {})}
-    >
-      <TamaguiSheet.Overlay />
-      <TamaguiSheet.Frame padding="$4">
-        <TamaguiSheet.Handle />
-        {title && (
-          <H3 textAlign="center" marginBottom="$4">
-            {title}
-          </H3>
-        )}
-        {children}
-      </TamaguiSheet.Frame>
-    </TamaguiSheet>
-  );
+export interface SheetRef {
+  close: () => void;
 }
+
+export const Sheet = forwardRef<SheetRef, SheetProps>(
+  (
+    {
+      open,
+      onOpenChange,
+      snapPoints,
+      dismissOnSnapToBottom = true,
+      title,
+      children,
+      minSnapPoint,
+    }: SheetProps,
+    ref
+  ) => {
+    // Create ref for the bottom sheet
+    const bottomSheetRef = useRef<BottomSheet>(null);
+
+    // Calculate snapPoints if minSnapPoint is provided
+    const calculatedSnapPoints =
+      snapPoints || (minSnapPoint ? [minSnapPoint, 85] : [50]);
+
+    // Expose methods via ref
+    useImperativeHandle(ref, () => ({
+      close: () => {
+        bottomSheetRef.current?.close();
+        onOpenChange(false);
+      },
+    }));
+
+    // Callbacks for sheet actions
+    const handleSheetChanges = useCallback(
+      (index: number) => {
+        if (index === -1) {
+          onOpenChange(false);
+        }
+      },
+      [onOpenChange]
+    );
+
+    // Backdrop component for the bottom sheet
+    const renderBackdrop = useCallback(
+      (props: any) => (
+        <BottomSheetBackdrop
+          {...props}
+          disappearsOnIndex={-1}
+          appearsOnIndex={0}
+          opacity={0.5}
+        />
+      ),
+      []
+    );
+
+    // Effect to handle opening and closing the sheet
+    React.useEffect(() => {
+      if (open) {
+        bottomSheetRef.current?.expand();
+      } else {
+        bottomSheetRef.current?.close();
+      }
+    }, [open]);
+
+    return (
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={open ? 0 : -1}
+        snapPoints={calculatedSnapPoints}
+        enablePanDownToClose={dismissOnSnapToBottom}
+        backdropComponent={renderBackdrop}
+        enableDynamicSizing
+        onChange={handleSheetChanges}
+        handleIndicatorStyle={styles.indicator}
+        backgroundStyle={styles.bottomSheetBackground}
+      >
+        <BottomSheetScrollView contentContainerStyle={styles.scrollContent}>
+          {title && (
+            <H3 textAlign="center" marginBottom="$4">
+              {title}
+            </H3>
+          )}
+          {children}
+        </BottomSheetScrollView>
+      </BottomSheet>
+    );
+  }
+);
+
+// Styles for the bottom sheet
+const styles = StyleSheet.create({
+  bottomSheetBackground: {
+    backgroundColor: "white",
+  },
+  indicator: {
+    backgroundColor: "#CDCDCD",
+    width: 40,
+    height: 4,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 24,
+  },
+});
 
 // Export Sheet components to maintain the original API
-Sheet.Overlay = TamaguiSheet.Overlay;
-Sheet.Frame = TamaguiSheet.Frame;
-Sheet.Handle = TamaguiSheet.Handle;
-Sheet.ScrollView = TamaguiSheet.ScrollView;
+// Using type assertion to add ScrollView property to Sheet
+(Sheet as any).ScrollView = BottomSheetScrollView;

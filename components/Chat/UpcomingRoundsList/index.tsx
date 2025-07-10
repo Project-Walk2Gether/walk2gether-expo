@@ -1,9 +1,11 @@
+import { useAuth } from "@/context/AuthContext";
 import BottomSheet from "@gorhom/bottom-sheet";
 import firestore from "@react-native-firebase/firestore";
-import { Info } from "@tamagui/lucide-icons";
+import { ChevronRight, Info } from "@tamagui/lucide-icons";
+import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
-import { Card, Text, XStack, YStack } from "tamagui";
-import { Round } from "walk2gether-shared";
+import { Button, Card, Text, XStack, YStack } from "tamagui";
+import { MeetupWalk, Round, Walk, WithId } from "walk2gether-shared";
 import { formatTimeLeft } from "../../../utils/dateUtils";
 import { COLORS } from "./constants";
 import { EditPromptSheet } from "./EditPromptSheet";
@@ -13,22 +15,27 @@ import { useInterval } from "./useInterval";
 
 interface Props {
   walkId: string;
-  upcomingRounds: Round[];
+  walk: WithId<Walk>;
   onRoundActivated?: (round: Round) => void;
-  currentUserId?: string;
-  isWalkOwner?: boolean;
 }
 
 export default function UpcomingRoundsList({
   walkId,
-  upcomingRounds,
+  walk,
   onRoundActivated,
-  currentUserId,
-  isWalkOwner = false,
 }: Props) {
-  const [expandedRoundIndex, setExpandedRoundIndex] = useState<number | null>(
-    null
-  );
+  // Get walk data from context
+  const { user } = useAuth();
+
+  // Check if the walk is a MeetupWalk by checking if it has upcomingRounds property
+  const isMeetupWalk = walk && "upcomingRounds" in walk;
+
+  // Use upcomingRounds from props if provided, otherwise from walk context if it's a MeetupWalk
+  const upcomingRounds = isMeetupWalk
+    ? (walk as unknown as MeetupWalk).upcomingRounds || []
+    : [];
+  const currentUserId = user?.uid;
+  const router = useRouter();
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [isRotating, setIsRotating] = useState(false);
   const [editingPromptIndex, setEditingPromptIndex] = useState<number | null>(
@@ -49,36 +56,36 @@ export default function UpcomingRoundsList({
 
   // Handle rotating to the next round
   const handleRotate = async () => {
-    if (upcomingRounds.length === 0 || !currentUserId) return;
+    if (upcomingRounds.length === 0 || !currentUserId || !walk) return;
 
     try {
       setIsRotating(true);
 
       // Get the first upcoming round
       const nextRound = upcomingRounds[0];
-      
+
       // Create a batch to perform multiple operations atomically
       const batch = firestore().batch();
-      
+
       // Reference to the walk document
       const walkRef = firestore().collection("walks").doc(walkId);
-      
+
       // Reference for the new round document
       const newRoundRef = walkRef.collection("rounds").doc();
-      
+
       // Create a new round document in Firestore
       const roundData = {
         ...nextRound,
         startTime: firestore.FieldValue.serverTimestamp(),
       };
-      
+
       // Add the round to the rounds collection
       batch.set(newRoundRef, roundData);
-      
+
       // Update the walk document to remove the first round from upcomingRounds
       const remainingRounds = upcomingRounds.slice(1);
       batch.update(walkRef, { upcomingRounds: remainingRounds });
-      
+
       // Commit the batch
       await batch.commit();
 
@@ -125,44 +132,14 @@ export default function UpcomingRoundsList({
     }
   };
 
-  if (upcomingRounds.length === 0) {
-    return (
-      <Card
-        bordered
-        elevate
-        size="$4"
-        margin="$2"
-        backgroundColor="white"
-        borderRadius="$4"
-      >
-        {/* Owner-only indicator */}
-        <XStack
-          backgroundColor="$blue2"
-          padding="$2"
-          alignItems="center"
-          space="$2"
-          borderTopLeftRadius="$4"
-          borderTopRightRadius="$4"
-        >
-          <Info size={16} color={COLORS.primary} />
-          <Text fontSize="$2" color="$blue8">
-            Only shown to you, the walk owner
-          </Text>
-        </XStack>
-
-        <YStack padding="$4" alignItems="center" justifyContent="center">
-          <Text textAlign="center">No upcoming rounds</Text>
-        </YStack>
-      </Card>
-    );
-  }
+  if (upcomingRounds.length === 0) return null;
 
   return (
     <Card
       bordered
       elevate
       size="$4"
-      margin="$2"
+      margin="$4"
       backgroundColor="white"
       borderRadius="$4"
     >
@@ -182,6 +159,30 @@ export default function UpcomingRoundsList({
       </XStack>
 
       <YStack padding="$2">
+        {/* Next upcoming round */}
+
+        <XStack
+          justifyContent="space-between"
+          alignItems="center"
+          paddingHorizontal="$2"
+          marginBottom="$2"
+        >
+          <Text fontSize="$6" fontWeight="bold">
+            Next Round
+          </Text>
+
+          <Button
+            size="$3"
+            backgroundColor="$blue2"
+            color="$blue8"
+            iconAfter={ChevronRight}
+            onPress={() =>
+              router.push(`/(app)/(modals)/upcoming-rounds?walkId=${walkId}`)
+            }
+          >
+            View All
+          </Button>
+        </XStack>
         {/* Rotation timer and button */}
         <RotationTimer
           timeLeft={timeLeft}
@@ -190,32 +191,16 @@ export default function UpcomingRoundsList({
           hasRounds={upcomingRounds.length > 0}
         />
 
-        {/* Upcoming rounds list */}
-        <YStack padding="$2">
-          <Text
-            fontSize="$6"
-            fontWeight="bold"
-            paddingHorizontal="$2"
-            marginBottom="$2"
-          >
-            Upcoming Rounds
-          </Text>
-
-          {upcomingRounds.map((round, index) => (
-            <UpcomingRound
-              key={`round-${index}`}
-              round={round}
-              index={index}
-              isExpanded={expandedRoundIndex === index}
-              onToggleExpand={() =>
-                setExpandedRoundIndex(
-                  expandedRoundIndex === index ? null : index
-                )
-              }
-              onEditPrompt={() => handleEditPrompt(index)}
-            />
-          ))}
-        </YStack>
+        {upcomingRounds.length > 0 && (
+          <UpcomingRound
+            key="next-round"
+            round={upcomingRounds[0]}
+            index={0}
+            isExpanded={true}
+            onToggleExpand={() => {}}
+            onEditPrompt={() => handleEditPrompt(0)}
+          />
+        )}
       </YStack>
 
       {/* Bottom sheet for editing question prompt */}

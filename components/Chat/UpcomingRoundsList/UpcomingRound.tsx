@@ -72,11 +72,7 @@ export const UpcomingRound = memo(
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <XStack space="$2" paddingVertical="$2">
                 {round.pairs.map((pair, pairIndex) => (
-                  <PairCard
-                    key={`pair-${pairIndex}`}
-                    pair={pair}
-                    width={screenWidth}
-                  />
+                  <PairCard key={`pair-${pairIndex}`} pair={pair} />
                 ))}
               </XStack>
             </ScrollView>

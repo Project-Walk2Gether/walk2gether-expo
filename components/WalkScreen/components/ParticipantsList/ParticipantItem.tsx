@@ -5,6 +5,7 @@ import {
   getParticipantStatusInfo,
 } from "@/utils/participantStatus";
 import { getWalkStatus } from "@/utils/walkUtils";
+import { Car, Footprints } from "@tamagui/lucide-icons";
 import React from "react";
 import { Avatar, Text, XStack, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
@@ -39,14 +40,12 @@ export default function ParticipantItem({
 
   // Only allow pressing participants that are not the current user
   const handlePress = () => {
-    if (!isCurrentUser && onPress) {
-      onPress(participant);
-    }
+    onPress?.(participant);
   };
 
   return (
     <XStack
-      onPress={isCurrentUser ? undefined : handlePress}
+      onPress={handlePress}
       padding="$2"
       gap="$2"
       alignItems="center"
@@ -90,6 +89,12 @@ export default function ParticipantItem({
 
         {/* Status text */}
         <XStack alignItems="center" gap="$1">
+          {participant.status === "on-the-way" &&
+            (participant.navigationMethod === "driving" ? (
+              <Car size={14} color={statusInfo.color} />
+            ) : (
+              <Footprints size={14} color={statusInfo.color} />
+            ))}
           <Text
             fontSize="$1"
             color={statusInfo.color}

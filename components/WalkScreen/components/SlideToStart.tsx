@@ -5,7 +5,7 @@ import Slider from "react-native-slide-to-unlock";
 import { Text } from "tamagui";
 
 type Props = {
-  onSlideComplete: () => void;
+  onSlideComplete?: () => void;
   text?: string;
   backgroundColor?: string;
   iconColor?: string;
@@ -44,14 +44,14 @@ const SlideAction: React.FC<Props> = ({
 
   return (
     <Slider
-      onEndReached={onSlideComplete}
+      onEndReached={() => onSlideComplete?.()}
       onSlideStart={() => {}}
       onSlideEnd={() => {}}
       containerStyle={{
         zIndex: -1,
         backgroundColor,
         borderRadius: 30,
-        height: "100%",
+        height: 43,
         paddingHorizontal: 5,
         overflow: "hidden",
         alignItems: "center",

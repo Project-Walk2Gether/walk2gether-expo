@@ -48,7 +48,8 @@ export default function MessageForm({
   const [isUploading, setIsUploading] = useState(false);
 
   // Check if the device has a camera
-  const hasCamera = Device.isDevice && Device.deviceType !== Device.DeviceType.DESKTOP;
+  const hasCamera =
+    Device.isDevice && Device.deviceType !== Device.DeviceType.DESKTOP;
 
   // Remove a specific image from the selection
   const removeImage = (index: number) => {
@@ -89,9 +90,6 @@ export default function MessageForm({
       const message: Partial<Message> = {
         message: messageText.trim(),
         attachments: attachments.length > 0 ? attachments : undefined,
-        // If there's an active round, this message is an answer to its question
-        roundId: activeRound ? `${activeRound.walkId}_${activeRound.roundNumber}` : undefined,
-        isRoundAnswer: !!activeRound,
       };
 
       onSendMessage(message);
@@ -163,7 +161,7 @@ export default function MessageForm({
             onPress={() => {
               // Create menu items based on device capabilities
               const menuItems = [];
-              
+
               // Only include camera option if device has a camera
               if (hasCamera) {
                 menuItems.push({
@@ -172,21 +170,23 @@ export default function MessageForm({
                   onPress: () => handleImagePicker("camera"),
                 });
               }
-              
+
               // Always include gallery option
               menuItems.push({
                 label: "Select photos",
                 icon: <ImagePlus size="$1" />,
                 onPress: () => handleImagePicker("multiple"),
               });
-              
+
               showMenu("Add Photos", menuItems);
             }}
           />
 
           <Input
             flex={1}
-            placeholder={activeRound ? `Answer the question...` : "Type a message..."}
+            placeholder={
+              activeRound ? `Answer the question...` : "Type a message..."
+            }
             value={messageText}
             onChangeText={setMessageText}
             backgroundColor={activeRound ? "$blue2" : "white"}

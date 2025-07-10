@@ -1,10 +1,11 @@
+import { useWalk } from "@/context/WalkContext";
 import React from "react";
 import { Dimensions } from "react-native";
 import { Card, Text, XStack, YStack } from "tamagui";
-import { Round as RoundType } from "walk2gether-shared";
+import { Round, WithId } from "walk2gether-shared";
 
 interface RoundProps {
-  round: RoundType;
+  round: WithId<Round>;
   currentUserId: string;
   isActive: boolean;
   onToggleActive: () => void;
@@ -23,14 +24,18 @@ export default function RoundCard({
     return round.pairs.find((pair) => pair.userUids.includes(currentUserId));
   }, [round.pairs, currentUserId]);
 
+  // Get walk context to access participant data
+  const { walk } = useWalk();
+
   // Get partner names (excluding current user)
   const partnerNames = React.useMemo(() => {
-    if (!userPair) return [];
+    if (!userPair || !walk?.participantsById) return [];
 
-    // This would need to be replaced with actual user data lookup
-    // For now, we'll just show user IDs
-    return userPair.userUids.filter((uid) => uid !== currentUserId);
-  }, [userPair, currentUserId]);
+    // Filter out current user and map to participant names from walk context
+    return userPair.userUids
+      .filter((uid) => uid !== currentUserId)
+      .map((uid) => walk.participantsById[uid]?.displayName);
+  }, [userPair, currentUserId, walk?.participantsById]);
 
   if (!userPair) {
     return null; // User not in any pair for this round
@@ -40,64 +45,61 @@ export default function RoundCard({
     <Card
       onPress={onToggleActive}
       pressStyle={{ opacity: 0.8 }}
-      backgroundColor={userPair.color + "20"} // Add transparency to the color
-      borderColor={userPair.color}
-      borderWidth={2}
+      borderWidth={isActive ? 2 : 1}
       borderRadius={16}
       padding="$4"
       marginVertical="$2"
       width="100%"
-      height={isActive ? SCREEN_HEIGHT * 0.5 : undefined}
       animation="bouncy"
       animateOnly={["height"]}
     >
-        <XStack
-          justifyContent="space-between"
-          alignItems="center"
-          marginBottom="$2"
-        >
-          <Text fontSize={16} fontWeight="bold">
-            Round {round.roundNumber}
+      <XStack
+        justifyContent="space-between"
+        alignItems="center"
+        marginBottom="$2"
+      >
+        <Text fontSize={16} fontWeight="bold">
+          Round {round.roundNumber}
+        </Text>
+        <Text fontSize={isActive ? 48 : 24}>{userPair.emoji}</Text>
+      </XStack>
+
+      {isActive && (
+        <YStack alignItems="center" marginVertical="$4">
+          <Text fontSize={150} marginBottom="$2">
+            {userPair.emoji}
           </Text>
-          <Text fontSize={24}>{userPair.emoji}</Text>
-        </XStack>
-
-        <YStack space="$2">
-          <Text fontSize={14} fontWeight="500">
-            Your pair:{" "}
-            {partnerNames.length > 0
-              ? partnerNames.join(", ")
-              : "No partner assigned"}
+          <Text fontSize={14} color="$gray10">
+            Show this emoji to find your partner
           </Text>
-
-          {round.questionPrompt && (
-            <YStack
-              backgroundColor="$blue2"
-              padding="$3"
-              borderRadius={12}
-              marginTop="$2"
-            >
-              <Text
-                fontSize={isActive ? 18 : 14}
-                fontWeight="600"
-                color="$blue11"
-              >
-                Question: {round.questionPrompt}
-              </Text>
-            </YStack>
-          )}
-
-          {isActive && (
-            <YStack marginTop="$4" space="$2">
-              <Text fontSize={16} fontWeight="500" color="$gray11">
-                This is the active round. Tap to collapse.
-              </Text>
-              <Text fontSize={14} color="$gray10">
-                Messages you send now will be answers to the question prompt.
-              </Text>
-            </YStack>
-          )}
         </YStack>
+      )}
+
+      <YStack space="$2">
+        <Text fontSize={14} fontWeight="500">
+          Your pair:{" "}
+          {partnerNames.length > 0
+            ? partnerNames.join(", ")
+            : "No partner assigned"}
+        </Text>
+
+        {round.questionPrompt && (
+          <YStack
+            backgroundColor="$blue2"
+            padding="$3"
+            borderRadius={12}
+            marginTop="$2"
+          >
+            <Text
+              fontSize={isActive ? 18 : 14}
+              fontWeight="600"
+              color="$blue11"
+            >
+              Question: {round.questionPrompt}
+            </Text>
+          </YStack>
+        )}
+      </YStack>
     </Card>
   );
 }

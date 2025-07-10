@@ -2,6 +2,7 @@ import { COLORS } from "@/styles/colors";
 import { Check, MapPin } from "@tamagui/lucide-icons";
 import React from "react";
 import { Spinner } from "tamagui";
+import { NavigationToggle } from "../../ParticipantStatusMenu/NavigationToggle";
 
 export type StatusType = "pending" | "on-the-way" | "arrived";
 
@@ -149,6 +150,7 @@ export const getStatusMenuItems = (
           backgroundColor: "$green9",
         },
         icon: <Check size={16} color="$green9" />,
+        children: <NavigationToggle isDriving onToggle={() => {}} />,
       },
       {
         label: "Arrived",

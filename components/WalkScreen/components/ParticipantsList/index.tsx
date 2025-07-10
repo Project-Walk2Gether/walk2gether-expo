@@ -1,21 +1,28 @@
+import { useMenu } from "@/context/MenuContext";
 import { getWalkStatus } from "@/utils/walkUtils";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { FlatList } from "react-native";
 import { View } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
-import ParticipantItem from "../ParticipantItem";
+import { useParticipantStatus } from "./hooks/useParticipantStatus";
+import ParticipantItem from "./ParticipantItem";
 import { sortParticipants } from "./sortParticipants";
+import { getStatusMenuItems, StatusType } from "./utils/walkStatusUtils";
 
 interface Props {
-  status: ReturnType<typeof getWalkStatus>;
+  walkStatus: ReturnType<typeof getWalkStatus>;
   participants: ParticipantWithRoute[];
   currentUserId?: string;
   isOwner: boolean;
+  walkId: string;
+  walkStarted?: boolean;
   onParticipantPress?: (participant: ParticipantWithRoute) => void;
 }
 
 export default function ParticipantsList({
-  status,
+  walkId,
+  walkStarted,
+  walkStatus,
   participants,
   currentUserId,
   isOwner,
@@ -41,7 +48,17 @@ export default function ParticipantsList({
     : [];
 
   // Sort participants based on requirements
-  const sortedParticipants = sortParticipants(confirmedParticipants, currentUserId);
+  const sortedParticipants = sortParticipants(
+    confirmedParticipants,
+    currentUserId
+  );
+
+  const myParticipant = useMemo(
+    () => participants.find((p) => p.userUid === currentUserId),
+    [participants]
+  );
+  const myParticipantStatus = myParticipant?.status;
+  const { showMenu } = useMenu();
 
   // Define a type that extends ParticipantWithRoute to include our flag
   type ExtendedParticipant = ParticipantWithRoute & {
@@ -62,26 +79,66 @@ export default function ParticipantsList({
     });
   }
 
-  // Modified renderItem to handle both regular and invited participants
-  const renderListItem = ({
-    item,
-  }: {
-    item: ParticipantWithRoute & { isInvitedParticipant?: boolean };
-  }) => {
-    return (
-      <ParticipantItem
-        participant={item}
-        walkStatus={status}
-        currentUserId={currentUserId}
-        onPress={onParticipantPress}
-      />
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const {
+    updateStatus,
+    updateNavigationMethod,
+    cancelParticipation,
+    reactivateParticipation,
+  } = useParticipantStatus({
+    walkId,
+    userId: currentUserId,
+    isOwner,
+    walkStarted,
+  });
+
+  // Handle status change
+  const handleStatusChange = async (newStatus: StatusType) => {
+    if (myParticipantStatus === newStatus) return; // Don't update if status is the same
+
+    setIsUpdatingStatus(true);
+
+    await updateStatus(
+      newStatus,
+      myParticipantStatus,
+      myParticipant?.navigationMethod!
     );
+
+    setIsUpdatingStatus(false);
+  };
+
+  const handleMeParticipantPress = () => {
+    console.log("PRESSING");
+    if (!myParticipant) return;
+
+    const status = myParticipant?.status;
+
+    const statusMenuItems = getStatusMenuItems(
+      status,
+      !!myParticipant.cancelledAt,
+      isOwner,
+      handleStatusChange,
+      cancelParticipation,
+      reactivateParticipation
+    );
+    showMenu("Edit my status", statusMenuItems);
   };
 
   return (
     <FlatList
       data={dataArray}
-      renderItem={({ item }) => renderListItem({ item })}
+      renderItem={({ item }) => (
+        <ParticipantItem
+          participant={item}
+          walkStatus={walkStatus}
+          currentUserId={currentUserId}
+          onPress={
+            item.userUid === currentUserId
+              ? handleMeParticipantPress
+              : onParticipantPress
+          }
+        />
+      )}
       keyExtractor={(item) => item.id || `participant-${item.userUid}`}
       horizontal
       showsHorizontalScrollIndicator={false}
