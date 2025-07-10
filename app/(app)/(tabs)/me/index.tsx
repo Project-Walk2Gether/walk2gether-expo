@@ -5,7 +5,7 @@ import { PlaceData } from "@/components/UI/PlacesAutocomplete";
 import { StatelessAvatar } from "@/components/UserAvatar";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
-import { useMenu } from "@/context/MenuContext";
+import { MenuItem, useMenu } from "@/context/MenuContext";
 import { useUpdates } from "@/context/UpdatesContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
@@ -19,6 +19,7 @@ import {
   Download,
   Info,
   LogOut,
+  Map,
   Phone,
   QrCode,
   Trash,
@@ -33,6 +34,7 @@ import {
   H4,
   Separator,
   Spinner,
+  Switch,
   Text,
   XStack,
   YStack,
@@ -299,6 +301,35 @@ export default function MeScreen() {
           icon={<Phone />}
           title="Phone"
           secondaryText={authUser?.phoneNumber || "Not provided"}
+        />
+
+        <Separator borderColor="$gray5" />
+
+        <ActionRow
+          icon={<Map />}
+          label="Distance Unit"
+          secondaryText={userData?.distanceUnit === "mi" ? "Miles" : "Kilometers"}
+          onPress={() => {
+            const menuItems: MenuItem[] = [
+              {
+                label: "Kilometers",
+                onPress: () => {
+                  updateUserData({ distanceUnit: "km" });
+                  showMessage("Distance unit changed to kilometers", "success");
+                },
+                theme: userData?.distanceUnit === "km" ? "blue" : "default",
+              },
+              {
+                label: "Miles",
+                onPress: () => {
+                  updateUserData({ distanceUnit: "mi" });
+                  showMessage("Distance unit changed to miles", "success");
+                },
+                theme: userData?.distanceUnit === "mi" ? "blue" : "default",
+              },
+            ];
+            showMenu("Select Distance Unit", menuItems);
+          }}
         />
 
         <Separator borderColor="$gray5" />

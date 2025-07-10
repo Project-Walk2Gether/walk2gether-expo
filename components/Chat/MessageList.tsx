@@ -18,6 +18,7 @@ type Props = {
   currentUserId: string;
   headerTitle?: React.ReactNode;
   onActiveRoundChange?: (round: RoundType | null) => void;
+  context?: 'friendship' | 'walk';
 };
 
 export type MessageListRef = {
@@ -25,7 +26,7 @@ export type MessageListRef = {
 };
 
 const MessageList = forwardRef<MessageListRef, Props>(
-  ({ timeline, loading = false, onDeleteMessage, currentUserId, onActiveRoundChange }, ref) => {
+  ({ timeline, loading = false, onDeleteMessage, currentUserId, onActiveRoundChange, context = 'friendship' }, ref) => {
     const scrollViewRef = useRef<RNScrollView | null>(null);
     const [selectedMessage, setSelectedMessage] = useState<MessageType | null>(
       null
@@ -113,7 +114,9 @@ const MessageList = forwardRef<MessageListRef, Props>(
               {timeline.length === 0 ? (
                 <YStack height={80} justifyContent="center" alignItems="center">
                   <Text color="#999" textAlign="center">
-                    No messages or walks yet. Say hello or invite to a walk!
+                    {context === 'walk' 
+                      ? "No messages yet. Say hello!"
+                      : "No messages or walks yet. Say hello or invite to a walk!"}
                   </Text>
                 </YStack>
               ) : (

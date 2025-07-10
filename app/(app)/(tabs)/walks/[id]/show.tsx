@@ -252,6 +252,7 @@ export default function WalkScreen() {
                 loading={false}
                 onDeleteMessage={handleDeleteMessage}
                 onActiveRoundChange={setActiveRound}
+                context="walk"
               />
               {walk.type === "meetup" && isWalkOwner && (
                 <UpcomingRoundsList

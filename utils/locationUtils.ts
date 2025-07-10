@@ -11,30 +11,28 @@ export interface Location {
 
 export interface DistanceParams {
   // The target location (could be a walk location)
-  targetLocation?:
-    | Location
-    | {
-        latitude?: number;
-        longitude?: number;
-        name?: string;
-      };
+  targetLocation: {
+    latitude: number;
+    longitude: number;
+  } | null;
   // Current user coordinates
-  userCoords?: {
-    latitude?: number;
-    longitude?: number;
-  };
+  userCoords: {
+    latitude: number;
+    longitude: number;
+  } | null;
   loading?: boolean;
-  error?: any;
+  error?: string;
+  distanceUnit?: "km" | "mi";
 }
 
 /**
  * Calculate and format the distance between a user's current location and a target location
  *
- * @param params Parameters containing location details and user coordinates
+ * @param params Parameters containing location details, user coordinates, and preferred distance unit
  * @returns Formatted distance as a string, or status messages for loading/error states
  */
 export const getDistanceToLocation = (params: DistanceParams): string => {
-  const { targetLocation, userCoords, loading, error } = params;
+  const { targetLocation, userCoords, loading, error, distanceUnit = "km" } = params;
 
   if (
     targetLocation?.latitude != null &&
@@ -48,7 +46,7 @@ export const getDistanceToLocation = (params: DistanceParams): string => {
       targetLocation.latitude,
       targetLocation.longitude
     );
-    return formatDistance(meters);
+    return formatDistance(meters, distanceUnit);
   } else if (loading) {
     return "Locating...";
   } else if (error) {

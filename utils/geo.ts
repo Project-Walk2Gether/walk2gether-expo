@@ -49,11 +49,25 @@ export function getDistanceMeters(lat1: number, lon1: number, lat2: number, lon2
 }
 
 /**
- * Formats a distance in meters to a user-friendly string (e.g. "1.2 km" or "350 m").
+ * Formats a distance in meters to a user-friendly string based on the preferred unit system
+ * @param meters Distance in meters
+ * @param unit Preferred unit system ('km' for metric or 'mi' for imperial)
+ * @returns Formatted distance string
  */
-export function formatDistance(meters: number): string {
-  if (meters < 1000) {
-    return `${Math.round(meters)} m`;
+export function formatDistance(meters: number, unit: "km" | "mi" = "km"): string {
+  // For metric system (kilometers)
+  if (unit === "km") {
+    if (meters < 1000) {
+      return `${Math.round(meters)} m`;
+    }
+    return `${(meters / 1000).toFixed(1)} km`;
   }
-  return `${(meters / 1000).toFixed(1)} km`;
+  
+  // For imperial system (miles)
+  const feet = meters * 3.28084;
+  if (feet < 1000) {
+    return `${Math.round(feet)} ft`;
+  }
+  const miles = meters / 1609.34;
+  return `${miles.toFixed(1)} mi`;
 }

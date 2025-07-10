@@ -1,4 +1,5 @@
 import { getDistanceToLocation } from "@/utils/locationUtils";
+import { useUserData } from "@/context/UserDataContext";
 import { Navigation } from "@tamagui/lucide-icons";
 import React from "react";
 import { Walk, WithId, walkIsNeighborhoodWalk } from "walk2gether-shared";
@@ -20,6 +21,10 @@ export const LocationDisplay: React.FC<Props> = ({
   locationLoading,
   locationError,
 }) => {
+  // Get user's preferred distance unit from userData
+  const { userData } = useUserData();
+  const distanceUnit = userData?.distanceUnit || "km";
+  
   if (walkIsNeighborhoodWalk(walk)) return null;
 
   // Extract the location name and remove city part for compact display
@@ -35,6 +40,7 @@ export const LocationDisplay: React.FC<Props> = ({
       userCoords: userCoords,
       loading: locationLoading,
       error: locationError,
+      distanceUnit, // Pass the user's preferred distance unit
     });
 
     if (distance) {
