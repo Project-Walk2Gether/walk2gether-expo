@@ -75,6 +75,7 @@ export default function VerificationCodeForm({
               onBlur={handleBlur("verificationCode")}
               keyboardType="number-pad"
               placeholderTextColor="#999"
+              textContentType="oneTimeCode"
               autoFocus
               height={50}
               fontSize="$4"
