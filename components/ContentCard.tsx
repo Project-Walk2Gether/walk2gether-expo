@@ -21,7 +21,7 @@ export const ContentCard = ({
 }: ContentCardProps) => {
   return (
     <YStack
-      gap="$3"
+      gap="$2"
       backgroundColor="white"
       borderRadius="$4"
       padding="$5"

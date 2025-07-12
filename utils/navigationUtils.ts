@@ -1,5 +1,5 @@
 import { Router } from "expo-router";
-import { Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
+import { Walk, WithId, walkIsNeighborhoodWalk } from "walk2gether-shared";
 
 /**
  * Shared handler for navigating to the appropriate screen when a walk card is pressed
@@ -7,7 +7,9 @@ import { Walk, WithId, walkIsFriendsWalk } from "walk2gether-shared";
  * @param router The expo-router instance
  */
 export const handleWalkPress = (walk: WithId<Walk>, router: Router) => {
-  if (walkIsFriendsWalk(walk)) {
+  if (walkIsNeighborhoodWalk(walk)) {
+    router.push({ pathname: `/walks/[id]`, params: { id: walk.id } });
+  } else {
     // For friends walks, check if participants exist
     const hasParticipants =
       walk.participantUids && walk.participantUids.length > 1; // More than just the creator
@@ -22,8 +24,5 @@ export const handleWalkPress = (walk: WithId<Walk>, router: Router) => {
         params: { id: walk.id },
       });
     }
-  } else {
-    // Not a friends walk (neighborhood walk) - go to walk details
-    router.push({ pathname: `/walks/[id]`, params: { id: walk.id } });
   }
 };

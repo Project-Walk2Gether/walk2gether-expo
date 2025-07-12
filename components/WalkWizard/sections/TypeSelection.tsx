@@ -55,7 +55,7 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({
           description="Start a walk in your neighborhood"
           onSelect={setSelectedWalkType}
         />
-        {/* <WalkTypeCard
+        <WalkTypeCard
           type="meetup"
           title="Meetup Walk"
           icon="chatbubbles-outline"
@@ -63,7 +63,7 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({
           backgroundColor={COLORS.walkTypes.meetup.background}
           description="Schedule a walk with a topic, and invite the public"
           onSelect={setSelectedWalkType}
-        /> */}
+        />
       </YStack>
     </WizardWrapper>
   );

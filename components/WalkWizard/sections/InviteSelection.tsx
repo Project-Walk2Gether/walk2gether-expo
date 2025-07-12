@@ -4,20 +4,20 @@ import UserList from "@/components/UserList";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useFriends } from "@/context/FriendsContext";
-import { useMaybeWalkForm, useWalkForm } from "@/context/WalkFormContext";
 import { useUserData } from "@/context/UserDataContext";
-import firestore from "@react-native-firebase/firestore";
+import { useMaybeWalkForm, useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
 import { fetchDocsByIds } from "@/utils/firestore";
 import { updateParticipants } from "@/utils/participantManagement";
 import { findNearbyWalkers } from "@/utils/userSearch";
+import firestore from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { QrCode, Share2, Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert } from "react-native";
 import { Button, Spacer, Spinner, Text, XStack, YStack } from "tamagui";
-import { UserData, Walk, WithId } from "walk2gether-shared";
+import { MeetupWalk, UserData, Walk, WithId } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
 
 interface Props {
@@ -203,6 +203,12 @@ export const InviteSelection: React.FC<Props> = ({
       } else {
         return "No neighbors found in your area";
       }
+    } else if (effectiveWalkType === "meetup") {
+      return `${formData.participantUids?.length || 0} ${
+        (formData.participantUids?.length || 0) === 1
+          ? "participant"
+          : "participants"
+      } invited`;
     } else {
       return `${formData.participantUids?.length || 0} ${
         (formData.participantUids?.length || 0) === 1 ? "friend" : "friends"
@@ -212,6 +218,7 @@ export const InviteSelection: React.FC<Props> = ({
     isNeighborhoodWalk,
     isLoadingNearbyUsers,
     formData.participantUids?.length,
+    effectiveWalkType,
   ]);
 
   // Handle user selection/deselection - updating form state instead of local state
@@ -256,9 +263,30 @@ export const InviteSelection: React.FC<Props> = ({
     }
 
     // Default message text that will be editable in the custom share screen
-    const defaultMessage =
-      "I’ve been using this walking app. You should check it out.";
-    const title = "Invite friends to Walk2Gether";
+    let defaultMessage =
+      "I've been using this walking app. You should check it out.";
+    let title = "Invite friends to Walk2Gether";
+
+    // Customize message based on walk type
+    if (effectiveWalkType === "meetup") {
+      defaultMessage = `Join me for a meetup walk to discuss "${
+        (walk as MeetupWalk)?.topic || formData.topic || "our topic"
+      }"! ${
+        (walk as MeetupWalk)?.descriptionMarkdown ||
+        formData.descriptionMarkdown
+          ? "We'll be talking about interesting ideas together while walking."
+          : ""
+      }`;
+      title = "Join my Walk2Gether Meetup";
+    } else if (effectiveWalkType === "neighborhood") {
+      defaultMessage =
+        "I'm organizing a neighborhood walk. Join me for some fresh air and community connection!";
+      title = "Join my Neighborhood Walk";
+    } else {
+      defaultMessage =
+        "I've been using this walking app. You should check it out.";
+      title = "Join my Walk2Gether Walk";
+    }
 
     // Navigate to the custom share screen with necessary parameters
     router.push({
@@ -277,17 +305,29 @@ export const InviteSelection: React.FC<Props> = ({
   const handleCancelButtonPress = () => {
     // Show confirmation dialog before canceling
     Alert.alert(
-      "Cancel Walk",
-      "Are you sure you want to cancel this walk? This action cannot be undone.",
+      effectiveWalkType === "meetup" ? "Cancel Meetup" : "Cancel Walk",
+      effectiveWalkType === "meetup"
+        ? "Are you sure you want to cancel this meetup? This action cannot be undone."
+        : "Are you sure you want to cancel this walk? This action cannot be undone.",
       [
-        { text: "No", style: "cancel" },
-        { 
-          text: "Yes, Cancel Walk", 
+        {
+          text:
+            effectiveWalkType === "meetup"
+              ? "No, Keep Meetup"
+              : "No, Keep Walk",
+          style: "cancel",
+        },
+        {
+          text:
+            effectiveWalkType === "meetup"
+              ? "Yes, Cancel Meetup"
+              : "Yes, Cancel Walk",
           style: "destructive",
           onPress: () => {
             // Delete the walk document if it exists
             if (walk?._ref) {
-              walk._ref.delete()
+              walk._ref
+                .delete()
                 .then(() => {
                   // Close the entire walk form modal
                   closeWalkForm();
@@ -319,8 +359,8 @@ export const InviteSelection: React.FC<Props> = ({
               // If no walk document exists yet, just close the form
               closeWalkForm();
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -429,110 +469,133 @@ export const InviteSelection: React.FC<Props> = ({
         currentStep={currentStep}
         totalSteps={totalSteps}
       >
-        <YStack flex={1} gap="$4">
-          <YStack gap="$5">
-            <ContentCard
-              title={isNeighborhoodWalk ? "Select Neighbors" : "Select Friends"}
-              icon={<Users size={20} color={COLORS.textOnLight} />}
-              description={
-                isNeighborhoodWalk
-                  ? "Walk2Gether neighbors in your area will be notified about your walk."
-                  : "Choose friends to invite to your walk."
-              }
-            >
-              {isLoadingUsers ? (
-                <YStack alignItems="center" padding="$4">
-                  <Spinner size="large" color="$blue10" />
-                  <Text color={COLORS.textOnLight} marginTop="$2">
-                    Loading friends...
+        <YStack flex={1} gap="$3">
+          <ContentCard
+            title={
+              isNeighborhoodWalk
+                ? "Select Neighbors"
+                : effectiveWalkType === "meetup"
+                ? "Invite Participants"
+                : "Select Friends"
+            }
+            icon={<Users size={20} color={COLORS.textOnLight} />}
+            description={
+              isNeighborhoodWalk
+                ? "Walk2Gether neighbors in your area will be notified about your walk."
+                : effectiveWalkType === "meetup"
+                ? "Invite people to join your meetup walk discussion."
+                : "Choose friends to invite to your walk."
+            }
+          >
+            {isLoadingUsers ? (
+              <YStack alignItems="center" padding="$4">
+                <Spinner size="large" color="$blue10" />
+                <Text color={COLORS.textOnLight} marginTop="$2">
+                  Loading friends...
+                </Text>
+              </YStack>
+            ) : (
+              <>
+                <UserList
+                  users={users}
+                  onSelectUser={handleUserToggle}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  selectedUserIds={formData.participantUids || []}
+                  acceptedUserIds={acceptedUserIds}
+                  emptyMessage={
+                    isFriendsWalk
+                      ? "Your friends aren't on Walk2Gether yet. Add friends to invite them to your walk."
+                      : effectiveWalkType === "meetup"
+                      ? undefined
+                      : "Neighbors in your area will be automatically notified when you create a walk."
+                  }
+                />
+                {users.length > 0 && (
+                  <Text
+                    fontSize={16}
+                    color={COLORS.textOnLight}
+                    marginTop="$2"
+                    textAlign="center"
+                    fontWeight="600"
+                    marginBottom="$2"
+                  >
+                    {getParticipantMessage}
                   </Text>
-                </YStack>
-              ) : (
-                <>
-                  <UserList
-                    users={users}
-                    onSelectUser={handleUserToggle}
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                    selectedUserIds={formData.participantUids || []}
-                    acceptedUserIds={acceptedUserIds}
-                    emptyMessage={
-                      isFriendsWalk
-                        ? "Your friends aren't on Walk2Gether yet. Add friends to invite them to your walk."
-                        : "Neighbors in your area will be automatically notified when you create a walk."
-                    }
-                  />
-                  {users.length > 0 && (
-                    <Text
-                      fontSize={16}
-                      color={COLORS.textOnLight}
-                      marginTop="$2"
-                      textAlign="center"
-                      fontWeight="600"
-                      marginBottom="$2"
-                    >
-                      {getParticipantMessage}
-                    </Text>
-                  )}
+                )}
 
-                  {!isNeighborhoodWalk && (
-                    <YStack
-                      alignItems="center"
-                      marginTop="$4"
-                      paddingBottom="$2"
-                      gap="$4"
-                    >
+                {!isNeighborhoodWalk && (
+                  <YStack
+                    alignItems="center"
+                    marginTop="$4"
+                    paddingBottom="$2"
+                    gap="$4"
+                  >
+                    {effectiveWalkType === "meetup" ? null : (
                       <Text fontSize={14} color="$gray10" fontWeight="500">
                         Don't see your friend here yet?
                       </Text>
+                    )}
 
-                      <FormControl label="Invite a new friend">
-                        <XStack gap="$3" width="100%" alignItems="center">
-                          <Button
-                            backgroundColor={COLORS.primary}
-                            color={COLORS.textOnDark}
-                            onPress={handleShareLink}
-                            size="$4"
-                            icon={<Share2 size={18} color="#fff" />}
-                            paddingHorizontal={16}
-                            borderRadius={8}
-                            hoverStyle={{ backgroundColor: "#6d4c2b" }}
-                            pressStyle={{ backgroundColor: "#4b2e13" }}
-                          >
-                            {isNeighborhoodWalk
-                              ? "Invite another neighbor"
-                              : "Send invitation"}
-                          </Button>
+                    <FormControl
+                      label={
+                        effectiveWalkType === "meetup"
+                          ? "Invite participants"
+                          : "Invite a new friend"
+                      }
+                    >
+                      <XStack gap="$3" width="100%" alignItems="center">
+                        <Button
+                          backgroundColor={COLORS.primary}
+                          color={COLORS.textOnDark}
+                          onPress={handleShareLink}
+                          size="$4"
+                          flex={1}
+                          icon={<Share2 size={18} color="#fff" />}
+                          paddingHorizontal={16}
+                          borderRadius={8}
+                          hoverStyle={{ backgroundColor: "#6d4c2b" }}
+                          pressStyle={{ backgroundColor: "#4b2e13" }}
+                        >
+                          {isNeighborhoodWalk
+                            ? "Invite another neighbor"
+                            : effectiveWalkType === "meetup"
+                            ? "Share invitation"
+                            : "Send invitation"}
+                        </Button>
 
-                          <Button
-                            backgroundColor={COLORS.secondary}
-                            color={COLORS.textOnDark}
-                            onPress={() =>
-                              router.push({
-                                pathname: "/qr-code",
-                                params: { walkCode: effectiveWalkId },
-                              })
-                            }
-                            size="$4"
-                            icon={<QrCode size={18} color="#fff" />}
-                            paddingHorizontal={16}
-                            borderRadius={8}
-                            hoverStyle={{ backgroundColor: "#4a95c4" }}
-                            pressStyle={{ backgroundColor: "#2d7fb3" }}
-                          >
-                            QR code
-                          </Button>
-                        </XStack>
-                      </FormControl>
-                    </YStack>
-                  )}
-                </>
-              )}
-            </ContentCard>
-          </YStack>
+                        <Button
+                          backgroundColor={COLORS.secondary}
+                          color={COLORS.textOnDark}
+                          flex={1}
+                          onPress={() =>
+                            router.push({
+                              pathname: "/qr-code",
+                              params: { walkCode: effectiveWalkId },
+                            })
+                          }
+                          size="$4"
+                          icon={<QrCode size={18} color="#fff" />}
+                          paddingHorizontal={16}
+                          borderRadius={8}
+                          hoverStyle={{ backgroundColor: "#4a95c4" }}
+                          pressStyle={{ backgroundColor: "#2d7fb3" }}
+                        >
+                          QR code
+                        </Button>
+                      </XStack>
+                    </FormControl>
+                  </YStack>
+                )}
+              </>
+            )}
+          </ContentCard>
+
           <Spacer flexGrow={1} />
           <Button onPress={handleCancelButtonPress} theme={"red"}>
-            I changed my mind - cancel the walk
+            {effectiveWalkType === "meetup"
+              ? "Cancel this meetup"
+              : "I changed my mind - cancel the walk"}
           </Button>
         </YStack>
       </WizardWrapper>

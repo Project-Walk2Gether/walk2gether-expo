@@ -1,13 +1,13 @@
 import { COLORS } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
-import { Card, Input, Spinner, Text, XStack, YStack, View } from "tamagui";
-import { UserData, WithId } from "walk2gether-shared";
+import { Card, Input, Spinner, Text, XStack, YStack } from "tamagui";
+import { UserData } from "walk2gether-shared";
 import { UserAvatar } from "../UserAvatar";
 
 interface Props {
-  users: Array<UserData & {id: string}>;
-  onSelectUser: (user: UserData & {id: string}) => void;
+  users: Array<UserData & { id: string }>;
+  onSelectUser: (user: UserData & { id: string }) => void;
   searchEnabled?: boolean;
   searchQuery?: string;
   onSearchChange?: (text: string) => void;
@@ -26,13 +26,13 @@ export default function UserList({
   onSearchChange,
   selectedUserIds = [], // Default to empty array
   loading = false,
-  emptyMessage = "No users found.",
+  emptyMessage,
   acceptedUserIds = [], // Default to empty array
 }: Props) {
   // Filter users if search is enabled and has query
   const filteredUsers = useMemo(() => {
     if (!searchQuery) return users;
-    
+
     return users.filter((user) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -73,7 +73,9 @@ export default function UserList({
       )}
 
       {users.length === 0 ? (
-        <Text color="$gray10">{emptyMessage}</Text>
+        emptyMessage ? (
+          <Text color="$gray10">{emptyMessage}</Text>
+        ) : null
       ) : (
         filteredUsers.map((user) => {
           // Check if this user is selected
@@ -92,7 +94,7 @@ export default function UserList({
             >
               {/* Absolutely positioned checkbox in top left corner */}
               {isSelected && (
-                <XStack 
+                <XStack
                   position="absolute"
                   top={-8}
                   left={-8}
@@ -106,25 +108,21 @@ export default function UserList({
                   borderWidth={1}
                   borderColor="$blue9"
                 >
-                  <Ionicons 
-                    name="checkmark-circle" 
-                    size={26} 
-                    color="$blue9" 
-                  />
+                  <Ionicons name="checkmark-circle" size={26} color="$blue9" />
                 </XStack>
               )}
-              
+
               <Card.Header padded>
                 <XStack alignItems="center" justifyContent="space-between">
                   <XStack alignItems="center" gap="$3">
-                    <UserAvatar 
-                      uid={user.id} 
-                      size={40} 
+                    <UserAvatar
+                      uid={user.id}
+                      size={40}
                       backgroundColor={COLORS.primary}
                     />
-                    
+
                     <YStack>
-                      <Text 
+                      <Text
                         fontSize={16}
                         fontWeight={isSelected ? "600" : "400"}
                       >
@@ -132,11 +130,7 @@ export default function UserList({
                       </Text>
                       {acceptedUserIds.includes(user.id) && (
                         <XStack paddingTop="$1">
-                          <Text 
-                            fontSize={12} 
-                            color="$green9"
-                            fontWeight="500"
-                          >
+                          <Text fontSize={12} color="$green9" fontWeight="500">
                             Accepted
                           </Text>
                         </XStack>

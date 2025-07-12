@@ -1,6 +1,7 @@
 import LocationButton from "@/components/UI/LocationButton";
 import { useWalkForm } from "@/context/WalkFormContext";
 import React, { useEffect, useRef, useState } from "react";
+import { Alert, Linking } from "react-native";
 import { YStack } from "tamagui";
 import WizardWrapper, { WizardWrapperHandle } from "../WizardWrapper";
 
@@ -14,6 +15,7 @@ import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomp
 import LocationNotes from "./LocationNotes";
 import LocationSearchSection from "./LocationSearchSection";
 import MapSection from "./MapSection";
+import TravelTimeWarning from "./TravelTimeWarning";
 
 interface Props {
   onContinue: () => void;
@@ -50,7 +52,9 @@ export const LocationSelection: React.FC<Props> = ({
     handleLocationSelect,
     handleMapLongPress,
     handleCurrentLocation,
-    handleLocationCoordinates,
+    userMayNotMakeItToStartLocationInTime,
+    isTravelTimeLoading,
+    travelTimeInfo,
   } = useLocationSelection();
 
   // Fetch saved locations
@@ -109,10 +113,39 @@ export const LocationSelection: React.FC<Props> = ({
     }, 100); // Small delay to ensure the keyboard is showing first
   };
 
+  // Handle continue button press
   const handleContinue = () => {
-    if (formData.startLocation) {
+    // Show alert if user may not make it to the start location in time
+    if (userMayNotMakeItToStartLocationInTime && travelTimeInfo) {
+      Alert.alert(
+        "Travel Time Warning",
+        `You may not make it to the walk on time. It takes about ${travelTimeInfo.travelTimeMinutes} minutes (${travelTimeInfo.route.distance.text}) to get there by car.${travelTimeInfo.arrivalTimeBeforeStart < 0 ? ` You'll arrive approximately ${Math.abs(travelTimeInfo.arrivalTimeBeforeStart)} minutes after the walk starts.` : ` You'll only arrive ${travelTimeInfo.arrivalTimeBeforeStart} minutes before the walk starts.`}
+
+Do you still want to continue?`,
+        [
+          { text: "Open Maps", onPress: handleOpenMaps },
+          { text: "Cancel", style: "cancel" },
+          { text: "Continue Anyway", onPress: () => onContinue() }
+        ]
+      );
+    } else {
+      // Continue normally if no travel time warning
       onContinue();
     }
+  };
+
+  // Handle opening maps app with directions
+  const handleOpenMaps = () => {
+    if (!formData.startLocation) return;
+
+    const destination = `${formData.startLocation.latitude},${formData.startLocation.longitude}`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+
+    Linking.canOpenURL(url).then((supported) => {
+      if (supported) {
+        Linking.openURL(url);
+      }
+    });
   };
 
   return (
@@ -162,6 +195,18 @@ export const LocationSelection: React.FC<Props> = ({
           setNotes={setNotes}
           onFocus={handleMeetupLocationFocus}
         />
+        {/* Travel time warning */}
+        {travelTimeInfo && userMayNotMakeItToStartLocationInTime && (
+          <TravelTimeWarning
+            isLoading={isTravelTimeLoading}
+            canMakeIt={!userMayNotMakeItToStartLocationInTime}
+            travelTimeMinutes={travelTimeInfo.travelTimeMinutes}
+            arrivalTimeBeforeStart={travelTimeInfo.arrivalTimeBeforeStart}
+            distanceText={travelTimeInfo.route.distance.text}
+            error={null}
+            onOpenMaps={handleOpenMaps}
+          />
+        )}
       </YStack>
     </WizardWrapper>
   );

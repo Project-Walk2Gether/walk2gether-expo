@@ -1,4 +1,5 @@
 import PrimaryButton from "@/components/PrimaryButton";
+import { COLORS } from "@/styles/colors";
 import React, {
   forwardRef,
   ReactNode,
@@ -89,7 +90,7 @@ const WizardWrapper = forwardRef<WizardWrapperHandle, WizardWrapperProps>(
             bottom={0}
             left={0}
             right={0}
-            backgroundColor="rgba(0, 0, 0, 0.2)"
+            backgroundColor={COLORS.background}
             paddingHorizontal={16}
             paddingBottom={Math.max(insets.bottom, 16)}
             paddingTop={16}
