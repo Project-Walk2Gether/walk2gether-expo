@@ -3,9 +3,11 @@ import { useWalkForm } from "@/context/WalkFormContext";
 import { getDistanceMeters } from "@/utils/geo";
 import { reverseGeocode } from "@/utils/locationUtils";
 import { writeLogIfEnabled } from "@/utils/logging";
-import { useEffect, useRef, useState } from "react";
+import functions from "@react-native-firebase/functions";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
 import MapView from "react-native-maps";
+import { API } from "walk2gether-shared";
 
 export const useLocationSelection = () => {
   const { updateFormData, setSystemErrors } = useWalkForm();
@@ -24,6 +26,12 @@ export const useLocationSelection = () => {
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [longPressActive, setLongPressActive] = useState(false);
   const [pendingLocationRequest, setPendingLocationRequest] = useState(false);
+  const [isTravelTimeLoading, setIsTravelTimeLoading] = useState(false);
+  const [
+    userMayNotMakeItToStartLocationInTime,
+    setUserMayNotMakeItToStartLocationInTime,
+  ] = useState(false);
+  const [travelTimeInfo, setTravelTimeInfo] = useState<any>(null);
 
   // Use the imported reverseGeocode function with error handling
   const handleReverseGeocode = async (latitude: number, longitude: number) => {
@@ -205,6 +213,58 @@ export const useLocationSelection = () => {
   const { formData } = useWalkForm();
   const { startLocation } = formData;
 
+  // Check travel time to determine if user can make it to the start location in time
+  const checkTravelTime = useCallback(async () => {
+    // Reset state
+    setUserMayNotMakeItToStartLocationInTime(false);
+
+    // Check if we have all required data
+    if (!startLocation || !formData.date || !coords) {
+      return;
+    }
+
+    // Only check for future walks
+    const walkStartTime = formData.date.toMillis();
+    const currentTime = Date.now();
+    if (walkStartTime <= currentTime) {
+      return;
+    }
+
+    setIsTravelTimeLoading(true);
+
+    try {
+      const checkTravelTimeFunction = functions().httpsCallable(
+        "checkTravelTime",
+        { timeout: 60000 }
+      );
+
+      const result = await checkTravelTimeFunction({
+        origin: {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        },
+        destination: {
+          latitude: startLocation.latitude,
+          longitude: startLocation.longitude,
+        },
+        walkStartTime: walkStartTime,
+        navigationMethod: "driving", // Default to driving for this check
+      });
+
+      const travelData = result.data as API.TravelTime.Check.ResponseBody;
+      console.log({ travelData });
+      setTravelTimeInfo(travelData);
+
+      // Update state based on whether user can make it in time
+      // We consider they may not make it if they'll arrive less than 10 minutes before start
+      setUserMayNotMakeItToStartLocationInTime(!travelData.canMakeIt);
+    } catch (err) {
+      console.error("Error checking travel time:", err);
+    } finally {
+      setIsTravelTimeLoading(false);
+    }
+  }, [startLocation, formData.date, coords]);
+
   useEffect(() => {
     // Only run the check if we have both user coordinates and a start location
     if (coords && startLocation?.latitude && startLocation?.longitude) {
@@ -222,8 +282,23 @@ export const useLocationSelection = () => {
         distance,
       });
       updateFormData({ ownerIsInitiallyAtLocation: isUserAtLocation });
+
+      // Check travel time when location changes
+      checkTravelTime();
     }
-  }, [coords, startLocation?.latitude, startLocation?.longitude]);
+  }, [
+    coords,
+    startLocation?.latitude,
+    startLocation?.longitude,
+    checkTravelTime,
+  ]);
+
+  // Also check travel time when the date changes
+  useEffect(() => {
+    if (startLocation?.latitude && startLocation?.longitude && formData.date) {
+      checkTravelTime();
+    }
+  }, [formData.date, checkTravelTime]);
 
   return {
     mapRef,
@@ -237,6 +312,10 @@ export const useLocationSelection = () => {
     handleMapLongPress,
     handleCurrentLocation,
     handleLocationCoordinates,
+    userMayNotMakeItToStartLocationInTime,
+    isTravelTimeLoading,
+    travelTimeInfo,
+    checkTravelTime,
   };
 };
 
