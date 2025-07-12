@@ -1,12 +1,13 @@
 import { FormikErrors, FormikTouched } from "formik";
 import React from "react";
-import { YStack } from "tamagui";
-import { Walk, walkSchema } from "walk2gether-shared";
+import { Input, Text, YStack } from "tamagui";
+import { MeetupWalk, Walk, walkSchema } from "walk2gether-shared";
 import { WithId } from "walk2gether-shared/lib/utils/persisted";
 
 // Form components
 import { FormControl } from "../FormControl";
 import LocationAutocomplete from "../LocationAutocomplete";
+import MarkdownEditor from "../MarkdownEditor";
 import DateTimeField from "./components/DateTimeField";
 import DurationField from "./components/DurationField";
 import FormProvider from "./components/FormProvider";
@@ -90,6 +91,35 @@ export default function WalkForm({
               }
               touched={!!(touched.startLocation as FormikTouched<any>)?.notes}
             />
+          )}
+
+          {/* Topic and Description fields - only for meetup walks */}
+          {values.type === "meetup" && (
+            <>
+              <FormControl label="Topic">
+                <Input
+                  placeholder="Enter a topic for your meetup walk"
+                  value={(values as any).topic || ""}
+                  onChangeText={(text) => setFieldValue("topic", text)}
+                />
+                {(touched as any).topic && (errors as any).topic && (
+                  <Text color="$red10" fontSize={14}>
+                    {(errors as any).topic as string}
+                  </Text>
+                )}
+              </FormControl>
+
+              <FormControl label="Description (Markdown)">
+                <MarkdownEditor
+                  value={(values as any).descriptionMarkdown || ""}
+                  onChange={(text) => setFieldValue("descriptionMarkdown", text)}
+                  label=""
+                  placeholder="Add details about your meetup using markdown..."
+                  error={(errors as any).descriptionMarkdown as string | undefined}
+                  touched={!!(touched as any).descriptionMarkdown}
+                />
+              </FormControl>
+            </>
           )}
 
           {/* Duration field - common to both walk types */}

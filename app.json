@@ -40,6 +40,7 @@
       }
     },
     "android": {
+      "versionCode": 1119,
       "intentFilters": [
         {
           "action": "VIEW",

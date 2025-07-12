@@ -6,7 +6,13 @@ import { useDoc } from "@/utils/firestore";
 import { calculateDisplayAvatars } from "@/utils/participantAvatars";
 import { getWalkTitle } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
-import { Calendar, CheckCircle, Hand, Timer } from "@tamagui/lucide-icons";
+import {
+  Calendar,
+  CheckCircle,
+  Hand,
+  MessageCircle,
+  Timer,
+} from "@tamagui/lucide-icons";
 import React from "react";
 import { Text, View, XStack, YStack } from "tamagui";
 import {
@@ -127,7 +133,13 @@ const WalkCard: React.FC<Props> = ({
         <CardHeader
           icon={<UserAvatar uid={walk.createdByUid} size={34} />}
           title={getWalkTitle(walk, user?.uid)}
-          walkType={walk.type === "neighborhood" ? "Neighborhood" : walk.type === "meetup" ? "Meetup" : "Friends"}
+          walkType={
+            walk.type === "neighborhood"
+              ? "Neighborhood"
+              : walk.type === "meetup"
+              ? "Meetup"
+              : "Friends"
+          }
           isUserInitiator={isMine}
           initiatorName={ownerName}
           action={
@@ -165,7 +177,7 @@ const WalkCard: React.FC<Props> = ({
         {/* Show topic for meetup walks */}
         {walk.type === "meetup" && walk.topic && (
           <IconTextRow
-            icon={<Text fontSize={16} color="#444">💬</Text>}
+            icon={<MessageCircle size={16} />}
             text={`Topic: ${walk.topic}`}
           />
         )}
