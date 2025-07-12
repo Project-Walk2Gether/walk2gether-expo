@@ -43,6 +43,7 @@ yarn-error.*
 # Android and iOS builds
 *.apk
 *.ipa
+*.aab
 
 firebase-debug.log
 firestore-debug.log
