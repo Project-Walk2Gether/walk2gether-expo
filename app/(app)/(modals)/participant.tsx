@@ -1,15 +1,8 @@
-import { firestore_instance } from "@/config/firebase";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
-import {
-  deleteField,
-  doc,
-  serverTimestamp,
-  updateDoc,
-} from "@react-native-firebase/firestore";
-import { Car, Check, Footprints, X } from "@tamagui/lucide-icons";
+import { Car, Footprints } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import { ScrollView } from "react-native";
 import {
   Avatar,
@@ -22,13 +15,20 @@ import {
   YStack,
 } from "tamagui";
 import { ParticipantWithRoute, UserData } from "walk2gether-shared";
+import { ParticipantAdminButtons } from "@/components/ParticipantAdminButtons";
+import { FriendshipSection } from "@/components/FriendshipSection";
+import { useWalk } from "@/context/WalkContext";
+import { useAuth } from "@/context/AuthContext";
 
-export default function ReviewParticipantScreen() {
+export default function ParticipantScreen() {
   const params = useLocalSearchParams();
   const walkId = params.walkId as string;
   const participantId = params.participantId as string;
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { walk } = useWalk();
+  const { user } = useAuth();
+
+  // Check if current user is the walk owner
+  const isWalkOwner = user?.uid === walk?.createdByUid;
 
   // Get the participant data
   const { doc: participant, status: participantStatus } =
@@ -43,50 +43,6 @@ export default function ReviewParticipantScreen() {
 
   const isLoading =
     participantStatus === "loading" || userDataStatus === "loading";
-
-  const handleApprove = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const participantRef = doc(
-        firestore_instance,
-        `walks/${walkId}/participants/${participantId}`
-      );
-      await updateDoc(participantRef, {
-        acceptedAt: serverTimestamp(),
-        deniedAt: null,
-        status: "approved",
-      });
-      router.back();
-    } catch (error) {
-      console.error("Error approving participant:", error);
-      setError("Failed to approve participant. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleReject = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const participantRef = doc(
-        firestore_instance,
-        `walks/${walkId}/participants/${participantId}`
-      );
-      await updateDoc(participantRef, {
-        deniedAt: serverTimestamp(),
-        acceptedAt: deleteField(),
-        status: "rejected",
-      });
-      router.back();
-    } catch (error) {
-      console.error("Error rejecting participant:", error);
-      setError("Failed to decline. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -157,41 +113,32 @@ export default function ReviewParticipantScreen() {
               </Text>
             </YStack>
           )}
-
-          {/* Friend count could be shown here if available in userData */}
         </YStack>
 
-        {error ? (
-          <Text color="$red10" textAlign="center">
-            {error}
-          </Text>
-        ) : null}
+        {/* Only show admin buttons if the current user is the walk owner */}
+        {isWalkOwner && (
+          <ParticipantAdminButtons
+            walkId={walkId}
+            participantId={participantId}
+            isDenied={!!participant.deniedAt}
+          />
+        )}
 
-        <YStack space="$4" marginTop="$4">
-          {participant.deniedAt ? (
-            <Button
-              size="$5"
-              backgroundColor={COLORS.success}
-              color="white"
-              icon={<Check color="white" />}
-              onPress={handleApprove}
-              disabled={loading}
-            >
-              {loading ? "Approving..." : "Approve"}
-            </Button>
-          ) : (
-            <Button
-              size="$5"
-              backgroundColor="$red10"
-              color="white"
-              icon={<X color="white" />}
-              onPress={handleReject}
-              disabled={loading}
-            >
-              {loading ? "Declining..." : "Remove from walk"}
-            </Button>
-          )}
-        </YStack>
+        {/* Show friendship section if the participant is not the current user */}
+        {user?.uid !== participantId && (
+          <FriendshipSection
+            participant={userData}
+            participantId={participantId}
+          />
+        )}
+
+        <Button 
+          marginTop="$4" 
+          onPress={() => router.back()}
+          size="$4"
+        >
+          Go Back
+        </Button>
       </YStack>
     </ScrollView>
   );
