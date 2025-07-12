@@ -5,7 +5,6 @@ import {
   Users,
 } from "@tamagui/lucide-icons";
 import React, { memo } from "react";
-import { Dimensions } from "react-native";
 import { Button, Card, ScrollView, Text, XStack, YStack } from "tamagui";
 import { Round } from "walk2gether-shared";
 import { COLORS } from "./constants";
@@ -21,30 +20,24 @@ interface Props {
 
 export const UpcomingRound = memo(
   ({ round, index, isExpanded, onToggleExpand, onEditPrompt }: Props) => {
-    const screenWidth = Dimensions.get("window").width;
-
     return (
       <Card
         key={`upcoming-round-${index}`}
         backgroundColor="$blue1"
-        padding="$4"
         marginBottom="$3"
         borderRadius="$4"
         onPress={onToggleExpand}
         pressStyle={{ opacity: 0.9 }}
       >
-        <XStack justifyContent="space-between" alignItems="center">
+        <XStack px="$4" justifyContent="space-between" alignItems="center">
           <Text fontWeight="bold">Round {round.roundNumber}</Text>
 
-          <XStack space="$2">
+          <XStack gap="$2">
             <Button
               size="$2"
               backgroundColor="transparent"
               icon={<Edit size={16} color={COLORS.primary} />}
-              onPress={(e) => {
-                e.stopPropagation();
-                onEditPrompt();
-              }}
+              onPress={onEditPrompt}
             />
             {isExpanded ? (
               <ChevronUp size={16} color={COLORS.text} />
@@ -56,20 +49,24 @@ export const UpcomingRound = memo(
 
         {/* Question prompt */}
         {round.questionPrompt && (
-          <YStack marginTop="$2">
+          <YStack px="$4" marginTop="$2">
             <Text fontStyle="italic">"{round.questionPrompt}"</Text>
           </YStack>
         )}
 
         {/* Expanded view with pairs */}
         {isExpanded && (
-          <YStack marginTop="$4" space="$2">
-            <XStack alignItems="center" space="$2">
+          <YStack marginTop="$2" space="$2">
+            <XStack px="$4" alignItems="center" space="$2">
               <Users size={16} color={COLORS.text} />
               <Text fontWeight="bold">Pairs</Text>
             </XStack>
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 12 }}
+            >
               <XStack space="$2" paddingVertical="$2">
                 {round.pairs.map((pair, pairIndex) => (
                   <PairCard key={`pair-${pairIndex}`} pair={pair} />

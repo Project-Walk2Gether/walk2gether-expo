@@ -1,17 +1,28 @@
+import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
-import BottomSheet from "@gorhom/bottom-sheet";
-import firestore from "@react-native-firebase/firestore";
+import { useSheet } from "@/context/SheetContext";
+import { useQuery } from "@/utils/firestore";
+import firestore, {
+  collection,
+  FirebaseFirestoreTypes,
+  orderBy,
+  query,
+} from "@react-native-firebase/firestore";
 import { ChevronRight, Info } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
-import { MeetupWalk, Round, Walk, WithId } from "walk2gether-shared";
-import { formatTimeLeft } from "../../../utils/dateUtils";
+import {
+  MeetupWalk,
+  Round,
+  Walk,
+  walkIsMeetupWalk,
+  WithId,
+} from "walk2gether-shared";
 import { COLORS } from "./constants";
 import { EditPromptSheet } from "./EditPromptSheet";
 import { RotationTimer } from "./RotationTimer";
 import { UpcomingRound } from "./UpcomingRound";
-import { useInterval } from "./useInterval";
 
 interface Props {
   walkId: string;
@@ -28,32 +39,23 @@ export default function UpcomingRoundsList({
   const { user } = useAuth();
 
   // Check if the walk is a MeetupWalk by checking if it has upcomingRounds property
-  const isMeetupWalk = walk && "upcomingRounds" in walk;
-
+  const isMeetupWalk = walkIsMeetupWalk(walk);
   // Use upcomingRounds from props if provided, otherwise from walk context if it's a MeetupWalk
   const upcomingRounds = isMeetupWalk
     ? (walk as unknown as MeetupWalk).upcomingRounds || []
     : [];
-  const currentUserId = user?.uid;
+  const currentUserId = user!.uid;
   const router = useRouter();
-  const [timeLeft, setTimeLeft] = useState<string>("");
   const [isRotating, setIsRotating] = useState(false);
-  const [editingPromptIndex, setEditingPromptIndex] = useState<number | null>(
-    null
+  const walkRef = collection(firestore_instance, "walks").doc(walkId);
+  const roundsQuery = query(
+    collection(walkRef, "rounds"),
+    orderBy("startTime")
   );
-  const [promptText, setPromptText] = useState("");
-  const bottomSheetRef = useRef<BottomSheet>(null);
-
-  // Calculate time until next round rotation (5 minutes from now)
-  useInterval(() => {
-    if (upcomingRounds.length > 0) {
-      const now = new Date();
-      const nextRotation = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes from now
-      const formatted = formatTimeLeft(now, nextRotation);
-      setTimeLeft(formatted);
-    }
-  }, 1000);
-
+  const roundsSnapshot = useQuery(roundsQuery);
+  const rounds = roundsSnapshot.docs as WithId<Round>[];
+  const currentRound = rounds[rounds.length - 1];
+  const { showSheet, hideSheet } = useSheet();
   // Handle rotating to the next round
   const handleRotate = async () => {
     if (upcomingRounds.length === 0 || !currentUserId || !walk) return;
@@ -68,15 +70,17 @@ export default function UpcomingRoundsList({
       const batch = firestore().batch();
 
       // Reference to the walk document
-      const walkRef = firestore().collection("walks").doc(walkId);
-
       // Reference for the new round document
-      const newRoundRef = walkRef.collection("rounds").doc();
+      const newRoundRef = walk._ref.collection("rounds").doc();
 
       // Create a new round document in Firestore
       const roundData = {
         ...nextRound,
         startTime: firestore.FieldValue.serverTimestamp(),
+        // Set endTime to 5 minutes from now
+        endTime: firestore.Timestamp.fromDate(
+          new Date(Date.now() + 5 * 60 * 1000)
+        ),
       };
 
       // Add the round to the rounds collection
@@ -84,7 +88,10 @@ export default function UpcomingRoundsList({
 
       // Update the walk document to remove the first round from upcomingRounds
       const remainingRounds = upcomingRounds.slice(1);
-      batch.update(walkRef, { upcomingRounds: remainingRounds });
+      batch.update(
+        walk._ref as unknown as FirebaseFirestoreTypes.DocumentReference,
+        { upcomingRounds: remainingRounds }
+      );
 
       // Commit the batch
       await batch.commit();
@@ -103,33 +110,9 @@ export default function UpcomingRoundsList({
 
   // Handle editing a round's question prompt
   const handleEditPrompt = (index: number) => {
-    setPromptText(upcomingRounds[index].questionPrompt || "");
-    setEditingPromptIndex(index);
-    bottomSheetRef.current?.expand();
-  };
-
-  // Save the edited question prompt
-  const handleSavePrompt = async () => {
-    if (editingPromptIndex === null) return;
-
-    try {
-      // Update the upcomingRounds array in the walk document
-      const updatedRounds = [...upcomingRounds];
-      updatedRounds[editingPromptIndex] = {
-        ...updatedRounds[editingPromptIndex],
-        questionPrompt: promptText,
-      };
-
-      await firestore().collection("walks").doc(walkId).update({
-        upcomingRounds: updatedRounds,
-      });
-
-      // Close the bottom sheet
-      bottomSheetRef.current?.close();
-      setEditingPromptIndex(null);
-    } catch (error) {
-      console.error("Error saving question prompt:", error);
-    }
+    showSheet(
+      <EditPromptSheet onClose={hideSheet} roundIndex={index} walk={walk} />
+    );
   };
 
   if (upcomingRounds.length === 0) return null;
@@ -177,15 +160,15 @@ export default function UpcomingRoundsList({
             color="$blue8"
             iconAfter={ChevronRight}
             onPress={() =>
-              router.push(`/(app)/(modals)/upcoming-rounds?walkId=${walkId}`)
+              router.push(`/(app)/(modals)/walk-rounds?walkId=${walkId}`)
             }
           >
-            View All
+            View All Rounds
           </Button>
         </XStack>
         {/* Rotation timer and button */}
         <RotationTimer
-          timeLeft={timeLeft}
+          currentRound={currentRound}
           isRotating={isRotating}
           onRotate={handleRotate}
           hasRounds={upcomingRounds.length > 0}
@@ -202,14 +185,6 @@ export default function UpcomingRoundsList({
           />
         )}
       </YStack>
-
-      {/* Bottom sheet for editing question prompt */}
-      <EditPromptSheet
-        ref={bottomSheetRef}
-        promptText={promptText}
-        setPromptText={setPromptText}
-        onSave={handleSavePrompt}
-      />
     </Card>
   );
 }

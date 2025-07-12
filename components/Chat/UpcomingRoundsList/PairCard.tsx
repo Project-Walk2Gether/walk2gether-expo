@@ -1,19 +1,14 @@
 import React from "react";
-import { Text, XStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 import { Pair } from "walk2gether-shared";
 import { useWalk } from "../../../context/WalkContext";
+import { formatNamesInSentenceCase } from "../../../utils/participantFilters";
 
 interface Props {
   pair: Pair;
-  width: number;
 }
 
-interface UserInfo {
-  displayName: string;
-  photoURL?: string;
-}
-
-export const PairCard = ({ pair, width }: Props) => {
+export const PairCard = ({ pair }: Props) => {
   // Get walk data from context
   const { walk } = useWalk();
 
@@ -26,30 +21,45 @@ export const PairCard = ({ pair, width }: Props) => {
     );
 
   return (
-    <XStack
-      backgroundColor={pair.color}
-      padding="$2"
+    <YStack
+      borderBottomLeftRadius="$4"
+      borderBottomRightRadius="$4"
+      borderColor={"#888"}
+      borderWidth={1}
       borderRadius="$4"
+      overflow="hidden"
       flex={1}
-      alignItems="center"
-      justifyContent="center"
-      flexDirection="column"
     >
-      <Text color="white" textAlign="center" fontSize="$5" marginBottom="$1">
-        {pair.emoji}
-      </Text>
-
-      {participantsInfo.length > 0 ? (
-        participantsInfo.map((participant, index) => (
-          <Text key={index} color="white" textAlign="center" fontSize="$2">
-            {participant.displayName}
-          </Text>
-        ))
-      ) : (
-        <Text color="white" textAlign="center">
-          {pair.userUids.length} participants
+      {/* Colored top section */}
+      <YStack
+        backgroundColor={pair.color}
+        padding="$2"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Text color="white" textAlign="center" fontSize="$5" marginBottom="$1">
+          {pair.emoji}
         </Text>
-      )}
-    </XStack>
+      </YStack>
+
+      {/* White bottom section */}
+      <YStack
+        backgroundColor="white"
+        padding="$2"
+        flex={1}
+        alignItems="center"
+        justifyContent="center"
+      >
+        {participantsInfo.length > 0 ? (
+          <Text textAlign="center" fontSize="$2">
+            {formatNamesInSentenceCase(
+              participantsInfo.map((participant) => participant.displayName)
+            )}
+          </Text>
+        ) : (
+          <Text textAlign="center">{pair.userUids.length} participants</Text>
+        )}
+      </YStack>
+    </YStack>
   );
 };
