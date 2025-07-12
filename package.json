@@ -17,6 +17,7 @@
     "test:e2e:ios": "maestro test"
   },
   "dependencies": {
+    "@expensify/react-native-live-markdown": "^0.1.292",
     "@expo/config-plugins": "~10.1.1",
     "@expo/vector-icons": "^14.0.4",
     "@gorhom/bottom-sheet": "^5.1.2",
@@ -43,6 +44,7 @@
     "@tamagui/lucide-icons": "1.126.9",
     "axios": "^1.8.4",
     "date-fns": "^4.1.0",
+    "expensify-common": "^2.0.148",
     "expo": "53.0.19",
     "expo-background-fetch": "~13.1.6",
     "expo-background-task": "~0.2.8",
