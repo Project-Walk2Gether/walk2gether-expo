@@ -11,6 +11,7 @@ import { Stack } from "expo-router";
 import flowRight from "lodash/flowRight";
 import React from "react";
 import "react-native-get-random-values";
+import { PortalHost } from "tamagui";
 import "../config/emulators";
 
 // https://github.com/FaridSafi/react-native-google-places-autocomplete#more-examples
@@ -27,29 +28,32 @@ function App() {
   useAppStateUpdates();
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen
-        name="(app)"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="join"
-        options={{
-          headerShown: false,
-          animation: "none",
-        }}
-      />
-      <Stack.Screen
-        name="auth"
-        options={{
-          headerShown: false,
-          animation: "none",
-        }}
-      />
-    </Stack>
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen
+          name="(app)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="join"
+          options={{
+            headerShown: false,
+            animation: "none",
+          }}
+        />
+        <Stack.Screen
+          name="auth"
+          options={{
+            headerShown: false,
+            animation: "none",
+          }}
+        />
+      </Stack>
+      <PortalHost name="root-portal" />
+    </>
   );
 }
 

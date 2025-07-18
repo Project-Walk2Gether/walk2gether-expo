@@ -8,8 +8,10 @@ import { FormInput } from "@/components/FormInput";
 import LocationAutocomplete from "@/components/LocationAutocomplete";
 import LocationButton from "@/components/UI/LocationButton";
 import { useAuth } from "@/context/AuthContext";
+import { useOnboarding } from "@/context/OnboardingContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
+import { Timestamp } from "@react-native-firebase/firestore";
 import { ArrowRight, Keyboard as KeyboardIcon } from "@tamagui/lucide-icons";
 import { Redirect } from "expo-router";
 import { Formik } from "formik";
@@ -17,7 +19,6 @@ import React, { useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, ScrollView, YStack } from "tamagui";
 import { userDataSchema } from "walk2gether-shared";
-import { useOnboarding } from "@/context/OnboardingContext";
 
 export default function CompleteYourProfile() {
   const { setUserData } = useUserData();
@@ -39,6 +40,8 @@ export default function CompleteYourProfile() {
       // Prepare the data to save
       const userData = {
         name: values.name,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
         location: values.location,
       };
 

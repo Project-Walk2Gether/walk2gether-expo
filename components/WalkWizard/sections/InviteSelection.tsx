@@ -12,11 +12,11 @@ import { updateParticipants } from "@/utils/participantManagement";
 import { findNearbyWalkers } from "@/utils/userSearch";
 import firestore from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
-import { QrCode, Share2, Users } from "@tamagui/lucide-icons";
+import { Check, Copy, QrCode, Share2, Users } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert } from "react-native";
-import { Button, Spacer, Spinner, Text, XStack, YStack } from "tamagui";
+import { Alert, Clipboard } from "react-native";
+import { Button, Input, Spacer, Spinner, Text, XStack, YStack } from "tamagui";
 import { MeetupWalk, UserData, Walk, WithId } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
 
@@ -83,6 +83,7 @@ export const InviteSelection: React.FC<Props> = ({
   const [nearbyUserIds, setNearbyUserIds] = useState<string[]>([]);
   const [isLoadingNearbyUsers, setIsLoadingNearbyUsers] = useState(false);
   const [shareSuccessful, setShareSuccessful] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // No need for custom functions to check invitation status
   // We'll pass the acceptedUserIds array to UserList instead
@@ -525,16 +526,64 @@ export const InviteSelection: React.FC<Props> = ({
                 )}
 
                 {!isNeighborhoodWalk && (
-                  <YStack
-                    alignItems="center"
-                    marginTop="$4"
-                    paddingBottom="$2"
-                    gap="$4"
-                  >
+                  <YStack marginTop="$4" paddingBottom="$2" gap="$4">
                     {effectiveWalkType === "meetup" ? null : (
                       <Text fontSize={14} color="$gray10" fontWeight="500">
                         Don't see your friend here yet?
                       </Text>
+                    )}
+
+                    {effectiveWalkType === "meetup" && (
+                      <YStack mb="$4" space="$2">
+                        <Text fontSize={14} color="$gray11" fontWeight="500">
+                          Meetup invitation link:
+                        </Text>
+                        <XStack
+                          backgroundColor="$background"
+                          borderRadius={8}
+                          borderColor="$borderColor"
+                          borderWidth={1}
+                          padding="$2"
+                          alignItems="center"
+                          space="$2"
+                        >
+                          <Input
+                            flex={1}
+                            value={getInvitationLink()}
+                            editable={false}
+                            fontSize={12}
+                          />
+                          <Button
+                            size="$3"
+                            color={COLORS.textOnDark}
+                            backgroundColor={
+                              copied ? COLORS.success : COLORS.primary
+                            }
+                            onPress={() => {
+                              Clipboard.setString(getInvitationLink());
+                              setCopied(true);
+                              showMessage(
+                                "Invitation link copied to clipboard",
+                                "success"
+                              );
+                              // Reset copied state after 2 seconds
+                              setTimeout(() => setCopied(false), 2000);
+                            }}
+                            icon={
+                              copied ? (
+                                <Check size={16} color="#fff" />
+                              ) : (
+                                <Copy size={16} color="#fff" />
+                              )
+                            }
+                          >
+                            {copied ? "Copied!" : "Copy"}
+                          </Button>
+                        </XStack>
+                        <Text fontSize={12} color="$gray10" marginTop="$1">
+                          Tap to copy the link and share it with others
+                        </Text>
+                      </YStack>
                     )}
 
                     <FormControl
@@ -567,7 +616,6 @@ export const InviteSelection: React.FC<Props> = ({
                         <Button
                           backgroundColor={COLORS.secondary}
                           color={COLORS.textOnDark}
-                          flex={1}
                           onPress={() =>
                             router.push({
                               pathname: "/qr-code",

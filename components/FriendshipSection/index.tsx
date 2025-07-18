@@ -1,12 +1,16 @@
 import { firestore_instance } from "@/config/firebase";
-import { useFriends } from "@/context/FriendsContext";
 import { useAuth } from "@/context/AuthContext";
+import { useFriends } from "@/context/FriendsContext";
 import { COLORS } from "@/styles/colors";
-import { addDoc, collection, serverTimestamp } from "@react-native-firebase/firestore";
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+} from "@react-native-firebase/firestore";
 import { UserPlus } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import { Button, Text, YStack } from "tamagui";
-import { Friendship, UserData } from "walk2gether-shared";
+import { UserData } from "walk2gether-shared";
 
 interface Props {
   participant: UserData;
@@ -24,18 +28,18 @@ export const FriendshipSection = ({ participant, participantId }: Props) => {
   // Find if there's an existing friendship between the current user and the participant
   const existingFriendship = friendships.find(
     (friendship) =>
-      friendship.uids.includes(user.uid) && 
+      friendship.uids.includes(user.uid) &&
       friendship.uids.includes(participantId)
   );
 
   const isPending = existingFriendship && !existingFriendship.acceptedAt;
   const isFriend = existingFriendship && existingFriendship.acceptedAt;
-  
+
   const handleSendFriendRequest = async () => {
     try {
       setLoading(true);
       setError("");
-      
+
       // Create a new friendship document
       await addDoc(collection(firestore_instance, "friendships"), {
         uids: [user.uid, participantId],
@@ -52,10 +56,9 @@ export const FriendshipSection = ({ participant, participantId }: Props) => {
           [participantId]: {
             name: participant.name || "",
             profilePicUrl: participant.profilePicUrl || null,
-          }
-        }
+          },
+        },
       });
-      
     } catch (error) {
       console.error("Error sending friend request:", error);
       setError("Failed to send friend request. Please try again.");
@@ -74,8 +77,6 @@ export const FriendshipSection = ({ participant, participantId }: Props) => {
 
   return (
     <YStack space="$4" marginTop="$4" paddingHorizontal="$2">
-      <Text fontWeight="500" fontSize="$4">Friendship</Text>
-      
       {error ? (
         <Text color="$red10" textAlign="center">
           {error}
@@ -84,15 +85,11 @@ export const FriendshipSection = ({ participant, participantId }: Props) => {
 
       {isFriend ? (
         <YStack backgroundColor="$green2" padding="$3" borderRadius="$3">
-          <Text color="$green10">
-            You and {participant.name} are friends
-          </Text>
+          <Text color="$green10">You and {participant.name} are friends</Text>
         </YStack>
       ) : isPending ? (
         <YStack backgroundColor="$yellow2" padding="$3" borderRadius="$3">
-          <Text color="$yellow10">
-            Friend request pending
-          </Text>
+          <Text color="$yellow10">Friend request pending</Text>
         </YStack>
       ) : (
         <Button

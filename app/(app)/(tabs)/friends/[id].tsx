@@ -100,7 +100,7 @@ export default function FriendshipScreen() {
           onPress={() => {
             showMenu("Friendship Options", [
               {
-                label: "Something's wrong",
+                label: "Remove Friend",
                 icon: <UserMinus size="$1" />,
                 onPress: handleNavigateToUnfriend,
                 theme: "red",

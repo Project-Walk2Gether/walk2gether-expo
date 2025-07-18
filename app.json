@@ -2,7 +2,7 @@
   "expo": {
     "name": "Walk2Gether",
     "slug": "walkmate",
-    "version": "1.1.19",
+    "version": "1.1.21",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -67,6 +67,7 @@
         "FOREGROUND_SERVICE",
         "WAKE_LOCK"
       ],
+      "blockedPermissions": ["com.google.android.gms.permission.AD_ID"],
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyAjnbays5Hi7wYTj9PLljDDFJzZq3Dh3z8"
@@ -130,7 +131,7 @@
         "projectId": "7b384d5a-3e2e-4c79-895f-30255a67819a"
       },
       "googleMapsApiKey": "AIzaSyAjnbays5Hi7wYTj9PLljDDFJzZq3Dh3z8",
-      "emulatorsEnabledInDev": true
+      "emulatorsEnabledInDev": false
     },
     "owner": "michaeldawson"
   }

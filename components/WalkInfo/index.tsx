@@ -75,7 +75,6 @@ export default function WalkInfo({ walk }: Props) {
     // If the walk is in the future
     if (walkDate && walkDate > currentTime) {
       const timeUntilWalk = differenceInSeconds(walkDate, currentTime);
-      console.log({ timeUntilWalk });
       return `Starting in ${formatTime(timeUntilWalk)}`;
     }
 

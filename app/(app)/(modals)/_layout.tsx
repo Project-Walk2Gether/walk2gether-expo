@@ -22,10 +22,9 @@ export default function ModalsLayout() {
           }}
         />
         <Stack.Screen
-          name="review-participant"
+          name="participant"
           options={{
             headerShown: true,
-            title: "Review walker",
             headerLeft: () => <HeaderBackButton />,
           }}
         />
@@ -36,7 +35,7 @@ export default function ModalsLayout() {
 
   return (
     <>
-      {Platform.OS === 'android' ? (
+      {Platform.OS === "android" ? (
         <SafeAreaView style={{ flex: 1 }}>{content}</SafeAreaView>
       ) : (
         content

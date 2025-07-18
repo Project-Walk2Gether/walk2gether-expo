@@ -156,10 +156,8 @@ export default function WalkScreen() {
 
   // Handle opening the approval modal
   const handleParticipantPress = (participant: ParticipantWithRoute) => {
-    if (!isWalkOwner) return;
-
     router.push({
-      pathname: "/(app)/(modals)/review-participant",
+      pathname: "/(app)/(modals)/participant",
       params: {
         walkId: id,
         participantId: participant.id,
@@ -173,6 +171,7 @@ export default function WalkScreen() {
   const status = getWalkStatus(walk);
 
   console.log({ participantsCount: participants.length });
+  console.log({ walkType: walk.type, isWalkOwner });
 
   return (
     <>
@@ -235,7 +234,7 @@ export default function WalkScreen() {
           >
             <BottomSheetScrollView
               keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{ zIndex: 1000000, paddingBottom: 100 }}
+              contentContainerStyle={{ paddingBottom: 50 }}
             >
               <ParticipantsList
                 walkId={walk.id}

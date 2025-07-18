@@ -22,7 +22,6 @@ import { WalkActionSliders } from "../WalkActionSliders";
 import LocationLoading from "./LocationLoading";
 import OfficialWalkRoute from "./OfficialWalkRoute";
 import ParticipantMarker from "./ParticipantMarker";
-import UserRoute from "./UserRoute";
 
 interface Props {
   walkId: string;
@@ -323,7 +322,7 @@ export default function LiveWalkMap({
         <OfficialWalkRoute walk={walk} />
 
         {/* Render route for current user */}
-        <UserRoute participant={currentUserParticipant} />
+        {/* <UserRoute participant={currentUserParticipant} /> */}
       </MapView>
 
       {/* Location loading overlay */}

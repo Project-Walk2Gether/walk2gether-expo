@@ -65,13 +65,33 @@ export default function RoundCard({
       </XStack>
 
       {isActive && (
-        <YStack alignItems="center" marginVertical="$4">
-          <Text fontSize={150} marginBottom="$2">
-            {userPair.emoji}
-          </Text>
-          <Text fontSize={14} color="$gray10">
-            Show this emoji to find your partner
-          </Text>
+        <YStack 
+          marginVertical="$4"
+          overflow="hidden"
+          borderRadius={16}
+        >
+          <YStack 
+            backgroundColor={userPair.color}
+            padding="$4"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Text fontSize={150} color="white" marginBottom="$2">
+              {userPair.emoji}
+            </Text>
+          </YStack>
+          
+          <YStack 
+            backgroundColor="white" 
+            padding="$3"
+            alignItems="center"
+            borderBottomLeftRadius={16}
+            borderBottomRightRadius={16}
+          >
+            <Text fontSize={14} color="$gray10">
+              Show this emoji to find your partner
+            </Text>
+          </YStack>
         </YStack>
       )}
 
