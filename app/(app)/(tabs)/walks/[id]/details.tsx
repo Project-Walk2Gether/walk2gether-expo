@@ -133,8 +133,6 @@ export default function DetailsTab() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
       <YStack p="$4" space="$4" pb="$6">
-        {/* Invitation Response Section - shown if user is invited but hasn't responded */}
-
         <WalkDetailsCard
           title="Respond to request"
           headerAction={

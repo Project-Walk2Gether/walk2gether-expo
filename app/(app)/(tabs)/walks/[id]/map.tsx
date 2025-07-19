@@ -1,11 +1,25 @@
 import LiveWalkMap from "@/components/WalkScreen/components/LiveWalkMap";
 import StatusUpdateButton from "@/components/WalkScreen/components/StatusUpdateButton";
+import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
 import { useWalk } from "@/context/WalkContext";
-import React from "react";
+import React, { useMemo } from "react";
 import { Text, View } from "tamagui";
+import { differenceInHours } from "date-fns";
 
 export default function MapTab() {
   const { walk } = useWalk();
+
+  // Check if walk is scheduled within the next 5 hours
+  const isStartingSoon = useMemo(() => {
+    if (!walk?.date) return false;
+    
+    const walkTime = walk.date.toDate();
+    const now = new Date();
+    const hoursDifference = differenceInHours(walkTime, now);
+    
+    // Show button if walk starts within 5 hours (including if it's already started)
+    return hoursDifference < 5;
+  }, [walk]);
 
   if (!walk || !walk.id) {
     return (
@@ -22,18 +36,38 @@ export default function MapTab() {
   return (
     <View style={{ flex: 1 }}>
       <LiveWalkMap walkId={walk.id} />
-
-      {/* Status Update Button - positioned at the bottom */}
+      
+      {/* Location Card - positioned at the top */}
       <View
         style={{
           position: "absolute",
-          bottom: 16,
+          top: 16,
           left: 16,
           right: 16,
+          zIndex: 10,
         }}
       >
-        <StatusUpdateButton testID="map-status-button" />
+        <WalkLocationCard
+          location={walk.currentLocation}
+          locationName={walk.currentLocation?.name}
+          notes={walk.startLocation?.notes}
+          showMap={false} // Don't show the map since we're already on the map screen
+        />
       </View>
+
+      {/* Status Update Button - positioned at the bottom, only shown when walk is starting soon */}
+      {isStartingSoon && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: 16,
+            left: 16,
+            right: 16,
+          }}
+        >
+          <StatusUpdateButton testID="map-status-button" />
+        </View>
+      )}
     </View>
   );
 }

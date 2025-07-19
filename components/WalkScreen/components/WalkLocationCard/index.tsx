@@ -12,6 +12,7 @@ interface Props {
   location?: Location;
   locationName?: string;
   notes?: string;
+  showMap?: boolean;
 }
 
 /**
@@ -21,6 +22,7 @@ export default function WalkLocationCard({
   location,
   locationName,
   notes,
+  showMap = true, // Default to showing the map
 }: Props) {
   // If there's no location data, show a placeholder
   if (!location || !location.latitude || !location.longitude) {
@@ -64,8 +66,8 @@ export default function WalkLocationCard({
           testID="walk-location-row"
         />
 
-        {/* Map Preview */}
-        {hasCoordinates && (
+        {/* Map Preview - only shown if showMap is true */}
+        {hasCoordinates && showMap && (
           <View
             height={180}
             borderRadius={12}
