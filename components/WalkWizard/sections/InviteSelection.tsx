@@ -536,7 +536,7 @@ export const InviteSelection: React.FC<Props> = ({
                     )}
 
                     {effectiveWalkType === "meetup" && (
-                      <YStack mb="$4" space="$2">
+                      <YStack mb="$4" gap="$2">
                         <Text fontSize={14} color="$gray11" fontWeight="500">
                           Meetup invitation link:
                         </Text>
@@ -545,9 +545,8 @@ export const InviteSelection: React.FC<Props> = ({
                           borderRadius={8}
                           borderColor="$borderColor"
                           borderWidth={1}
-                          padding="$2"
                           alignItems="center"
-                          space="$2"
+                          gap="$2"
                         >
                           <Input
                             flex={1}

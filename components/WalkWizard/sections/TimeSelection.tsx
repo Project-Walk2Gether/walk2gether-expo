@@ -28,6 +28,7 @@ export const TimeSelection: React.FC<Props> = ({
   const { formData, updateFormData } = useWalkForm();
   // Determine if this is a friends walk or neighborhood walk
   const isFriendsWalk = formData.type === "friends";
+  const isNeighborhoodWalk = formData.type === "neighborhood";
   const [timeOption, setTimeOption] = useState<"now" | "future">("future");
 
   // Local state for date and time (date-only and time-only)
@@ -110,7 +111,7 @@ export const TimeSelection: React.FC<Props> = ({
     >
       <YStack gap="$4">
         {/* Only show time option tabs for neighborhood walks */}
-        {!isFriendsWalk && (
+        {isNeighborhoodWalk && (
           <XStack backgroundColor="white" borderRadius={12} overflow="hidden">
             <TouchableOpacity
               style={{

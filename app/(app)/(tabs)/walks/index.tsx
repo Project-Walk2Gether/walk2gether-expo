@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { FlatList, View } from "react-native";
-import { Text } from "tamagui";
+import { Text, YStack } from "tamagui";
 import useDynamicRefs from "use-dynamic-refs";
 import { Walk, WithId } from "walk2gether-shared";
 
@@ -76,7 +76,7 @@ export default function WalksScreen() {
         {activeWalks.length > 0 || upcomingWalks.length > 0 ? (
           <>
             {activeWalks.length > 0 && (
-              <>
+              <YStack mb="$2">
                 <Text fontWeight="bold" fontSize={20} mb="$2">
                   Active Walks
                 </Text>
@@ -86,10 +86,10 @@ export default function WalksScreen() {
                   keyExtractor={(item) => item.id}
                   scrollEnabled={false}
                 />
-              </>
+              </YStack>
             )}
             {upcomingWalks.length > 0 && (
-              <>
+              <YStack mb="$2">
                 <Text fontWeight="bold" fontSize={20} mb="$2" ml="$2">
                   Upcoming Walks
                 </Text>
@@ -99,7 +99,7 @@ export default function WalksScreen() {
                   keyExtractor={(item) => item.id}
                   scrollEnabled={false}
                 />
-              </>
+              </YStack>
             )}
           </>
         ) : (

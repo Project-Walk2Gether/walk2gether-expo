@@ -9,7 +9,7 @@ import { useDoc } from "@/utils/firestore";
 import { doc, updateDoc } from "@react-native-firebase/firestore";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import { Alert } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { ScrollView, Spacer } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
 
@@ -44,12 +44,17 @@ export default function EditWalkScreen() {
           headerRight: () => <HeaderCloseButton />,
         }}
       />
-      <ScrollView
-        flex={1}
-        backgroundColor="#f5f5f5"
-        p="$4"
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={100}
       >
+        <ScrollView
+          flex={1}
+          backgroundColor="#f5f5f5"
+          p="$4"
+          keyboardShouldPersistTaps="handled"
+        >
         <WalkForm
           initialValues={walk}
           onSubmit={handleSubmit}
@@ -59,7 +64,8 @@ export default function EditWalkScreen() {
         />
         <Spacer flexGrow={1} />
         <CopyableIdField showFullId id={walk.id} label="Walk ID" />
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </>
   );
 }

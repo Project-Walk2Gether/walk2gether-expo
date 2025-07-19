@@ -3,7 +3,8 @@ import { Screen } from "@/components/UI";
 import WalkCard from "@/components/WalkCard";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@/utils/firestore";
-import firestore, { Timestamp } from "@react-native-firebase/firestore";
+import firestore from "@react-native-firebase/firestore";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { FlatList } from "react-native";
 import { Card, Text, YStack } from "tamagui";
@@ -12,14 +13,14 @@ import { Walk } from "walk2gether-shared";
 export default function WalkHistoryScreen() {
   const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Query walks where user is invited and the walk has ended
+  // Query walks where user is invited and the walk has ended.
   const { docs: pastWalks, status } = useQuery<Walk>(
     user
       ? firestore()
           .collection("walks")
           .where("participantUids", "array-contains", user.uid)
-          .where("estimatedEndTime", "<", Timestamp.now())
           .orderBy("estimatedEndTime", "desc") // Sort by most recently ended first
       : undefined,
     [user?.uid]
@@ -48,7 +49,13 @@ export default function WalkHistoryScreen() {
         {walkIds.length > 0 ? (
           <FlatList
             data={pastWalks}
-            renderItem={({ item }) => <WalkCard walk={item} />}
+            renderItem={({ item }) => (
+              <WalkCard
+                onPress={() => router.push(`/walks/${item.id}`)}
+                walk={item}
+                canShowDismissButton={false}
+              />
+            )}
             keyExtractor={(item) => item.id}
             contentContainerStyle={{ paddingBottom: 20 }}
           />

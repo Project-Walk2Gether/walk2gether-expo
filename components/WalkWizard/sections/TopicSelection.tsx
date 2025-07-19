@@ -64,7 +64,7 @@ export const TopicSelection: React.FC<Props> = ({
             <MarkdownTextInput
               value={formData.descriptionMarkdown || ""}
               onChangeText={(text) =>
-                updateFormData({ descriptionMarkdown: text } as any)
+                updateFormData({ descriptionMarkdown: text })
               }
               parser={parseExpensiMark}
               placeholder="Add details about your meetup using markdown..."

@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useMenu } from "@/context/MenuContext";
 import { useWalk } from "@/context/WalkContext";
+import Markdown from "react-native-markdown-display";
 
 import { getWalkStatus } from "@/utils/walkUtils";
 import {
@@ -63,6 +64,7 @@ export default function DetailsTab() {
 
   const [loading, setLoading] = useState(false);
   const { showMenu } = useMenu();
+  const isMine = walk?.createdByUid === user?.uid;
 
   // Handle participation changes
   const handleToggleParticipation = async () => {
@@ -83,6 +85,7 @@ export default function DetailsTab() {
           acceptedAt: Timestamp.now(),
           status: "pending",
           cancelledAt: null,
+          hiddenAt: null,
         });
 
         showMessage("Great! You're now attending this walk.", "success");
@@ -136,14 +139,21 @@ export default function DetailsTab() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
       <YStack p="$4" space="$4" pb="$6">
-        <RespondToInvitationCard
-          walk={walk}
-          participantDoc={currentUserParticipantDoc || undefined}
-          hasResponded={hasResponded}
-          loading={loading}
-          onMenuPress={handleShowParticipationMenu}
-        />
-
+        {/* Use type assertion since descriptionMarkdown exists but isn't in the type definition yet */}
+        {(walk as any).descriptionMarkdown && (
+          <WalkDetailsCard title="Description">
+            <Markdown>{(walk as any).descriptionMarkdown}</Markdown>
+          </WalkDetailsCard>
+        )}
+        {isMine ? null : (
+          <RespondToInvitationCard
+            walk={walk}
+            participantDoc={currentUserParticipantDoc || undefined}
+            hasResponded={hasResponded}
+            loading={loading}
+            onMenuPress={handleShowParticipationMenu}
+          />
+        )}
         {/* Walk Time Card */}
         <WalkTimeCard
           walkDate={walk.date ? walk.date.toDate() : undefined}

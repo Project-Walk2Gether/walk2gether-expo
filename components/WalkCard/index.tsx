@@ -36,17 +36,17 @@ import { WalkCardButton } from "./WalkCardButton";
 interface Props {
   walk: WithId<Walk>;
   showAttachments?: boolean;
+  canShowDismissButton?: boolean;
   showActions?: boolean;
   onPress?: () => void;
-  hideInviteOption?: boolean;
 }
 
 const WalkCard: React.FC<Props> = ({
   walk,
   showAttachments = false,
+  canShowDismissButton = true,
   showActions = false,
   onPress,
-  hideInviteOption = false,
 }) => {
   const {
     coords,
@@ -143,11 +143,7 @@ const WalkCard: React.FC<Props> = ({
           }
           isUserInitiator={isMine}
           initiatorName={ownerName}
-          action={
-            isMine && (
-              <WalkMenu walk={walk} hideInviteOption={hideInviteOption} />
-            )
-          }
+          action={isMine && <WalkMenu walk={walk} />}
         />
         <IconTextRow
           icon={<Calendar size={16} color="#444" />}
@@ -215,9 +211,11 @@ const WalkCard: React.FC<Props> = ({
                   You've told {ownerName} you can't make it
                 </Text>
               </XStack>
-              <Button onPress={handleHideInvitationButtonPress}>
-                Hide this invitation
-              </Button>
+              {canShowDismissButton ? (
+                <Button onPress={handleHideInvitationButtonPress}>
+                  Hide this invitation
+                </Button>
+              ) : null}
             </YStack>
           )}
 

@@ -9,13 +9,7 @@ import {
   restoreParticipation,
 } from "@/utils/participantManagement";
 import { deleteDoc, doc, getDoc } from "@react-native-firebase/firestore";
-import {
-  Edit3,
-  LogOut,
-  MoreVertical,
-  Trash,
-  UserPlus,
-} from "@tamagui/lucide-icons";
+import { Edit3, LogOut, MoreVertical, Trash } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "tamagui";
@@ -25,15 +19,10 @@ interface Props {
   walk: WithId<Walk>;
   onOpenMaps?: () => void;
   hasLocation?: boolean;
-  hideInviteOption?: boolean;
   afterDelete?: () => void;
 }
 
-export default function WalkMenu({
-  walk,
-  hideInviteOption = false,
-  afterDelete,
-}: Props) {
+export default function WalkMenu({ walk, afterDelete }: Props) {
   const router = useRouter();
   const { showMenu } = useMenu();
   const { showMessage } = useFlashMessage();
@@ -155,20 +144,6 @@ export default function WalkMenu({
           }),
       });
 
-      // Only add the Invite Friends option if not hidden
-      if (!hideInviteOption) {
-        menuItems.push({
-          label:
-            walk.type === "friends"
-              ? "Invite Friends"
-              : walk.type === "neighborhood"
-              ? "Invite Neighbors"
-              : "Invite",
-          icon: <UserPlus size="$1" color={COLORS.primary} />,
-          onPress: () => router.push(`/walks/${walk.id}/invite`),
-        });
-      }
-
       // Add the Cancel Walk option at the end for owners
       menuItems.push({
         label: "Cancel Walk",
@@ -203,7 +178,6 @@ export default function WalkMenu({
     showMenu,
     router,
     createConfirmAction, // replaced onActionPress with createConfirmAction
-    hideInviteOption,
     isWalkOwner,
     userHasCancelled,
     loading,

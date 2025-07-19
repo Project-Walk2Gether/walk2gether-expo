@@ -10,11 +10,20 @@ import {
   Timestamp,
   updateDoc,
 } from "@react-native-firebase/firestore";
-import { Check } from "@tamagui/lucide-icons";
+import { Check, X } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, Alert } from "react-native";
-import { Button, Checkbox, Input, Label, Text, XStack, YStack } from "tamagui";
+import {
+  Button,
+  Card,
+  Checkbox,
+  Input,
+  Label,
+  Text,
+  XStack,
+  YStack,
+} from "tamagui";
 import {
   Participant,
   Walk,
@@ -161,15 +170,47 @@ const RespondToInvitation: React.FC<Props> = ({
   return (
     <YStack w="100%" gap="$4" ai="center">
       {isApproved ? (
-        <>
-          <Text fontSize="$4" textAlign="center" color="$gray11">
-            You're going!
-          </Text>
-        </>
+        <Card
+          backgroundColor={"$green2"}
+          borderColor={"$green6"}
+          borderWidth={1}
+          padding="$4"
+          marginBottom="$2"
+          width="100%"
+        >
+          <YStack gap="$2" ai="center">
+            <XStack gap="$2" ai="center" jc="center">
+              <Check size="$1" color={"$green10"} />
+              <Text fontSize="$5" fontWeight="bold" color="$green10">
+                You're Going!
+              </Text>
+            </XStack>
+            <Text fontSize="$3" textAlign="center" color="$green9">
+              {walk.organizerName} is looking forward to seeing you at the walk
+            </Text>
+          </YStack>
+        </Card>
       ) : cantMakeIt ? (
-        <Text fontSize="$4" textAlign="center" color="$gray11" mb="$2">
-          You've said you can't make it to this walk.
-        </Text>
+        <Card
+          backgroundColor={"$red2"}
+          borderColor={"$red6"}
+          borderWidth={1}
+          padding="$4"
+          marginBottom="$2"
+          width="100%"
+        >
+          <YStack gap="$2" ai="center">
+            <XStack gap="$2" ai="center" jc="center">
+              <X size="$1" color={"$red10"} />
+              <Text fontSize="$5" fontWeight="bold" color="$red10">
+                Not Attending
+              </Text>
+            </XStack>
+            <Text fontSize="$3" textAlign="center" color="$red9">
+              You've declined this walk invitation
+            </Text>
+          </YStack>
+        </Card>
       ) : (
         <>
           {walkIsNeighborhoodWalk(walk) && (
@@ -215,6 +256,7 @@ const RespondToInvitation: React.FC<Props> = ({
               color="white"
               onPress={handleAcceptButtonPress}
               disabled={loading}
+              iconAfter={loading ? undefined : <Check color="white" />}
             >
               {loading ? (
                 <ActivityIndicator color="white" />
@@ -228,13 +270,16 @@ const RespondToInvitation: React.FC<Props> = ({
             <Button
               size="$5"
               w="100%"
-              bg="rgba(255, 0, 0, 0.05)"
-              color="$gray10"
+              borderWidth={1}
+              borderColor="$red6"
+              bg="$red2"
+              color="$red10"
               onPress={handleCancelButtonPress}
               disabled={loading}
+              iconAfter={loading ? undefined : <X color="$red10" />}
             >
               {loading ? (
-                <ActivityIndicator color="$gray11" />
+                <ActivityIndicator color="$red10" />
               ) : (
                 "I can't make it"
               )}
