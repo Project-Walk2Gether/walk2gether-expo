@@ -7,6 +7,7 @@ import {
   query,
   where,
 } from "@react-native-firebase/firestore";
+import { addHours } from "date-fns";
 import "firebase/compat/firestore";
 import React, { createContext, ReactNode, useContext, useMemo } from "react";
 import { Walk, WithId } from "walk2gether-shared";
@@ -46,7 +47,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     // Get walks that haven't ended yet (estimatedEndTime > now)
     return query(
       collection(firestore_instance, "walks"),
-      where("estimatedEndTime", ">", now),
+      where("estimatedEndTime", ">", addHours(now, -3)),
       where("participantUids", "array-contains", user.uid),
       orderBy("estimatedEndTime", "asc"),
       limit(10)

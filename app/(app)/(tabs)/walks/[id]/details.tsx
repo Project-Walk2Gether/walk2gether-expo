@@ -8,8 +8,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useMenu } from "@/context/MenuContext";
 import { useWalk } from "@/context/WalkContext";
-import Markdown from "react-native-markdown-display";
-
 import { getWalkStatus } from "@/utils/walkUtils";
 import {
   FirebaseFirestoreTypes,
@@ -19,8 +17,9 @@ import { router } from "expo-router";
 import { Timestamp } from "firebase/firestore";
 import React, { useMemo, useState } from "react";
 import { ScrollView } from "react-native";
+import Markdown from "react-native-markdown-display";
 import { Button, Text, View, YStack } from "tamagui";
-import { Participant } from "walk2gether-shared";
+import { MeetupWalk, Participant } from "walk2gether-shared";
 
 export default function DetailsTab() {
   const { walk } = useWalk();
@@ -138,11 +137,11 @@ export default function DetailsTab() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <YStack p="$4" space="$4" pb="$6">
+      <YStack p="$4" gap="$4" pb="$w6">
         {/* Use type assertion since descriptionMarkdown exists but isn't in the type definition yet */}
-        {(walk as any).descriptionMarkdown && (
+        {(walk as MeetupWalk).descriptionMarkdown && (
           <WalkDetailsCard title="Description">
-            <Markdown>{(walk as any).descriptionMarkdown}</Markdown>
+            <Markdown>{(walk as MeetupWalk).descriptionMarkdown}</Markdown>
           </WalkDetailsCard>
         )}
         {isMine ? null : (

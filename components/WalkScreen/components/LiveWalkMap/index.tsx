@@ -15,7 +15,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Card, Text, View, YStack } from "tamagui";
-import { ParticipantWithRoute, Walk } from "walk2gether-shared";
+import { Walk } from "walk2gether-shared";
 import MeetupSpot from "../MeetupSpot";
 import RequestBackgroundLocationModal from "../RequestBackgroundLocationModal";
 import { WalkActionSliders } from "../WalkActionSliders";
@@ -266,12 +266,6 @@ export default function LiveWalkMap({
     );
   }
 
-  // Find the current user's participant for route rendering
-  const currentUserParticipant =
-    user && participants
-      ? (participants.find((p) => p.id === user.uid) as ParticipantWithRoute)
-      : null;
-
   return (
     <View flex={1} justifyContent="center" alignItems="center">
       <MapView
@@ -328,16 +322,14 @@ export default function LiveWalkMap({
       />
 
       {/* Controls rendered using absolute positioning */}
-      {status === "active" && (
-        <WalkActionSliders
-          status={userParticipant?.status}
-          isOwner={isWalkOwner}
-          walkStarted={hasWalkStarted}
-          walkEnded={hasWalkEnded}
-          onStartWalk={handleStartWalk}
-          onEndWalk={handleEndWalk}
-        />
-      )}
+
+      <WalkActionSliders
+        showStartWalkSlider={!walk?.startedAt && !walk?.endedAt}
+        showEndWalkSlider={!walk?.endedAt}
+        onStartWalk={handleStartWalk}
+        onEndWalk={handleEndWalk}
+      />
+
       <RequestBackgroundLocationModal
         open={isBackgroundLocationModalOpen}
         onOpenChange={setIsBackgroundLocationModalOpen}

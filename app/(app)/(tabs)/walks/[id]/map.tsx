@@ -1,17 +1,17 @@
+import CurrentUserStatusCard from "@/components/WalkScreen/components/CurrentUserStatusCard";
 import LiveWalkMap from "@/components/WalkScreen/components/LiveWalkMap";
 import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
 import WalkParticipantStatusControls from "@/components/WalkScreen/components/WalkParticipantStatusControls/index";
-import CurrentUserStatusCard from "@/components/WalkScreen/components/CurrentUserStatusCard";
 import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useSheet } from "@/context/SheetContext";
 import { useWalk } from "@/context/WalkContext";
 import { COLORS } from "@/styles/colors";
 import { useIsFocused } from "@react-navigation/native";
-import { Car, ChevronRight, MapPin } from "@tamagui/lucide-icons";
+import { Car, MapPin } from "@tamagui/lucide-icons";
 import { differenceInHours } from "date-fns";
 import React, { useMemo } from "react";
-import { Pressable } from "react-native";
-import { Avatar, Text, View, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
 
 // Helper function to render the status information based on participant status
@@ -64,6 +64,16 @@ export default function MapTab() {
   const { walk, participants, currentUserParticipantDoc } = useWalk();
   const { user } = useAuth();
   const { showSheet, hideSheet } = useSheet();
+  const { showMessage } = useFlashMessage();
+
+  // Check if the current user is the walk owner and has arrived
+  const isOwner = walk?.createdByUid === user?.uid;
+  const hasArrived = currentUserParticipantDoc?.status === "arrived";
+  const showActionSliders = isOwner && hasArrived;
+
+  // Determine if the walk is already in progress based on startedAt field
+  const walkInProgress = !!walk?.startedAt;
+  const canEndWalk = walkInProgress;
 
   const isFocussed = useIsFocused();
   console.log({ isFocussed });
@@ -111,46 +121,75 @@ export default function MapTab() {
           locationName={walk.currentLocation?.name}
           notes={walk.startLocation?.notes}
           showMap={false} // Don't show the map since we're already on the map screen
-        />
+        >
+          {isStartingSoon && user && walk?.id && currentUserParticipantDoc && (
+            <CurrentUserStatusCard
+              participant={currentUserParticipantDoc}
+              isOwner={walk.createdByUid === user.uid}
+              mt="$2"
+              onPress={() => {
+                if (!walk || !user) return;
+
+                showSheet(
+                  <WalkParticipantStatusControls
+                    status={currentUserParticipantDoc.status || "pending"}
+                    isCancelled={!!currentUserParticipantDoc.cancelledAt}
+                    isOwner={walk.createdByUid === user.uid}
+                    walkId={walk.id}
+                    userId={user.uid}
+                    navigationMethod={
+                      currentUserParticipantDoc.navigationMethod || "driving"
+                    }
+                    onClose={() => {
+                      hideSheet();
+                    }}
+                  />,
+                  {
+                    title: "Update Your Status",
+                    dismissOnSnapToBottom: true,
+                  }
+                );
+              }}
+            />
+          )}
+        </WalkLocationCard>
       </View>
 
-      {/* Current user's participant item - positioned at the bottom, only shown when walk is starting soon */}
-      {isStartingSoon && user && walk?.id && currentUserParticipantDoc && (
-        <View
-          style={{
-            position: "absolute",
-            bottom: 16,
-            left: 16,
-            right: 16,
-          }}
-        >
-          <CurrentUserStatusCard
-            participant={currentUserParticipantDoc}
-            isOwner={walk.createdByUid === user.uid}
-            onPress={() => {
-              if (!walk || !user) return;
+      {/* Walk Action Sliders - only shown when user is owner and has arrived */}
+      {/* {showActionSliders && (
+        <WalkActionSliders
+          showStartWalkSlider={!walkInProgress}
+          showEndWalkSlider={canEndWalk}
+          onStartWalk={async () => {
+            if (!walk?.id) return;
 
-              showSheet(
-                <WalkParticipantStatusControls
-                  status={currentUserParticipantDoc.status || "pending"}
-                  isCancelled={!!currentUserParticipantDoc.cancelledAt}
-                  isOwner={walk.createdByUid === user.uid}
-                  walkId={walk.id}
-                  userId={user.uid}
-                  navigationMethod={currentUserParticipantDoc.navigationMethod || "driving"}
-                  onClose={() => {
-                    hideSheet();
-                  }}
-                />,
-                {
-                  title: "Update Your Status",
-                  dismissOnSnapToBottom: true,
-                }
-              );
-            }}
-          />
-        </View>
-      )}
+            try {
+              await updateDoc(walk._ref as any, {
+                startedAt: Timestamp.now(),
+              });
+
+              showMessage("Walk started! Enjoy your walk.", "success");
+            } catch (error) {
+              console.error("Error starting walk:", error);
+              showMessage("Failed to start walk. Please try again.", "error");
+            }
+          }}
+          onEndWalk={async () => {
+            if (!walk?.id) return;
+
+            try {
+              await updateDoc(walk._ref as any, {
+                endedAt: Timestamp.now(),
+              });
+
+              showMessage("Walk completed! Thanks for joining.", "success");
+            } catch (error) {
+              console.error("Error ending walk:", error);
+              showMessage("Failed to end walk. Please try again.", "error");
+            }
+          }}
+        />
+      )} */}
     </View>
   );
 }

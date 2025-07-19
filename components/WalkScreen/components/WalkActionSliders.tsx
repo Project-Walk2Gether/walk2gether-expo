@@ -1,4 +1,5 @@
 import React from "react";
+import { View } from "react-native";
 import { YStack } from "tamagui";
 import SlideAction from "./SlideToStart";
 
@@ -25,31 +26,32 @@ export const WalkActionSliders: React.FC<Props> = ({
   return (
     <YStack
       position="absolute"
-      top={0}
-      left={0}
-      right={0}
-      bottom={0}
-      zIndex={1}
+      bottom={"$4"}
+      left={"$4"}
+      right={"$4"}
+      zIndex={100}
     >
-      {showStartWalkSlider && (
-        <SlideAction
-          onSlideComplete={onStartWalk}
-          text="SLIDE TO START WALK"
-          backgroundColor="rgba(0,153,255,0.9)"
-          iconColor="#0099ff"
-          icon="play"
-        />
-      )}
+      <View style={{ width: "100%" }}>
+        {showStartWalkSlider && (
+          <SlideAction
+            onSlideComplete={onStartWalk}
+            text="SLIDE TO START WALK"
+            backgroundColor="rgba(0,153,255,0.9)"
+            iconColor="#0099ff"
+            icon="play"
+          />
+        )}
 
-      {showEndWalkSlider && (
-        <SlideAction
-          onSlideComplete={onEndWalk}
-          text="SLIDE TO END WALK"
-          backgroundColor="rgba(255,59,48,0.9)"
-          iconColor="#FF3B30"
-          icon="stop"
-        />
-      )}
+        {showEndWalkSlider && (
+          <SlideAction
+            onSlideComplete={onEndWalk}
+            text="SLIDE TO END WALK"
+            backgroundColor="rgba(255,59,48,0.9)"
+            iconColor="#FF3B30"
+            icon="stop"
+          />
+        )}
+      </View>
     </YStack>
   );
 };

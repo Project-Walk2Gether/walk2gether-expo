@@ -1,11 +1,12 @@
+import { StatelessAvatar } from "@/components/UserAvatar/StatelessAvatar";
+import { COLORS } from "@/styles/colors";
+import { Car, ChevronRight, MapPin } from "@tamagui/lucide-icons";
 import React from "react";
 import { Pressable } from "react-native";
-import { Text, Avatar, XStack, YStack } from "tamagui";
-import { Car, MapPin, ChevronRight } from "@tamagui/lucide-icons";
-import { COLORS } from "@/styles/colors";
+import { Text, XStack, YStack, GetProps } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
 
-interface Props {
+interface Props extends GetProps<typeof XStack> {
   participant: ParticipantWithRoute;
   isOwner: boolean;
   onPress: () => void;
@@ -16,7 +17,7 @@ const renderStatusInfo = (participant: ParticipantWithRoute) => {
   let icon = null;
   let label = "Not on the way yet";
   let color = "$gray10";
-  
+
   if (participant.status === "on-the-way") {
     icon = <Car size={16} color={COLORS.primary} />;
     label = "On the way";
@@ -26,7 +27,7 @@ const renderStatusInfo = (participant: ParticipantWithRoute) => {
     label = "Arrived";
     color = "$blue9";
   }
-  
+
   return (
     <XStack alignItems="center" space="$1">
       {icon}
@@ -40,7 +41,7 @@ const renderStatusInfo = (participant: ParticipantWithRoute) => {
 // Helper function to render distance and duration information
 const renderDistanceInfo = (participant: ParticipantWithRoute) => {
   if (!participant?.route?.distance?.text) return null;
-  
+
   return (
     <YStack alignItems="flex-end" space="$1">
       <Text fontSize="$3" color="$gray11" fontWeight="bold">
@@ -58,7 +59,8 @@ const renderDistanceInfo = (participant: ParticipantWithRoute) => {
 export default function CurrentUserStatusCard({
   participant,
   isOwner,
-  onPress
+  onPress,
+  ...rest
 }: Props) {
   return (
     <XStack
@@ -71,36 +73,27 @@ export default function CurrentUserStatusCard({
       shadowRadius={4}
       elevation={3}
       overflow="hidden"
+      {...rest}
     >
       <Pressable
         onPress={onPress}
         style={({ pressed }: { pressed: boolean }) => ({
           opacity: pressed ? 0.7 : 1,
-          width: "100%"
+          width: "100%",
         })}
       >
         <XStack
-          padding="$3"
           alignItems="center"
           space="$3"
           backgroundColor="$backgroundHover"
         >
           {/* User Avatar */}
-          <Avatar size="$4" circular>
-            {participant.photoURL ? (
-              <Avatar.Image
-                source={{ uri: participant.photoURL }}
-                width="100%"
-                height="100%"
-              />
-            ) : (
-              <Avatar.Fallback backgroundColor="$blue5">
-                <Text color="white" fontSize="$3">
-                  {participant.displayName?.[0] || "?"}
-                </Text>
-              </Avatar.Fallback>
-            )}
-          </Avatar>
+          <StatelessAvatar
+            profilePicUrl={participant.photoURL || undefined}
+            name={participant.displayName}
+            size={40}
+            backgroundColor={COLORS.primary}
+          />
 
           {/* User Status Section */}
           <YStack flex={1} space="$1">
@@ -114,7 +107,7 @@ export default function CurrentUserStatusCard({
 
           {/* Distance and ETA */}
           {renderDistanceInfo(participant)}
-          
+
           {/* Chevron indicator */}
           <ChevronRight size={16} color="$gray9" />
         </XStack>

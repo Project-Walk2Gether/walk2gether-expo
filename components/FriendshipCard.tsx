@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { COLORS } from "@/styles/colors";
+import { getFriendData, getFriendId } from "@/utils/friendshipUtils";
 import React, { memo } from "react";
 import { Card, Text, XStack, YStack } from "tamagui";
 import { Friendship } from "walk2gether-shared";
@@ -145,16 +146,9 @@ export const FriendshipCard: React.FC<Props> = memo(
   ({ friendship, onPress }) => {
     const { user } = useAuth();
 
-    // Find the ID of the user that isn't the current user
-    const friendId = user?.uid
-      ? friendship.uids.find((uid) => uid !== user.uid)
-      : null;
-
-    // Get friend data directly from the denormalized friendship document
-    const friendData =
-      friendId && friendship.userDataByUid
-        ? friendship.userDataByUid[friendId]
-        : null;
+    // Get friend ID and data using utility functions
+    const friendId = getFriendId(friendship, user?.uid);
+    const friendData = getFriendData(friendship, user?.uid);
 
     // Render the appropriate card based on whether friend data exists
     if (!friendData) {

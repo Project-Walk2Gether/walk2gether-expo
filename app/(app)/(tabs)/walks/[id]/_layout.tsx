@@ -84,6 +84,7 @@ export default function WalkLayout() {
           <StatusBar style="dark" />
           <MaterialTopTabs
             screenOptions={{
+              swipeEnabled: false, // Disable horizontal swipe navigation
               tabBarStyle: {
                 backgroundColor: "transparent",
                 elevation: 0, // Android: remove drop-shadow

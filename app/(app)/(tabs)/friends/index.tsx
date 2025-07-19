@@ -5,6 +5,7 @@ import { Screen } from "@/components/UI";
 import WalkIcon from "@/components/WalkIcon";
 import { useAuth } from "@/context/AuthContext";
 import { useFriends } from "@/context/FriendsContext";
+import { getFriendData } from "@/utils/friendshipUtils";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
@@ -117,13 +118,22 @@ export default function FriendsScreen() {
                   iconColor="#7C5F45"
                 />
               ) : (
-                setupFriendships.map((friendship) => (
-                  <FriendshipCard
-                    key={friendship.id}
-                    friendship={friendship}
-                    onPress={() => navigateToChat(friendship)}
-                  />
-                ))
+                // Sort friendships alphabetically by friend name
+                [...setupFriendships]
+                  .sort((a, b) => {
+                    const friendDataA = getFriendData(a, user?.uid);
+                    const friendDataB = getFriendData(b, user?.uid);
+                    const nameA = friendDataA?.name?.toLowerCase() || '';
+                    const nameB = friendDataB?.name?.toLowerCase() || '';
+                    return nameA.localeCompare(nameB);
+                  })
+                  .map((friendship) => (
+                    <FriendshipCard
+                      key={friendship.id}
+                      friendship={friendship}
+                      onPress={() => navigateToChat(friendship)}
+                    />
+                  ))
               )}
 
               {notSetupFriendships.length > 0 && (

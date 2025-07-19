@@ -13,6 +13,7 @@ interface Props {
   locationName?: string;
   notes?: string;
   showMap?: boolean;
+  children?: React.ReactNode;
 }
 
 /**
@@ -23,6 +24,7 @@ export default function WalkLocationCard({
   locationName,
   notes,
   showMap = true, // Default to showing the map
+  children,
 }: Props) {
   // If there's no location data, show a placeholder
   if (!location || !location.latitude || !location.longitude) {
@@ -100,6 +102,7 @@ export default function WalkLocationCard({
         )}
 
         {/* No need for Navigate button here as it's moved to the header */}
+        {children}
       </YStack>
     </WalkDetailsCard>
   );

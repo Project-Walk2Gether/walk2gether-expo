@@ -1,7 +1,5 @@
 import { Clock, Footprints, User, Users } from "@tamagui/lucide-icons";
 
-type IconProps = { size: string | number; color?: string };
-
 /**
  * Defines the visual styling for different walk types
  * This serves as a single source of truth for walk type styling across the app

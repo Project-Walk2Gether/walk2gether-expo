@@ -33,7 +33,7 @@ import {
 
 interface Props {
   walk: WithId<Walk>;
-  participantDoc?: Participant;
+  participantDoc?: WithId<Participant>;
   onInvitationResponded?: () => void;
 }
 
@@ -73,7 +73,6 @@ const RespondToInvitation: React.FC<Props> = ({
         userUid: user.uid,
         displayName: userData?.name || "Anonymous",
         photoURL: userData?.profilePicUrl || null,
-        sourceType: "requested" as const,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };

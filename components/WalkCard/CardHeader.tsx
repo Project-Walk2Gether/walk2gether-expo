@@ -46,14 +46,16 @@ export const CardHeader: React.FC<Props> = ({
   initiatorName,
 }) => {
   // Determine which icon to show based on walkType
-  const walkTypeIcon = 
+  const walkTypeIcon =
     walkType === "Friends" ? (
       <WalkIcon size={24} color="#000" />
     ) : walkType === "Neighborhood" ? (
       <House size={24} color="#000" />
     ) : (
       // Meetup icon - using chat bubbles icon from Tamagui
-      <Text fontSize={24} color="#000">💬</Text>
+      <Text fontSize={24} color="#000">
+        💬
+      </Text>
     );
 
   return (
@@ -66,7 +68,8 @@ export const CardHeader: React.FC<Props> = ({
             fontSize={20}
             fontWeight="700"
             color="$gray12"
-            numberOfLines={1}
+            numberOfLines={2}
+            flexShrink={1}
             ellipsizeMode="tail"
           >
             {isUserInitiator ? "My" : `${initiatorName}'s`} {walkType} Walk

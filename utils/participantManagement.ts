@@ -3,8 +3,8 @@ import {
   Timestamp,
   collection,
   doc,
-  getDocs,
   getDoc,
+  getDocs,
   setDoc,
   updateDoc,
 } from "@react-native-firebase/firestore";
@@ -172,26 +172,6 @@ export async function updateParticipants(
 }
 
 /**
- * Updates the participantUids array in a walk document
- * This is used for querying walks that should be visible to a user
- */
-export async function updateWalkVisibility(
-  walkId: string,
-  userIds: string[]
-): Promise<void> {
-  try {
-    const walkRef = doc(firestore_instance, `walks/${walkId}`);
-    await updateDoc(walkRef, {
-      participantUids: userIds,
-      updatedAt: Timestamp.now(),
-    });
-  } catch (error) {
-    console.error("Error updating walk visibility:", error);
-    throw error;
-  }
-}
-
-/**
  * Cancels a user's participation in a walk
  * - Sets cancelledAt in the participant document
  * - Removes the user from the walk's participantsById object
@@ -220,32 +200,20 @@ export async function cancelParticipation(
     // 2. Remove user from the walk's participantsById
     const walkRef = doc(firestore_instance, `walks/${walkId}`);
     const walkSnapshot = await getDoc(walkRef);
-    
+
     if (walkSnapshot.exists()) {
       const walkData = walkSnapshot.data() as Walk;
-      
+
       if (walkData.participantsById && walkData.participantsById[userId]) {
         // Create a copy of the participantsById object
         const updatedParticipantsById = { ...walkData.participantsById };
-        
+
         // Remove the user
         delete updatedParticipantsById[userId];
-        
+
         // Update the walk document
         await updateDoc(walkRef, {
           participantsById: updatedParticipantsById,
-          updatedAt: Timestamp.now(),
-        });
-      }
-      
-      // Also update participantUids array if it exists
-      if (walkData.participantUids?.includes(userId)) {
-        const updatedParticipantUids = walkData.participantUids.filter(
-          (uid) => uid !== userId
-        );
-        
-        await updateDoc(walkRef, {
-          participantUids: updatedParticipantUids,
           updatedAt: Timestamp.now(),
         });
       }
@@ -274,14 +242,14 @@ export async function restoreParticipation(
       firestore_instance,
       `walks/${walkId}/participants/${userId}`
     );
-    
+
     const participantSnapshot = await getDoc(participantDocRef);
-    
+
     if (!participantSnapshot.exists()) {
       console.error("Participant document does not exist");
       return false;
     }
-    
+
     // Update the participant doc to remove cancelledAt
     await setDoc(
       participantDocRef,
@@ -291,7 +259,7 @@ export async function restoreParticipation(
       },
       { merge: true }
     );
-    
+
     return true;
   } catch (error) {
     console.error("Error restoring participation:", error);

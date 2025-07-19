@@ -133,6 +133,7 @@ export default function WalkForm({
             error={errors.durationMinutes as string | undefined}
             touched={!!touched.durationMinutes}
           />
+          <Text>{JSON.stringify(errors)}</Text>
         </YStack>
       )}
     </FormProvider>
