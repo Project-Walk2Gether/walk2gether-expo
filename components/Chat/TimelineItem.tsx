@@ -1,5 +1,4 @@
 import WalkCard from "@/components/WalkCard";
-import { handleWalkPress } from "@/utils/navigationUtils";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -46,7 +45,9 @@ export function TimelineItem({
       <WalkCard
         showActions
         walk={item.data as WithId<Walk>}
-        onPress={() => handleWalkPress(item.data as WithId<Walk>, router)}
+        onPress={() =>
+          router.push({ pathname: `/walks/[id]`, params: { id: item.data.id } })
+        }
       />
     );
   } else if (item.type === "round") {

@@ -27,3 +27,35 @@ export const validateInviteCode = (code: string): boolean => {
   const regex = /^[A-Z0-9]{6}$/;
   return regex.test(code);
 };
+
+/**
+ * Generates an invitation URL with appropriate query parameters
+ * @param code Friend invitation code (optional)
+ * @param walkCode Walk code (optional)
+ * @returns A properly formatted invitation URL
+ */
+export const getInvitationUrl = (code?: string, walkCode?: string): string => {
+  // Base URL
+  const baseUrl = "https://projectwalk2gether.org/join";
+  
+  // Start building query params
+  const params = new URLSearchParams();
+  
+  // Add parameters if they exist
+  if (code) {
+    params.append("code", code);
+  }
+  
+  if (walkCode) {
+    params.append("walk", walkCode);
+  }
+  
+  // If we have any params, add them to the URL
+  const queryString = params.toString();
+  if (queryString) {
+    return `${baseUrl}?${queryString}`;
+  }
+  
+  // Return just the base URL if no params
+  return baseUrl;
+};

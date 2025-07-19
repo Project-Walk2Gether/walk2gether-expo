@@ -17,38 +17,46 @@ export default function FriendsScreen() {
   const { friendships } = useFriends();
 
   // Separate friendships into setup and not-setup categories
-  const { setupFriendships, notSetupFriendships, settingUpFriendNames } = React.useMemo(() => {
-    const setup: Friendship[] = [];
-    const notSetup: Friendship[] = [];
-    const friendNames: string[] = [];
-    
-    friendships.forEach(friendship => {
-      // Find the ID of the user that isn't the current user
-      const friendId = user?.uid
-        ? friendship.uids.find((uid) => uid !== user.uid)
-        : null;
-      
-      // Check if friend data exists and is not in setup mode
-      const friendData = friendId && friendship.userDataByUid && friendship.userDataByUid[friendId];
-      const isSettingUp = friendData && friendData._isSettingUp;
-      
-      if (friendData && !isSettingUp) {
-        setup.push(friendship);
-      } else {
-        notSetup.push(friendship);
-        // If we have a name for this person, add it to our list
-        if (friendData && typeof friendData === 'object' && 'name' in friendData) {
-          friendNames.push(friendData.name);
+  const { setupFriendships, notSetupFriendships, settingUpFriendNames } =
+    React.useMemo(() => {
+      const setup: Friendship[] = [];
+      const notSetup: Friendship[] = [];
+      const friendNames: string[] = [];
+
+      friendships.forEach((friendship) => {
+        // Find the ID of the user that isn't the current user
+        const friendId = user?.uid
+          ? friendship.uids.find((uid) => uid !== user.uid)
+          : null;
+
+        // Check if friend data exists and is not in setup mode
+        const friendData =
+          friendId &&
+          friendship.userDataByUid &&
+          friendship.userDataByUid[friendId];
+        const isSettingUp = friendData && friendData._isSettingUp;
+
+        if (friendData && !isSettingUp) {
+          setup.push(friendship);
+        } else {
+          notSetup.push(friendship);
+          // If we have a name for this person, add it to our list
+          if (
+            friendData &&
+            typeof friendData === "object" &&
+            "name" in friendData
+          ) {
+            friendNames.push(friendData.name);
+          }
         }
-      }
-    });
-    
-    return { 
-      setupFriendships: setup, 
-      notSetupFriendships: notSetup,
-      settingUpFriendNames: friendNames
-    };
-  }, [friendships, user?.uid]);
+      });
+
+      return {
+        setupFriendships: setup,
+        notSetupFriendships: notSetup,
+        settingUpFriendNames: friendNames,
+      };
+    }, [friendships, user?.uid]);
 
   const navigateToChat = (friendship: Friendship) => {
     if (!friendship.id) return;
@@ -84,7 +92,7 @@ export default function FriendsScreen() {
         floatingAction={
           <FAB
             text="Invite a friend"
-            onPress={() => router.push("/(app)/(modals)/invite-friends")}
+            onPress={() => router.push("/(app)/(modals)/invite")}
           />
         }
       >
@@ -99,7 +107,8 @@ export default function FriendsScreen() {
             />
           ) : (
             <>
-              {setupFriendships.length === 0 && notSetupFriendships.length > 0 ? (
+              {setupFriendships.length === 0 &&
+              notSetupFriendships.length > 0 ? (
                 <EmptyMessage
                   message="Your friends are setting up"
                   subtitle="Your friends have accepted your invitation but haven't completed their account setup"
@@ -116,26 +125,50 @@ export default function FriendsScreen() {
                   />
                 ))
               )}
-              
+
               {notSetupFriendships.length > 0 && (
                 <View paddingHorizontal="$4" paddingVertical="$3">
                   <Text textAlign="center" color="$gray10">
                     {settingUpFriendNames.length > 0 ? (
                       <>
                         {settingUpFriendNames.length === 1 ? (
-                          <>{settingUpFriendNames[0]} has</>  
+                          <>{settingUpFriendNames[0]} has</>
                         ) : settingUpFriendNames.length === 2 ? (
-                          <>{settingUpFriendNames[0]} and {settingUpFriendNames[1]} have</>  
+                          <>
+                            {settingUpFriendNames[0]} and{" "}
+                            {settingUpFriendNames[1]} have
+                          </>
                         ) : (
-                          <>{settingUpFriendNames.slice(0, -1).join(', ')}, and {settingUpFriendNames[settingUpFriendNames.length-1]} have</>  
+                          <>
+                            {settingUpFriendNames.slice(0, -1).join(", ")}, and{" "}
+                            {
+                              settingUpFriendNames[
+                                settingUpFriendNames.length - 1
+                              ]
+                            }{" "}
+                            have
+                          </>
                         )}
-                        {' accepted your invitation but '}
-                        {settingUpFriendNames.length === 1 ? 'hasn\'t' : 'haven\'t'}
-                        {' completed their account setup in the Walk2Gether app yet.'}
+                        {" accepted your invitation but "}
+                        {settingUpFriendNames.length === 1
+                          ? "hasn't"
+                          : "haven't"}
+                        {
+                          " completed their account setup in the Walk2Gether app yet."
+                        }
                       </>
                     ) : (
                       <>
-                        {notSetupFriendships.length} {notSetupFriendships.length === 1 ? 'friend has' : 'friends have'} accepted your invitation but {notSetupFriendships.length === 1 ? 'hasn\'t' : 'haven\'t'} completed their account setup in the Walk2Gether app yet.
+                        {notSetupFriendships.length}{" "}
+                        {notSetupFriendships.length === 1
+                          ? "friend has"
+                          : "friends have"}{" "}
+                        accepted your invitation but{" "}
+                        {notSetupFriendships.length === 1
+                          ? "hasn't"
+                          : "haven't"}{" "}
+                        completed their account setup in the Walk2Gether app
+                        yet.
                       </>
                     )}
                   </Text>

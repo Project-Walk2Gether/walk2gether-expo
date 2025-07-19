@@ -14,7 +14,7 @@ export default function ModalsLayout() {
         }}
       >
         <Stack.Screen
-          name="invite-friends"
+          name="invite"
           options={{
             title: "Invite Friends",
             headerShown: true,

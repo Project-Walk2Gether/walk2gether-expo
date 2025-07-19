@@ -1,6 +1,6 @@
 import { withErrorBoundary } from "@/components/ErrorBoundary";
 import { withAuthProvider } from "@/context/AuthContext";
-import { withFlashMessage } from "@/context/FlashMessageProvider";
+import { withFlashMessage } from "@/context/FlashMessageContext";
 import { withGestureHandler } from "@/context/GestureHandlerProvider";
 import { withSheetProvider } from "@/context/SheetProvider";
 import { withTamagui } from "@/context/TamaguiProvider";

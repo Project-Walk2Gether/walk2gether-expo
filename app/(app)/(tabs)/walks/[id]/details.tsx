@@ -1,0 +1,226 @@
+import QuoteWithImage from "@/components/QuoteWithImage";
+import RespondToInvitation from "@/components/RespondToInvitation";
+import ParticipantsListVertical from "@/components/WalkScreen/components/ParticipantsListVertical";
+import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
+import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
+import WalkTimeCard from "@/components/WalkScreen/components/WalkTimeCard";
+import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useMenu } from "@/context/MenuContext";
+import { useWalk } from "@/context/WalkContext";
+import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
+import { getWalkStatus } from "@/utils/walkUtils";
+import {
+  FirebaseFirestoreTypes,
+  updateDoc,
+} from "@react-native-firebase/firestore";
+import { MoreVertical } from "@tamagui/lucide-icons";
+import { router } from "expo-router";
+import { Timestamp } from "firebase/firestore";
+import React, { useMemo, useState } from "react";
+import { Alert, ScrollView } from "react-native";
+import { Button, Text, View, YStack } from "tamagui";
+import { Participant } from "walk2gether-shared";
+
+export default function DetailsTab() {
+  const { walk } = useWalk();
+  const { user } = useAuth();
+  const { showMessage } = useFlashMessage();
+
+  // Get participants for the walk
+  const participants = useWalkParticipants(walk?.id || "");
+  const isLoadingParticipants = !participants && !!walk?.id;
+
+  // Get the current user's participant document
+  const participantDoc = participants?.find(
+    (participant) => participant.userUid === user?.uid
+  );
+
+  // Check if current user is the owner of the walk
+  const isWalkOwner = useMemo(() => {
+    if (!walk || !user) return false;
+    return walk.createdByUid === user.uid;
+  }, [walk, user]);
+
+  // Determine if user can view participants (owner or friends walk)
+  const canViewParticipants = useMemo(() => {
+    if (!walk) return false;
+    return isWalkOwner || walk.type === "friends";
+  }, [walk, isWalkOwner]);
+
+  // Determine if the user has responded to the invitation
+  const hasResponded = useMemo(() => {
+    if (!participantDoc) return false;
+    return !!participantDoc.acceptedAt || !!participantDoc.cancelledAt;
+  }, [participantDoc]);
+
+  // Determine if the user has explicitly declined the invitation
+  const hasDeclined = useMemo(() => {
+    if (!participantDoc) return false;
+    return !!participantDoc.cancelledAt;
+  }, [participantDoc]);
+
+  const [loading, setLoading] = useState(false);
+  const { showMenu } = useMenu();
+
+  // Handle participation changes
+  const handleToggleParticipation = async () => {
+    if (!walk || !participantDoc || !user) return;
+
+    console.log("Toggling participation", { hasDeclined });
+
+    try {
+      setLoading(true);
+
+      const participantRef = walk._ref
+        .collection("participants")
+        .doc(user.uid) as FirebaseFirestoreTypes.DocumentReference<Participant>;
+
+      if (hasDeclined) {
+        // User wants to re-accept the invitation
+        await updateDoc(participantRef, {
+          acceptedAt: Timestamp.now(),
+          status: "pending",
+          cancelledAt: null,
+        });
+
+        Alert.alert("Success", "Great! You're now attending this walk.");
+      } else {
+        // User wants to cancel participation
+        await updateDoc(participantRef, {
+          cancelledAt: Timestamp.now(),
+        });
+
+        Alert.alert(
+          "Success",
+          "You've cancelled your participation in this walk."
+        );
+      }
+    } catch (error) {
+      console.error("Error updating participation:", error);
+      Alert.alert(
+        "Error",
+        "There was a problem updating your participation status."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Show the menu with the appropriate option
+  const handleShowParticipationMenu = () => {
+    if (!hasResponded) return;
+
+    showMenu("Participation Options", [
+      {
+        label: hasDeclined ? "I can make it" : "Cancel my participation",
+        theme: hasDeclined ? "green" : "red",
+        onPress: handleToggleParticipation,
+      },
+    ]);
+  };
+
+  if (!walk) {
+    return (
+      <View flex={1} justifyContent="center" alignItems="center">
+        <Text>Walk information not available</Text>
+      </View>
+    );
+  }
+
+  const walkStatus = getWalkStatus(walk);
+
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
+      <YStack p="$4" space="$4" pb="$6">
+        {/* Invitation Response Section - shown if user is invited but hasn't responded */}
+
+        <WalkDetailsCard
+          title="Respond to request"
+          headerAction={
+            hasResponded ? (
+              <Button
+                size="$2"
+                chromeless
+                icon={<MoreVertical size={18} />}
+                circular
+                onPress={handleShowParticipationMenu}
+                disabled={loading}
+              />
+            ) : undefined
+          }
+        >
+          <RespondToInvitation
+            walk={walk}
+            participantDoc={participantDoc || undefined}
+          />
+        </WalkDetailsCard>
+
+        {/* Walk Time Card */}
+        <WalkTimeCard
+          walkDate={walk.date ? walk.date.toDate() : undefined}
+          durationMinutes={walk.durationMinutes}
+        />
+
+        {/* Walk Location Card */}
+        <WalkLocationCard
+          location={walk.currentLocation}
+          locationName={walk.currentLocation?.name}
+          notes={walk.startLocation?.notes}
+        />
+
+        {/* Participants Section - only shown for walk owner or friends walks */}
+        {canViewParticipants && (
+          <WalkDetailsCard title="Participants">
+            <YStack w="100%">
+              {isLoadingParticipants ? (
+                <View height={50} justifyContent="center" alignItems="center">
+                  <Text>Loading participants...</Text>
+                </View>
+              ) : (
+                <ParticipantsListVertical
+                  walkId={walk.id}
+                  walkStatus={walkStatus}
+                  participants={participants}
+                  currentUserId={user?.uid}
+                  isOwner={isWalkOwner}
+                  walkStartDate={walk.date?.toDate()}
+                  onParticipantPress={() => {}}
+                />
+              )}
+              {isWalkOwner && walk?.id && (
+                <Button
+                  mt="$2"
+                  variant="outlined"
+                  onPress={() => {
+                    // For friend walks, include the addFriend parameter
+                    const params: { walkId: string; addFriend?: string } = {
+                      walkId: walk.id,
+                    };
+
+                    // Only include addFriend parameter for friend type walks
+                    if (walk.type === "friends") {
+                      params.addFriend = "true";
+                    }
+
+                    router.push({
+                      pathname: "/invite",
+                      params,
+                    });
+                  }}
+                >
+                  Invite others
+                </Button>
+              )}
+            </YStack>
+          </WalkDetailsCard>
+        )}
+
+        {/* Quote and Image at the bottom */}
+        <YStack alignItems="center" marginTop="$4">
+          <QuoteWithImage imageSize={180} skipAnimation={true} />
+        </YStack>
+      </YStack>
+    </ScrollView>
+  );
+}

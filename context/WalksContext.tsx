@@ -61,6 +61,8 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
   const { docs: currentWalks, status: walksStatus } =
     useQuery<WithId<Walk>>(currentWalksQuery);
 
+  console.log({ currentWalks });
+
   // Loading state for fetching data
   const walksLoading = walksStatus === "loading";
 

@@ -1,12 +1,10 @@
-import { useSheet } from "@/context/SheetContext";
 import { getWalkStatus } from "@/utils/walkUtils";
-import React, { useMemo, useState } from "react";
+import React from "react";
 import { FlatList } from "react-native";
-import { View } from "tamagui";
+import { Separator, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
-import { sortParticipants } from "../ParticipantsListVertical/sortParticipants";
-import WalkParticipantStatusControls from "../WalkParticipantStatusControls";
-import ParticipantItem from "./ParticipantItem";
+import ParticipantRow from "./ParticipantRow";
+import { sortParticipants } from "./sortParticipants";
 
 interface Props {
   walkStatus: ReturnType<typeof getWalkStatus>;
@@ -14,19 +12,20 @@ interface Props {
   currentUserId?: string;
   isOwner: boolean;
   walkId: string;
+  walkStartDate?: Date;
   onParticipantPress?: (participant: ParticipantWithRoute) => void;
 }
 
-export default function ParticipantsList({
+export default function ParticipantsListVertical({
   walkId,
   walkStatus,
   participants,
   currentUserId,
   isOwner,
+  walkStartDate,
   onParticipantPress,
 }: Props) {
-  // For ALL users (even owners), we don't directly show invited participants
-  // They'll be shown as a special message item
+  // Filter to show confirmed or active participants
   const confirmedParticipants = participants.filter(
     (p) =>
       // Include accepted participants or those who are on the way/arrived
@@ -50,12 +49,6 @@ export default function ParticipantsList({
     currentUserId
   );
 
-  const myParticipant = useMemo(
-    () => participants.find((p) => p.userUid === currentUserId),
-    [participants]
-  );
-  const { showSheet, hideSheet } = useSheet();
-
   // Define a type that extends ParticipantWithRoute to include our flag
   type ExtendedParticipant = ParticipantWithRoute & {
     isInvitedParticipant?: boolean;
@@ -75,48 +68,23 @@ export default function ParticipantsList({
     });
   }
 
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-
-  const handleMeParticipantPress = () => {
-    console.log("PRESSING");
-    if (!myParticipant) return;
-
-    const status = myParticipant?.status || "pending";
-
-    showSheet(
-      <WalkParticipantStatusControls
-        status={status}
-        isCancelled={!!myParticipant.cancelledAt}
-        isOwner={isOwner}
-        walkId={walkId}
-        userId={currentUserId}
-        navigationMethod={myParticipant.navigationMethod || "driving"}
-        onClose={hideSheet}
-      />,
-      { title: "Edit My Status" }
-    );
-  };
-
   return (
-    <FlatList
-      data={dataArray}
-      renderItem={({ item }) => (
-        <ParticipantItem
-          participant={item}
-          walkStatus={walkStatus}
-          currentUserId={currentUserId}
-          onPress={
-            item.userUid === currentUserId
-              ? handleMeParticipantPress
-              : onParticipantPress
-          }
-        />
-      )}
-      keyExtractor={(item) => item.id || `participant-${item.userUid}`}
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 8 }}
-      ItemSeparatorComponent={() => <View w={6} />}
-    />
+    <YStack flex={1}>
+      <FlatList
+        data={dataArray}
+        renderItem={({ item }) => (
+          <ParticipantRow
+            participant={item}
+            walkStatus={walkStatus}
+            currentUserId={currentUserId}
+            walkStartTime={walkStartDate}
+            onPress={onParticipantPress}
+          />
+        )}
+        keyExtractor={(item) => item.id || `participant-${item.userUid}`}
+        ItemSeparatorComponent={() => <Separator />}
+        contentContainerStyle={{ paddingBottom: 16 }}
+      />
+    </YStack>
   );
 }

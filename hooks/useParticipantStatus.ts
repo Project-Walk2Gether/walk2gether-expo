@@ -7,14 +7,15 @@ import {
   Timestamp,
 } from "@react-native-firebase/firestore";
 import { Alert } from "react-native";
-import { Participant } from "walk2gether-shared";
-import { StatusType } from "../../../utils/walkStatusUtils";
+import { Participant, Walk, WithId } from "walk2gether-shared";
+import { StatusType } from "../components/WalkScreen/components/ParticipantsList/utils/walkStatusUtils";
 
 interface UseParticipantStatusOptions {
   walkId: string;
   userId?: string;
   isOwner?: boolean;
   walkStarted?: boolean;
+  walk?: WithId<Walk>;
 }
 
 /**
@@ -25,6 +26,7 @@ export const useParticipantStatus = ({
   userId,
   isOwner = false,
   walkStarted = false,
+  walk,
 }: UseParticipantStatusOptions) => {
   const { reportNonFatalError } = useErrorReporting();
 
@@ -72,7 +74,6 @@ export const useParticipantStatus = ({
           firestore_instance,
           `walks/${walkId}/participants/${userId}`
         );
-
         const update: Partial<Participant> = {
           status: newStatus,
           statusUpdatedAt: Timestamp.now(),
@@ -223,7 +224,22 @@ export const useParticipantStatus = ({
     );
   };
 
+  // Extract the current participant's status from the walk object
+  const currentStatus =
+    userId && walk?.participantsById?.[userId]
+      ? {
+          status: walk.participantsById[userId].status as StatusType,
+          // navigationMethod may not exist in baseParticipantSchema, default to "driving" if missing
+          navigationMethod:
+            ((walk.participantsById[userId] as any)?.navigationMethod as
+              | "driving"
+              | "walking") || "driving",
+          isCancelled: !!walk.participantsById[userId].cancelledAt,
+        }
+      : undefined;
+
   return {
+    currentStatus,
     updateStatus,
     updateNavigationMethod,
     cancelParticipation,

@@ -7,7 +7,6 @@ import WalkCard from "@/components/WalkCard";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useWalks } from "@/context/WalksContext";
 import { COLORS } from "@/styles/colors";
-import { handleWalkPress } from "@/utils/navigationUtils";
 import { syncWalkReminders } from "@/utils/notifications";
 import { Footprints } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
@@ -34,7 +33,12 @@ export default function WalksScreen() {
       key={item.id}
       walk={item}
       showActions
-      onPress={() => handleWalkPress(item, router)}
+      onPress={() =>
+        router.push({
+          pathname: `/walks/[id]/details`,
+          params: { id: item.id },
+        })
+      }
     />
   );
 

@@ -2,7 +2,7 @@ import { COLORS } from "@/styles/colors";
 import { Check, MapPin } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import { Button, Spinner, XStack, YStack } from "tamagui";
-import { useParticipantStatus } from "../ParticipantsList/hooks/useParticipantStatus";
+import { useParticipantStatus } from "../../../../hooks/useParticipantStatus";
 import { StatusType } from "../ParticipantsList/utils/walkStatusUtils";
 import { NavigationToggle } from "../ParticipantStatusMenu/NavigationToggle";
 
@@ -65,7 +65,7 @@ export default function WalkParticipantStatusControls({
         }
       } else {
         let success = true;
-        
+
         // Update status if changed
         if (selectedStatus !== status) {
           success = await updateStatus(
@@ -74,7 +74,7 @@ export default function WalkParticipantStatusControls({
             selectedNavigationMethod
           );
         }
-        
+
         // Update navigation method if changed
         if (success && selectedNavigationMethod !== navigationMethod) {
           success = await updateNavigationMethod(selectedNavigationMethod);

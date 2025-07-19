@@ -58,9 +58,6 @@ export default function LiveWalkMap({
     userParticipant
   );
 
-  // Get current user participant via memoization
-  const navigationMethod = userParticipant?.navigationMethod;
-
   // Get walk data to access start location and check if user is owner
   const { doc: walk } = useDoc<Walk>(`walks/${walkId}`);
 
