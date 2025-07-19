@@ -159,7 +159,7 @@ const RespondToInvitation: React.FC<Props> = ({
   const handleCancelButtonPress = () => handleWalkAction("cancel");
 
   return (
-    <YStack gap="$4" ai="center">
+    <YStack w="100%" gap="$4" ai="center">
       {isApproved ? (
         <>
           <Text fontSize="$4" textAlign="center" color="$gray11">

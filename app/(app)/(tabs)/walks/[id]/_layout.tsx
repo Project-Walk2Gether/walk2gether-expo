@@ -17,6 +17,7 @@ import {
   router,
   Stack,
   useLocalSearchParams,
+  useNavigation,
   withLayoutContext,
 } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -39,13 +40,15 @@ export default function WalkLayout() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { user } = useAuth();
   const { doc: walk, status } = useDoc<Walk>(`walks/${id}`);
-  
+
+  const navigation = useNavigation();
+
   // Get participants for the walk
   const participants = useWalkParticipants(id || "");
   const isLoadingParticipants = !participants && !!id;
-  
+
   // Get the current user's participant document
-  const participantDoc = participants?.find(
+  const currentUserParticipantDoc = participants?.find(
     (participant) => participant.userUid === user?.uid
   );
 
@@ -53,32 +56,30 @@ export default function WalkLayout() {
     return <FullScreenLoader />;
   }
 
+  const goBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <>
       <Stack.Screen
         options={{
           title: getWalkTitle(walk, user?.uid),
-          headerLeft: () => <HeaderBackButton />,
-          headerRight: () => (
-            <WalkMenu
-              walk={walk}
-              afterDelete={() => {
-                if (router.canGoBack()) {
-                  router.back();
-                } else {
-                  router.push("/");
-                }
-              }}
-            />
-          ),
+          headerLeft: () => <HeaderBackButton onPress={goBack} />,
+          headerRight: () => <WalkMenu walk={walk} afterDelete={goBack} />,
         }}
       />
-      <WalkProvider 
-          walk={walk} 
-          participants={participants || null}
-          participantDoc={participantDoc}
-          isLoadingParticipants={isLoadingParticipants}
-        >
+      <WalkProvider
+        walk={walk}
+        goBack={goBack}
+        participants={participants || null}
+        currentUserParticipantDoc={currentUserParticipantDoc}
+        isLoadingParticipants={isLoadingParticipants}
+      >
         <View flex={1}>
           <StatusBar style="dark" />
           <MaterialTopTabs

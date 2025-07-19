@@ -29,7 +29,15 @@ export default function ParticipantRow({
   
   // Determine status and get corresponding UI elements
   const getStatusInfo = () => {
-    if (isInvited) {
+    // First check if the participant has cancelled
+    if (participant.cancelledAt) {
+      return {
+        icon: null,
+        label: "Can't make it",
+        color: "$red10",
+        backgroundColor: "$red2",
+      };
+    } else if (isInvited) {
       return {
         icon: null,
         label: "Invited",

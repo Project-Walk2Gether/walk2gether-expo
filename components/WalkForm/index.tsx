@@ -1,7 +1,7 @@
 import { FormikErrors, FormikTouched } from "formik";
 import React from "react";
 import { Input, Text, YStack } from "tamagui";
-import { MeetupWalk, Walk, walkSchema } from "walk2gether-shared";
+import { Walk, walkSchema } from "walk2gether-shared";
 import { WithId } from "walk2gether-shared/lib/utils/persisted";
 
 // Form components
@@ -112,10 +112,14 @@ export default function WalkForm({
               <FormControl label="Description (Markdown)">
                 <MarkdownEditor
                   value={(values as any).descriptionMarkdown || ""}
-                  onChange={(text) => setFieldValue("descriptionMarkdown", text)}
+                  onChange={(text) =>
+                    setFieldValue("descriptionMarkdown", text)
+                  }
                   label=""
                   placeholder="Add details about your meetup using markdown..."
-                  error={(errors as any).descriptionMarkdown as string | undefined}
+                  error={
+                    (errors as any).descriptionMarkdown as string | undefined
+                  }
                   touched={!!(touched as any).descriptionMarkdown}
                 />
               </FormControl>
@@ -129,6 +133,7 @@ export default function WalkForm({
             error={errors.durationMinutes as string | undefined}
             touched={!!touched.durationMinutes}
           />
+          <Text>{JSON.stringify(errors)}</Text>
         </YStack>
       )}
     </FormProvider>

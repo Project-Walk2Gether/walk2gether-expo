@@ -119,13 +119,21 @@ export const LocationSelection: React.FC<Props> = ({
     if (userMayNotMakeItToStartLocationInTime && travelTimeInfo) {
       Alert.alert(
         "Travel Time Warning",
-        `You may not make it to the walk on time. It takes about ${travelTimeInfo.travelTimeMinutes} minutes (${travelTimeInfo.route.distance.text}) to get there by car.${travelTimeInfo.arrivalTimeBeforeStart < 0 ? ` You'll arrive approximately ${Math.abs(travelTimeInfo.arrivalTimeBeforeStart)} minutes after the walk starts.` : ` You'll only arrive ${travelTimeInfo.arrivalTimeBeforeStart} minutes before the walk starts.`}
+        `You may not make it to the walk on time. It takes about ${
+          travelTimeInfo.travelTimeMinutes
+        } minutes (${travelTimeInfo.route.distance.text}) to get there by car.${
+          travelTimeInfo.arrivalTimeBeforeStart < 0
+            ? ` You'll arrive approximately ${Math.abs(
+                travelTimeInfo.arrivalTimeBeforeStart
+              )} minutes after the walk starts.`
+            : ` You'll only arrive ${travelTimeInfo.arrivalTimeBeforeStart} minutes before the walk starts.`
+        }
 
 Do you still want to continue?`,
         [
           { text: "Open Maps", onPress: handleOpenMaps },
           { text: "Cancel", style: "cancel" },
-          { text: "Continue Anyway", onPress: () => onContinue() }
+          { text: "Continue Anyway", onPress: () => onContinue() },
         ]
       );
     } else {
@@ -155,7 +163,7 @@ Do you still want to continue?`,
       onBack={onBack}
       currentStep={currentStep}
       totalSteps={totalSteps}
-      continueDisabled={!formData.startLocation}
+      continueDisabled={!formData.startLocation || isTravelTimeLoading}
     >
       <YStack space="$4">
         {/* Search section */}
@@ -189,12 +197,6 @@ Do you still want to continue?`,
           isLoadingNearbyUsers={isLoadingNearbyUsers}
         />
 
-        {/* Notes section */}
-        <LocationNotes
-          notes={notes}
-          setNotes={setNotes}
-          onFocus={handleMeetupLocationFocus}
-        />
         {/* Travel time warning */}
         {travelTimeInfo && userMayNotMakeItToStartLocationInTime && (
           <TravelTimeWarning
@@ -207,6 +209,13 @@ Do you still want to continue?`,
             onOpenMaps={handleOpenMaps}
           />
         )}
+
+        {/* Notes section */}
+        <LocationNotes
+          notes={notes}
+          setNotes={setNotes}
+          onFocus={handleMeetupLocationFocus}
+        />
       </YStack>
     </WizardWrapper>
   );

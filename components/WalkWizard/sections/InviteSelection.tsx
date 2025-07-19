@@ -73,6 +73,7 @@ export const InviteSelection: React.FC<Props> = ({
   // Determine walk type
   const isNeighborhoodWalk = effectiveWalkType === "neighborhood";
   const isFriendsWalk = effectiveWalkType === "friends";
+  const isMeetupWalk = effectiveWalkType === "meetup";
   const { friendships } = useFriends();
 
   // Determine if user can continue
@@ -380,6 +381,7 @@ export const InviteSelection: React.FC<Props> = ({
     const handleProceed = () => {
       if (
         formData.participantUids?.length === 0 &&
+        !isMeetupWalk &&
         (friendships.length > 0 || nearbyUserIds.length > 0) &&
         !shareSuccessful
       ) {

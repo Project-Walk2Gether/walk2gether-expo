@@ -2,12 +2,12 @@ import { COLORS } from "@/styles/colors";
 import { Check, MapPin } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import { Button, Spinner, XStack, YStack } from "tamagui";
+import { Participant } from "walk2gether-shared";
 import { useParticipantStatus } from "../../../../hooks/useParticipantStatus";
-import { StatusType } from "../ParticipantsList/utils/walkStatusUtils";
 import { NavigationToggle } from "../ParticipantStatusMenu/NavigationToggle";
 
 interface Props {
-  status: StatusType;
+  status: Participant["status"];
   isCancelled: boolean;
   isOwner: boolean;
   walkId: string;
@@ -25,7 +25,8 @@ export default function WalkParticipantStatusControls({
   navigationMethod = "driving",
   onClose,
 }: Props) {
-  const [selectedStatus, setSelectedStatus] = useState<StatusType>(status);
+  const [selectedStatus, setSelectedStatus] =
+    useState<Participant["status"]>(status);
   const [isUpdating, setIsUpdating] = useState(false);
   const [selectedNavigationMethod, setSelectedNavigationMethod] = useState<
     "driving" | "walking"
@@ -44,7 +45,7 @@ export default function WalkParticipantStatusControls({
   });
 
   // Handle status selection
-  const handleStatusSelect = (newStatus: StatusType) => {
+  const handleStatusSelect = (newStatus: Participant["status"]) => {
     setSelectedStatus(newStatus);
   };
 
@@ -128,20 +129,6 @@ export default function WalkParticipantStatusControls({
         </Button>
       ) : (
         <>
-          {/* Only show the cancel option for non-owners */}
-          {!isOwner && (
-            <Button
-              size="$4"
-              backgroundColor="$red9"
-              color="white"
-              onPress={handleCancel}
-              pressStyle={{ opacity: 0.8 }}
-              disabled={isUpdating}
-            >
-              I can no longer make it
-            </Button>
-          )}
-
           <Button
             size="$4"
             backgroundColor={

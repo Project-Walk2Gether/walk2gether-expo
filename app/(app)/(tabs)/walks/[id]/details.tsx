@@ -1,6 +1,6 @@
 import QuoteWithImage from "@/components/QuoteWithImage";
-import RespondToInvitationCard from "@/components/WalkScreen/components/RespondToInvitationCard";
 import ParticipantsListVertical from "@/components/WalkScreen/components/ParticipantsListVertical";
+import RespondToInvitationCard from "@/components/WalkScreen/components/RespondToInvitationCard";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
 import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
 import WalkTimeCard from "@/components/WalkScreen/components/WalkTimeCard";
@@ -14,11 +14,10 @@ import {
   FirebaseFirestoreTypes,
   updateDoc,
 } from "@react-native-firebase/firestore";
-import { MoreVertical } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import { Timestamp } from "firebase/firestore";
 import React, { useMemo, useState } from "react";
-import { Alert, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import { Button, Text, View, YStack } from "tamagui";
 import { Participant } from "walk2gether-shared";
 
@@ -28,7 +27,12 @@ export default function DetailsTab() {
   const { showMessage } = useFlashMessage();
 
   // Get participants data from context
-  const { participants, participantDoc, isLoadingParticipants } = useWalk();
+  const {
+    participants,
+    goBack,
+    currentUserParticipantDoc,
+    isLoadingParticipants,
+  } = useWalk();
 
   // Check if current user is the owner of the walk
   const isWalkOwner = useMemo(() => {
@@ -44,22 +48,25 @@ export default function DetailsTab() {
 
   // Determine if the user has responded to the invitation
   const hasResponded = useMemo(() => {
-    if (!participantDoc) return false;
-    return !!participantDoc.acceptedAt || !!participantDoc.cancelledAt;
-  }, [participantDoc]);
+    if (!currentUserParticipantDoc) return false;
+    return (
+      !!currentUserParticipantDoc.acceptedAt ||
+      !!currentUserParticipantDoc.cancelledAt
+    );
+  }, [currentUserParticipantDoc]);
 
   // Determine if the user has explicitly declined the invitation
   const hasDeclined = useMemo(() => {
-    if (!participantDoc) return false;
-    return !!participantDoc.cancelledAt;
-  }, [participantDoc]);
+    if (!currentUserParticipantDoc) return false;
+    return !!currentUserParticipantDoc.cancelledAt;
+  }, [currentUserParticipantDoc]);
 
   const [loading, setLoading] = useState(false);
   const { showMenu } = useMenu();
 
   // Handle participation changes
   const handleToggleParticipation = async () => {
-    if (!walk || !participantDoc || !user) return;
+    if (!walk || !currentUserParticipantDoc || !user) return;
 
     console.log("Toggling participation", { hasDeclined });
 
@@ -78,23 +85,25 @@ export default function DetailsTab() {
           cancelledAt: null,
         });
 
-        Alert.alert("Success", "Great! You're now attending this walk.");
+        showMessage("Great! You're now attending this walk.", "success");
       } else {
         // User wants to cancel participation
         await updateDoc(participantRef, {
           cancelledAt: Timestamp.now(),
         });
 
-        Alert.alert(
-          "Success",
-          "You've cancelled your participation in this walk."
+        goBack();
+
+        showMessage(
+          "You've cancelled your participation in this walk.",
+          "success"
         );
       }
     } catch (error) {
       console.error("Error updating participation:", error);
-      Alert.alert(
-        "Error",
-        "There was a problem updating your participation status."
+      showMessage(
+        "There was a problem updating your participation status.",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -105,9 +114,9 @@ export default function DetailsTab() {
   const handleShowParticipationMenu = () => {
     if (!hasResponded) return;
 
-    showMenu("Participation Options", [
+    showMenu("Respond to request", [
       {
-        label: hasDeclined ? "I can make it" : "Cancel my participation",
+        label: hasDeclined ? "I can make it" : "I can no longer make it",
         theme: hasDeclined ? "green" : "red",
         onPress: handleToggleParticipation,
       },
@@ -129,7 +138,7 @@ export default function DetailsTab() {
       <YStack p="$4" space="$4" pb="$6">
         <RespondToInvitationCard
           walk={walk}
-          participantDoc={participantDoc || undefined}
+          participantDoc={currentUserParticipantDoc || undefined}
           hasResponded={hasResponded}
           loading={loading}
           onMenuPress={handleShowParticipationMenu}
@@ -160,7 +169,7 @@ export default function DetailsTab() {
                 <ParticipantsListVertical
                   walkId={walk.id}
                   walkStatus={walkStatus}
-                  participants={participants as any[] || []}
+                  participants={(participants as any[]) || []}
                   currentUserId={user?.uid}
                   isOwner={isWalkOwner}
                   walkStartDate={walk.date?.toDate()}

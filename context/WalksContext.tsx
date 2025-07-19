@@ -2,7 +2,6 @@ import { firestore_instance } from "@/config/firebase";
 import { useQuery } from "@/utils/firestore";
 import {
   collection,
-  FirebaseFirestoreTypes,
   limit,
   orderBy,
   query,
@@ -17,9 +16,6 @@ interface WalksContextType {
   upcomingWalks: WithId<Walk>[];
   activeWalks: WithId<Walk>[];
   walksLoading: boolean;
-  createWalk: (
-    walk: Walk
-  ) => Promise<FirebaseFirestoreTypes.DocumentReference<Walk>>;
   getWalkById: (walkId: string) => Walk | undefined;
 }
 
@@ -61,7 +57,9 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
   const { docs: currentWalks, status: walksStatus } =
     useQuery<WithId<Walk>>(currentWalksQuery);
 
-  console.log({ currentWalks });
+  const currentNonHiddenWalks = currentWalks.filter(
+    (walk) => !walk.participantsById?.[user?.uid!]?.hiddenAt
+  );
 
   // Loading state for fetching data
   const walksLoading = walksStatus === "loading";
@@ -71,7 +69,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     const now = new Date();
     const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
 
-    return currentWalks.reduce(
+    return currentNonHiddenWalks.reduce(
       (acc, walk) => {
         // If walk date is less than 30 minutes from now, it's active
         if (walk.date && walk.date.toDate() <= thirtyMinutesFromNow) {
@@ -83,7 +81,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
       },
       { activeWalks: [] as WithId<Walk>[], upcomingWalks: [] as WithId<Walk>[] }
     );
-  }, [currentWalks]);
+  }, [currentNonHiddenWalks]);
 
   // Add getWalkById function to find a walk by its ID
   const getWalkById = (walkId: string): Walk | undefined => {

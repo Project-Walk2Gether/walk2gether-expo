@@ -1,5 +1,8 @@
 import { useWalkForm } from "@/context/WalkFormContext";
-import { MarkdownTextInput, parseExpensiMark } from "@expensify/react-native-live-markdown";
+import {
+  MarkdownTextInput,
+  parseExpensiMark,
+} from "@expensify/react-native-live-markdown";
 import React from "react";
 import { Card, Input, Text, YStack } from "tamagui";
 import WizardWrapper from "./WizardWrapper";
@@ -32,6 +35,7 @@ export const TopicSelection: React.FC<Props> = ({
       currentStep={currentStep}
       totalSteps={totalSteps}
       continueText="Continue"
+      continueDisabled={!formData.topic}
     >
       <YStack space="$4">
         <Card
@@ -59,7 +63,9 @@ export const TopicSelection: React.FC<Props> = ({
 
             <MarkdownTextInput
               value={formData.descriptionMarkdown || ""}
-              onChangeText={(text) => updateFormData({ descriptionMarkdown: text } as any)}
+              onChangeText={(text) =>
+                updateFormData({ descriptionMarkdown: text } as any)
+              }
               parser={parseExpensiMark}
               placeholder="Add details about your meetup using markdown..."
               style={{ minHeight: 150 }}

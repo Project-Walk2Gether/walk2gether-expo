@@ -6,6 +6,7 @@ import { useDoc } from "@/utils/firestore";
 import { calculateDisplayAvatars } from "@/utils/participantAvatars";
 import { getWalkTitle } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
+import { Timestamp } from "@react-native-firebase/firestore";
 import {
   Calendar,
   CheckCircle,
@@ -14,7 +15,7 @@ import {
   Timer,
 } from "@tamagui/lucide-icons";
 import React from "react";
-import { Text, View, XStack, YStack } from "tamagui";
+import { Button, Text, View, XStack, YStack } from "tamagui";
 import {
   Participant,
   Walk,
@@ -92,16 +93,11 @@ const WalkCard: React.FC<Props> = ({
   const currentUserHasAccepted = React.useMemo(() => {
     if (!user?.uid || isMine) return true; // Owner or no user ID - not relevant
 
-    // If the user has a participant record with participantsById
-    if (walk.participantsById && walk.participantsById[user.uid]) {
-      const participant = walk.participantsById[user.uid] as Participant;
-      return (
-        participant.acceptedAt !== undefined && participant.acceptedAt !== null
-      );
-    }
-
-    return false; // No participant record found
-  }, [user?.uid, isMine, walk.participantsById]);
+    return (
+      participantDoc?.acceptedAt !== undefined &&
+      participantDoc.acceptedAt !== null
+    );
+  }, [user?.uid, isMine, participantDoc]);
 
   // Calculate display avatars using the utility function
   const { displayAvatars, overflow, hasNonOwnerParticipants } =
@@ -113,10 +109,15 @@ const WalkCard: React.FC<Props> = ({
   const shouldShowParticipantsDisplay =
     isMine || (currentUserHasAccepted && hasNonOwnerParticipants);
 
-  // Use the extracted LocationDisplay component
-
   // Determine the walk type for color styling
   const walkType = walk.type;
+
+  const handleHideInvitationButtonPress = () => {
+    participantDoc?._ref.update({ hiddenAt: Timestamp.now() });
+    walk._ref.update({
+      [`participantsById.${user?.uid}.hiddenAt`]: Timestamp.now(),
+    });
+  };
 
   return (
     <YStack marginVertical={10} opacity={!isMine && isCancelled ? 0.85 : 1}>
@@ -200,19 +201,24 @@ const WalkCard: React.FC<Props> = ({
         <YStack gap="$2">
           {/* If user has cancelled their participation */}
           {isCancelled && (
-            <XStack
-              backgroundColor="$red7"
-              paddingHorizontal="$3"
-              paddingVertical="$2"
-              borderRadius="$3"
-              alignItems="center"
-              gap="$1"
-              mt="$2"
-            >
-              <Text fontSize={12} fontWeight="600">
-                You've told {ownerName} you can't make it
-              </Text>
-            </XStack>
+            <YStack gap="$2">
+              <XStack
+                backgroundColor="$red7"
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$3"
+                alignItems="center"
+                gap="$1"
+                mt="$2"
+              >
+                <Text fontSize={12} fontWeight="600">
+                  You've told {ownerName} you can't make it
+                </Text>
+              </XStack>
+              <Button onPress={handleHideInvitationButtonPress}>
+                Hide this invitation
+              </Button>
+            </YStack>
           )}
 
           {/* Unified participants display component - only render if conditions are met */}

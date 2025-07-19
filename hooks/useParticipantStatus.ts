@@ -8,7 +8,6 @@ import {
 } from "@react-native-firebase/firestore";
 import { Alert } from "react-native";
 import { Participant, Walk, WithId } from "walk2gether-shared";
-import { StatusType } from "../components/WalkScreen/components/ParticipantsList/utils/walkStatusUtils";
 
 interface UseParticipantStatusOptions {
   walkId: string;
@@ -60,8 +59,8 @@ export const useParticipantStatus = ({
    * Update the participant's status and navigation method
    */
   const updateStatus = async (
-    newStatus: StatusType,
-    currentStatus: StatusType,
+    newStatus: Participant["status"],
+    currentStatus: Participant["status"],
     navigationMethod: "walking" | "driving"
   ) => {
     if (!userId || !walkId) return false;

@@ -1,41 +1,40 @@
-import React, { createContext, useContext, ReactNode } from "react";
-import { MeetupWalk, Walk, WithId, Participant } from "walk2gether-shared";
+import React, { createContext, ReactNode, useContext } from "react";
+import { MeetupWalk, Participant, Walk, WithId } from "walk2gether-shared";
 
 interface WalkContextType {
   walk: WithId<Walk | MeetupWalk> | null;
   participants: WithId<Participant>[] | null;
-  participantDoc: WithId<Participant> | undefined;
+  goBack: () => void;
+  currentUserParticipantDoc: WithId<Participant> | undefined;
   isLoadingParticipants: boolean;
 }
 
-const WalkContext = createContext<WalkContextType>({
-  walk: null,
-  participants: null,
-  participantDoc: undefined,
-  isLoadingParticipants: false,
-});
+const WalkContext = createContext<WalkContextType>(undefined as any);
 
 interface WalkProviderProps {
   children: ReactNode;
   walk: WithId<Walk | MeetupWalk> | null;
+  goBack: () => void;
   participants: WithId<Participant>[] | null;
-  participantDoc: WithId<Participant> | undefined;
+  currentUserParticipantDoc: WithId<Participant> | undefined;
   isLoadingParticipants: boolean;
 }
 
 export const WalkProvider = ({
   children,
   walk,
+  goBack,
   participants,
-  participantDoc,
+  currentUserParticipantDoc,
   isLoadingParticipants,
 }: WalkProviderProps) => {
   return (
     <WalkContext.Provider
       value={{
         walk,
+        goBack,
         participants,
-        participantDoc,
+        currentUserParticipantDoc,
         isLoadingParticipants,
       }}
     >

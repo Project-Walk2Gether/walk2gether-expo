@@ -17,7 +17,6 @@ export default function FormProvider<T extends object>({
   validationSchema,
   onSubmit,
   submitButtonText,
-  onCancel,
   children,
 }: FormProviderProps<T>) {
   return (
