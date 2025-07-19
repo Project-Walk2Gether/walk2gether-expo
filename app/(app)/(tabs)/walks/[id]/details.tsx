@@ -1,5 +1,5 @@
 import QuoteWithImage from "@/components/QuoteWithImage";
-import RespondToInvitation from "@/components/RespondToInvitation";
+import RespondToInvitationCard from "@/components/WalkScreen/components/RespondToInvitationCard";
 import ParticipantsListVertical from "@/components/WalkScreen/components/ParticipantsListVertical";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
 import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useMenu } from "@/context/MenuContext";
 import { useWalk } from "@/context/WalkContext";
-import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
+
 import { getWalkStatus } from "@/utils/walkUtils";
 import {
   FirebaseFirestoreTypes,
@@ -27,14 +27,8 @@ export default function DetailsTab() {
   const { user } = useAuth();
   const { showMessage } = useFlashMessage();
 
-  // Get participants for the walk
-  const participants = useWalkParticipants(walk?.id || "");
-  const isLoadingParticipants = !participants && !!walk?.id;
-
-  // Get the current user's participant document
-  const participantDoc = participants?.find(
-    (participant) => participant.userUid === user?.uid
-  );
+  // Get participants data from context
+  const { participants, participantDoc, isLoadingParticipants } = useWalk();
 
   // Check if current user is the owner of the walk
   const isWalkOwner = useMemo(() => {
@@ -133,26 +127,13 @@ export default function DetailsTab() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
       <YStack p="$4" space="$4" pb="$6">
-        <WalkDetailsCard
-          title="Respond to request"
-          headerAction={
-            hasResponded ? (
-              <Button
-                size="$2"
-                chromeless
-                icon={<MoreVertical size={18} />}
-                circular
-                onPress={handleShowParticipationMenu}
-                disabled={loading}
-              />
-            ) : undefined
-          }
-        >
-          <RespondToInvitation
-            walk={walk}
-            participantDoc={participantDoc || undefined}
-          />
-        </WalkDetailsCard>
+        <RespondToInvitationCard
+          walk={walk}
+          participantDoc={participantDoc || undefined}
+          hasResponded={hasResponded}
+          loading={loading}
+          onMenuPress={handleShowParticipationMenu}
+        />
 
         {/* Walk Time Card */}
         <WalkTimeCard
@@ -179,7 +160,7 @@ export default function DetailsTab() {
                 <ParticipantsListVertical
                   walkId={walk.id}
                   walkStatus={walkStatus}
-                  participants={participants}
+                  participants={participants as any[] || []}
                   currentUserId={user?.uid}
                   isOwner={isWalkOwner}
                   walkStartDate={walk.date?.toDate()}

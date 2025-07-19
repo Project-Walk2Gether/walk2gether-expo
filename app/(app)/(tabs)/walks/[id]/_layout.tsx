@@ -3,6 +3,7 @@ import HeaderBackButton from "@/components/HeaderBackButton";
 import WalkMenu from "@/components/WalkMenu";
 import { useAuth } from "@/context/AuthContext";
 import { WalkProvider } from "@/context/WalkContext";
+import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
 import { getWalkTitle } from "@/utils/walkType";
@@ -38,8 +39,17 @@ export default function WalkLayout() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { user } = useAuth();
   const { doc: walk, status } = useDoc<Walk>(`walks/${id}`);
+  
+  // Get participants for the walk
+  const participants = useWalkParticipants(id || "");
+  const isLoadingParticipants = !participants && !!id;
+  
+  // Get the current user's participant document
+  const participantDoc = participants?.find(
+    (participant) => participant.userUid === user?.uid
+  );
 
-  if (status === "loading" || !walk) {
+  if (status === "loading" || !walk || isLoadingParticipants) {
     return <FullScreenLoader />;
   }
 
@@ -63,7 +73,12 @@ export default function WalkLayout() {
           ),
         }}
       />
-      <WalkProvider walk={walk}>
+      <WalkProvider 
+          walk={walk} 
+          participants={participants || null}
+          participantDoc={participantDoc}
+          isLoadingParticipants={isLoadingParticipants}
+        >
         <View flex={1}>
           <StatusBar style="dark" />
           <MaterialTopTabs

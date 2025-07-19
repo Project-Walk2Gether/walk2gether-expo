@@ -7,7 +7,7 @@ import { Text, View } from "tamagui";
 import { differenceInHours } from "date-fns";
 
 export default function MapTab() {
-  const { walk } = useWalk();
+  const { walk, participants, participantDoc } = useWalk();
 
   // Check if walk is scheduled within the next 5 hours
   const isStartingSoon = useMemo(() => {
