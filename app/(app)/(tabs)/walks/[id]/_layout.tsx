@@ -1,13 +1,11 @@
 import FullScreenLoader from "@/components/FullScreenLoader";
-import HeaderBackButton from "@/components/HeaderBackButton";
 import ActiveRoundIndicator from "@/components/Rounds/ActiveRoundIndicator";
-import WalkMenu from "@/components/WalkMenu";
+import WalkHeader from "@/components/WalkHeader";
 import { useAuth } from "@/context/AuthContext";
 import { WalkProvider } from "@/context/WalkContext";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
-import { getWalkTitle } from "@/utils/walkType";
 import {
   createMaterialTopTabNavigator,
   MaterialTopTabNavigationEventMap,
@@ -16,7 +14,6 @@ import {
 import { ParamListBase, TabNavigationState } from "@react-navigation/native";
 import {
   router,
-  Stack,
   useLocalSearchParams,
   useNavigation,
   withLayoutContext,
@@ -70,13 +67,6 @@ export default function WalkLayout() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: getWalkTitle(walk, user?.uid),
-          headerLeft: () => <HeaderBackButton onPress={goBack} />,
-          headerRight: () => <WalkMenu walk={walk} afterDelete={goBack} />,
-        }}
-      />
       <WalkProvider
         walk={walk}
         goBack={goBack}
@@ -84,11 +74,9 @@ export default function WalkLayout() {
         currentUserParticipantDoc={currentUserParticipantDoc}
         isLoadingParticipants={isLoadingParticipants}
       >
+        <WalkHeader goBack={goBack} />
         <View flex={1}>
           <StatusBar style="dark" />
-          {walk.type === "meetup" && walk.startedAt && !walk.endedAt && (
-            <ActiveRoundIndicator walkId={id} />
-          )}
           <MaterialTopTabs
             initialRouteName={initialRouteName}
             screenOptions={{

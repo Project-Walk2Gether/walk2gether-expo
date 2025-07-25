@@ -22,6 +22,7 @@ import {
 } from "walk2gether-shared";
 import { COLORS } from "./constants";
 import { EditUpcomingRoundSheet } from "./EditUpcomingRoundSheet";
+import EditRoundSheet from "../EditRoundSheet";
 
 interface Props {
   walk: WithId<Walk>;
@@ -54,20 +55,6 @@ export default function RoundsList({ walk }: Props): React.ReactNode {
     return walk.createdByUid === user.uid;
   }, [walk, user]);
 
-  // Query for active round (no endTime set)
-  const activeRoundQuery = useMemo(() => {
-    if (!walk?._ref) return undefined;
-    return query(
-      collection(walk._ref as any, "rounds"),
-      where("endTime", "==", null),
-      orderBy("startTime", "asc")
-    );
-  }, [walk?._ref]);
-
-  // Fetch active round
-  const { docs: activeRounds } = useQuery(activeRoundQuery);
-  const activeRound = activeRounds?.[0] as WithId<Round> | undefined;
-
   // Query for actual rounds with end time (completed rounds) - limit to last 3
   const actualRoundsQuery = useMemo(() => {
     if (!walk?._ref) return undefined;
@@ -89,14 +76,29 @@ export default function RoundsList({ walk }: Props): React.ReactNode {
 
   const { showSheet, hideSheet } = useSheet();
 
+  // Handle editing the prompt for an actual round
+  const handleEditActualRound = (round: WithId<Round>) => {
+    if (!round._ref) return;
+    
+    showSheet(
+      <EditRoundSheet
+        round={round}
+        onClose={() => hideSheet()}
+        onSave={() => hideSheet()}
+      />
+    );
+  };
+
   // Handle editing the prompt for an upcoming round
   const handleEditPrompt = (index: number) => {
     if (!walk) return;
-    
+
     // For the first upcoming round, also show duration picker
     const isFirstRound = index === 0;
-    const suggestedDuration = isFirstRound ? calculateSuggestedDuration() : undefined;
-    
+    const suggestedDuration = isFirstRound
+      ? calculateSuggestedDuration()
+      : undefined;
+
     showSheet(
       <EditUpcomingRoundSheet
         walk={walk}
@@ -186,14 +188,6 @@ export default function RoundsList({ walk }: Props): React.ReactNode {
       // Add the round to the rounds collection
       batch.set(newRoundRef, roundData);
 
-      // If there's a current active round, update its endTime to now
-      if (activeRound) {
-        const activeRoundRef = activeRound._ref as any;
-        batch.update(activeRoundRef, {
-          endTime: firestore.FieldValue.serverTimestamp(),
-        });
-      }
-
       // Update the walk document to remove the first upcoming round and shift others up
       if (isMeetupWalk) {
         const updatedUpcomingRounds = [...upcomingRounds.slice(1)];
@@ -248,13 +242,14 @@ export default function RoundsList({ walk }: Props): React.ReactNode {
     >
       <YStack space="$4" width="100%">
         {/* Map over actual rounds (including active) */}
-        {actualRounds.map((round, index) => (
+        {actualRounds.map((round) => (
           <RoundCard
             key={`actual-round-${round.id}`}
             round={round}
             isExpanded={expandedActualRoundId === round.id}
             isActual={true}
             onToggleExpand={() => toggleActualRoundExpanded(round.id)}
+            onEditPrompt={() => handleEditActualRound(round)}
           />
         ))}
 

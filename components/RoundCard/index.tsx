@@ -12,7 +12,6 @@ const COLORS = {
 
 interface Props {
   round: Round | WithId<Round>;
-  currentUserId?: string;
   isExpanded?: boolean;
   isActual?: boolean;
   isFirstUpcoming?: boolean;
@@ -26,7 +25,6 @@ interface Props {
 
 export default function RoundCard({
   round,
-  currentUserId,
   isExpanded = false,
   isActual = true,
   isFirstUpcoming = false,
@@ -47,7 +45,8 @@ export default function RoundCard({
   const iconColor = isActual ? "$gray9" : COLORS.primary;
 
   // Check if this is the currently active round (has startTime but no endTime)
-  const isActiveRound = isActual && round.startTime && !round.endTime;
+  const isActiveRound =
+    isActual && (!round.endTime || round.endTime.toDate() > new Date());
 
   // Standard round card for RoundsList
   return (
@@ -122,22 +121,10 @@ export default function RoundCard({
               </Text>
             </XStack>
           )}
-
-          {/* Time indicator */}
-          {isActual && round.startTime && (
-            <Text fontSize="$1" color="$gray8">
-              {round.startTime.toDate
-                ? round.startTime.toDate().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "Unknown time"}
-            </Text>
-          )}
         </XStack>
 
         <XStack gap="$2" alignItems="center">
-          {onEditPrompt && !isActual && (
+          {onEditPrompt && (
             <Button
               size="$2"
               backgroundColor="transparent"

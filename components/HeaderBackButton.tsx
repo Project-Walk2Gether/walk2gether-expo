@@ -15,8 +15,6 @@ export default function HeaderBackButton({
     <Button
       chromeless
       onPress={onPress || (() => router.back())}
-      marginLeft={10}
-      padding={0}
       circular
       icon={<ChevronLeft size={24} color={color} />}
     />

@@ -1,12 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useWalk } from "@/context/WalkContext";
 import { useQuery } from "@/utils/firestore";
-import {
-  collection,
-  orderBy,
-  query,
-  where,
-} from "@react-native-firebase/firestore";
+import { collection, orderBy, query } from "@react-native-firebase/firestore";
 import React, { useMemo } from "react";
 import { Card, Text, XStack, YStack } from "tamagui";
 import { Round, WithId } from "walk2gether-shared";
@@ -31,11 +26,7 @@ export default function ActiveRoundIndicator({ walkId }: Props) {
     if (!walk?._ref) return undefined;
     // Convert DocumentReferenceLike to FirebaseFirestoreTypes.DocumentReference
     const walkRef = walk._ref as any;
-    return query(
-      collection(walkRef, "rounds"),
-      where("endTime", "==", null),
-      orderBy("startTime", "desc")
-    );
+    return query(collection(walkRef, "rounds"), orderBy("startTime", "desc"));
   }, [walk?._ref]);
 
   const { docs: rounds } = useQuery(roundsQuery);

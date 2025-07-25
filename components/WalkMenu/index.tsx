@@ -20,9 +20,10 @@ interface Props {
   onOpenMaps?: () => void;
   hasLocation?: boolean;
   afterDelete?: () => void;
+  iconColor?: string;
 }
 
-export default function WalkMenu({ walk, afterDelete }: Props) {
+export default function WalkMenu({ walk, afterDelete, iconColor }: Props) {
   const router = useRouter();
   const { showMenu } = useMenu();
   const { showMessage } = useFlashMessage();
@@ -190,7 +191,7 @@ export default function WalkMenu({ walk, afterDelete }: Props) {
         circular
         chromeless
         onPress={handleShowMenu}
-        icon={<MoreVertical size="$1" color="black" />}
+        icon={<MoreVertical size="$1" color={iconColor || "black"} />}
       />
 
       <ConfirmationDialog

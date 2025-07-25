@@ -87,7 +87,7 @@ export const ParticipantsDisplay: React.FC<Props> = ({
 
   // Handler for the invite button
   const handleInvite = () => {
-    router.push(`/walks/${walk.id}/invite`);
+    router.push(`/walks/${walk.id}/details`);
   };
 
   // Show owner view

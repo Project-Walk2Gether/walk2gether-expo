@@ -8,13 +8,10 @@ interface Props {
   currentUserId?: string;
 }
 
-export default function TimelineRoundCard({
-  round,
-  currentUserId,
-}: Props) {
+export default function TimelineRoundCard({ round, currentUserId }: Props) {
   // Get walk context to access participant data
   const { walk } = useWalk();
-  
+
   // Find the current user's pair
   const userPair = React.useMemo(() => {
     if (!currentUserId) return null;
@@ -43,8 +40,8 @@ export default function TimelineRoundCard({
         marginVertical="$1"
         width="100%"
       >
-        <XStack justifyContent="space-between" alignItems="center">
-          <XStack space="$2" alignItems="center" flex={1}>
+        <YStack justifyContent="space-between">
+          <XStack mb="$2" gap="$2" alignItems="center" flex={1}>
             <Text
               fontSize={16}
               color={userPair.color}
@@ -55,7 +52,7 @@ export default function TimelineRoundCard({
             >
               {userPair.emoji}
             </Text>
-            <YStack>
+            <XStack gap="$2">
               <Text fontSize={14} fontWeight="500">
                 Round {round.roundNumber}
               </Text>
@@ -64,7 +61,7 @@ export default function TimelineRoundCard({
                   ? `Partner: ${partnerNames.join(", ")}`
                   : "No partner"}
               </Text>
-            </YStack>
+            </XStack>
           </XStack>
 
           {round.questionPrompt && (
@@ -74,15 +71,14 @@ export default function TimelineRoundCard({
               flex={1}
               numberOfLines={1}
               ellipsizeMode="tail"
-              textAlign="right"
             >
               {round.questionPrompt}
             </Text>
           )}
-        </XStack>
+        </YStack>
       </Card>
     );
   }
-  
+
   return null;
 }

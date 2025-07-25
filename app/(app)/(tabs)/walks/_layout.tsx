@@ -12,7 +12,7 @@ export default function WalksLayout() {
       }}
       initialRouteName="index"
     >
-      <Stack.Screen name="[id]" options={{ headerShown: true }} />
+      <Stack.Screen name="[id]" />
     </Stack>
   );
 }

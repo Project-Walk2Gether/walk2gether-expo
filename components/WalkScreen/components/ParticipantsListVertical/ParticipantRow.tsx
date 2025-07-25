@@ -4,8 +4,8 @@ import { Text, XStack, YStack } from "tamagui";
 import { getWalkStatus } from "@/utils/walkUtils";
 import { COLORS } from "@/styles/colors";
 import { ParticipantWithRoute } from "walk2gether-shared";
-import { MapPin, Car, Calendar } from "@tamagui/lucide-icons";
-import { differenceInHours } from "date-fns";
+import { MapPin, Car, Calendar, Check } from "@tamagui/lucide-icons";
+import { differenceInHours, format } from "date-fns";
 import { StatelessAvatar } from "@/components/UserAvatar/StatelessAvatar";
 
 interface Props {
@@ -28,6 +28,24 @@ export default function ParticipantRow({
   const isCurrentUser = participant.userUid === currentUserId;
   const isInvited = participant.isInvitedParticipant;
   
+  // Helper function to convert timestamp to Date
+  const timestampToDate = (timestamp: any) => {
+    if (!timestamp) return undefined;
+    
+    // Handle Firebase Timestamp objects
+    if (typeof timestamp.toDate === 'function') {
+      return timestamp.toDate();
+    }
+    
+    // Try to create a date directly
+    try {
+      return new Date(timestamp);
+    } catch (e) {
+      console.warn('Unable to convert timestamp to date:', timestamp);
+      return undefined;
+    }
+  };
+
   // Determine status and get corresponding UI elements
   const getStatusInfo = () => {
     // First check if the participant has cancelled
@@ -60,10 +78,24 @@ export default function ParticipantRow({
         backgroundColor: "$blue2",
       };
     } else {
-      // Handle pending status based on whether walk is starting soon
       const now = new Date();
-      const isStartingSoon = walkStartTime && 
-        differenceInHours(walkStartTime, now) <= 3;
+      
+      // Check if walk is far in the future (more than 4 hours away)
+      const isFutureWalk = walkStartTime && differenceInHours(walkStartTime, now) > 4;
+      
+      // If it's a future walk and participant has accepted, show when they accepted
+      if (isFutureWalk && participant.acceptedAt) {
+        const acceptedDate = timestampToDate(participant.acceptedAt);
+        return {
+          icon: <Check size={16} color="green" />,
+          label: acceptedDate ? `Accepted ${format(acceptedDate, "M/d/yy")}` : "Accepted",
+          color: "green",
+          backgroundColor: "$green2",
+        };
+      }
+      
+      // Handle pending status based on whether walk is starting soon
+      const isStartingSoon = walkStartTime && differenceInHours(walkStartTime, now) <= 3;
       
       if (walkStatus === "active" || isStartingSoon) {
         return {

@@ -123,7 +123,7 @@ export const RoundItem = memo(
           </XStack>
 
           <XStack gap="$2" alignItems="center">
-            {onEditPrompt && !isActual && (
+            {onEditPrompt && (
               <Button
                 size="$2"
                 backgroundColor="transparent"
