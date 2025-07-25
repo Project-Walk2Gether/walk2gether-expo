@@ -1,24 +1,15 @@
 import { useWalk } from "@/context/WalkContext";
 import React from "react";
-import { Dimensions } from "react-native";
 import { Card, Text, XStack, YStack } from "tamagui";
 import { Round, WithId } from "walk2gether-shared";
 
 interface RoundProps {
   round: WithId<Round>;
   currentUserId: string;
-  isActive: boolean;
   onToggleActive: () => void;
 }
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-
-export default function RoundCard({
-  round,
-  currentUserId,
-  isActive,
-  onToggleActive,
-}: RoundProps) {
+export default function RoundCard({ round, currentUserId }: RoundProps) {
   // Find the current user's pair
   const userPair = React.useMemo(() => {
     return round.pairs.find((pair) => pair.userUids.includes(currentUserId));
@@ -43,83 +34,51 @@ export default function RoundCard({
 
   return (
     <Card
-      onPress={onToggleActive}
       pressStyle={{ opacity: 0.8 }}
-      borderWidth={isActive ? 2 : 1}
-      borderRadius={16}
-      padding="$4"
-      marginVertical="$2"
+      borderWidth={1}
+      borderColor="$gray5"
+      borderRadius={8}
+      padding="$2"
+      marginVertical="$1"
       width="100%"
-      animation="bouncy"
-      animateOnly={["height"]}
     >
-      <XStack
-        justifyContent="space-between"
-        alignItems="center"
-        marginBottom="$2"
-      >
-        <Text fontSize={16} fontWeight="bold">
-          Round {round.roundNumber}
-        </Text>
-        <Text fontSize={isActive ? 48 : 24}>{userPair.emoji}</Text>
-      </XStack>
-
-      {isActive && (
-        <YStack 
-          marginVertical="$4"
-          overflow="hidden"
-          borderRadius={16}
-        >
-          <YStack 
-            backgroundColor={userPair.color}
-            padding="$4"
-            alignItems="center"
-            justifyContent="center"
+      <XStack justifyContent="space-between" alignItems="center">
+        <XStack space="$2" alignItems="center" flex={1}>
+          <Text
+            fontSize={16}
+            color={userPair.color}
+            backgroundColor={`${userPair.color}20`} // 20% opacity of the color
+            borderRadius={4}
+            paddingHorizontal="$2"
+            paddingVertical="$1"
           >
-            <Text fontSize={150} color="white" marginBottom="$2">
-              {userPair.emoji}
+            {userPair.emoji}
+          </Text>
+          <YStack>
+            <Text fontSize={14} fontWeight="500">
+              Round {round.roundNumber}
+            </Text>
+            <Text fontSize={12} color="$gray10" numberOfLines={1}>
+              {partnerNames.length > 0
+                ? `Partner: ${partnerNames.join(", ")}`
+                : "No partner"}
             </Text>
           </YStack>
-          
-          <YStack 
-            backgroundColor="white" 
-            padding="$3"
-            alignItems="center"
-            borderBottomLeftRadius={16}
-            borderBottomRightRadius={16}
-          >
-            <Text fontSize={14} color="$gray10">
-              Show this emoji to find your partner
-            </Text>
-          </YStack>
-        </YStack>
-      )}
-
-      <YStack space="$2">
-        <Text fontSize={14} fontWeight="500">
-          Your pair:{" "}
-          {partnerNames.length > 0
-            ? partnerNames.join(", ")
-            : "No partner assigned"}
-        </Text>
+        </XStack>
 
         {round.questionPrompt && (
-          <YStack
-            backgroundColor="$blue2"
-            padding="$3"
-            borderRadius={12}
-            marginTop="$2"
+          <Text
+            fontSize={12}
+            color="$blue11"
+            flex={1}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            textAlign="right"
           >
-            <Text
-              fontSize={isActive ? 18 : 14}
-              fontWeight="600"
-              color="$blue11"
-            >
-              Question: {round.questionPrompt}
-            </Text>
-          </YStack>
+            {round.questionPrompt}
+          </Text>
         )}
-      </YStack>
+      </XStack>
     </Card>
   );
 }

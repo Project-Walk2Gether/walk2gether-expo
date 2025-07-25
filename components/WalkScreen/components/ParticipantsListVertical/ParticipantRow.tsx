@@ -1,11 +1,12 @@
 import React from "react";
 import { Pressable } from "react-native";
-import { Avatar, Text, XStack, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 import { getWalkStatus } from "@/utils/walkUtils";
 import { COLORS } from "@/styles/colors";
 import { ParticipantWithRoute } from "walk2gether-shared";
 import { MapPin, Car, Calendar } from "@tamagui/lucide-icons";
 import { differenceInHours } from "date-fns";
+import { StatelessAvatar } from "@/components/UserAvatar/StatelessAvatar";
 
 interface Props {
   participant: ParticipantWithRoute & {
@@ -103,21 +104,12 @@ export default function ParticipantRow({
         space="$3"
         backgroundColor={isCurrentUser ? "$backgroundHover" : "white"}
       >
-        <Avatar size="$4" circular>
-          {participant.photoURL ? (
-            <Avatar.Image
-              source={{ uri: participant.photoURL }}
-              width="100%"
-              height="100%"
-            />
-          ) : (
-            <Avatar.Fallback backgroundColor="$blue5">
-              <Text color="white" fontSize="$3">
-                {participant.displayName?.[0] || "?"}
-              </Text>
-            </Avatar.Fallback>
-          )}
-        </Avatar>
+        <StatelessAvatar
+          profilePicUrl={participant.photoURL || undefined}
+          name={participant.displayName}
+          size={36}
+          backgroundColor="$blue5"
+        />
 
         <YStack flex={1} space="$1">
           <Text

@@ -138,14 +138,6 @@ export const useLocationSelection = () => {
       };
 
       updateFormData({ startLocation: newLocation });
-
-      // Animate map to selected location
-      mapRef.current?.animateToRegion({
-        latitude: details.geometry.location.lat,
-        longitude: details.geometry.location.lng,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
     }
   };
 
@@ -227,6 +219,13 @@ export const useLocationSelection = () => {
     const walkStartTime = formData.date.toMillis();
     const currentTime = Date.now();
     if (walkStartTime <= currentTime) {
+      return;
+    }
+    
+    // Skip travel time checks for walks more than 4 hours in the future
+    const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
+    if (walkStartTime - currentTime > FOUR_HOURS_MS) {
+      setIsTravelTimeLoading(false);
       return;
     }
 

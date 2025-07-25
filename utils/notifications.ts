@@ -1,17 +1,17 @@
 import * as Notifications from "expo-notifications";
+import { SchedulableTriggerInputTypes } from "expo-notifications";
 import { Platform } from "react-native";
 import { Walk, WithId } from "walk2gether-shared";
-import { SchedulableTriggerInputTypes } from "expo-notifications";
 
 // Create a channel for Android notifications
 export const createNotificationChannel = () => {
-  if (Platform.OS === 'android') {
-    Notifications.setNotificationChannelAsync('walk-reminders', {
-      name: 'Walk Reminders',
+  if (Platform.OS === "android") {
+    Notifications.setNotificationChannelAsync("walk-reminders", {
+      name: "Walk Reminders",
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-      sound: 'default',
+      lightColor: "#FF231F7C",
+      sound: "default",
     });
   }
 };
@@ -22,7 +22,7 @@ export const createNotificationChannel = () => {
 export const configureNotifications = () => {
   // Create the Android notification channel
   createNotificationChannel();
-  
+
   // Set notification handler
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -46,13 +46,16 @@ export const scheduleWalkReminder = async (
   try {
     // Ensure we have a valid date
     if (!walk.date || !walk.date.toDate) {
-      console.warn("Walk missing valid date, cannot schedule notification", walk.id);
+      console.warn(
+        "Walk missing valid date, cannot schedule notification",
+        walk.id
+      );
       return null;
     }
 
     const walkDate = walk.date.toDate();
     const reminderTime = new Date(walkDate.getTime() - 10 * 60 * 1000); // 10 minutes before
-    
+
     // Don't schedule if reminder time is in the past
     if (reminderTime <= new Date()) {
       console.log(`Reminder time for walk ${walk.id} is in the past, skipping`);
@@ -60,10 +63,14 @@ export const scheduleWalkReminder = async (
     }
 
     // Calculate the trigger seconds from now
-    const triggerSeconds = Math.floor((reminderTime.getTime() - Date.now()) / 1000);
-    
-    const walkName = walk.organizerName ? `${walk.organizerName}'s walk` : 'Your walk';
-    
+    const triggerSeconds = Math.floor(
+      (reminderTime.getTime() - Date.now()) / 1000
+    );
+
+    const walkName = walk.organizerName
+      ? `${walk.organizerName}'s walk`
+      : "Your walk";
+
     // Schedule the notification
     const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
@@ -71,11 +78,12 @@ export const scheduleWalkReminder = async (
         body: `${walkName} starts in 10 minutes!`,
         data: { walkId: walk.id },
         sound: true,
+        vibrate: [0, 250, 250, 250],
       },
       trigger: {
         type: SchedulableTriggerInputTypes.TIME_INTERVAL,
-        channelId: Platform.OS === 'android' ? 'walk-reminders' : undefined,
-        seconds: triggerSeconds
+        channelId: Platform.OS === "android" ? "walk-reminders" : undefined,
+        seconds: triggerSeconds,
       },
     });
 
@@ -91,7 +99,9 @@ export const scheduleWalkReminder = async (
  * Cancel a scheduled notification
  * @param notificationId ID of the notification to cancel
  */
-export const cancelNotification = async (notificationId: string): Promise<void> => {
+export const cancelNotification = async (
+  notificationId: string
+): Promise<void> => {
   try {
     await Notifications.cancelScheduledNotificationAsync(notificationId);
     console.log(`Canceled notification ${notificationId}`);
@@ -111,27 +121,28 @@ export const syncWalkReminders = async (
 ): Promise<Record<string, string>> => {
   try {
     // Get all scheduled notifications
-    const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
-    
+    const scheduledNotifications =
+      await Notifications.getAllScheduledNotificationsAsync();
+
     // Create a map of walk IDs to notification IDs
     const existingNotifications: Record<string, string> = {};
-    scheduledNotifications.forEach(notification => {
+    scheduledNotifications.forEach((notification) => {
       const walkId = notification.content.data?.walkId;
       if (walkId) {
         existingNotifications[walkId as string] = notification.identifier;
       }
     });
-    
+
     // Track the new notification mappings
     const notificationMap: Record<string, string> = {};
-    
+
     // Get current date/time
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     // Filter walks to those happening in the next 24 hours
-    const upcomingWalksWithin24h = walks.filter(walk => {
+    const upcomingWalksWithin24h = walks.filter((walk) => {
       if (!walk.date || !walk.date.toDate) return false;
       const walkDate = walk.date.toDate();
       return walkDate > now && walkDate <= tomorrow;
@@ -158,12 +169,14 @@ export const syncWalkReminders = async (
 
     // Cancel notifications for walks that no longer exist or are past
     await Promise.all(
-      Object.values(existingNotifications).map(notificationId => 
+      Object.values(existingNotifications).map((notificationId) =>
         cancelNotification(notificationId)
       )
     );
 
-    console.log(`Synced notifications for ${upcomingWalksWithin24h.length} upcoming walks`);
+    console.log(
+      `Synced notifications for ${upcomingWalksWithin24h.length} upcoming walks`
+    );
     return notificationMap;
   } catch (error) {
     console.error("Error syncing walk reminders:", error);

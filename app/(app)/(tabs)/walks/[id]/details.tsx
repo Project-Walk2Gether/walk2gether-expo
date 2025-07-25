@@ -1,9 +1,9 @@
 import QuoteWithImage from "@/components/QuoteWithImage";
+import RoundsList from "@/components/Rounds/RoundsList";
 import ParticipantsListVertical from "@/components/WalkScreen/components/ParticipantsListVertical";
 import RespondToInvitationCard from "@/components/WalkScreen/components/RespondToInvitationCard";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
-import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
-import WalkTimeCard from "@/components/WalkScreen/components/WalkTimeCard";
+import WalkInfoCard from "@/components/WalkScreen/components/WalkInfoCard";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useMenu } from "@/context/MenuContext";
@@ -153,19 +153,14 @@ export default function DetailsTab() {
             onMenuPress={handleShowParticipationMenu}
           />
         )}
-        {/* Walk Time Card */}
-        <WalkTimeCard
+        {/* Walk Info Card */}
+        <WalkInfoCard
           walkDate={walk.date ? walk.date.toDate() : undefined}
           durationMinutes={walk.durationMinutes}
-        />
-
-        {/* Walk Location Card */}
-        <WalkLocationCard
-          location={walk.currentLocation}
-          locationName={walk.currentLocation?.name}
+          // location={walk.currentLocation}
+          // locationName={walk.currentLocation?.name}
           notes={walk.startLocation?.notes}
         />
-
         {/* Participants Section - only shown for walk owner or friends walks */}
         {canViewParticipants && (
           <WalkDetailsCard title="Participants">
@@ -212,6 +207,9 @@ export default function DetailsTab() {
             </YStack>
           </WalkDetailsCard>
         )}
+
+        {/* Show UpcomingRoundsList only for walk owners */}
+        {isWalkOwner && <RoundsList walkId={walk.id} walk={walk} />}
 
         {/* Quote and Image at the bottom */}
         <YStack alignItems="center" marginTop="$4">

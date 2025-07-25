@@ -7,7 +7,7 @@ import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
 import { useDoc } from "@/utils/firestore";
 import { calculateOptimalRegion } from "@/utils/mapUtils";
-import { getWalkStatus } from "@/utils/walkUtils";
+import { getWalkStatus, isOwner } from "@/utils/walkUtils";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { MapPin } from "@tamagui/lucide-icons";
 import { addHours } from "date-fns";
@@ -322,13 +322,14 @@ export default function LiveWalkMap({
       />
 
       {/* Controls rendered using absolute positioning */}
-
-      <WalkActionSliders
-        showStartWalkSlider={!walk?.startedAt && !walk?.endedAt}
-        showEndWalkSlider={!walk?.endedAt}
-        onStartWalk={handleStartWalk}
-        onEndWalk={handleEndWalk}
-      />
+      {walk && isOwner(walk) ? (
+        <WalkActionSliders
+          showStartWalkSlider={!walk?.startedAt && !walk?.endedAt}
+          showEndWalkSlider={!!walk?.startedAt && !walk?.endedAt}
+          onStartWalk={handleStartWalk}
+          onEndWalk={handleEndWalk}
+        />
+      ) : null}
 
       <RequestBackgroundLocationModal
         open={isBackgroundLocationModalOpen}

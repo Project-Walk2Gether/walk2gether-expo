@@ -1,6 +1,6 @@
 import { COLORS } from "@/styles/colors";
 import React from "react";
-import { Button, ButtonProps } from "tamagui";
+import { Button, ButtonProps, Spinner, XStack } from "tamagui";
 
 interface Props {
   onPress: () => void;
@@ -9,6 +9,7 @@ interface Props {
   flex?: number;
   size?: ButtonProps["size"];
   width?: ButtonProps["width"];
+  isLoading?: boolean;
 }
 
 export default function PrimaryButton({
@@ -18,6 +19,7 @@ export default function PrimaryButton({
   flex,
   width,
   size = "$5",
+  isLoading = false,
 }: Props) {
   return (
     <Button
@@ -29,7 +31,14 @@ export default function PrimaryButton({
       flex={flex}
       width={width}
     >
-      {children}
+      {isLoading ? (
+        <XStack space="$2" justifyContent="center">
+          <Spinner size="small" color={COLORS.textOnDark} />
+          {typeof children === 'string' && children}
+        </XStack>
+      ) : (
+        children
+      )}
     </Button>
   );
 }

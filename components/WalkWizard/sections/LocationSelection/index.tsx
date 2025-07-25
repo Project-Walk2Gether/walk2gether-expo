@@ -164,6 +164,7 @@ Do you still want to continue?`,
       currentStep={currentStep}
       totalSteps={totalSteps}
       continueDisabled={!formData.startLocation || isTravelTimeLoading}
+      isLoading={isTravelTimeLoading}
     >
       <YStack space="$4">
         {/* Search section */}

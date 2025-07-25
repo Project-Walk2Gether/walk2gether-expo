@@ -30,6 +30,7 @@ interface WizardWrapperProps {
   hideFooter?: boolean;
   currentStep?: number;
   totalSteps?: number;
+  isLoading?: boolean;
 }
 
 // Create the component with forwardRef
@@ -43,6 +44,7 @@ const WizardWrapper = forwardRef<WizardWrapperHandle, WizardWrapperProps>(
       continueText = "Continue",
       backText = "Back",
       hideFooter = false,
+      isLoading = false,
     } = props;
 
     const insets = useSafeAreaInsets();
@@ -108,6 +110,7 @@ const WizardWrapper = forwardRef<WizardWrapperHandle, WizardWrapperProps>(
                 disabled={continueDisabled}
                 flex={1}
                 size="$5"
+                isLoading={isLoading}
               >
                 {continueText}
               </PrimaryButton>

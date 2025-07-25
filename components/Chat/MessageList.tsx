@@ -3,13 +3,12 @@ import React, {
   useImperativeHandle,
   useRef,
   useState,
-  useEffect,
 } from "react";
 import { ScrollView as RNScrollView } from "react-native";
 import { ScrollView, Spinner, Text, YStack } from "tamagui";
-import { Message as MessageType, Walk, Round as RoundType } from "walk2gether-shared";
-import { TimelineItem, TimelineItemType } from "./TimelineItem";
+import { Message as MessageType, Round as RoundType } from "walk2gether-shared";
 import { MessageOptionsSheet } from "./MessageOptionsSheet";
+import { TimelineItem, TimelineItemType } from "./TimelineItem";
 
 type Props = {
   timeline: TimelineItemType[];
@@ -18,7 +17,7 @@ type Props = {
   currentUserId: string;
   headerTitle?: React.ReactNode;
   onActiveRoundChange?: (round: RoundType | null) => void;
-  context?: 'friendship' | 'walk';
+  context?: "friendship" | "walk";
 };
 
 export type MessageListRef = {
@@ -26,35 +25,21 @@ export type MessageListRef = {
 };
 
 const MessageList = forwardRef<MessageListRef, Props>(
-  ({ timeline, loading = false, onDeleteMessage, currentUserId, onActiveRoundChange, context = 'friendship' }, ref) => {
+  (
+    {
+      timeline,
+      loading = false,
+      onDeleteMessage,
+      currentUserId,
+      context = "friendship",
+    },
+    ref
+  ) => {
     const scrollViewRef = useRef<RNScrollView | null>(null);
     const [selectedMessage, setSelectedMessage] = useState<MessageType | null>(
       null
     );
     const [optionsSheetOpen, setOptionsSheetOpen] = useState(false);
-    const [activeRound, setActiveRound] = useState<RoundType | null>(null);
-    
-    // Extract rounds from timeline
-    const rounds = React.useMemo(() => {
-      return timeline
-        .filter((item): item is { type: "round"; data: RoundType } => item.type === "round")
-        .map(item => item.data);
-    }, [timeline]);
-    
-    // Set the active round to the last round when rounds change
-    useEffect(() => {
-      if (rounds.length > 0 && !activeRound) {
-        const lastRound = rounds[rounds.length - 1];
-        setActiveRound(lastRound);
-      }
-    }, [rounds.length]);
-    
-    // Notify parent component when active round changes
-    useEffect(() => {
-      if (onActiveRoundChange) {
-        onActiveRoundChange(activeRound);
-      }
-    }, [activeRound, onActiveRoundChange]);
 
     // Expose methods to parent component
     useImperativeHandle(ref, () => ({
@@ -69,17 +54,6 @@ const MessageList = forwardRef<MessageListRef, Props>(
     const handleLongPress = (message: MessageType) => {
       setSelectedMessage(message);
       setOptionsSheetOpen(true);
-    };
-    
-    // Handle toggling active round
-    const handleToggleActiveRound = (round: RoundType) => {
-      if (activeRound?.roundNumber === round.roundNumber) {
-        // If tapping the currently active round, deactivate it
-        setActiveRound(null);
-      } else {
-        // Otherwise, set this round as active
-        setActiveRound(round);
-      }
     };
 
     // Handle delete message
@@ -114,22 +88,26 @@ const MessageList = forwardRef<MessageListRef, Props>(
               {timeline.length === 0 ? (
                 <YStack height={80} justifyContent="center" alignItems="center">
                   <Text color="#999" textAlign="center">
-                    {context === 'walk' 
+                    {context === "walk"
                       ? "No messages yet. Say hello!"
                       : "No messages or walks yet. Say hello or invite to a walk!"}
                   </Text>
                 </YStack>
               ) : (
-                timeline.map((item, index) => (
+                timeline.map((item) => (
                   <TimelineItem
-                    key={item.type === 'message' ? `msg-${item.data.id}` : 
-                         item.type === 'walk' ? `walk-${item.data.id}` : 
-                         `round-${item.data.walkId}-${item.data.roundNumber}`}
+                    key={
+                      item.type === "message"
+                        ? `msg-${item.data.id}`
+                        : item.type === "walk"
+                        ? `walk-${item.data.id}`
+                        : `round-${item.data.walkId}-${item.data.roundNumber}`
+                    }
                     item={item}
                     currentUserId={currentUserId}
-                    onLongPress={item.type === 'message' ? handleLongPress : undefined}
-                    activeRound={activeRound}
-                    onToggleActiveRound={handleToggleActiveRound}
+                    onLongPress={
+                      item.type === "message" ? handleLongPress : undefined
+                    }
                   />
                 ))
               )}

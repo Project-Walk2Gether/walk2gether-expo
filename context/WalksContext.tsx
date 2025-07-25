@@ -16,6 +16,7 @@ import { useAuth } from "./AuthContext";
 interface WalksContextType {
   upcomingWalks: WithId<Walk>[];
   activeWalks: WithId<Walk>[];
+  walksForBackgroundSync: WithId<Walk>[];
   walksLoading: boolean;
   getWalkById: (walkId: string) => Walk | undefined;
 }
@@ -75,6 +76,9 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
         // If walk date is less than 30 minutes from now, it's active
         if (walk.date && walk.date.toDate() <= thirtyMinutesFromNow) {
           acc.activeWalks.push(walk);
+          // If the walk is started and not ended, it's active
+        } else if (walk.startedAt && !walk.endedAt) {
+          acc.activeWalks.push(walk);
         } else {
           acc.upcomingWalks.push(walk);
         }
@@ -89,12 +93,23 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
     return currentWalks.find((walk) => walk.id === walkId);
   };
 
+  const walksForBackgroundSync = useMemo(
+    () =>
+      activeWalks.filter((walk) => {
+        const myParticipant = walk.participantsById?.[user?.uid!];
+        if (walk.createdByUid === user?.uid) return true;
+        return myParticipant && myParticipant.status !== "pending";
+      }),
+    [activeWalks, user]
+  );
+
   return (
     <WalksContext.Provider
       value={{
         upcomingWalks,
         activeWalks,
         walksLoading,
+        walksForBackgroundSync,
         getWalkById,
       }}
     >

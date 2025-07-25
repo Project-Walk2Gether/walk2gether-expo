@@ -19,16 +19,12 @@ interface TimelineItemProps {
   item: TimelineItemType;
   currentUserId: string;
   onLongPress?: (message: MessageType) => void;
-  activeRound: RoundType | null;
-  onToggleActiveRound?: (round: RoundType) => void;
 }
 
 export function TimelineItem({
   item,
   currentUserId,
   onLongPress,
-  activeRound,
-  onToggleActiveRound,
 }: TimelineItemProps) {
   const router = useRouter();
 
@@ -46,22 +42,17 @@ export function TimelineItem({
         showActions
         walk={item.data as WithId<Walk>}
         onPress={() =>
-          router.push({ pathname: `/walks/[id]`, params: { id: item.data.id } })
+          router.push({
+            pathname: `/walks/[id]/details`,
+            params: { id: item.data.id },
+          })
         }
       />
     );
   } else if (item.type === "round") {
     const round = item.data as RoundType;
-    const isActive = activeRound?.roundNumber === round.roundNumber;
 
-    return (
-      <Round
-        round={round}
-        currentUserId={currentUserId}
-        isActive={isActive}
-        onToggleActive={() => onToggleActiveRound?.(round)}
-      />
-    );
+    return <Round round={round} currentUserId={currentUserId} />;
   }
 
   return null;

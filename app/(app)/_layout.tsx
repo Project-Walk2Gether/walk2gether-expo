@@ -13,12 +13,13 @@ import { ActivityIndicator } from "react-native";
 import { YStack } from "tamagui";
 
 function MainAppLayout() {
-  const { activeWalks } = useWalks();
+  const { walksForBackgroundSync, walksLoading } = useWalks();
 
   // Sync background location tracking with active walks
   useEffect(() => {
-    syncBackgroundLocationTracking(activeWalks.length);
-  }, [activeWalks]);
+    if (walksLoading) return;
+    syncBackgroundLocationTracking(walksForBackgroundSync.length);
+  }, [walksForBackgroundSync, walksLoading]);
 
   return (
     <Stack initialRouteName="(tabs)" screenOptions={{ headerShown: false }}>

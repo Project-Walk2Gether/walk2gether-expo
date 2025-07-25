@@ -48,20 +48,19 @@ export const UpcomingRound = memo(
         </XStack>
 
         {/* Question prompt */}
-        {round.questionPrompt && (
-          <YStack px="$4" marginTop="$2">
-            <Text fontStyle="italic">"{round.questionPrompt}"</Text>
-          </YStack>
-        )}
+
+        <YStack px="$4" marginTop="$2">
+          <XStack alignItems="center" gap="$2">
+            <Users size={16} color={COLORS.text} />
+            <Text fontWeight="bold">Question Prompt</Text>
+          </XStack>
+
+          <Text fontStyle="italic">"{round.questionPrompt}"</Text>
+        </YStack>
 
         {/* Expanded view with pairs */}
         {isExpanded && (
           <YStack marginTop="$2" space="$2">
-            <XStack px="$4" alignItems="center" space="$2">
-              <Users size={16} color={COLORS.text} />
-              <Text fontWeight="bold">Pairs</Text>
-            </XStack>
-
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}

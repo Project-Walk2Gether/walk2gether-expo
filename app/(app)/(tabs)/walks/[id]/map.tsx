@@ -3,7 +3,6 @@ import LiveWalkMap from "@/components/WalkScreen/components/LiveWalkMap";
 import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
 import WalkParticipantStatusControls from "@/components/WalkScreen/components/WalkParticipantStatusControls/index";
 import { useAuth } from "@/context/AuthContext";
-import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useSheet } from "@/context/SheetContext";
 import { useWalk } from "@/context/WalkContext";
 import { COLORS } from "@/styles/colors";
@@ -11,7 +10,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { Car, MapPin } from "@tamagui/lucide-icons";
 import { differenceInHours } from "date-fns";
 import React, { useMemo } from "react";
-import { Text, View, XStack, YStack } from "tamagui";
+import { Text, View, XStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
 
 // Helper function to render the status information based on participant status
@@ -42,29 +41,10 @@ const renderStatusInfo = (participant?: ParticipantWithRoute) => {
   );
 };
 
-// Helper function to render distance and duration information
-const renderDistanceInfo = (participant?: ParticipantWithRoute) => {
-  if (!participant?.route?.distance?.text) return null;
-
-  return (
-    <YStack alignItems="flex-end" space="$1">
-      <Text fontSize="$3" color="$gray11" fontWeight="bold">
-        {participant.route.distance.text}
-      </Text>
-      {participant.route.duration?.text && (
-        <Text fontSize="$2" color="$gray9">
-          {participant.route.duration.text}
-        </Text>
-      )}
-    </YStack>
-  );
-};
-
 export default function MapTab() {
-  const { walk, participants, currentUserParticipantDoc } = useWalk();
+  const { walk, currentUserParticipantDoc } = useWalk();
   const { user } = useAuth();
   const { showSheet, hideSheet } = useSheet();
-  const { showMessage } = useFlashMessage();
 
   // Check if the current user is the walk owner and has arrived
   const isOwner = walk?.createdByUid === user?.uid;
@@ -76,7 +56,6 @@ export default function MapTab() {
   const canEndWalk = walkInProgress;
 
   const isFocussed = useIsFocused();
-  console.log({ isFocussed });
 
   // Check if walk is scheduled within the next 5 hours
   const isStartingSoon = useMemo(() => {
@@ -120,7 +99,7 @@ export default function MapTab() {
           location={walk.currentLocation}
           locationName={walk.currentLocation?.name}
           notes={walk.startLocation?.notes}
-          showMap={false} // Don't show the map since we're already on the map screen
+          showMap={false}
         >
           {isStartingSoon && user && walk?.id && currentUserParticipantDoc && (
             <CurrentUserStatusCard

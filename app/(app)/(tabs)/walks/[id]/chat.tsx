@@ -1,37 +1,45 @@
 import MessageForm from "@/components/Chat/MessageForm";
 import MessageList from "@/components/Chat/MessageList";
-import UpcomingRoundsList from "@/components/Chat/UpcomingRoundsList";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useWalk } from "@/context/WalkContext";
 import { useWalkChat } from "@/hooks/useWalkChat";
-import { getWalkStatus } from "@/utils/walkUtils";
-import React, { useRef, useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { useQuery } from "@/utils/firestore";
+import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
+import { sortBy } from "lodash";
+import React, { useMemo, useRef } from "react";
+import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { Text, View, YStack } from "tamagui";
-import { MeetupWalk, Round } from "walk2gether-shared";
+import { Round } from "walk2gether-shared";
 
 export default function ChatTab() {
   const { user } = useAuth();
   const { userData } = useUserData();
   const { walk } = useWalk();
-  const [activeRound, setActiveRound] = useState<Round | null>(null);
   const messageListRef = useRef(null);
 
+  const roundsCollection = walk?._ref?.collection(
+    "rounds"
+  ) as FirebaseFirestoreTypes.CollectionReference<Round>;
+  const { docs: rounds } = useQuery(roundsCollection);
+
+  console.log({ walkId: walk?.id, rounds: rounds.map((doc) => doc._ref.path) });
   // Use our new useWalkChat hook for chat functionality
-  const { messages, sendMessage, deleteMessage, isSending } = useWalkChat({
+  const { messages, sendMessage, deleteMessage } = useWalkChat({
     walkId: walk?.id || "",
     userId: user?.uid || "",
     userName: userData?.name || "Unknown User",
-    userPhotoURL: ""
+    userPhotoURL: "",
   });
 
-  // Get walk status to determine if owner and active status
-  const status = walk ? getWalkStatus(walk) : null;
-  const isWalkOwner = walk?.createdByUid === user?.uid;
-
   // Handle sending message
-  const handleSendMessage = ({ message, attachments }: { message?: string, attachments?: any[] }) => {
+  const handleSendMessage = ({
+    message,
+    attachments,
+  }: {
+    message?: string;
+    attachments?: any[];
+  }) => {
     if (message) {
       sendMessage({ message, attachments });
     }
@@ -61,8 +69,24 @@ export default function ChatTab() {
     );
   }
 
-  // Combine messages and rounds for the timeline
-  const timeline = messages.map(message => ({ type: "message" as const, data: message }));
+  // Combine messages and rounds for the timeline ,memoizing
+  const timelineItems = useMemo(
+    () =>
+      sortBy(
+        [
+          ...messages.map((message) => ({
+            type: "message" as const,
+            data: message,
+          })),
+          ...rounds.map((round) => ({
+            type: "round" as const,
+            data: round,
+          })),
+        ],
+        (item) => item.data.createdAt?.toDate()
+      ),
+    [messages, rounds]
+  );
 
   return (
     <KeyboardAvoidingView
@@ -71,30 +95,18 @@ export default function ChatTab() {
       keyboardVerticalOffset={90}
     >
       <YStack flex={1} backgroundColor="white">
-        <ScrollView 
+        <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ paddingBottom: 20 }}
         >
           <MessageList
             ref={messageListRef}
-            timeline={timeline}
+            timeline={timelineItems}
             currentUserId={user?.uid || ""}
             loading={false}
             onDeleteMessage={handleDelete}
-            onActiveRoundChange={setActiveRound}
             context="walk"
           />
-          
-          {/* Show upcoming rounds list only for meetup walks and only for the walk owner */}
-          {walk && (walk as any).type === "meetup" && isWalkOwner && (
-            <UpcomingRoundsList
-              walkId={walk.id || ""}
-              walk={walk}
-              onRoundActivated={(round) => {
-                setActiveRound(round);
-              }}
-            />
-          )}
         </ScrollView>
 
         <MessageForm
@@ -103,7 +115,6 @@ export default function ChatTab() {
           chatId={walk?.id || ""}
           senderId={user?.uid || ""}
           onFocus={handleMessageFormFocus}
-          activeRound={activeRound}
           containerStyle={{ backgroundColor: "white" }}
         />
       </YStack>

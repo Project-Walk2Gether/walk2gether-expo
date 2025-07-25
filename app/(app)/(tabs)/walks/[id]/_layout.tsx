@@ -1,5 +1,6 @@
 import FullScreenLoader from "@/components/FullScreenLoader";
 import HeaderBackButton from "@/components/HeaderBackButton";
+import ActiveRoundIndicator from "@/components/Rounds/ActiveRoundIndicator";
 import WalkMenu from "@/components/WalkMenu";
 import { useAuth } from "@/context/AuthContext";
 import { WalkProvider } from "@/context/WalkContext";
@@ -37,7 +38,7 @@ export const MaterialTopTabs = withLayoutContext<
 
 export default function WalkLayout() {
   const params = useLocalSearchParams<{ id: string }>();
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const id = (Array.isArray(params.id) ? params.id[0] : params.id) as string;
   const { user } = useAuth();
   const { doc: walk, status } = useDoc<Walk>(`walks/${id}`);
 
@@ -55,6 +56,9 @@ export default function WalkLayout() {
   if (status === "loading" || !walk || isLoadingParticipants) {
     return <FullScreenLoader />;
   }
+
+  // TODO: if the walk is soon,
+  const initialRouteName = "details";
 
   const goBack = () => {
     if (navigation.canGoBack()) {
@@ -82,9 +86,13 @@ export default function WalkLayout() {
       >
         <View flex={1}>
           <StatusBar style="dark" />
+          {walk.type === "meetup" && walk.startedAt && !walk.endedAt && (
+            <ActiveRoundIndicator walkId={id} />
+          )}
           <MaterialTopTabs
+            initialRouteName={initialRouteName}
             screenOptions={{
-              swipeEnabled: false, // Disable horizontal swipe navigation
+              // swipeEnabled: false, // Disable horizontal swipe navigation
               tabBarStyle: {
                 backgroundColor: "transparent",
                 elevation: 0, // Android: remove drop-shadow
@@ -104,12 +112,12 @@ export default function WalkLayout() {
             }}
             style={{ backgroundColor: "transparent" }}
           >
+            <MaterialTopTabs.Screen name="map" options={{ title: "Meet" }} />
             <MaterialTopTabs.Screen
               name="details"
-              options={{ title: "Details" }}
+              options={{ title: "Walk" }}
             />
-            <MaterialTopTabs.Screen name="map" options={{ title: "Map" }} />
-            <MaterialTopTabs.Screen name="chat" options={{ title: "Chat" }} />
+            <MaterialTopTabs.Screen name="chat" options={{ title: "Talk" }} />
           </MaterialTopTabs>
         </View>
       </WalkProvider>

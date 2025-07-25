@@ -30,7 +30,7 @@ export const getWalkTitle = (
   if (walk.type === "friends") {
     return `${ownerText} friend walk`;
   } else if (walk.type === "meetup") {
-    return `${ownerText} ${walk.topic} walk`;
+    return walk.topic;
   } else {
     return `${ownerText} neighborhood walk`;
   }
