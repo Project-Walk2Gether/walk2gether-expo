@@ -8,7 +8,7 @@ import {
   WithId,
 } from "walk2gether-shared";
 import MessageComponent from "./Message";
-import Round from "./RoundCard";
+import TimelineRoundCard from "./TimelineRoundCard";
 
 export type TimelineItemType =
   | { type: "message"; data: MessageType }
@@ -52,7 +52,7 @@ export function TimelineItem({
   } else if (item.type === "round") {
     const round = item.data as RoundType;
 
-    return <Round round={round} currentUserId={currentUserId} />;
+    return <TimelineRoundCard round={round} currentUserId={currentUserId} />;
   }
 
   return null;

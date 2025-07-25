@@ -1,15 +1,9 @@
-import CurrentUserStatusCard from "@/components/WalkScreen/components/CurrentUserStatusCard";
 import LiveWalkMap from "@/components/WalkScreen/components/LiveWalkMap";
-import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
-import WalkParticipantStatusControls from "@/components/WalkScreen/components/WalkParticipantStatusControls/index";
-import { useAuth } from "@/context/AuthContext";
-import { useSheet } from "@/context/SheetContext";
 import { useWalk } from "@/context/WalkContext";
 import { COLORS } from "@/styles/colors";
 import { useIsFocused } from "@react-navigation/native";
 import { Car, MapPin } from "@tamagui/lucide-icons";
-import { differenceInHours } from "date-fns";
-import React, { useMemo } from "react";
+import React from "react";
 import { Text, View, XStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
 
@@ -42,32 +36,8 @@ const renderStatusInfo = (participant?: ParticipantWithRoute) => {
 };
 
 export default function MapTab() {
-  const { walk, currentUserParticipantDoc } = useWalk();
-  const { user } = useAuth();
-  const { showSheet, hideSheet } = useSheet();
-
-  // Check if the current user is the walk owner and has arrived
-  const isOwner = walk?.createdByUid === user?.uid;
-  const hasArrived = currentUserParticipantDoc?.status === "arrived";
-  const showActionSliders = isOwner && hasArrived;
-
-  // Determine if the walk is already in progress based on startedAt field
-  const walkInProgress = !!walk?.startedAt;
-  const canEndWalk = walkInProgress;
-
+  const { walk } = useWalk();
   const isFocussed = useIsFocused();
-
-  // Check if walk is scheduled within the next 5 hours
-  const isStartingSoon = useMemo(() => {
-    if (!walk?.date) return false;
-
-    const walkTime = walk.date.toDate();
-    const now = new Date();
-    const hoursDifference = differenceInHours(walkTime, now);
-
-    // Show button if walk starts within 5 hours (including if it's already started)
-    return hoursDifference < 5;
-  }, [walk]);
 
   if (!walk || !isFocussed || !walk.id) {
     return (
@@ -84,55 +54,6 @@ export default function MapTab() {
   return (
     <View style={{ flex: 1 }}>
       <LiveWalkMap walkId={walk.id} />
-
-      {/* Location Card - positioned at the top */}
-      <View
-        style={{
-          position: "absolute",
-          top: 16,
-          left: 16,
-          right: 16,
-          zIndex: 10,
-        }}
-      >
-        <WalkLocationCard
-          location={walk.currentLocation}
-          locationName={walk.currentLocation?.name}
-          notes={walk.startLocation?.notes}
-          showMap={false}
-        >
-          {isStartingSoon && user && walk?.id && currentUserParticipantDoc && (
-            <CurrentUserStatusCard
-              participant={currentUserParticipantDoc}
-              isOwner={walk.createdByUid === user.uid}
-              mt="$2"
-              onPress={() => {
-                if (!walk || !user) return;
-
-                showSheet(
-                  <WalkParticipantStatusControls
-                    status={currentUserParticipantDoc.status || "pending"}
-                    isCancelled={!!currentUserParticipantDoc.cancelledAt}
-                    isOwner={walk.createdByUid === user.uid}
-                    walkId={walk.id}
-                    userId={user.uid}
-                    navigationMethod={
-                      currentUserParticipantDoc.navigationMethod || "driving"
-                    }
-                    onClose={() => {
-                      hideSheet();
-                    }}
-                  />,
-                  {
-                    title: "Update Your Status",
-                    dismissOnSnapToBottom: true,
-                  }
-                );
-              }}
-            />
-          )}
-        </WalkLocationCard>
-      </View>
 
       {/* Walk Action Sliders - only shown when user is owner and has arrived */}
       {/* {showActionSliders && (

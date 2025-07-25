@@ -1,3 +1,4 @@
+import RoundCard from "@/components/RoundCard";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
 import { useAuth } from "@/context/AuthContext";
 import { useSheet } from "@/context/SheetContext";
@@ -9,6 +10,7 @@ import firestore, {
   where,
 } from "@react-native-firebase/firestore";
 import { Info } from "@tamagui/lucide-icons";
+import { differenceInMinutes } from "date-fns";
 import React, { useMemo, useState } from "react";
 import { Text, XStack, YStack } from "tamagui";
 import {
@@ -20,15 +22,12 @@ import {
 } from "walk2gether-shared";
 import { COLORS } from "./constants";
 import { EditUpcomingRoundSheet } from "./EditUpcomingRoundSheet";
-import { RoundItem } from "./RoundItem";
 
 interface Props {
-  walkId: string;
   walk: WithId<Walk>;
-  onRoundActivated?: (round: Round) => void;
 }
 
-export default function RoundsList({ walkId, walk, onRoundActivated }: Props) {
+export default function RoundsList({ walk }: Props): React.ReactNode {
   // Get walk data from context
   const { user } = useAuth();
   const [isRotating, setIsRotating] = useState(false);
@@ -90,24 +89,77 @@ export default function RoundsList({ walkId, walk, onRoundActivated }: Props) {
 
   const { showSheet, hideSheet } = useSheet();
 
-  // Handle editing an upcoming round's question prompt
+  // Handle editing the prompt for an upcoming round
   const handleEditPrompt = (index: number) => {
+    if (!walk) return;
+    
+    // For the first upcoming round, also show duration picker
+    const isFirstRound = index === 0;
+    const suggestedDuration = isFirstRound ? calculateSuggestedDuration() : undefined;
+    
     showSheet(
       <EditUpcomingRoundSheet
-        onClose={hideSheet}
-        roundIndex={index}
         walk={walk}
+        roundIndex={index}
+        suggestedDuration={suggestedDuration}
+        showDurationPicker={isFirstRound}
+        onStartRound={isFirstRound ? startRoundWithDuration : undefined}
+        onClose={() => hideSheet()}
       />
     );
   };
 
-  // Handle rotating to the next round
+  // Calculate suggested round duration based on remaining time and rounds
+  const calculateSuggestedDuration = () => {
+    if (!walk || !walk.estimatedEndTime || upcomingRounds.length === 0) {
+      return 15; // Default to 15 minutes if we can't calculate
+    }
+
+    // Calculate minutes between now and estimated end time
+    const now = new Date();
+    const estimatedEndTime = walk.estimatedEndTime.toDate();
+    const remainingMinutes = differenceInMinutes(estimatedEndTime, now);
+
+    // If we have negative time remaining or very little time, use a minimum duration
+    if (remainingMinutes <= 5) {
+      return 5; // Minimum duration of 5 minutes
+    }
+
+    // Calculate suggested duration based on remaining time and upcoming rounds
+    let suggestedDuration = Math.floor(
+      remainingMinutes / upcomingRounds.length
+    );
+
+    // Cap the duration between 5 and 30 minutes
+    suggestedDuration = Math.max(5, Math.min(30, suggestedDuration));
+
+    // Round to the nearest 5 minutes
+    return Math.round(suggestedDuration / 5) * 5;
+  };
+
+  // Handle rotating to the next round - starts the round immediately with suggested duration
   const handleRotate = async () => {
     if (upcomingRounds.length === 0 || !currentUserId || !walk) return;
 
     try {
       setIsRotating(true);
+      // Get the suggested duration and start the round immediately
+      const suggestedDuration = calculateSuggestedDuration();
+      await startRoundWithDuration(suggestedDuration);
+    } catch (error) {
+      console.error("Error rotating rounds:", error);
+      setIsRotating(false);
+    }
+  };
 
+  // Start the round with the selected duration
+  const startRoundWithDuration = async (durationMinutes: number) => {
+    if (upcomingRounds.length === 0 || !currentUserId || !walk) {
+      setIsRotating(false);
+      return;
+    }
+
+    try {
       // Get the first upcoming round
       const nextRound = upcomingRounds[0];
 
@@ -117,17 +169,15 @@ export default function RoundsList({ walkId, walk, onRoundActivated }: Props) {
       // Reference for the new round document
       const newRoundRef = (walk._ref as any).collection("rounds").doc();
 
-      // Configure round duration (15 minutes by default)
-      // You can adjust this value based on your needs
-      const ROUND_DURATION_MINUTES = 15;
-      const roundDurationMs = ROUND_DURATION_MINUTES * 60 * 1000;
-      
+      // Calculate round duration in milliseconds
+      const roundDurationMs = durationMinutes * 60 * 1000;
+
       // Create a new round document in Firestore
       const roundData = {
         ...nextRound,
         createdAt: firestore.FieldValue.serverTimestamp(),
         startTime: firestore.FieldValue.serverTimestamp(),
-        // Set endTime based on the round's duration
+        // Set endTime based on the selected duration
         endTime: firestore.Timestamp.fromDate(
           new Date(Date.now() + roundDurationMs)
         ),
@@ -155,10 +205,8 @@ export default function RoundsList({ walkId, walk, onRoundActivated }: Props) {
       // Commit the batch
       await batch.commit();
 
-      // Notify the onRoundActivated callback if provided
-      if (onRoundActivated) {
-        onRoundActivated(nextRound);
-      }
+      // Hide the sheet
+      hideSheet();
     } catch (error) {
       console.error("Error rotating rounds:", error);
     } finally {
@@ -168,12 +216,16 @@ export default function RoundsList({ walkId, walk, onRoundActivated }: Props) {
 
   // Toggle expanded state for actual rounds
   const toggleActualRoundExpanded = (roundId: string) => {
-    setExpandedActualRoundId((prev) => (prev === roundId ? null : roundId));
+    setExpandedActualRoundId((prev: string | null) =>
+      prev === roundId ? null : roundId
+    );
   };
 
   // Toggle expanded state for upcoming rounds
   const toggleUpcomingRoundExpanded = (index: number) => {
-    setExpandedUpcomingRoundIndex((prev) => (prev === index ? -1 : index));
+    setExpandedUpcomingRoundIndex((prev: number) =>
+      prev === index ? -1 : index
+    );
   };
 
   return (
@@ -197,10 +249,9 @@ export default function RoundsList({ walkId, walk, onRoundActivated }: Props) {
       <YStack space="$4" width="100%">
         {/* Map over actual rounds (including active) */}
         {actualRounds.map((round, index) => (
-          <RoundItem
+          <RoundCard
             key={`actual-round-${round.id}`}
             round={round}
-            index={index}
             isExpanded={expandedActualRoundId === round.id}
             isActual={true}
             onToggleExpand={() => toggleActualRoundExpanded(round.id)}
@@ -209,10 +260,9 @@ export default function RoundsList({ walkId, walk, onRoundActivated }: Props) {
 
         {/* Map over upcoming rounds */}
         {upcomingRounds.map((round, index) => (
-          <RoundItem
+          <RoundCard
             key={`upcoming-round-${index}`}
             round={round}
-            index={index}
             isExpanded={expandedUpcomingRoundIndex === index}
             isActual={false}
             isFirstUpcoming={index === 0}
@@ -220,6 +270,9 @@ export default function RoundsList({ walkId, walk, onRoundActivated }: Props) {
             onToggleExpand={() => toggleUpcomingRoundExpanded(index)}
             onEditPrompt={() => handleEditPrompt(index)}
             onStartRound={index === 0 ? handleRotate : undefined}
+            suggestedDuration={
+              index === 0 ? calculateSuggestedDuration() : undefined
+            }
             isRotating={isRotating}
           />
         ))}

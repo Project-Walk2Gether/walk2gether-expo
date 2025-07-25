@@ -2,6 +2,7 @@ import { stopBackgroundLocationTracking } from "@/background/backgroundLocationT
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
+import { useSheet } from "@/context/SheetContext";
 import { useLocationTracking } from "@/hooks/useLocationTracking";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
@@ -10,15 +11,18 @@ import { calculateOptimalRegion } from "@/utils/mapUtils";
 import { getWalkStatus, isOwner } from "@/utils/walkUtils";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { MapPin } from "@tamagui/lucide-icons";
-import { addHours } from "date-fns";
+import { addHours, differenceInHours } from "date-fns";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Card, Text, View, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
+import CurrentUserStatusCard from "../CurrentUserStatusCard";
 import MeetupSpot from "../MeetupSpot";
 import RequestBackgroundLocationModal from "../RequestBackgroundLocationModal";
 import { WalkActionSliders } from "../WalkActionSliders";
+import WalkLocationCard from "../WalkLocationCard";
+import WalkParticipantStatusControls from "../WalkParticipantStatusControls";
 import LocationLoading from "./LocationLoading";
 import OfficialWalkRoute from "./OfficialWalkRoute";
 import ParticipantMarker from "./ParticipantMarker";
@@ -137,6 +141,20 @@ export default function LiveWalkMap({
     hasWalkStarted,
     hasWalkEnded,
   ]);
+
+  // Check if walk is scheduled within the next 5 hours
+  const isStartingSoon = useMemo(() => {
+    if (!walk?.date) return false;
+
+    const walkTime = walk.date.toDate();
+    const now = new Date();
+    const hoursDifference = differenceInHours(walkTime, now);
+
+    // Show button if walk starts within 5 hours (including if it's already started)
+    return hoursDifference < 5;
+  }, [walk?.date]);
+
+  const { showSheet, hideSheet } = useSheet();
 
   // Handler for starting a walk (owner only)
   const handleStartWalk = async () => {
@@ -315,6 +333,57 @@ export default function LiveWalkMap({
         {/* Render route for current user */}
         {/* <UserRoute participant={currentUserParticipant} /> */}
       </MapView>
+
+      {/* Location Card - only shown when location permissions are granted */}
+      {locationPermission && walk && (
+        <View
+          style={{
+            position: "absolute",
+            top: 16,
+            left: 16,
+            right: 16,
+            zIndex: 10,
+          }}
+        >
+          <WalkLocationCard
+            location={walk.currentLocation}
+            locationName={walk.currentLocation?.name}
+            notes={walk.startLocation?.notes}
+            showMap={false}
+          >
+            {isStartingSoon && user && walkId && userParticipant && (
+              <CurrentUserStatusCard
+                participant={userParticipant}
+                isOwner={walk.createdByUid === user.uid}
+                mt="$2"
+                onPress={() => {
+                  if (!walk || !user) return;
+
+                  showSheet(
+                    <WalkParticipantStatusControls
+                      status={userParticipant.status || "pending"}
+                      isCancelled={!!userParticipant.cancelledAt}
+                      isOwner={walk.createdByUid === user.uid}
+                      walkId={walk.id}
+                      userId={user.uid}
+                      navigationMethod={
+                        userParticipant.navigationMethod || "driving"
+                      }
+                      onClose={() => {
+                        hideSheet();
+                      }}
+                    />,
+                    {
+                      title: "Update Your Status",
+                      dismissOnSnapToBottom: true,
+                    }
+                  );
+                }}
+              />
+            )}
+          </WalkLocationCard>
+        </View>
+      )}
 
       {/* Location loading overlay */}
       <LocationLoading

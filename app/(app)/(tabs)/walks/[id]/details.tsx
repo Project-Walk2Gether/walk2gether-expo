@@ -209,7 +209,7 @@ export default function DetailsTab() {
         )}
 
         {/* Show UpcomingRoundsList only for walk owners */}
-        {isWalkOwner && <RoundsList walkId={walk.id} walk={walk} />}
+        {isWalkOwner && <RoundsList walk={walk} />}
 
         {/* Quote and Image at the bottom */}
         <YStack alignItems="center" marginTop="$4">

@@ -1,4 +1,3 @@
-import { useWalk } from "@/context/WalkContext";
 import { ChevronDown, ChevronUp, Edit3 as Edit } from "@tamagui/lucide-icons";
 import React from "react";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
@@ -21,8 +20,8 @@ interface Props {
   onToggleExpand?: () => void;
   onEditPrompt?: () => void;
   onStartRound?: () => void;
+  suggestedDuration?: number; // Duration in minutes
   isRotating?: boolean;
-  simplified?: boolean; // For timeline view to show simplified version
 }
 
 export default function RoundCard({
@@ -35,12 +34,9 @@ export default function RoundCard({
   onToggleExpand,
   onEditPrompt,
   onStartRound,
+  suggestedDuration,
   isRotating = false,
-  simplified = false,
 }: Props) {
-  // Get walk context to access participant data when in simplified mode
-  const { walk } = useWalk();
-  
   // Determine styling based on whether this is an actual or upcoming round
   const cardBackgroundColor = isFirstUpcoming
     ? "$blue2"
@@ -49,80 +45,11 @@ export default function RoundCard({
     : "$blue1";
   const textColor = isActual ? "$gray11" : COLORS.text;
   const iconColor = isActual ? "$gray9" : COLORS.primary;
-  
+
   // Check if this is the currently active round (has startTime but no endTime)
   const isActiveRound = isActual && round.startTime && !round.endTime;
 
-  // Find the current user's pair (only needed in simplified mode)
-  const userPair = React.useMemo(() => {
-    if (!currentUserId || !simplified) return null;
-    return round.pairs?.find((pair) => pair.userUids.includes(currentUserId));
-  }, [round.pairs, currentUserId, simplified]);
-
-  // Get partner names (excluding current user) - only for simplified mode
-  const partnerNames = React.useMemo(() => {
-    if (!userPair || !walk?.participantsById || !simplified) return [];
-
-    // Filter out current user and map to participant names from walk context
-    return userPair.userUids
-      .filter((uid) => uid !== currentUserId)
-      .map((uid) => walk.participantsById[uid]?.displayName);
-  }, [userPair, currentUserId, walk?.participantsById, simplified]);
-
-  // For simplified mode in timeline, show condensed version
-  if (simplified && userPair) {
-    return (
-      <Card
-        pressStyle={{ opacity: 0.8 }}
-        borderWidth={1}
-        borderColor="$gray5"
-        borderRadius={8}
-        padding="$2"
-        marginVertical="$1"
-        width="100%"
-      >
-        <XStack justifyContent="space-between" alignItems="center">
-          <XStack space="$2" alignItems="center" flex={1}>
-            <Text
-              fontSize={16}
-              color={userPair.color}
-              backgroundColor={`${userPair.color}20`} // 20% opacity of the color
-              borderRadius={4}
-              paddingHorizontal="$2"
-              paddingVertical="$1"
-            >
-              {userPair.emoji}
-            </Text>
-            <YStack>
-              <Text fontSize={14} fontWeight="500">
-                Round {round.roundNumber}
-              </Text>
-              <Text fontSize={12} color="$gray10" numberOfLines={1}>
-                {partnerNames.length > 0
-                  ? `Partner: ${partnerNames.join(", ")}`
-                  : "No partner"}
-              </Text>
-            </YStack>
-          </XStack>
-
-          {round.questionPrompt && (
-            <Text
-              fontSize={12}
-              color="$blue11"
-              flex={1}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              textAlign="right"
-            >
-              {round.questionPrompt}
-            </Text>
-          )}
-        </XStack>
-      </Card>
-    );
-  }
-
-  // For full mode (in RoundsList)
+  // Standard round card for RoundsList
   return (
     <Card
       key={`round-${round.roundNumber}`}
@@ -140,17 +67,25 @@ export default function RoundCard({
         justifyContent="space-between"
         alignItems="center"
       >
-        <XStack space="$2" alignItems="center">
+        <XStack
+          space="$2"
+          alignItems="center"
+          justifyContent="space-between"
+          flex={1}
+        >
           <Text fontWeight="bold" color={textColor}>
             Round {round.roundNumber}
+            {suggestedDuration && isFirstUpcoming
+              ? ` (${suggestedDuration}min)`
+              : ""}
           </Text>
-          
+
           {/* Status indicator */}
           {isActiveRound && (
-            <XStack 
-              backgroundColor="$green2" 
-              paddingHorizontal="$2" 
-              paddingVertical="$1" 
+            <XStack
+              backgroundColor="$green2"
+              paddingHorizontal="$2"
+              paddingVertical="$1"
               borderRadius="$2"
               alignItems="center"
             >
@@ -159,12 +94,12 @@ export default function RoundCard({
               </Text>
             </XStack>
           )}
-          
+
           {!isActual && (
-            <XStack 
-              backgroundColor="$blue2" 
-              paddingHorizontal="$2" 
-              paddingVertical="$1" 
+            <XStack
+              backgroundColor="$blue2"
+              paddingHorizontal="$2"
+              paddingVertical="$1"
               borderRadius="$2"
               alignItems="center"
             >
@@ -173,12 +108,12 @@ export default function RoundCard({
               </Text>
             </XStack>
           )}
-          
+
           {isActual && !isActiveRound && (
-            <XStack 
-              backgroundColor="$gray2" 
-              paddingHorizontal="$2" 
-              paddingVertical="$1" 
+            <XStack
+              backgroundColor="$gray2"
+              paddingHorizontal="$2"
+              paddingVertical="$1"
               borderRadius="$2"
               alignItems="center"
             >
@@ -187,7 +122,7 @@ export default function RoundCard({
               </Text>
             </XStack>
           )}
-          
+
           {/* Time indicator */}
           {isActual && round.startTime && (
             <Text fontSize="$1" color="$gray8">
@@ -201,23 +136,22 @@ export default function RoundCard({
           )}
         </XStack>
 
-        {onToggleExpand && (
-          <XStack gap="$2" alignItems="center">
-            {onEditPrompt && !isActual && (
-              <Button
-                size="$2"
-                backgroundColor="transparent"
-                icon={<Edit size={16} color={iconColor} />}
-                onPress={onEditPrompt}
-              />
-            )}
-            {isExpanded ? (
+        <XStack gap="$2" alignItems="center">
+          {onEditPrompt && !isActual && (
+            <Button
+              size="$2"
+              backgroundColor="transparent"
+              icon={<Edit size={16} color={iconColor} />}
+              onPress={onEditPrompt}
+            />
+          )}
+          {onToggleExpand &&
+            (isExpanded ? (
               <ChevronUp size={16} color={textColor} />
             ) : (
               <ChevronDown size={16} color={textColor} />
-            )}
-          </XStack>
-        )}
+            ))}
+        </XStack>
       </XStack>
 
       {/* Question prompt */}
@@ -240,18 +174,20 @@ export default function RoundCard({
             disabled={isRotating}
             opacity={isRotating ? 0.7 : 1}
           >
-            {isRotating ? "Starting round..." : "Start this round"}
+            {isRotating
+              ? "Starting round..."
+              : `Start Round (${suggestedDuration || 15} min)`}
           </Button>
         </YStack>
       )}
 
       {/* Expanded view with pairs */}
       {isExpanded && round.pairs && (
-        <YStack 
-          marginTop="$2" 
-          marginBottom="$2" 
-          paddingHorizontal="$4" 
-          paddingBottom="$2" 
+        <YStack
+          marginTop="$2"
+          marginBottom="$2"
+          paddingHorizontal="$4"
+          paddingBottom="$2"
           space="$3"
         >
           <Text fontWeight="bold" color={textColor} fontSize="$3">
