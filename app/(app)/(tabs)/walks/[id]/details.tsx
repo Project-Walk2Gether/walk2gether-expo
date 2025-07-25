@@ -1,6 +1,7 @@
 import QuoteWithImage from "@/components/QuoteWithImage";
 import RoundsList from "@/components/Rounds/RoundsList";
 import ParticipantsListVertical from "@/components/WalkScreen/components/ParticipantsListVertical";
+import QuestionPromptsList from "@/components/WalkScreen/components/QuestionPromptsList";
 import RespondToInvitationCard from "@/components/WalkScreen/components/RespondToInvitationCard";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
 import WalkInfoCard from "@/components/WalkScreen/components/WalkInfoCard";
@@ -161,6 +162,14 @@ export default function DetailsTab() {
           // locationName={walk.currentLocation?.name}
           notes={walk.startLocation?.notes}
         />
+        
+        {/* Question Prompts - only for meetup walks */}
+        {walk.type === "meetup" && (
+          <QuestionPromptsList 
+            walk={walk as MeetupWalk} 
+            isWalkOwner={isWalkOwner} 
+          />
+        )}
         {/* Participants Section - only shown for walk owner or friends walks */}
         {canViewParticipants && (
           <WalkDetailsCard title="Participants">
@@ -208,8 +217,8 @@ export default function DetailsTab() {
           </WalkDetailsCard>
         )}
 
-        {/* Show UpcomingRoundsList only for walk owners */}
-        {isWalkOwner && <RoundsList walk={walk} />}
+        {/* Show RoundsList only for meetup walk owners */}
+        {isWalkOwner && walk.type === "meetup" && <RoundsList walk={walk} />}
 
         {/* Quote and Image at the bottom */}
         <YStack alignItems="center" marginTop="$4">

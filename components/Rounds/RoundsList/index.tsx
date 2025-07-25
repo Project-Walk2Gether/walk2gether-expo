@@ -5,6 +5,7 @@ import { useSheet } from "@/context/SheetContext";
 import { useQuery } from "@/utils/firestore";
 import firestore, {
   collection,
+  FirebaseFirestoreTypes,
   orderBy,
   query,
   where,
@@ -20,9 +21,9 @@ import {
   walkIsMeetupWalk,
   WithId,
 } from "walk2gether-shared";
+import EditRoundSheet from "../EditRoundSheet";
 import { COLORS } from "./constants";
 import { EditUpcomingRoundSheet } from "./EditUpcomingRoundSheet";
-import EditRoundSheet from "../EditRoundSheet";
 
 interface Props {
   walk: WithId<Walk>;
@@ -59,7 +60,10 @@ export default function RoundsList({ walk }: Props): React.ReactNode {
   const actualRoundsQuery = useMemo(() => {
     if (!walk?._ref) return undefined;
     return query(
-      collection(walk._ref as any, "rounds"),
+      collection(
+        walk._ref as unknown as FirebaseFirestoreTypes.DocumentReference<Walk>,
+        "rounds"
+      ),
       where("endTime", "!=", null),
       orderBy("endTime", "asc"),
       orderBy("roundNumber", "asc")
@@ -79,7 +83,7 @@ export default function RoundsList({ walk }: Props): React.ReactNode {
   // Handle editing the prompt for an actual round
   const handleEditActualRound = (round: WithId<Round>) => {
     if (!round._ref) return;
-    
+
     showSheet(
       <EditRoundSheet
         round={round}

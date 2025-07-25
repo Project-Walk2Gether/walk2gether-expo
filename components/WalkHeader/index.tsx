@@ -27,25 +27,11 @@ export default function WalkHeader({ goBack }: Props) {
     return getWalkTitle(walk, user?.uid);
   }, [walk, user?.uid]);
 
-  // Query for active rounds (no endTime set)
-  const roundsQuery = useMemo(() => {
-    if (!walk?._ref) return undefined;
-    // Convert DocumentReferenceLike to FirebaseFirestoreTypes.DocumentReference
-    const walkRef = walk._ref as any;
-    return query(collection(walkRef, "rounds"), orderBy("startTime", "desc"));
-  }, [walk?._ref]);
-
-  const { docs: rounds } = useQuery(roundsQuery);
-  const activeRound = rounds?.[0] as WithId<Round> | undefined;
+  // Get activeRound and userPair from context instead of querying directly
+  const { activeRound, userPair } = useWalk();
   const insets = useSafeAreaInsets();
 
-  // Find the current user's pair in the active round
-  const userPair = useMemo(() => {
-    if (!activeRound || !currentUserId) return undefined;
-    return activeRound.pairs.find((pair) =>
-      pair.userUids.includes(currentUserId)
-    );
-  }, [activeRound, currentUserId]);
+  // userPair is now provided by the context
 
   // Get partner names (excluding current user)
   const partnerNames = useMemo(() => {
