@@ -29,6 +29,12 @@ export default function ModalsLayout() {
             headerLeft: () => <HeaderBackButton />,
           }}
         />
+        <Stack.Screen
+          name="meetup-photo-viewer"
+          options={{
+            headerShown: false,
+          }}
+        />
       </Stack>
       <Toast topOffset={66} />
     </>

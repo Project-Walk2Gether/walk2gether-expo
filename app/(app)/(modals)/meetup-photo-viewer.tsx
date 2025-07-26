@@ -13,6 +13,8 @@ export default function MeetupPhotoViewer() {
   // Parse the boolean from string
   const isOwnerBool = isOwner === "true";
 
+  console.log({ imageUri, isOwnerBool, walkId });
+
   if (!imageUri) {
     return <View flex={1} backgroundColor="black" />;
   }

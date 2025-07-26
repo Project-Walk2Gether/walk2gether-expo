@@ -1,7 +1,7 @@
 import MediaPickerButton from "@/components/shared/MediaPickerButton";
-import { COLORS } from "@/styles/colors";
 import { uploadMessageAttachments } from "@/utils/imageUpload";
 import firestore from "@react-native-firebase/firestore";
+import { ImagePlus } from "@tamagui/lucide-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -20,6 +20,8 @@ interface Props {
  */
 export default function MeetupSpotPhoto({ photo, isWalkOwner, walkId }: Props) {
   const [isUploading, setIsUploading] = useState(false);
+
+  console.log({ photo });
 
   const handlePhotoSelected = async (
     assets: ImagePicker.ImagePickerAsset[]
@@ -59,19 +61,21 @@ export default function MeetupSpotPhoto({ photo, isWalkOwner, walkId }: Props) {
   if (photo?.uri) {
     const router = useRouter();
 
-    const handleImagePress = () => {
-      router.push({
-        pathname: "/meetup-photo-viewer",
-        params: {
-          imageUri: photo.uri,
-          isOwner: isWalkOwner.toString(),
-          walkId: walkId || "",
-        },
-      });
+    const handleViewPhoto = () => {
+      if (photo && walkId) {
+        router.push({
+          pathname: "/(app)/(modals)/meetup-photo-viewer",
+          params: {
+            imageUri: photo.uri,
+            isOwner: String(isWalkOwner),
+            walkId,
+          },
+        });
+      }
     };
 
     return (
-      <Pressable onPress={handleImagePress}>
+      <Pressable onPress={handleViewPhoto}>
         <View
           width={70}
           height={70}
@@ -91,30 +95,50 @@ export default function MeetupSpotPhoto({ photo, isWalkOwner, walkId }: Props) {
     );
   }
 
-  // No photo but user is the owner, show upload button
-  if (isWalkOwner) {
+  if (!photo) {
+    // Only show upload button if user is the walk owner
+    if (isWalkOwner && walkId) {
+      return (
+        <View width={70} height={70} borderRadius="$4" overflow="hidden">
+          {isUploading ? (
+            <View
+              width="100%"
+              height="100%"
+              backgroundColor="$gray5"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Spinner size="large" color="$blue10" />
+            </View>
+          ) : (
+            <View
+              width="100%"
+              height="100%"
+              backgroundColor="$gray5"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <MediaPickerButton
+                onMediaSelected={handlePhotoSelected}
+                buttonSize="$5"
+                customIcon={<ImagePlus size={24} color="$gray9" />}
+                menuTitle="Add Meetup Spot Photo"
+              />
+            </View>
+          )}
+        </View>
+      );
+    }
+
+    // Non-owners see an empty placeholder with reduced opacity
     return (
       <View
-        width={100}
-        height={100}
-        justifyContent="center"
-        alignItems="center"
-        backgroundColor="$gray2"
-        borderRadius={8}
-        borderWidth={1}
-        borderColor="$gray4"
-      >
-        {isUploading ? (
-          <Spinner size="large" color={COLORS.primary} />
-        ) : (
-          <MediaPickerButton
-            onMediaSelected={handlePhotoSelected}
-            buttonLabel="Add Photo"
-            buttonSize="$2"
-            menuTitle="Add Meetup Spot Photo"
-          />
-        )}
-      </View>
+        width={70}
+        height={70}
+        borderRadius="$4"
+        backgroundColor="$gray3"
+        opacity={0.6}
+      />
     );
   }
 

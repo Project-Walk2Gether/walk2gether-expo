@@ -115,6 +115,8 @@ export default function ImageViewer({
     showMenu("Image Options", menuItems);
   };
 
+  console.log({ imageUri });
+
   return (
     <YStack flex={1} backgroundColor="black">
       <StatusBar barStyle="light-content" />
