@@ -149,6 +149,7 @@ export default function WalksScreen() {
           contentContainerStyle={{
             paddingHorizontal: 16,
             paddingVertical: 8,
+            marginBottom: 20,
           }}
         />
         <YStack mx={20}>

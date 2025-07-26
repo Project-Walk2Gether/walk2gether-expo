@@ -1,11 +1,7 @@
-import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useState,
-} from "react";
-import { Button, Text, YStack } from "tamagui";
+import React, { createContext, ReactNode, useContext } from "react";
+import { Button, YStack } from "tamagui";
 import { useSheet } from "./SheetContext";
+import { useMaybePortalHostContext } from "./PortalHostContext";
 
 // Define the MenuItem type
 export interface MenuItem {
@@ -16,9 +12,14 @@ export interface MenuItem {
   children?: ReactNode;
 }
 
+// Define the menu options type
+interface MenuOptions {
+  portalHostName?: string;
+}
+
 // Define the MenuContext type
 interface MenuContextType {
-  showMenu: (title: string, items: MenuItem[]) => void;
+  showMenu: (title: string, items: MenuItem[], options?: MenuOptions) => void;
 }
 
 // Create the context with a default value
@@ -27,40 +28,51 @@ const MenuContext = createContext<MenuContextType | undefined>(undefined);
 // Custom hook to use the menu context
 export const useMenu = () => {
   const context = useContext(MenuContext);
+  const portalContext = useMaybePortalHostContext();
+  
   if (!context) {
     throw new Error("useMenu must be used within a MenuProvider");
   }
-  return context;
+  
+  // Create a wrapped version of showMenu that automatically includes portal context
+  const enhancedContext = {
+    ...context,
+    showMenu: (title: string, items: MenuItem[], options?: MenuOptions) => {
+      // Mix in the portal context if available and not explicitly overridden
+      const enhancedOptions = {
+        ...options,
+        // Only use the context's portal host if not explicitly provided in options
+        portalHostName: options?.portalHostName || portalContext?.portalHostName,
+      };
+      
+      return context.showMenu(title, items, enhancedOptions);
+    },
+  };
+  
+  return enhancedContext;
 };
 
 // Menu provider component
 export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [menuTitle, setMenuTitle] = useState("");
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const { showSheet, hideSheet, isSheetOpen } = useSheet();
 
   // Function to show the menu
-  const showMenu = (title: string, items: MenuItem[]) => {
-    setMenuTitle(title);
-    setMenuItems(items);
-    
+  const showMenu = (
+    title: string,
+    items: MenuItem[],
+    options?: MenuOptions
+  ) => {
     // Use the SheetContext to show the menu content
-    showSheet(
-      <MenuContent 
-        title={title} 
-        items={items} 
-        onClose={hideSheet} 
-      />,
-      { title }
-    );
+    showSheet(<MenuContent title={title} items={items} onClose={hideSheet} />, {
+      title,
+      portalHostName: options?.portalHostName,
+    });
   };
 
   return (
-    <MenuContext.Provider value={{ showMenu }}>
-      {children}
-    </MenuContext.Provider>
+    <MenuContext.Provider value={{ showMenu }}>{children}</MenuContext.Provider>
   );
 };
 

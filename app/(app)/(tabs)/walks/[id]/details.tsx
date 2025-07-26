@@ -162,12 +162,12 @@ export default function DetailsTab() {
           // locationName={walk.currentLocation?.name}
           notes={walk.startLocation?.notes}
         />
-        
+
         {/* Question Prompts - only for meetup walks */}
         {walk.type === "meetup" && (
-          <QuestionPromptsList 
-            walk={walk as MeetupWalk} 
-            isWalkOwner={isWalkOwner} 
+          <QuestionPromptsList
+            walk={walk as MeetupWalk}
+            isWalkOwner={isWalkOwner}
           />
         )}
         {/* Participants Section - only shown for walk owner or friends walks */}
@@ -221,9 +221,11 @@ export default function DetailsTab() {
         {isWalkOwner && walk.type === "meetup" && <RoundsList walk={walk} />}
 
         {/* Quote and Image at the bottom */}
-        <YStack alignItems="center" marginTop="$4">
-          <QuoteWithImage imageSize={180} skipAnimation={true} />
-        </YStack>
+        {walk.type !== "meetup" && (
+          <YStack alignItems="center" marginTop="$4">
+            <QuoteWithImage imageSize={180} skipAnimation={true} />
+          </YStack>
+        )}
       </YStack>
     </ScrollView>
   );

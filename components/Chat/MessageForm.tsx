@@ -82,8 +82,7 @@ export default function MessageForm({
       if (selectedImages.length > 0) {
         attachments = await uploadMessageAttachments(
           selectedImages,
-          chatId,
-          senderId
+          `messages/${chatId}/${senderId}`
         );
       }
 

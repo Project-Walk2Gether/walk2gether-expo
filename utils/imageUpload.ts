@@ -95,8 +95,7 @@ export const uploadImage = async (uri: string, path: string): Promise<string> =>
 // Upload multiple images and return Attachment objects
 export const uploadMessageAttachments = async (
   assets: ImagePicker.ImagePickerAsset[],
-  chatId: string,
-  senderId: string
+  storagePathPrefix: string
 ): Promise<Attachment[]> => {
   if (!assets.length) return [];
   
@@ -106,7 +105,7 @@ export const uploadMessageAttachments = async (
     // Upload each image and create attachment objects
     const uploadPromises = assets.map(async (asset) => {
       const attachmentId = uuid.v4().toString();
-      const storagePath = `messages/${chatId}/${senderId}/${attachmentId}.jpg`;
+      const storagePath = `${storagePathPrefix}/${attachmentId}.jpg`;
       
       const uri = await uploadImage(asset.uri, storagePath);
       

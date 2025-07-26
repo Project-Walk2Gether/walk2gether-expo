@@ -45,7 +45,7 @@ export const TopicSelection: React.FC<Props> = ({
           padding="$4"
         >
           <YStack gap="$4">
-            <Text fontSize={24} fontWeight="600">
+            <Text fontSize={24} fontWeight="bold">
               Set your meetup walk topic
             </Text>
             <Text fontSize={16} color="#555">

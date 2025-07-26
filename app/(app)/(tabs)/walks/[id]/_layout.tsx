@@ -79,7 +79,8 @@ export default function WalkLayout() {
           <MaterialTopTabs
             initialRouteName={initialRouteName}
             screenOptions={{
-              // swipeEnabled: false, // Disable horizontal swipe navigation
+              // Disable horizontal swipe navigation, so that the walk sliders work
+              swipeEnabled: false,
               tabBarStyle: {
                 backgroundColor: "transparent",
                 elevation: 0, // Android: remove drop-shadow

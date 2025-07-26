@@ -1,4 +1,13 @@
 import { stopBackgroundLocationTracking } from "@/background/backgroundLocationTask";
+import CurrentUserStatusCard from "@/components/WalkScreen/components/CurrentUserStatusCard";
+import LocationLoading from "@/components/WalkScreen/components/LiveWalkMap/LocationLoading";
+import OfficialWalkRoute from "@/components/WalkScreen/components/LiveWalkMap/OfficialWalkRoute";
+import ParticipantMarker from "@/components/WalkScreen/components/LiveWalkMap/ParticipantMarker";
+import MeetupSpot from "@/components/WalkScreen/components/MeetupSpot";
+import RequestBackgroundLocationModal from "@/components/WalkScreen/components/RequestBackgroundLocationModal";
+import { WalkActionSliders } from "@/components/WalkScreen/components/WalkActionSliders";
+import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
+import WalkParticipantStatusControls from "@/components/WalkScreen/components/WalkParticipantStatusControls";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
@@ -6,28 +15,15 @@ import { useSheet } from "@/context/SheetContext";
 import { useWalk } from "@/context/WalkContext";
 import { useLocationTracking } from "@/hooks/useLocationTracking";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
-import { COLORS } from "@/styles/colors";
-import { useDoc } from "@/utils/firestore";
 import { calculateOptimalRegion } from "@/utils/mapUtils";
 import { getWalkStatus, isOwner } from "@/utils/walkUtils";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
-import { MapPin } from "@tamagui/lucide-icons";
-import { addHours, differenceInHours } from "date-fns";
 import { useIsFocused } from "@react-navigation/native";
+import { differenceInHours } from "date-fns";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { Button, Card, Text, View, YStack } from "tamagui";
-import { Walk } from "walk2gether-shared";
-import CurrentUserStatusCard from "@/components/WalkScreen/components/CurrentUserStatusCard";
-import MeetupSpot from "@/components/WalkScreen/components/MeetupSpot";
-import RequestBackgroundLocationModal from "@/components/WalkScreen/components/RequestBackgroundLocationModal";
-import { WalkActionSliders } from "@/components/WalkScreen/components/WalkActionSliders";
-import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
-import WalkParticipantStatusControls from "@/components/WalkScreen/components/WalkParticipantStatusControls";
-import LocationLoading from "@/components/WalkScreen/components/LiveWalkMap/LocationLoading";
-import OfficialWalkRoute from "@/components/WalkScreen/components/LiveWalkMap/OfficialWalkRoute";
-import ParticipantMarker from "@/components/WalkScreen/components/LiveWalkMap/ParticipantMarker";
+import { Text, View } from "tamagui";
 
 export default function MapTab() {
   const { walk: contextWalk } = useWalk();
@@ -43,20 +39,7 @@ export default function MapTab() {
     useState(false);
   const { showSheet, hideSheet } = useSheet();
 
-  // Return loading screen if we don't have walk or focus
-  if (!contextWalk || !isFocussed || !contextWalk.id) {
-    return (
-      <View flex={1} justifyContent="center" alignItems="center">
-        <View padding="$4">
-          <Text fontSize="$5" textAlign="center">
-            Loading walk...
-          </Text>
-        </View>
-      </View>
-    );
-  }
-
-  const walkId = contextWalk.id;
+  const walkId = contextWalk?.id || "";
 
   // Get walk participants
   const participants = useWalkParticipants(walkId);
@@ -70,15 +53,15 @@ export default function MapTab() {
   // Use the location tracking hook
   const { userLocation } = useLocationTracking(
     walkId,
-    user?.uid || '',
+    user?.uid || "",
     userParticipant
   );
 
-  // Get walk data to access start location and check if user is owner
-  const { doc: walk } = useDoc<Walk>(`walks/${walkId}`);
-
   // Get access to location context for tracking functions
   const locationContext = useLocation();
+
+  // Use the walk from context instead of re-fetching
+  const walk = contextWalk;
 
   // Check if current user is the walk owner
   const isWalkOwner = walk?.createdByUid === user?.uid;
@@ -95,11 +78,11 @@ export default function MapTab() {
   // Check if walk is starting soon (within 1 hour of start time)
   const isStartingSoon = useMemo(() => {
     if (!walk || !walk.date) return false;
-    
+
     const scheduledDate = walk.date.toDate();
     const now = new Date();
     const hoursUntilStart = differenceInHours(scheduledDate, now);
-    
+
     return hoursUntilStart <= 1;
   }, [walk?.date]);
 
@@ -138,7 +121,14 @@ export default function MapTab() {
 
     // Update the last tracking state reference
     lastTrackingState.current = backgroundLocationPermission;
-  }, [backgroundLocationPermission, walkId, user, status, hasWalkStarted, hasWalkEnded]);
+  }, [
+    backgroundLocationPermission,
+    walkId,
+    user,
+    status,
+    hasWalkStarted,
+    hasWalkEnded,
+  ]);
 
   function updateTracking() {
     if (!user?.uid || !walkId) return;
@@ -228,11 +218,15 @@ export default function MapTab() {
     }
   }
 
-  // Render loading state if we don't have the walk data yet
-  if (!walk) {
+  // Return loading screen if we don't have walk or focus
+  if (!walk || !walk.id) {
     return (
       <View flex={1} justifyContent="center" alignItems="center">
-        <Text>Loading walk data...</Text>
+        <View padding="$4">
+          <Text fontSize="$5" textAlign="center">
+            Loading walk...
+          </Text>
+        </View>
       </View>
     );
   }
@@ -300,6 +294,9 @@ export default function MapTab() {
             locationName={walk.currentLocation?.name}
             notes={walk.startLocation?.notes}
             showMap={false}
+            meetupSpotPhoto={walk.meetupSpotPhoto}
+            isWalkOwner={isWalkOwner}
+            walkId={walkId}
           >
             {isStartingSoon && user && walkId && userParticipant && (
               <CurrentUserStatusCard

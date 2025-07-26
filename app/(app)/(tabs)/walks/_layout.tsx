@@ -1,10 +1,7 @@
-import { Stack, usePathname } from "expo-router";
+import { Stack } from "expo-router";
 import React from "react";
 
 export default function WalksLayout() {
-  const pathname = usePathname();
-
-  console.log("RENDERING");
   return (
     <Stack
       screenOptions={{

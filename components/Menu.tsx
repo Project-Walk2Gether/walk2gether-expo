@@ -1,9 +1,10 @@
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import type { IconProps } from "@tamagui/helpers-icon";
 import { MoreVertical } from "@tamagui/lucide-icons";
+import { useMaybePortalHostContext } from "@/context/PortalHostContext";
 import React, { useCallback, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
-import { Button, GetProps, Text, YStack } from "tamagui";
+import { Button, GetProps, Portal, Text, YStack } from "tamagui";
 
 export interface MenuItem {
   label: string;
@@ -17,9 +18,10 @@ interface Props {
   color?: string;
   items: MenuItem[];
   trigger?: React.ReactNode;
+  portalHostName?: string;
 }
 
-export default function Menu({ title, items, color, trigger }: Props) {
+export default function Menu({ title, items, color, trigger, portalHostName }: Props) {
   const [open, setOpen] = useState(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -52,52 +54,70 @@ export default function Menu({ title, items, color, trigger }: Props) {
     }, 300); // Slight delay to ensure sheet is closed before action
   }, []);
 
+  // Access the portal context from the parent component, if available
+  const portalContext = useMaybePortalHostContext();
+  const resolvedPortalName = portalHostName || portalContext?.portalHostName;
+  
+  // Create the trigger button
+  const triggerButton = trigger ? (
+    React.cloneElement(trigger as React.ReactElement<any>, {
+      onPress: handleOpen,
+    })
+  ) : (
+    <Button
+      size="$2"
+      circular
+      chromeless
+      onPress={handleOpen}
+      icon={<MoreVertical size="$1" color={color} />}
+    />
+  );
+
+  // Create the menu content
+  const menuContent = open && (
+    <BottomSheet
+      ref={bottomSheetRef}
+      index={0}
+      enableDynamicSizing={true}
+      enablePanDownToClose
+      onClose={handleClose}
+      backdropComponent={renderBackdrop}
+      style={styles.bottomSheet}
+      handleIndicatorStyle={styles.indicator}
+    >
+      <YStack padding="$4" gap="$4">
+        <Text fontSize="$6" fontWeight="600" textAlign="center">
+          {title}
+        </Text>
+
+        <YStack gap="$4" padding="$2" marginTop="$2">
+          {items.map((item, index) => (
+            <Button
+              key={`menu-item-${index}`}
+              size="$4"
+              onPress={() => handleItemPress(item)}
+              icon={item.icon}
+              {...item.buttonProps}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </YStack>
+      </YStack>
+    </BottomSheet>
+  );
+
   return (
     <>
-      {trigger ? (
-        React.cloneElement(trigger as React.ReactElement<any>, {
-          onPress: handleOpen,
-        })
+      {triggerButton}
+      {resolvedPortalName && menuContent ? (
+        // Render in a portal if we have a portal host name
+        <Portal>
+          {menuContent}
+        </Portal>
       ) : (
-        <Button
-          size="$2"
-          circular
-          chromeless
-          onPress={handleOpen}
-          icon={<MoreVertical size="$1" color={color} />}
-        />
-      )}
-      {open && (
-        <BottomSheet
-          ref={bottomSheetRef}
-          index={0}
-          enableDynamicSizing={true}
-          enablePanDownToClose
-          onClose={handleClose}
-          backdropComponent={renderBackdrop}
-          style={styles.bottomSheet}
-          handleIndicatorStyle={styles.indicator}
-        >
-          <YStack padding="$4" gap="$4">
-            <Text fontSize="$6" fontWeight="600" textAlign="center">
-              {title}
-            </Text>
-
-            <YStack gap="$4" padding="$2" marginTop="$2">
-              {items.map((item, index) => (
-                <Button
-                  key={`menu-item-${index}`}
-                  size="$4"
-                  onPress={() => handleItemPress(item)}
-                  icon={item.icon}
-                  {...item.buttonProps}
-                >
-                  {item.label}
-                </Button>
-              ))}
-            </YStack>
-          </YStack>
-        </BottomSheet>
+        // Otherwise render normally
+        menuContent
       )}
     </>
   );
