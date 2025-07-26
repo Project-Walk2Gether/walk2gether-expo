@@ -3,6 +3,7 @@ import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { useSheet } from "@/context/SheetContext";
+import { useWalk } from "@/context/WalkContext";
 import { useLocationTracking } from "@/hooks/useLocationTracking";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { COLORS } from "@/styles/colors";
@@ -12,30 +13,25 @@ import { getWalkStatus, isOwner } from "@/utils/walkUtils";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { MapPin } from "@tamagui/lucide-icons";
 import { addHours, differenceInHours } from "date-fns";
+import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Card, Text, View, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
-import CurrentUserStatusCard from "../CurrentUserStatusCard";
-import MeetupSpot from "../MeetupSpot";
-import RequestBackgroundLocationModal from "../RequestBackgroundLocationModal";
-import { WalkActionSliders } from "../WalkActionSliders";
-import WalkLocationCard from "../WalkLocationCard";
-import WalkParticipantStatusControls from "../WalkParticipantStatusControls";
-import LocationLoading from "./LocationLoading";
-import OfficialWalkRoute from "./OfficialWalkRoute";
-import ParticipantMarker from "./ParticipantMarker";
+import CurrentUserStatusCard from "@/components/WalkScreen/components/CurrentUserStatusCard";
+import MeetupSpot from "@/components/WalkScreen/components/MeetupSpot";
+import RequestBackgroundLocationModal from "@/components/WalkScreen/components/RequestBackgroundLocationModal";
+import { WalkActionSliders } from "@/components/WalkScreen/components/WalkActionSliders";
+import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
+import WalkParticipantStatusControls from "@/components/WalkScreen/components/WalkParticipantStatusControls";
+import LocationLoading from "@/components/WalkScreen/components/LiveWalkMap/LocationLoading";
+import OfficialWalkRoute from "@/components/WalkScreen/components/LiveWalkMap/OfficialWalkRoute";
+import ParticipantMarker from "@/components/WalkScreen/components/LiveWalkMap/ParticipantMarker";
 
-interface Props {
-  walkId: string;
-  onNavigationMethodChange?: (method: "walking" | "driving") => void;
-}
-
-export default function LiveWalkMap({
-  walkId,
-  onNavigationMethodChange,
-}: Props) {
+export default function MapTab() {
+  const { walk: contextWalk } = useWalk();
+  const isFocussed = useIsFocused();
   const { user } = useAuth();
   const mapRef = useRef<MapView>(null);
   const {
@@ -45,6 +41,22 @@ export default function LiveWalkMap({
   } = useLocation();
   const [isBackgroundLocationModalOpen, setIsBackgroundLocationModalOpen] =
     useState(false);
+  const { showSheet, hideSheet } = useSheet();
+
+  // Return loading screen if we don't have walk or focus
+  if (!contextWalk || !isFocussed || !contextWalk.id) {
+    return (
+      <View flex={1} justifyContent="center" alignItems="center">
+        <View padding="$4">
+          <Text fontSize="$5" textAlign="center">
+            Loading walk...
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  const walkId = contextWalk.id;
 
   // Get walk participants
   const participants = useWalkParticipants(walkId);
@@ -58,7 +70,7 @@ export default function LiveWalkMap({
   // Use the location tracking hook
   const { userLocation } = useLocationTracking(
     walkId,
-    user!.uid,
+    user?.uid || '',
     userParticipant
   );
 
@@ -79,6 +91,17 @@ export default function LiveWalkMap({
 
   // Track the last background tracking state to prevent unnecessary updates
   const lastTrackingState = useRef<boolean | null>(null);
+
+  // Check if walk is starting soon (within 1 hour of start time)
+  const isStartingSoon = useMemo(() => {
+    if (!walk || !walk.date) return false;
+    
+    const scheduledDate = walk.date.toDate();
+    const now = new Date();
+    const hoursUntilStart = differenceInHours(scheduledDate, now);
+    
+    return hoursUntilStart <= 1;
+  }, [walk?.date]);
 
   useEffect(() => {
     if (
@@ -110,176 +133,106 @@ export default function LiveWalkMap({
         "Updating location tracking to:",
         backgroundLocationPermission
       );
-      const updateTracking = async () => {
-        try {
-          // Update our ref to prevent infinite loops
-          lastTrackingState.current = backgroundLocationPermission;
-
-          // Stop current tracking and restart with new preference
-          console.log("Starting walk location tracking");
-          await locationContext.stopWalkTracking();
-          await locationContext.startWalkTracking(
-            walkId,
-            // TODO: use proper walk end time with buffer
-            addHours(new Date(), 1)
-          );
-        } catch (error) {
-          console.error("Error updating location tracking:", error);
-          // Reset the ref if there was an error
-          lastTrackingState.current = null;
-        }
-      };
-
       updateTracking();
     }
-  }, [
-    backgroundLocationPermission,
-    walkId,
-    user?.uid,
-    locationContext,
-    status,
-    hasWalkStarted,
-    hasWalkEnded,
-  ]);
 
-  // Check if walk is scheduled within the next 5 hours
-  const isStartingSoon = useMemo(() => {
-    if (!walk?.date) return false;
+    // Update the last tracking state reference
+    lastTrackingState.current = backgroundLocationPermission;
+  }, [backgroundLocationPermission, walkId, user, status, hasWalkStarted, hasWalkEnded]);
 
-    const walkTime = walk.date.toDate();
-    const now = new Date();
-    const hoursDifference = differenceInHours(walkTime, now);
+  function updateTracking() {
+    if (!user?.uid || !walkId) return;
 
-    // Show button if walk starts within 5 hours (including if it's already started)
-    return hoursDifference < 5;
-  }, [walk?.date]);
+    // If we don't have background permission, stop tracking
+    if (!backgroundLocationPermission) {
+      console.log("Stopping background tracking - no permission");
+      stopBackgroundLocationTracking();
+      return;
+    }
 
-  const { showSheet, hideSheet } = useSheet();
+    // Only track when we're on the way or have arrived
+    if (
+      userParticipant &&
+      ["on-the-way", "arrived"].includes(userParticipant.status) &&
+      !userParticipant.cancelledAt
+    ) {
+      console.log("Starting background tracking");
+      // Use the appropriate method from locationContext to start tracking
+      if (locationContext.requestBackgroundPermissions) {
+        locationContext.requestBackgroundPermissions();
+      }
+    } else {
+      console.log("Stopping background tracking - not participating actively");
+      stopBackgroundLocationTracking();
+    }
+  }
 
   // Handler for starting a walk (owner only)
-  const handleStartWalk = async () => {
-    // When starting a walk, use the user's background tracking preference
-    if (!walkId || !user?.uid || !isWalkOwner) return;
+  async function handleStartWalk() {
+    if (!walk || !walk.id) return;
 
     try {
-      // Update walk status to in-progress
-      const walkDocRef = doc(firestore_instance, `walks/${walkId}`);
       await setDoc(
-        walkDocRef,
+        doc(firestore_instance, "walks", walk.id),
         {
-          // Use startedAt timestamp to indicate the walk has started
           startedAt: Timestamp.now(),
-          active: true,
+          status: "active",
         },
         { merge: true }
       );
 
-      // Start location tracking with the user's background tracking preference
-      if (locationContext) {
-        await locationContext.startWalkTracking(walkId);
-      }
+      // Show confirmation alert
+      Alert.alert(
+        "Walk Started",
+        "Your walk has officially started. Participants will be notified.",
+        [{ text: "OK" }]
+      );
     } catch (error) {
       console.error("Error starting walk:", error);
-      Alert.alert("Error", "Failed to start the walk. Please try again.");
+      Alert.alert(
+        "Error",
+        "There was a problem starting the walk. Please try again."
+      );
     }
-  };
+  }
 
   // Handler for ending a walk (owner only)
-  const handleEndWalk = async () => {
-    if (!walkId || !user?.uid || !isWalkOwner) return;
+  async function handleEndWalk() {
+    if (!walk || !walk.id) return;
 
     try {
-      // Stop background location tracking
-      await stopBackgroundLocationTracking();
-
-      // Update walk status to completed
-      const walkDocRef = doc(firestore_instance, `walks/${walkId}`);
       await setDoc(
-        walkDocRef,
+        doc(firestore_instance, "walks", walk.id),
         {
-          // Use endedAt timestamp to indicate the walk has ended
           endedAt: Timestamp.now(),
-          active: false,
+          status: "completed",
         },
         { merge: true }
+      );
+
+      // Stop background tracking for the current user
+      stopBackgroundLocationTracking();
+
+      // Show confirmation alert
+      Alert.alert(
+        "Walk Ended",
+        "Your walk has ended. Thank you for using Walk2gether!",
+        [{ text: "OK" }]
       );
     } catch (error) {
       console.error("Error ending walk:", error);
-      Alert.alert("Error", "Failed to end the walk. Please try again.");
+      Alert.alert(
+        "Error",
+        "There was a problem ending the walk. Please try again."
+      );
     }
-  };
+  }
 
-  // Render location permission denied message
-  if (locationPermission === false) {
+  // Render loading state if we don't have the walk data yet
+  if (!walk) {
     return (
-      <View flex={1} justifyContent="center" alignItems="center" p="$4">
-        <Card
-          backgroundColor={COLORS.walkTypes.friends.background}
-          padding="$6"
-          borderRadius="$5"
-          width="100%"
-          maxWidth={400}
-          elevate
-          bordered
-          borderColor="$borderColor"
-        >
-          <YStack alignItems="center" gap="$4">
-            {/* Icon and Title */}
-            <YStack alignItems="center" gap="$2">
-              <View
-                backgroundColor={COLORS.walkTypes.friends.main}
-                width={60}
-                height={60}
-                borderRadius={30}
-                justifyContent="center"
-                alignItems="center"
-                marginBottom="$2"
-              >
-                <MapPin size={30} color="white" />
-              </View>
-              <Text fontSize="$7" fontWeight="bold" textAlign="center">
-                Location Access Needed
-              </Text>
-            </YStack>
-
-            {/* Explanation Text */}
-            <YStack gap="$3">
-              <Text
-                fontSize="$5"
-                color={COLORS.textSecondary}
-                textAlign="center"
-                lineHeight={24}
-              >
-                To see the walk map and participate with friends, Walk2Gether
-                needs access to your location.
-              </Text>
-              <Text
-                fontSize="$5"
-                color={COLORS.textSecondary}
-                textAlign="center"
-                lineHeight={24}
-              >
-                This helps everyone see where you are during walks and ensures
-                you can find the meetup spot.
-              </Text>
-            </YStack>
-
-            {/* CTA Button */}
-            <Button
-              onPress={() => requestForegroundPermissions()}
-              backgroundColor={COLORS.walkTypes.friends.main}
-              paddingHorizontal="$6"
-              paddingVertical="$3"
-              borderRadius="$6"
-              marginTop="$2"
-              pressStyle={{ opacity: 0.9 }}
-            >
-              <Text color="white" fontWeight="bold" fontSize="$5">
-                Enable Location Access
-              </Text>
-            </Button>
-          </YStack>
-        </Card>
+      <View flex={1} justifyContent="center" alignItems="center">
+        <Text>Loading walk data...</Text>
       </View>
     );
   }
@@ -329,9 +282,6 @@ export default function LiveWalkMap({
 
         {/* Render the official walk route (from owner's tracked locations) */}
         <OfficialWalkRoute walk={walk} />
-
-        {/* Render route for current user */}
-        {/* <UserRoute participant={currentUserParticipant} /> */}
       </MapView>
 
       {/* Location Card - only shown when location permissions are granted */}

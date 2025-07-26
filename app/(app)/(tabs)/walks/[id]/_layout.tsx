@@ -1,5 +1,4 @@
 import FullScreenLoader from "@/components/FullScreenLoader";
-import ActiveRoundIndicator from "@/components/Rounds/ActiveRoundIndicator";
 import WalkHeader from "@/components/WalkHeader";
 import { useAuth } from "@/context/AuthContext";
 import { WalkProvider } from "@/context/WalkContext";
@@ -100,7 +99,7 @@ export default function WalkLayout() {
             }}
             style={{ backgroundColor: "transparent" }}
           >
-            <MaterialTopTabs.Screen name="map" options={{ title: "Meet" }} />
+            <MaterialTopTabs.Screen name="meet" options={{ title: "Meet" }} />
             <MaterialTopTabs.Screen
               name="details"
               options={{ title: "Walk" }}
