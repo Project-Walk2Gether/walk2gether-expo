@@ -5,17 +5,20 @@ import firestore, {
   doc,
   serverTimestamp,
 } from "@react-native-firebase/firestore";
-import { AlertTriangle, ArrowLeft, Flag } from "@tamagui/lucide-icons";
+import { AlertTriangle, ArrowLeft, ChevronDown, Flag } from "@tamagui/lucide-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Button,
-  Checkbox,
   Label,
+  Select,
+  Sheet,
   Spinner,
   Text,
   XStack,
   YStack,
+  Adapt,
+  Checkbox,
 } from "tamagui";
 
 export default function UnfriendScreen() {
@@ -27,6 +30,7 @@ export default function UnfriendScreen() {
   const router = useRouter();
   const { showMessage } = useFlashMessage();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [unfriendReason, setUnfriendReason] = useState<string>("");
   const [reportUser, setReportUser] = useState(false);
   const [reportReason, setReportReason] = useState("");
 
@@ -52,8 +56,11 @@ export default function UnfriendScreen() {
         deletedByUid: user.uid,
       };
 
+      // Store the unfriend reason
+      updateData.unfriendReason = unfriendReason || "No reason provided";
+      
       // If user chose to report, add reporting information
-      if (reportUser) {
+      if (unfriendReason === "something_wrong" && reportUser) {
         updateData.reportedAt = firestore.FieldValue.serverTimestamp();
         updateData.reportedByUid = user.uid;
         updateData.reportReason = reportReason || "No reason provided";
@@ -63,7 +70,7 @@ export default function UnfriendScreen() {
       await friendshipRef.update(updateData);
 
       // Show success message based on whether user also reported
-      if (reportUser) {
+      if (unfriendReason === "something_wrong" && reportUser) {
         showMessage(`You've removed and reported ${friendName}`, "success");
       } else {
         showMessage(
@@ -95,7 +102,7 @@ export default function UnfriendScreen() {
               icon={<ArrowLeft size="$1.5" color="#4EB1BA" />}
             />
           ),
-          headerTitle: "Something's Wrong",
+          headerTitle: "Remove a friend",
           headerStyle: {
             backgroundColor: "white",
           },
@@ -123,7 +130,7 @@ export default function UnfriendScreen() {
             You'll be disconnected from {friendName} on Walk2Gether.
           </Text>
 
-          <Text fontSize="$3" textAlign="center" color="$gray9" marginTop="$2">
+          <Text fontSize="$3" color="$gray9" marginTop="$2">
             You won't be able to send messages to each other anymore, and you'll
             be removed from each other's friend list.
           </Text>
@@ -133,35 +140,85 @@ export default function UnfriendScreen() {
             padding="$4"
             borderRadius="$4"
             marginTop="$2"
+            gap="$4"
           >
-            <XStack alignItems="center" gap="$2">
-              <Checkbox
-                id="report-user"
-                size="$4"
-                checked={reportUser}
-                onCheckedChange={(checked) => {
-                  setReportUser(checked as boolean);
-                  // If unchecked, clear the reason
-                  if (!checked) {
+            <YStack gap="$2">
+              <Label htmlFor="unfriend-reason">
+                <Text fontWeight="500">Why are you removing {friendName}?</Text>
+              </Label>
+              
+              <Select
+                id="unfriend-reason"
+                value={unfriendReason}
+                onValueChange={value => {
+                  setUnfriendReason(value);
+                  // Reset reporting when changing reason
+                  if (value !== "something_wrong") {
+                    setReportUser(false);
                     setReportReason("");
                   }
                 }}
               >
-                <Checkbox.Indicator>
-                  <Flag size={16} color="$red9" />
-                </Checkbox.Indicator>
-              </Checkbox>
+                <Select.Trigger width="100%" iconAfter={ChevronDown}>
+                  <Select.Value placeholder="Select a reason" />
+                </Select.Trigger>
+                
+                <Adapt when="sm" platform="touch">
+                  <Sheet modal snapPoints={[50]}>
+                    <Sheet.Frame>
+                      <Sheet.ScrollView>
+                        <Adapt.Contents />
+                      </Sheet.ScrollView>
+                    </Sheet.Frame>
+                    <Sheet.Overlay />
+                  </Sheet>
+                </Adapt>
+                
+                <Select.Content>
+                  <Select.Group>
+                    <Select.Item index={0} value="changed_mind">
+                      <Select.ItemText>Changed my mind / no reason</Select.ItemText>
+                    </Select.Item>
+                    <Select.Item index={1} value="something_wrong">
+                      <Select.ItemText>Something's wrong</Select.ItemText>
+                    </Select.Item>
+                  </Select.Group>
+                </Select.Content>
+              </Select>
+            </YStack>
+            
+            {unfriendReason === "something_wrong" && (
+              <YStack gap="$3">
+                <XStack alignItems="center" gap="$2">
+                  <Checkbox
+                    id="report-user"
+                    size="$4"
+                    checked={reportUser}
+                    onCheckedChange={(checked) => {
+                      setReportUser(checked as boolean);
+                      // If unchecked, clear the reason
+                      if (!checked) {
+                        setReportReason("");
+                      }
+                    }}
+                  >
+                    <Checkbox.Indicator>
+                      <Flag size={16} color="$red9" />
+                    </Checkbox.Indicator>
+                  </Checkbox>
 
-              <Label htmlFor="report-user" paddingLeft="$2">
-                <Text fontWeight="500">Report {friendName} to Walk2Gether</Text>
-              </Label>
-            </XStack>
+                  <Label htmlFor="report-user" paddingLeft="$2">
+                    <Text fontWeight="500">Report {friendName} to Walk2Gether</Text>
+                  </Label>
+                </XStack>
 
-            {reportUser && (
-              <Text fontSize="$3" marginTop="$3" color="$gray9">
-                Our team will review your report. This user won't know you
-                reported them.
-              </Text>
+                {reportUser && (
+                  <Text fontSize="$3" color="$gray9">
+                    Our team will review your report. This user won't know you
+                    reported them.
+                  </Text>
+                )}
+              </YStack>
             )}
           </YStack>
         </YStack>
@@ -183,7 +240,7 @@ export default function UnfriendScreen() {
                 onPress={handleUnfriend}
                 pressStyle={{ backgroundColor: "$red10" }}
               >
-                Remove {reportUser ? "and Report" : ""}
+                Remove {unfriendReason === "something_wrong" && reportUser ? "and Report" : ""}
               </Button>
 
               <Button variant="outlined" size="$5" onPress={handleBack}>
