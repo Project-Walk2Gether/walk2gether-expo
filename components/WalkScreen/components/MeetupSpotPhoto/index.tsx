@@ -62,11 +62,10 @@ export default function MeetupSpotPhoto({ photo, isWalkOwner, walkId }: Props) {
     const router = useRouter();
 
     const handleViewPhoto = () => {
-      if (photo && walkId) {
+      if (walkId) {
         router.push({
           pathname: "/(app)/(modals)/meetup-photo-viewer",
           params: {
-            imageUri: photo.uri,
             isOwner: String(isWalkOwner),
             walkId,
           },

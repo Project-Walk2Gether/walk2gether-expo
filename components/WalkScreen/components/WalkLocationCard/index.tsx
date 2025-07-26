@@ -75,7 +75,7 @@ export default function WalkLocationCard({
         <YStack flex={1} space="$3">
           {/* Location Info */}
           <WalkDetailsRow
-            icon={<MapPin />}
+            icon={meetupSpotPhoto ? null : <MapPin />}
             label={displayName}
             sublabel={notes}
             testID="walk-location-row"

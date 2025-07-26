@@ -1,11 +1,12 @@
 import ImageViewer from "@/components/ImageViewer";
+import { useDoc } from "@/utils/firestore";
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
-import { View } from "tamagui";
+import { Spinner, View } from "tamagui";
+import { Walk } from "walk2gether-shared";
 
 export default function MeetupPhotoViewer() {
-  const { imageUri, isOwner, walkId } = useLocalSearchParams<{
-    imageUri: string;
+  const { isOwner, walkId } = useLocalSearchParams<{
     isOwner: string;
     walkId: string;
   }>();
@@ -13,13 +14,30 @@ export default function MeetupPhotoViewer() {
   // Parse the boolean from string
   const isOwnerBool = isOwner === "true";
 
-  console.log({ imageUri, isOwnerBool, walkId });
+  // Fetch the walk document using the walkId
+  const { doc: walk, status } = useDoc<Walk>(walkId ? `walks/${walkId}` : undefined);
 
-  if (!imageUri) {
+  console.log({ walk, isOwnerBool, walkId });
+
+  // Show loading spinner while the document is loading
+  if (status === "loading") {
+    return (
+      <View flex={1} backgroundColor="black" justifyContent="center" alignItems="center">
+        <Spinner size="large" color="$blue10" />
+      </View>
+    );
+  }
+
+  // Make sure we have the walk and the meetupSpotPhoto
+  if (!walk || !walk.meetupSpotPhoto || !walk.meetupSpotPhoto.uri) {
     return <View flex={1} backgroundColor="black" />;
   }
 
   return (
-    <ImageViewer imageUri={imageUri} isOwner={isOwnerBool} walkId={walkId} />
+    <ImageViewer 
+      imageUri={walk.meetupSpotPhoto.uri} 
+      isOwner={isOwnerBool} 
+      walkId={walkId} 
+    />
   );
 }
