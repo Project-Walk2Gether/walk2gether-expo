@@ -37,19 +37,20 @@ export const TopicSelection: React.FC<Props> = ({
       continueText="Continue"
       continueDisabled={!formData.topic}
     >
-      <YStack space="$4">
+      <YStack gap="$4">
         <Card
           backgroundColor="white"
           borderRadius={12}
           elevation={2}
           padding="$4"
         >
-          <YStack space="$4">
+          <YStack gap="$4">
             <Text fontSize={24} fontWeight="600">
-              Topic for Your Meetup
+              Set your meetup walk topic
             </Text>
             <Text fontSize={16} color="#555">
-              What would you like to discuss during your walk?
+              What's your walk about? This topic helps others find and RSVP to
+              your walk.
             </Text>
             <Input
               placeholder="Enter your topic..."
@@ -58,7 +59,7 @@ export const TopicSelection: React.FC<Props> = ({
             />
 
             <Text fontWeight="bold" marginTop="$2">
-              Description (Markdown)
+              Description
             </Text>
 
             <MarkdownTextInput
@@ -67,7 +68,7 @@ export const TopicSelection: React.FC<Props> = ({
                 updateFormData({ descriptionMarkdown: text })
               }
               parser={parseExpensiMark}
-              placeholder="Add details about your meetup using markdown..."
+              placeholder="Describe the topic so more people in the public might want to join. (Supports Markdown)"
               style={{ minHeight: 150 }}
             />
           </YStack>

@@ -36,7 +36,7 @@ export default function WalkHistoryScreen() {
   if (error) {
     return (
       <Screen>
-        <Card backgroundColor="$red2" p="$4" borderRadius={12}>
+        <Card backgroundColor="$red2" mx={20} p="$4" borderRadius={12}>
           <Text color="$red9">{error}</Text>
         </Card>
       </Screen>
@@ -45,13 +45,13 @@ export default function WalkHistoryScreen() {
 
   return (
     <Screen>
-      <YStack pt="$4">
+      <YStack mx={20} pt="$4">
         {walkIds.length > 0 ? (
           <FlatList
             data={pastWalks}
             renderItem={({ item }) => (
               <WalkCard
-                onPress={() => router.push(`/walks/${item.id}`)}
+                onPress={() => router.push(`/walks/${item.id}/details`)}
                 walk={item}
                 canShowDismissButton={false}
               />

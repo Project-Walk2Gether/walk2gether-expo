@@ -1,8 +1,8 @@
-import { Walk, WithId } from "walk2gether-shared";
 import { COLORS } from "@/styles/colors";
+import { Walk, WithId } from "walk2gether-shared";
 
 // Define literal types for walk types to satisfy TypeScript constraints
-export type WalkTypeKey = 'friends' | 'neighborhood' | 'meetup';
+export type WalkTypeKey = "friends" | "neighborhood" | "meetup";
 
 export interface WalkTypeConfig {
   type: WalkTypeKey;
@@ -19,28 +19,28 @@ export interface WalkTypeConfig {
 export const WALK_TYPES: Record<WalkTypeKey, WalkTypeConfig> = {
   friends: {
     type: "friends",
-    title: "Friend Walk",
+    title: "Friend",
     icon: "people-outline",
     color: COLORS.walkTypes.friends.main,
     backgroundColor: COLORS.walkTypes.friends.background,
-    description: "Schedule a walk with a friend"
+    description: "Schedule a walk with a friend",
   },
   neighborhood: {
     type: "neighborhood",
-    title: "Neighborhood Walk",
+    title: "Neighborhood",
     icon: "home-outline",
     color: COLORS.walkTypes.neighborhood.main,
     backgroundColor: COLORS.walkTypes.neighborhood.background,
-    description: "Start a walk in your neighborhood"
+    description: "Start a walk in your neighborhood",
   },
   meetup: {
     type: "meetup",
-    title: "Meetup Walk",
+    title: "Meetup",
     icon: "chatbubbles-outline",
     color: COLORS.walkTypes.meetup.main,
     backgroundColor: COLORS.walkTypes.meetup.background,
-    description: "Schedule a walk with a topic, and invite the public"
-  }
+    description: "Schedule a walk with a topic, and invite the public",
+  },
 };
 
 export const getWalkTypeLabel = (type: Walk["type"]) => {

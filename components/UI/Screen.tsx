@@ -38,15 +38,11 @@ export const Screen: React.FC<Props> = ({
         contentContainerStyle={{
           paddingBottom: floatingAction ? 80 : 40, // Extra padding if FAB is present
           paddingTop: useTopInsets ? insets.top + 10 : undefined,
-          paddingHorizontal: 20,
         }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           onRefresh ? (
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-            />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           ) : undefined
         }
       >
@@ -55,6 +51,7 @@ export const Screen: React.FC<Props> = ({
             fontSize={32}
             fontWeight="bold"
             marginBottom="$2"
+            marginHorizontal={20}
             color={titleColor}
           >
             {title}

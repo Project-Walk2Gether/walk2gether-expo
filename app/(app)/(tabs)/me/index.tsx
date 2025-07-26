@@ -34,8 +34,8 @@ import {
   H4,
   Separator,
   Spinner,
-  Switch,
   Text,
+  View,
   XStack,
   YStack,
 } from "tamagui";
@@ -196,197 +196,209 @@ export default function MeScreen() {
 
   return (
     <Screen title="" useTopInsets gradientVariant="main">
-      <YStack mt="$4" mb="$5" alignItems="center">
-        <Pressable
-          onPress={() => {
-            showMenu("Profile Picture", [
-              {
-                label: "Change Picture",
-                icon: <Camera size={24} color={COLORS.primary} />,
-                onPress: handlePickImage,
-                theme: "blue",
-              },
-              {
-                label: "Remove Picture",
-                icon: <Trash size={24} color="#ff3b30" />,
-                onPress: handleRemoveImage,
-                theme: "red",
-              },
-            ]);
-          }}
-        >
-          <StatelessAvatar
-            profilePicUrl={profilePicUrl}
-            name={name}
-            size={120}
-            borderWidth={3}
-            backgroundColor={COLORS.primary}
-          />
-        </Pressable>
-        <H4 mt="$3" mb="$1" fontSize={26} fontWeight="bold">
-          {name || "Your Name"}
-        </H4>
-      </YStack>
-
-      {/* About Me Section */}
-      <Card
-        onPress={handleEditProfile}
-        backgroundColor="white"
-        mb="$3"
-        px="$2"
-        py="$2"
-        borderRadius={16}
-        position="relative"
-      >
-        <YStack px="$4" py="$3">
-          {location && (
-            <>
-              <Text
-                fontSize={16}
-                fontWeight="bold"
-                color={COLORS.primary}
-                mb="$2"
-              >
-                My location
-              </Text>
-              <Text fontSize={16} opacity={0.9} mb="$3">
-                {location.name}
-              </Text>
-            </>
-          )}
-          <Text fontWeight="bold" fontSize="$4" color={COLORS.primary} mb="$2">
-            About me
-          </Text>
-          <Text fontSize={16} color={COLORS.text} opacity={aboutMe ? 1 : 0.7}>
-            {aboutMe || "Add some details about yourself..."}
-          </Text>
+      <View mx={20}>
+        <YStack mt="$4" mb="$5" alignItems="center">
+          <Pressable
+            onPress={() => {
+              showMenu("Profile Picture", [
+                {
+                  label: "Change Picture",
+                  icon: <Camera size={24} color={COLORS.primary} />,
+                  onPress: handlePickImage,
+                  theme: "blue",
+                },
+                {
+                  label: "Remove Picture",
+                  icon: <Trash size={24} color="#ff3b30" />,
+                  onPress: handleRemoveImage,
+                  theme: "red",
+                },
+              ]);
+            }}
+          >
+            <StatelessAvatar
+              profilePicUrl={profilePicUrl}
+              name={name}
+              size={120}
+              borderWidth={3}
+              backgroundColor={COLORS.primary}
+            />
+          </Pressable>
+          <H4 mt="$3" mb="$1" fontSize={26} fontWeight="bold">
+            {name || "Your Name"}
+          </H4>
         </YStack>
-        <EditButton
-          backgroundColor="#888888"
+
+        {/* About Me Section */}
+        <Card
           onPress={handleEditProfile}
-          size={32}
-          position="absolute"
-          right={-6}
-          top={-6}
-        />
-      </Card>
-
-      {/* Actions Section */}
-      <Card backgroundColor="white" mb="$3" borderRadius={16}>
-        <ActionRow
-          icon={<QrCode />}
-          label="My QR Code"
-          onPress={() => router.push("/qr-code")}
-        />
-
-        <Separator borderColor="$gray5" />
-
-        <ActionRow
-          icon={<Clock />}
-          label="My Walk History"
-          onPress={() => router.push("/me/history")}
-        />
-
-        <Separator borderColor="$gray5" />
-
-        <ActionRow
-          icon={<Bell />}
-          label="Notification Settings"
-          onPress={() => router.push("/me/notifications")}
-        />
-
-        <Separator borderColor="$gray5" />
-
-        <ActionRow
-          icon={<Phone />}
-          title="Phone"
-          secondaryText={authUser?.phoneNumber || "Not provided"}
-        />
-
-        <Separator borderColor="$gray5" />
-
-        <ActionRow
-          icon={<Map />}
-          label="Distance Unit"
-          secondaryText={userData?.distanceUnit === "mi" ? "Miles" : "Kilometers"}
-          onPress={() => {
-            const menuItems: MenuItem[] = [
-              {
-                label: "Kilometers",
-                onPress: () => {
-                  updateUserData({ distanceUnit: "km" });
-                  showMessage("Distance unit changed to kilometers", "success");
-                },
-                theme: userData?.distanceUnit === "km" ? "blue" : "default",
-              },
-              {
-                label: "Miles",
-                onPress: () => {
-                  updateUserData({ distanceUnit: "mi" });
-                  showMessage("Distance unit changed to miles", "success");
-                },
-                theme: userData?.distanceUnit === "mi" ? "blue" : "default",
-              },
-            ];
-            showMenu("Select Distance Unit", menuItems);
-          }}
-        />
-
-        <Separator borderColor="$gray5" />
-
-        <ActionRow
-          icon={
-            isCheckingForUpdate ? (
-              <Spinner
-                size="small"
-                color={isUpdateAvailable ? "white" : COLORS.primary}
-              />
-            ) : (
-              <Info
-                size={24}
-                color={isUpdateAvailable ? "white" : COLORS.textSecondary}
-              />
-            )
-          }
-          title="Version"
-          secondaryText={appVersion}
-          onPress={isUpdateAvailable ? applyUpdate : undefined}
-          action={
-            isUpdateAvailable ? (
-              <XStack alignItems="center" space="$2">
-                <Download size={16} color="white" />
-                <Text color="white" fontWeight="500">
-                  Tap to instant-update
-                </Text>
-              </XStack>
-            ) : undefined
-          }
-          backgroundColor={isUpdateAvailable ? COLORS.info : undefined}
-          titleColor={isUpdateAvailable ? "white" : undefined}
-          secondaryTextColor={isUpdateAvailable ? "white" : undefined}
-        />
-
-        <Separator borderColor="$gray5" />
-
-        <ActionRow
-          icon={<LogOut color={COLORS.error} />}
-          label="Sign Out"
-          onPress={handleSignOut}
-          isLast={true}
-        />
-      </Card>
-
-      <YStack mt={100}>
-        <Button
-          size="$4"
-          color="#DC2626"
-          icon={<AlertTriangle size={20} color="#DC2626" />}
-          onPress={() => router.push("/me/delete-account")}
-          fontWeight="600"
+          backgroundColor="white"
+          mb="$3"
+          px="$2"
+          py="$2"
+          borderRadius={16}
+          position="relative"
         >
-          Delete My Account
-        </Button>
-      </YStack>
+          <YStack px="$4" py="$3">
+            {location && (
+              <>
+                <Text
+                  fontSize={16}
+                  fontWeight="bold"
+                  color={COLORS.primary}
+                  mb="$2"
+                >
+                  My location
+                </Text>
+                <Text fontSize={16} opacity={0.9} mb="$3">
+                  {location.name}
+                </Text>
+              </>
+            )}
+            <Text
+              fontWeight="bold"
+              fontSize="$4"
+              color={COLORS.primary}
+              mb="$2"
+            >
+              About me
+            </Text>
+            <Text fontSize={16} color={COLORS.text} opacity={aboutMe ? 1 : 0.7}>
+              {aboutMe || "Add some details about yourself..."}
+            </Text>
+          </YStack>
+          <EditButton
+            backgroundColor="#888888"
+            onPress={handleEditProfile}
+            size={32}
+            position="absolute"
+            right={-6}
+            top={-6}
+          />
+        </Card>
+
+        {/* Actions Section */}
+        <Card backgroundColor="white" mb="$3" borderRadius={16}>
+          <ActionRow
+            icon={<QrCode />}
+            label="My QR Code"
+            onPress={() => router.push("/qr-code")}
+          />
+
+          <Separator borderColor="$gray5" />
+
+          <ActionRow
+            icon={<Clock />}
+            label="My Walk History"
+            onPress={() => router.push("/me/history")}
+          />
+
+          <Separator borderColor="$gray5" />
+
+          <ActionRow
+            icon={<Bell />}
+            label="Notification Settings"
+            onPress={() => router.push("/me/notifications")}
+          />
+
+          <Separator borderColor="$gray5" />
+
+          <ActionRow
+            icon={<Phone />}
+            title="Phone"
+            secondaryText={authUser?.phoneNumber || "Not provided"}
+          />
+
+          <Separator borderColor="$gray5" />
+
+          <ActionRow
+            icon={<Map />}
+            label="Distance Unit"
+            secondaryText={
+              userData?.distanceUnit === "mi" ? "Miles" : "Kilometers"
+            }
+            onPress={() => {
+              const menuItems: MenuItem[] = [
+                {
+                  label: "Kilometers",
+                  onPress: () => {
+                    updateUserData({ distanceUnit: "km" });
+                    showMessage(
+                      "Distance unit changed to kilometers",
+                      "success"
+                    );
+                  },
+                  theme: userData?.distanceUnit === "km" ? "blue" : "default",
+                },
+                {
+                  label: "Miles",
+                  onPress: () => {
+                    updateUserData({ distanceUnit: "mi" });
+                    showMessage("Distance unit changed to miles", "success");
+                  },
+                  theme: userData?.distanceUnit === "mi" ? "blue" : "default",
+                },
+              ];
+              showMenu("Select Distance Unit", menuItems);
+            }}
+          />
+
+          <Separator borderColor="$gray5" />
+
+          <ActionRow
+            icon={
+              isCheckingForUpdate ? (
+                <Spinner
+                  size="small"
+                  color={isUpdateAvailable ? "white" : COLORS.primary}
+                />
+              ) : (
+                <Info
+                  size={24}
+                  color={isUpdateAvailable ? "white" : COLORS.textSecondary}
+                />
+              )
+            }
+            title="Version"
+            secondaryText={appVersion}
+            onPress={isUpdateAvailable ? applyUpdate : undefined}
+            action={
+              isUpdateAvailable ? (
+                <XStack alignItems="center" space="$2">
+                  <Download size={16} color="white" />
+                  <Text color="white" fontWeight="500">
+                    Tap to instant-update
+                  </Text>
+                </XStack>
+              ) : undefined
+            }
+            backgroundColor={isUpdateAvailable ? COLORS.info : undefined}
+            titleColor={isUpdateAvailable ? "white" : undefined}
+            secondaryTextColor={isUpdateAvailable ? "white" : undefined}
+          />
+
+          <Separator borderColor="$gray5" />
+
+          <ActionRow
+            icon={<LogOut color={COLORS.error} />}
+            label="Sign Out"
+            onPress={handleSignOut}
+            isLast={true}
+          />
+        </Card>
+
+        <YStack mt={100}>
+          <Button
+            size="$4"
+            color="#DC2626"
+            icon={<AlertTriangle size={20} color="#DC2626" />}
+            onPress={() => router.push("/me/delete-account")}
+            fontWeight="600"
+          >
+            Delete My Account
+          </Button>
+        </YStack>
+      </View>
     </Screen>
   );
 }

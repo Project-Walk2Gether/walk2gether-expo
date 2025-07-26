@@ -97,7 +97,7 @@ export default function FriendsScreen() {
           />
         }
       >
-        <View flex={1}>
+        <View flex={1} px={20}>
           {friendships.length === 0 ? (
             <EmptyMessage
               message="Your friends aren't here yet!"
@@ -123,8 +123,8 @@ export default function FriendsScreen() {
                   .sort((a, b) => {
                     const friendDataA = getFriendData(a, user?.uid);
                     const friendDataB = getFriendData(b, user?.uid);
-                    const nameA = friendDataA?.name?.toLowerCase() || '';
-                    const nameB = friendDataB?.name?.toLowerCase() || '';
+                    const nameA = friendDataA?.name?.toLowerCase() || "";
+                    const nameB = friendDataB?.name?.toLowerCase() || "";
                     return nameA.localeCompare(nameB);
                   })
                   .map((friendship) => (
