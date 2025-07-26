@@ -41,9 +41,9 @@ interface Props {
 export const CardHeader: React.FC<Props> = ({
   icon,
   action,
+  title,
   walkType,
   isUserInitiator,
-  initiatorName,
 }) => {
   // Determine which icon to show based on walkType
   const walkTypeIcon =
@@ -72,7 +72,7 @@ export const CardHeader: React.FC<Props> = ({
             flexShrink={1}
             ellipsizeMode="tail"
           >
-            {isUserInitiator ? "My" : `${initiatorName}'s`} {walkType} Walk
+            {title}
           </Text>
         </XStack>
 

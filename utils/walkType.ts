@@ -62,9 +62,32 @@ export const getWalkTitle = (
   const ownerText = isMine ? "Your" : `${walk.organizerName}'s`;
 
   if (walk.type === "friends") {
-    return `${ownerText} friend walk`;
+    // Get participants excluding the walk creator and current user
+    const participants = Object.values(walk.participantsById || {}).filter(
+      (p) =>
+        p.userUid !== walk.createdByUid &&
+        p.userUid !== currentUserId &&
+        !p.cancelledAt &&
+        !p.deniedAt
+    );
+
+    if (isMine) {
+      // Current user is the creator
+      if (participants.length === 0) {
+        return "Your friend walk";
+      } else if (participants.length === 1) {
+        return `You invited ${participants[0].displayName}`;
+      } else {
+        return `You invited ${participants[0].displayName} and ${
+          participants.length - 1
+        } other${participants.length > 2 ? "s" : ""}`;
+      }
+    } else {
+      // Current user is an invitee
+      return `${walk.organizerName} invited you`;
+    }
   } else if (walk.type === "meetup") {
-    return walk.topic;
+    return walk.topic + " meetup";
   } else {
     return `${ownerText} neighborhood walk`;
   }

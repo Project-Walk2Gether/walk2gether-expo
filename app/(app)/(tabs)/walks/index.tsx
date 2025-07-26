@@ -194,7 +194,7 @@ export default function WalksScreen() {
                   ? `Start a walk with a using the button below! Or go to the Friends tab below to "Invite a Friend".`
                   : `Try creating a new ${
                       WALK_TYPES[selectedType]?.title || ""
-                    } or select a different filter`
+                    } walk, or select a different filter`
               }
               icon={Footprints}
               iconSize={70}
