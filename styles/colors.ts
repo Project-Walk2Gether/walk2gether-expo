@@ -55,8 +55,8 @@ export const COLORS = {
       background: "#E7E9FE", // Background color for Friends walks
     },
     neighborhood: {
-      main: "#47C97E", // Primary color for Neighborhood walks
-      background: "#E4F6ED", // Background color for Neighborhood walks
+      main: "#0A8A40", // Primary color for Neighborhood walks - darker green for better contrast
+      background: "#E1F5EA", // Background color for Neighborhood walks
     },
     meetup: {
       main: "#FF6B6B", // Primary color for Meetup walks

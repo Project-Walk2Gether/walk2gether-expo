@@ -85,7 +85,15 @@ export default function WalksScreen() {
   );
 
   // Prepare filter options
-  const filterOptions = [
+  type FilterOption = {
+    type: WalkTypeKey | "all";
+    title: string;
+    icon?: string;
+    color: string;
+    backgroundColor: string;
+  };
+
+  const filterOptions: FilterOption[] = [
     {
       type: "all",
       title: "All Walks",
@@ -183,7 +191,7 @@ export default function WalksScreen() {
               }
               subtitle={
                 selectedType === "all"
-                  ? `Start a walk with a friend or neighbor using the button below! Or go to the Friends tab below to "Invite a Friend".`
+                  ? `Start a walk with a using the button below! Or go to the Friends tab below to "Invite a Friend".`
                   : `Try creating a new ${
                       WALK_TYPES[selectedType]?.title || ""
                     } or select a different filter`

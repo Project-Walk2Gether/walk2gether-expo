@@ -60,7 +60,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const idTokenResult = await firebaseUser?.getIdTokenResult();
       setClaims(idTokenResult?.claims || null);
     } catch (error) {
-      signOut();
       console.error("Error refreshing token:", error);
     }
   };
@@ -181,7 +180,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       // Just show the welcome message - update checking is now handled separately
       showMessage(`Welcome, ${displayName}!`, "success");
-      
+
       return userCredential;
     } catch (error: any) {
       console.error("Error signing in with phone:", error);
@@ -201,10 +200,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   ): Promise<FirebaseAuthTypes.UserCredential> => {
     try {
       const userCredential = await auth_instance.signInWithCustomToken(token);
-      
+
       // Just show the welcome message - update checking is now handled separately
       showMessage("Signed in successfully!", "success");
-      
+
       return userCredential;
     } catch (error: any) {
       console.error("Error signing in with token:", error);
