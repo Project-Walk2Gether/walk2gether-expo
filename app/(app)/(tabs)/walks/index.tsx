@@ -7,26 +7,79 @@ import WalkCard from "@/components/WalkCard";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useWalks } from "@/context/WalksContext";
 import { COLORS } from "@/styles/colors";
+import { WALK_TYPES, WalkTypeKey } from "@/utils/walkType";
 import { syncWalkReminders } from "@/utils/notifications";
 import { Footprints } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
-import { FlatList, View } from "react-native";
-import { Text, YStack } from "tamagui";
+import React, { useEffect, useState, useCallback } from "react";
+import { FlatList, View, TouchableOpacity } from "react-native";
+import { Text, YStack, XStack, Pressable } from "tamagui";
 import useDynamicRefs from "use-dynamic-refs";
 import { Walk, WithId } from "walk2gether-shared";
+import Ionicons from '@expo/vector-icons/Ionicons';
+
+// Filter pill component to select walk type
+interface FilterPillProps {
+  type: WalkTypeKey | 'all';
+  title: string;
+  icon?: string;
+  color: string;
+  backgroundColor: string;
+  isActive: boolean;
+  onSelect: (type: WalkTypeKey | 'all') => void;
+}
+
+const FilterPill = ({ type, title, icon, color, backgroundColor, isActive, onSelect }: FilterPillProps) => (
+  <Pressable
+    onPress={() => onSelect(type)}
+    marginRight="$2"
+    paddingHorizontal="$3"
+    paddingVertical="$1.5"
+    borderRadius="$5"
+    backgroundColor={isActive ? color : backgroundColor}
+    opacity={isActive ? 1 : 0.8}
+    pressStyle={{ opacity: 0.7 }}
+  >
+    <XStack alignItems="center" space="$1">
+      {icon && (
+        <Ionicons 
+          name={icon as any} 
+          size={16} 
+          color={isActive ? 'white' : color} 
+        />
+      )}
+      <Text 
+        fontSize={14} 
+        fontWeight={isActive ? "bold" : "normal"} 
+        color={isActive ? "white" : color}
+      >
+        {title}
+      </Text>
+    </XStack>
+  </Pressable>
+);
 
 export default function WalksScreen() {
   const router = useRouter();
   const { activeWalks, upcomingWalks } = useWalks();
   const { permissionStatus } = useNotifications();
   const [_getRef, setRef] = useDynamicRefs();
-
+  const [selectedType, setSelectedType] = useState<WalkTypeKey | 'all'>('all');
+  
   // Sync walk reminders whenever upcoming walks change
   useEffect(() => {
     if (permissionStatus?.granted) syncWalkReminders(upcomingWalks);
   }, [upcomingWalks, permissionStatus?.granted]);
+  
+  // Filter walks based on selected type
+  const filteredActiveWalks = selectedType === 'all' 
+    ? activeWalks 
+    : activeWalks.filter(walk => walk.type === selectedType);
+    
+  const filteredUpcomingWalks = selectedType === 'all' 
+    ? upcomingWalks 
+    : upcomingWalks.filter(walk => walk.type === selectedType);
 
   const renderWalkItem = ({ item }: { item: WithId<Walk> }) => (
     <WalkCard
@@ -41,6 +94,41 @@ export default function WalksScreen() {
       }
     />
   );
+  
+  // Handle filter selection
+  const handleFilterSelect = useCallback((type: WalkTypeKey | 'all') => {
+    setSelectedType(type);
+  }, []);
+  
+  // Render filter pill
+  const renderFilterPill = ({ item }: { item: { type: WalkTypeKey | 'all', title: string, icon?: string, color: string, backgroundColor: string } }) => (
+    <FilterPill
+      type={item.type}
+      title={item.title}
+      icon={item.icon}
+      color={item.color}
+      backgroundColor={item.backgroundColor}
+      isActive={selectedType === item.type}
+      onSelect={handleFilterSelect}
+    />
+  );
+  
+  // Prepare filter options
+  const filterOptions = [
+    {
+      type: 'all',
+      title: 'All Walks',
+      color: COLORS.primary,
+      backgroundColor: '#F0F0F0',
+    },
+    ...Object.values(WALK_TYPES).map(walkType => ({
+      type: walkType.type,
+      title: walkType.title,
+      icon: walkType.icon,
+      color: walkType.color,
+      backgroundColor: walkType.backgroundColor,
+    }))
+  ];
 
   return (
     <>
@@ -73,28 +161,39 @@ export default function WalksScreen() {
           />
         }
       >
-        {activeWalks.length > 0 || upcomingWalks.length > 0 ? (
+        <YStack mb="$3">
+          <FlatList
+            data={filterOptions}
+            renderItem={renderFilterPill}
+            keyExtractor={(item) => item.type}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
+          />
+        </YStack>
+        
+        {(filteredActiveWalks.length > 0 || filteredUpcomingWalks.length > 0) ? (
           <>
-            {activeWalks.length > 0 && (
+            {filteredActiveWalks.length > 0 && (
               <YStack mb="$2">
                 <Text fontWeight="bold" fontSize={20} mb="$2">
                   Active Walks
                 </Text>
                 <FlatList
-                  data={activeWalks}
+                  data={filteredActiveWalks}
                   renderItem={renderWalkItem}
                   keyExtractor={(item) => item.id}
                   scrollEnabled={false}
                 />
               </YStack>
             )}
-            {upcomingWalks.length > 0 && (
+            {filteredUpcomingWalks.length > 0 && (
               <YStack mb="$2">
                 <Text fontWeight="bold" fontSize={20} mb="$2" ml="$2">
                   Upcoming Walks
                 </Text>
                 <FlatList
-                  data={upcomingWalks}
+                  data={filteredUpcomingWalks}
                   renderItem={renderWalkItem}
                   keyExtractor={(item) => item.id}
                   scrollEnabled={false}
@@ -104,11 +203,14 @@ export default function WalksScreen() {
           </>
         ) : (
           <EmptyMessage
-            message="Ready to take the first step?"
-            subtitle={`Start a walk with a friend or neighbor using the button below! Or go to the Friends tab below to "Invite a Friend".`}
+            message={selectedType === 'all' ? "Ready to take the first step?" : `No ${WALK_TYPES[selectedType]?.title || ''} walks found`}
+            subtitle={selectedType === 'all' 
+              ? `Start a walk with a friend or neighbor using the button below! Or go to the Friends tab below to "Invite a Friend".`
+              : `Try creating a new ${WALK_TYPES[selectedType]?.title || ''} or select a different filter`
+            }
             icon={Footprints}
             iconSize={70}
-            iconColor={COLORS.primary}
+            iconColor={selectedType === 'all' ? COLORS.primary : WALK_TYPES[selectedType]?.color || COLORS.primary}
           />
         )}
       </Screen>

@@ -1,16 +1,50 @@
 import { Walk, WithId } from "walk2gether-shared";
+import { COLORS } from "@/styles/colors";
+
+// Define literal types for walk types to satisfy TypeScript constraints
+export type WalkTypeKey = 'friends' | 'neighborhood' | 'meetup';
+
+export interface WalkTypeConfig {
+  type: WalkTypeKey;
+  title: string;
+  icon: string;
+  color: string;
+  backgroundColor: string;
+  description: string;
+}
+
+/**
+ * Comprehensive walk type configuration with all metadata needed for UI components
+ */
+export const WALK_TYPES: Record<WalkTypeKey, WalkTypeConfig> = {
+  friends: {
+    type: "friends",
+    title: "Friend Walk",
+    icon: "people-outline",
+    color: COLORS.walkTypes.friends.main,
+    backgroundColor: COLORS.walkTypes.friends.background,
+    description: "Schedule a walk with a friend"
+  },
+  neighborhood: {
+    type: "neighborhood",
+    title: "Neighborhood Walk",
+    icon: "home-outline",
+    color: COLORS.walkTypes.neighborhood.main,
+    backgroundColor: COLORS.walkTypes.neighborhood.background,
+    description: "Start a walk in your neighborhood"
+  },
+  meetup: {
+    type: "meetup",
+    title: "Meetup Walk",
+    icon: "chatbubbles-outline",
+    color: COLORS.walkTypes.meetup.main,
+    backgroundColor: COLORS.walkTypes.meetup.background,
+    description: "Schedule a walk with a topic, and invite the public"
+  }
+};
 
 export const getWalkTypeLabel = (type: Walk["type"]) => {
-  switch (type) {
-    case "friends":
-      return "Friend Walk";
-    case "neighborhood":
-      return "Neighborhood Walk";
-    case "meetup":
-      return "Meetup Walk";
-    default:
-      return "Walk";
-  }
+  return type && WALK_TYPES[type] ? WALK_TYPES[type].title : "Walk";
 };
 
 /**
