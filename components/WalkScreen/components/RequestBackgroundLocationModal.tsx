@@ -151,7 +151,7 @@ export default function RequestBackgroundLocationModal({
                 onPress={handleEnableTracking}
                 disabled={isRequesting}
               >
-                Enable Tracking
+                Show system prompt
               </Button>
               <Button
                 backgroundColor="$gray3"
