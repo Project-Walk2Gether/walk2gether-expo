@@ -1,13 +1,10 @@
 import { useAuth } from "@/context/AuthContext";
 import { useWalk } from "@/context/WalkContext";
-import { useQuery } from "@/utils/firestore";
 import { getWalkTitle } from "@/utils/walkType";
-import { collection, orderBy, query } from "@react-native-firebase/firestore";
 import { router } from "expo-router";
 import React, { useMemo } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, Text, XStack, YStack } from "tamagui";
-import { Round, WithId } from "walk2gether-shared";
 import HeaderBackButton from "../HeaderBackButton";
 import RoundCountdown from "../Rounds/RoundCountdown";
 import WalkMenu from "../WalkMenu";
@@ -72,8 +69,8 @@ export default function WalkHeader({ goBack }: Props) {
           {/* Top row: Back button, emoji and timer, menu */}
           <XStack
             width="100%"
-            paddingHorizontal="$2"
             alignItems="center"
+            paddingHorizontal="$2"
             justifyContent="space-between"
           >
             {/* Left: Back button */}
@@ -101,7 +98,7 @@ export default function WalkHeader({ goBack }: Props) {
           {/* Bottom row: Partner names and question prompt */}
           <YStack
             width="100%"
-            paddingHorizontal="$4"
+            paddingHorizontal="$3"
             marginTop="$1"
             alignItems="center"
             justifyContent="center"
@@ -146,7 +143,7 @@ export default function WalkHeader({ goBack }: Props) {
           </XStack>
 
           {/* Center: Title */}
-          <YStack alignItems="center" flex={3}>
+          <YStack alignItems="center">
             <Text fontSize={16} fontWeight="600" textAlign="center">
               {walkTitle}
             </Text>

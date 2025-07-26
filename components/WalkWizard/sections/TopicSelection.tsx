@@ -56,6 +56,8 @@ export const TopicSelection: React.FC<Props> = ({
               placeholder="Enter your topic..."
               value={formData.topic || ""}
               onChangeText={(text) => updateFormData({ topic: text })}
+              backgroundColor="#f8f8f8"
+              borderRadius={8}
             />
 
             <Text fontWeight="bold" marginTop="$2">
@@ -69,7 +71,19 @@ export const TopicSelection: React.FC<Props> = ({
               }
               parser={parseExpensiMark}
               placeholder="Describe the topic so more people in the public might want to join. (Supports Markdown)"
-              style={{ minHeight: 150 }}
+              style={{
+                minHeight: 150,
+                textAlignVertical: "top",
+                paddingTop: 12,
+                paddingBottom: 12,
+                paddingHorizontal: 12,
+                backgroundColor: "#f8f8f8",
+                borderColor: "#eaeaea",
+                borderWidth: 1,
+                borderRadius: 8,
+              }}
+              multiline={true}
+              numberOfLines={5}
             />
           </YStack>
         </Card>
