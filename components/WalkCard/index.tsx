@@ -72,6 +72,26 @@ const WalkCard: React.FC<Props> = ({
   const ownerName = getOwnerName();
   const status = getWalkStatus(walk);
 
+  // Determine if the walk is happening now (more precise than just 'active' status)
+  const isHappeningNow = React.useMemo(() => {
+    const now = new Date();
+    
+    // Check if date is in the past
+    if (walk.date) {
+      const walkDate = walk.date.toDate();
+      if (now >= walkDate) return true;
+    }
+    
+    // Check if startedAt is set and in the past
+    if (walk.startedAt) {
+      const startTime = walk.startedAt.toDate();
+      if (now >= startTime) return true;
+    }
+    
+    // Neither date nor startedAt indicates the walk is happening now
+    return false;
+  }, [walk.date, walk.startedAt]);
+
   // Get the participant document for the current user (if they exist as a participant)
   const { doc: participantDoc } = useDoc<Participant>(
     user?.uid ? `walks/${walk.id}/participants/${user.uid}` : undefined
@@ -150,7 +170,7 @@ const WalkCard: React.FC<Props> = ({
           text={getSmartDateFormat(walk.date.toDate())}
           textWeight="bold"
           right={
-            status === "active" ? (
+            isHappeningNow ? (
               <XStack
                 paddingHorizontal={8}
                 paddingVertical={4}
