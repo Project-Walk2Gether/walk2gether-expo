@@ -412,7 +412,7 @@ export const InviteSelection: React.FC<Props> = ({
               isNeighborhoodWalk
                 ? "Select Neighbors"
                 : effectiveWalkType === "meetup"
-                ? "Promote your meetup walk"
+                ? "Promote Your Meetup Walk"
                 : "Select Friends"
             }
             icon={<Users size={20} color={COLORS.textOnLight} />}
@@ -471,12 +471,19 @@ export const InviteSelection: React.FC<Props> = ({
 
                     <InvitationSharing
                       walkId={effectiveWalkId}
-                      invitationCode={userData?.friendInvitationCode || ''}
+                      invitationCode={userData?.friendInvitationCode || ""}
                       walkType={effectiveWalkType}
                       walkTopic={(walk as MeetupWalk)?.topic || formData.topic}
-                      walkDescription={(walk as MeetupWalk)?.descriptionMarkdown || formData.descriptionMarkdown}
+                      walkDescription={
+                        (walk as MeetupWalk)?.descriptionMarkdown ||
+                        formData.descriptionMarkdown
+                      }
                       showPublicInvitation={isMeetupWalk}
-                      personalInvitationLabel={isMeetupWalk ? "Personal invitation" : "Invite participants"}
+                      personalInvitationLabel={
+                        isMeetupWalk
+                          ? "Personal invitation"
+                          : "Invite participants"
+                      }
                       onShareSuccess={handleShareSuccess}
                     />
                   </YStack>

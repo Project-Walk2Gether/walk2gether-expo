@@ -14,9 +14,9 @@ import "react-native-get-random-values";
 import { PortalHost } from "tamagui";
 import "../config/emulators";
 
-import { registerGlobals } from '@livekit/react-native';
+// import { registerGlobals } from '@livekit/react-native';
 
-registerGlobals();
+// registerGlobals();
 
 // @ts-ignore
 
