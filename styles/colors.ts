@@ -62,5 +62,9 @@ export const COLORS = {
       main: "#FF6B6B", // Primary color for Meetup walks
       background: "#FFE5E0", // Background color for Meetup walks
     },
+    virtual: {
+      main: "#8A2BE2", // Primary color for Virtual walks - blueviolet
+      background: "#E6E6FA", // Background color for Virtual walks - light lavender
+    },
   },
 };

@@ -1,5 +1,5 @@
 import { ContentCard } from "@/components/ContentCard";
-import { FormControl } from "@/components/FormControl";
+import InvitationSharing from "@/components/InvitationSharing";
 import UserList from "@/components/UserList";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
@@ -12,11 +12,10 @@ import { updateParticipants } from "@/utils/participantManagement";
 import { findNearbyWalkers } from "@/utils/userSearch";
 import firestore from "@react-native-firebase/firestore";
 import { LinearGradient } from "@tamagui/linear-gradient";
-import { Check, Copy, QrCode, Share2, Users } from "@tamagui/lucide-icons";
-import { useRouter } from "expo-router";
+import { Users } from "@tamagui/lucide-icons";
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Clipboard } from "react-native";
-import { Button, Input, Spacer, Spinner, Text, XStack, YStack } from "tamagui";
+import { Alert } from "react-native";
+import { Button, Spacer, Spinner, Text, YStack } from "tamagui";
 import { MeetupWalk, UserData, Walk, WithId } from "walk2gether-shared";
 import WizardWrapper from "./WizardWrapper";
 
@@ -46,7 +45,7 @@ export const InviteSelection: React.FC<Props> = ({
   const { user } = useAuth();
   const { userData } = useUserData();
   const { showMessage } = useFlashMessage();
-  const router = useRouter();
+  // router no longer needed here as it's used in InvitationSharing
 
   // Use either the provided walk object or fallback to walkId and walkType for backwards compatibility
   const effectiveWalkId =
@@ -84,7 +83,6 @@ export const InviteSelection: React.FC<Props> = ({
   const [nearbyUserIds, setNearbyUserIds] = useState<string[]>([]);
   const [isLoadingNearbyUsers, setIsLoadingNearbyUsers] = useState(false);
   const [shareSuccessful, setShareSuccessful] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   // No need for custom functions to check invitation status
   // We'll pass the acceptedUserIds array to UserList instead
@@ -235,72 +233,8 @@ export const InviteSelection: React.FC<Props> = ({
     updateFormData({ participantUids: updatedUids });
   };
 
-  // Generate and share the invitation link
-  const getInvitationLink = () => {
-    // Need user's invitation code and walk ID to generate a valid link
-    if (!userData?.friendInvitationCode)
-      throw new Error("No friend invitation code available");
-
-    // Properly encode URL parameters to prevent encoding issues
-    const userCode = encodeURIComponent(userData.friendInvitationCode);
-
-    // Use the walk ID directly as the walk parameter
-    // This is more reliable than using the invitation code
-    const inviteLink = `https://projectwalk2gether.org/join?code=${userCode}&walk=${effectiveWalkId}`;
-    console.log("[InviteSelection] Generated invitation link:", inviteLink);
-    console.log("[InviteSelection] Params:", {
-      userCode,
-      walkId: effectiveWalkId,
-    });
-    return inviteLink;
-  };
-
-  // Handle sharing the invitation link
-  const handleShareLink = () => {
-    const link = getInvitationLink();
-
-    if (!link) {
-      showMessage("Unable to generate invitation link", "error");
-      return;
-    }
-
-    // Default message text that will be editable in the custom share screen
-    let defaultMessage =
-      "I've been using this walking app. You should check it out.";
-    let title = "Invite friends to Walk2Gether";
-
-    // Customize message based on walk type
-    if (effectiveWalkType === "meetup") {
-      defaultMessage = `Join me for a meetup walk to discuss "${
-        (walk as MeetupWalk)?.topic || formData.topic || "our topic"
-      }"! ${
-        (walk as MeetupWalk)?.descriptionMarkdown ||
-        formData.descriptionMarkdown
-          ? "We'll be talking about interesting ideas together while walking."
-          : ""
-      }`;
-      title = "Join my Walk2Gether Meetup";
-    } else if (effectiveWalkType === "neighborhood") {
-      defaultMessage =
-        "I'm organizing a neighborhood walk. Join me for some fresh air and community connection!";
-      title = "Join my Neighborhood Walk";
-    } else {
-      defaultMessage =
-        "I've been using this walking app. You should check it out.";
-      title = "Join my Walk2Gether Walk";
-    }
-
-    // Navigate to the custom share screen with necessary parameters
-    router.push({
-      pathname: "/(app)/(modals)/custom-share",
-      params: {
-        link: encodeURIComponent(link),
-        defaultMessage: encodeURIComponent(defaultMessage),
-        title: encodeURIComponent(title),
-      },
-    });
-
-    // Track that the user shared the invitation
+  // Handle when a share was successful
+  const handleShareSuccess = () => {
     setShareSuccessful(true);
   };
 
@@ -478,7 +412,7 @@ export const InviteSelection: React.FC<Props> = ({
               isNeighborhoodWalk
                 ? "Select Neighbors"
                 : effectiveWalkType === "meetup"
-                ? "Invite Participants"
+                ? "Promote Your Meetup Walk"
                 : "Select Friends"
             }
             icon={<Users size={20} color={COLORS.textOnLight} />}
@@ -535,105 +469,23 @@ export const InviteSelection: React.FC<Props> = ({
                       </Text>
                     )}
 
-                    {effectiveWalkType === "meetup" && (
-                      <YStack mb="$4" gap="$2">
-                        <Text fontSize={14} color="$gray11" fontWeight="500">
-                          Meetup invitation link:
-                        </Text>
-                        <XStack
-                          backgroundColor="$background"
-                          borderRadius={8}
-                          borderColor="$borderColor"
-                          borderWidth={1}
-                          alignItems="center"
-                          gap="$2"
-                        >
-                          <Input
-                            flex={1}
-                            value={getInvitationLink()}
-                            editable={false}
-                            fontSize={12}
-                          />
-                          <Button
-                            size="$3"
-                            color={COLORS.textOnDark}
-                            backgroundColor={
-                              copied ? COLORS.success : COLORS.primary
-                            }
-                            onPress={() => {
-                              Clipboard.setString(getInvitationLink());
-                              setCopied(true);
-                              showMessage(
-                                "Invitation link copied to clipboard",
-                                "success"
-                              );
-                              // Reset copied state after 2 seconds
-                              setTimeout(() => setCopied(false), 2000);
-                            }}
-                            icon={
-                              copied ? (
-                                <Check size={16} color="#fff" />
-                              ) : (
-                                <Copy size={16} color="#fff" />
-                              )
-                            }
-                          >
-                            {copied ? "Copied!" : "Copy"}
-                          </Button>
-                        </XStack>
-                        <Text fontSize={12} color="$gray10" marginTop="$1">
-                          Tap to copy the link and share it with others
-                        </Text>
-                      </YStack>
-                    )}
-
-                    <FormControl
-                      label={
-                        effectiveWalkType === "meetup"
-                          ? "Invite participants"
-                          : "Invite a new friend"
+                    <InvitationSharing
+                      walkId={effectiveWalkId}
+                      invitationCode={userData?.friendInvitationCode || ""}
+                      walkType={effectiveWalkType}
+                      walkTopic={(walk as MeetupWalk)?.topic || formData.topic}
+                      walkDescription={
+                        (walk as MeetupWalk)?.descriptionMarkdown ||
+                        formData.descriptionMarkdown
                       }
-                    >
-                      <XStack gap="$3" width="100%" alignItems="center">
-                        <Button
-                          backgroundColor={COLORS.primary}
-                          color={COLORS.textOnDark}
-                          onPress={handleShareLink}
-                          size="$4"
-                          flex={1}
-                          icon={<Share2 size={18} color="#fff" />}
-                          paddingHorizontal={16}
-                          borderRadius={8}
-                          hoverStyle={{ backgroundColor: "#6d4c2b" }}
-                          pressStyle={{ backgroundColor: "#4b2e13" }}
-                        >
-                          {isNeighborhoodWalk
-                            ? "Invite another neighbor"
-                            : effectiveWalkType === "meetup"
-                            ? "Share invitation"
-                            : "Send invitation"}
-                        </Button>
-
-                        <Button
-                          backgroundColor={COLORS.secondary}
-                          color={COLORS.textOnDark}
-                          onPress={() =>
-                            router.push({
-                              pathname: "/qr-code",
-                              params: { walkCode: effectiveWalkId },
-                            })
-                          }
-                          size="$4"
-                          icon={<QrCode size={18} color="#fff" />}
-                          paddingHorizontal={16}
-                          borderRadius={8}
-                          hoverStyle={{ backgroundColor: "#4a95c4" }}
-                          pressStyle={{ backgroundColor: "#2d7fb3" }}
-                        >
-                          QR code
-                        </Button>
-                      </XStack>
-                    </FormControl>
+                      showPublicInvitation={isMeetupWalk}
+                      personalInvitationLabel={
+                        isMeetupWalk
+                          ? "Personal invitation"
+                          : "Invite participants"
+                      }
+                      onShareSuccess={handleShareSuccess}
+                    />
                   </YStack>
                 )}
               </>

@@ -4,18 +4,21 @@ import { WalkTypeConfig } from "./base";
 import { friendsWalkConfig } from "./friends";
 import { meetupWalkConfig } from "./meetup";
 import { neighborhoodWalkConfig } from "./neighborhood";
+import { virtualWalkConfig } from "./virtual";
 
 // Export all walk type configurations
 export type { WalkTypeConfig } from "./base";
 export { friendsWalkConfig } from "./friends";
 export { meetupWalkConfig } from "./meetup";
 export { neighborhoodWalkConfig } from "./neighborhood";
+export { virtualWalkConfig } from "./virtual";
 
 // Map of all walk type configurations by type
 export const walkTypeConfigs: Record<string, WalkTypeConfig> = {
   friends: friendsWalkConfig,
   neighborhood: neighborhoodWalkConfig,
   meetup: meetupWalkConfig,
+  virtual: virtualWalkConfig,
 };
 
 /**

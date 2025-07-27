@@ -46,8 +46,8 @@ export const WalkActionSliders: React.FC<Props> = ({
           <SlideAction
             onSlideComplete={onEndWalk}
             text="SLIDE TO END WALK"
-            backgroundColor="rgba(255,59,48,0.9)"
-            iconColor="#FF3B30"
+            backgroundColor="rgba(147,112,219,0.9)"
+            iconColor="#9370DB"
             icon="stop"
           />
         )}

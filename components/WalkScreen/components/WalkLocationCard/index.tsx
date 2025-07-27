@@ -1,6 +1,6 @@
 import { COLORS } from "@/styles/colors";
 import { openLocationInMaps } from "@/utils/locationUtils";
-import { MapPin, Navigation } from "@tamagui/lucide-icons";
+import { MapPin, MonitorSmartphone, Navigation } from "@tamagui/lucide-icons";
 import React from "react";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Text, View, XStack, YStack } from "tamagui";
@@ -18,6 +18,7 @@ interface Props {
   meetupSpotPhoto?: Attachment;
   isWalkOwner?: boolean;
   walkId?: string;
+  isVirtual?: boolean;
 }
 
 /**
@@ -32,7 +33,27 @@ export default function WalkLocationCard({
   meetupSpotPhoto,
   isWalkOwner = false,
   walkId,
+  isVirtual = false,
 }: Props) {
+  // If it's a virtual walk, show a virtual meeting card
+  if (isVirtual) {
+    return (
+      <WalkDetailsCard title="Virtual Walk" testID="walk-location-card">
+        <XStack alignItems="center" width="100%" gap="$2">
+          <YStack flex={1} gap="$3">
+            <WalkDetailsRow
+              icon={<MonitorSmartphone color={COLORS.walkTypes.virtual.main} />}
+              label="Connect virtually from anywhere"
+              sublabel={notes || "Join using the video chat button when the walk starts"}
+              testID="walk-virtual-row"
+            />
+            {children}
+          </YStack>
+        </XStack>
+      </WalkDetailsCard>
+    );
+  }
+
   // If there's no location data, show a placeholder
   if (!location || !location.latitude || !location.longitude) {
     return (
@@ -72,7 +93,7 @@ export default function WalkLocationCard({
           isWalkOwner={isWalkOwner}
           walkId={walkId}
         />
-        <YStack flex={1} space="$3">
+        <YStack flex={1} gap="$3">
           {/* Location Info */}
           <WalkDetailsRow
             icon={meetupSpotPhoto ? null : <MapPin />}

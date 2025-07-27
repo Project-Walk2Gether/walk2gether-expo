@@ -14,6 +14,12 @@ import "react-native-get-random-values";
 import { PortalHost } from "tamagui";
 import "../config/emulators";
 
+// import { registerGlobals } from '@livekit/react-native';
+
+// registerGlobals();
+
+// @ts-ignore
+
 // https://github.com/FaridSafi/react-native-google-places-autocomplete#more-examples
 (navigator as any).geolocation = require("@react-native-community/geolocation");
 

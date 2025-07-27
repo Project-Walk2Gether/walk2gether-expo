@@ -1,4 +1,4 @@
-import { Clock, Footprints, User, Users } from "@tamagui/lucide-icons";
+import { Clock, Footprints, MonitorSmartphone, User, Users } from "@tamagui/lucide-icons";
 
 /**
  * Defines the visual styling for different walk types
@@ -30,6 +30,15 @@ export const WALK_TYPES = {
     backgroundColor: "#FF6A55",
     label: "Meetup Walk",
     description: "Walk with a group of friends",
+  },
+
+  // Virtual Walk
+  virtual: {
+    icon: MonitorSmartphone,
+    gradient: ["#8A2BE2", "#4169E1"] as const,
+    backgroundColor: "#8A2BE2",
+    label: "Virtual Walk",
+    description: "Connect virtually from anywhere",
   },
 
   // Default Walk (fallback)

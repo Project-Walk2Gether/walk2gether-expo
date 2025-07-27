@@ -2,7 +2,7 @@ import { COLORS } from "@/styles/colors";
 import { Walk, WithId } from "walk2gether-shared";
 
 // Define literal types for walk types to satisfy TypeScript constraints
-export type WalkTypeKey = "friends" | "neighborhood" | "meetup";
+export type WalkTypeKey = "friends" | "neighborhood" | "meetup" | "virtual";
 
 export interface WalkTypeConfig {
   type: WalkTypeKey;
@@ -40,6 +40,14 @@ export const WALK_TYPES: Record<WalkTypeKey, WalkTypeConfig> = {
     color: COLORS.walkTypes.meetup.main,
     backgroundColor: COLORS.walkTypes.meetup.background,
     description: "Schedule a walk with a topic, and invite the public",
+  },
+  virtual: {
+    type: "virtual",
+    title: "Virtual",
+    icon: "laptop-outline",
+    color: "#8A2BE2", // Blueviolet color for virtual walks
+    backgroundColor: "#E6E6FA", // Light lavender background
+    description: "Connect virtually from anywhere",
   },
 };
 
