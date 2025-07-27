@@ -1,4 +1,7 @@
-import { MarkdownTextInput, parseExpensiMark } from "@expensify/react-native-live-markdown";
+import {
+  MarkdownTextInput,
+  parseExpensiMark,
+} from "@expensify/react-native-live-markdown";
 import React from "react";
 import { Text, YStack } from "tamagui";
 
@@ -26,15 +29,16 @@ export default function MarkdownEditor({
           {label}
         </Text>
       )}
-      
+
       <MarkdownTextInput
         value={value || ""}
         onChangeText={onChange}
         parser={parseExpensiMark}
         placeholder={placeholder}
         style={{ minHeight: 150 }}
+        markdownStyle={markdownStyle}
       />
-      
+
       {touched && error && (
         <Text color="$red10" fontSize={14}>
           {error}
@@ -43,3 +47,45 @@ export default function MarkdownEditor({
     </YStack>
   );
 }
+
+const markdownStyle: any = {
+  syntax: {
+    color: "gray",
+  },
+  link: {
+    color: "blue",
+  },
+  h1: {
+    fontSize: 25,
+  },
+  emoji: {
+    fontSize: 20,
+    // fontFamily: FONT_FAMILY_EMOJI,
+  },
+  blockquote: {
+    borderColor: "gray",
+    borderWidth: 6,
+    marginLeft: 6,
+    paddingLeft: 6,
+  },
+  code: {
+    // fontFamily: FONT_FAMILY_MONOSPACE,
+    fontSize: 20,
+    color: "black",
+    backgroundColor: "lightgray",
+  },
+  pre: {
+    // fontFamily: FONT_FAMILY_MONOSPACE,
+    fontSize: 20,
+    color: "black",
+    backgroundColor: "lightgray",
+  },
+  mentionHere: {
+    color: "green",
+    backgroundColor: "lime",
+  },
+  mentionUser: {
+    color: "blue",
+    backgroundColor: "cyan",
+  },
+};
