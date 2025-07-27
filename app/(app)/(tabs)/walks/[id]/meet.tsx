@@ -1,4 +1,5 @@
 import { stopBackgroundLocationTracking } from "@/background/backgroundLocationTask";
+import LivekitRoom from "@/components/LivekitRoom";
 import CurrentUserStatusCard from "@/components/WalkScreen/components/CurrentUserStatusCard";
 import LocationLoading from "@/components/WalkScreen/components/LiveWalkMap/LocationLoading";
 import OfficialWalkRoute from "@/components/WalkScreen/components/LiveWalkMap/OfficialWalkRoute";
@@ -37,6 +38,7 @@ export default function MapTab() {
   } = useLocation();
   const [isBackgroundLocationModalOpen, setIsBackgroundLocationModalOpen] =
     useState(false);
+  const [showLivekitRoom, setShowLivekitRoom] = useState(false);
   const { showSheet, hideSheet } = useSheet();
 
   const walkId = contextWalk?.id || "";
@@ -297,12 +299,12 @@ export default function MapTab() {
             meetupSpotPhoto={walk.meetupSpotPhoto}
             isWalkOwner={isWalkOwner}
             walkId={walkId}
+            isVirtual={walk.type === "virtual"}
           >
             {isStartingSoon && user && walkId && userParticipant && (
               <CurrentUserStatusCard
                 participant={userParticipant}
                 isOwner={walk.createdByUid === user.uid}
-                mt="$2"
                 onPress={() => {
                   if (!walk || !user) return;
 
@@ -329,6 +331,52 @@ export default function MapTab() {
               />
             )}
           </WalkLocationCard>
+        </View>
+      )}
+
+      {/* Toggle button for LivekitRoom */}
+      <View
+        position="absolute"
+        bottom={walk && isOwner(walk) ? 100 : 20}
+        right={20}
+        zIndex={10}
+      >
+        <View
+          backgroundColor="$background"
+          paddingHorizontal={16}
+          paddingVertical={12}
+          borderRadius={30}
+          shadowColor="#000"
+          shadowOffset={{ width: 0, height: 2 }}
+          shadowOpacity={0.1}
+          shadowRadius={4}
+          pressStyle={{ opacity: 0.8 }}
+          onPress={() => setShowLivekitRoom(!showLivekitRoom)}
+        >
+          <Text fontWeight="bold" color="$color">
+            {showLivekitRoom ? "Hide Video Chat" : "Show Video Chat"}
+          </Text>
+        </View>
+      </View>
+
+      {/* LivekitRoom component */}
+      {showLivekitRoom && (
+        <View
+          position="absolute"
+          bottom={walk && isOwner(walk) ? 160 : 80}
+          right={20}
+          left={20}
+          height={300}
+          zIndex={5}
+          backgroundColor="$background"
+          borderRadius={12}
+          shadowColor="#000"
+          shadowOffset={{ width: 0, height: 2 }}
+          shadowOpacity={0.2}
+          shadowRadius={4}
+          overflow="hidden"
+        >
+          <LivekitRoom />
         </View>
       )}
 

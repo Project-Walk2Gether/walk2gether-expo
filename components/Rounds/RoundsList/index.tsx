@@ -1,4 +1,5 @@
 import RoundCard from "@/components/RoundCard";
+import QuestionPromptsList from "@/components/WalkScreen/components/QuestionPromptsList";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
 import { useAuth } from "@/context/AuthContext";
 import { useSheet } from "@/context/SheetContext";
@@ -278,9 +279,19 @@ export default function RoundsList({ walk }: Props): React.ReactNode {
 
         {/* Empty state */}
         {actualRounds.length === 0 && upcomingRounds.length === 0 && (
-          <Text color="$gray9" textAlign="center" padding="$4">
-            No rounds have been created for this walk yet.
-          </Text>
+          <YStack>
+            <Text color="$gray9" textAlign="center" padding="$4">
+              Once the walk starts, participants will be matched into pairs
+              throughout the walk. Add question prompts to give pairs something
+              to talk about during each round.
+            </Text>
+            {/* Question Prompts - only for meetup walks */}
+
+            <QuestionPromptsList
+              walk={walk as MeetupWalk}
+              isWalkOwner={isWalkOwner}
+            />
+          </YStack>
         )}
       </YStack>
     </WalkDetailsCard>

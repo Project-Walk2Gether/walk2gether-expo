@@ -1,9 +1,14 @@
 import RespondToInvitation from "@/components/RespondToInvitation";
+import { MoreVertical } from "@tamagui/lucide-icons";
 import React from "react";
 import { Button } from "tamagui";
-import { WithId, Walk, Participant } from "walk2gether-shared";
+import {
+  Participant,
+  Walk,
+  walkIsMeetupWalk,
+  WithId,
+} from "walk2gether-shared";
 import WalkDetailsCard from "../WalkDetailsCard";
-import { MoreVertical } from "@tamagui/lucide-icons";
 
 interface Props {
   walk: WithId<Walk>;
@@ -25,7 +30,7 @@ export default function RespondToInvitationCard({
 }: Props) {
   return (
     <WalkDetailsCard
-      title="Respond to request"
+      title={walkIsMeetupWalk(walk) ? "Respond to request" : "RSVP to join"}
       headerAction={
         hasResponded ? (
           <Button
@@ -39,10 +44,7 @@ export default function RespondToInvitationCard({
         ) : undefined
       }
     >
-      <RespondToInvitation
-        walk={walk}
-        participantDoc={participantDoc}
-      />
+      <RespondToInvitation walk={walk} participantDoc={participantDoc} />
     </WalkDetailsCard>
   );
 }
