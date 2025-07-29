@@ -1,6 +1,7 @@
 import QuoteWithImage from "@/components/QuoteWithImage";
 import RoundsList from "@/components/Rounds/RoundsList";
 import ParticipantsListVertical from "@/components/WalkScreen/components/ParticipantsListVertical";
+import QuestionPromptsList from "@/components/WalkScreen/components/QuestionPromptsList";
 import RespondToInvitationCard from "@/components/WalkScreen/components/RespondToInvitationCard";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
 import WalkInfoCard from "@/components/WalkScreen/components/WalkInfoCard";
@@ -19,7 +20,7 @@ import React, { useMemo, useState } from "react";
 import { ScrollView } from "react-native";
 import Markdown from "react-native-markdown-display";
 import { Button, Text, View, YStack } from "tamagui";
-import { MeetupWalk, Participant } from "walk2gether-shared";
+import { MeetupWalk, Participant, WithId } from "walk2gether-shared";
 
 export default function DetailsTab() {
   const { walk } = useWalk();
@@ -209,8 +210,15 @@ export default function DetailsTab() {
           </WalkDetailsCard>
         )}
 
-        {/* Show RoundsList only for meetup walk owners */}
-        {isWalkOwner && walk.type === "meetup" && <RoundsList walk={walk} />}
+        {/* Question Prompts - only for meetup walk owners */}
+        {isWalkOwner && walk.type === "meetup" && (
+          <QuestionPromptsList walk={walk} />
+        )}
+
+        {/* Rounds Management - only for meetup walk owners */}
+        {isWalkOwner && walk.type === "meetup" && (
+          <RoundsList walk={walk as any} />
+        )}
 
         {/* Quote and Image at the bottom */}
         {walk.type !== "meetup" && (

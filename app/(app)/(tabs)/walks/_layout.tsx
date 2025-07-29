@@ -3,12 +3,8 @@ import React from "react";
 
 export default function WalksLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-      initialRouteName="index"
-    >
+    <Stack initialRouteName="index">
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="[id]" />
     </Stack>
   );

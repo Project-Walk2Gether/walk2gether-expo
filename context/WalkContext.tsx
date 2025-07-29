@@ -1,6 +1,8 @@
-import React, { createContext, ReactNode, useContext, useEffect } from "react";
+import React, { createContext, ReactNode, useContext, useEffect, useMemo } from "react";
 import { MeetupWalk, Participant, Round, Walk, WithId } from "walk2gether-shared";
 import { useActiveRound } from "@/hooks/useActiveRound";
+import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
+import { useAuth } from "@/context/AuthContext";
 import * as Notifications from 'expo-notifications';
 
 interface WalkContextType {
@@ -20,19 +22,32 @@ interface WalkProviderProps {
   children: ReactNode;
   walk: WithId<Walk | MeetupWalk> | null;
   goBack: () => void;
-  participants: WithId<Participant>[] | null;
-  currentUserParticipantDoc: WithId<Participant> | undefined;
-  isLoadingParticipants: boolean;
 }
 
 export const WalkProvider = ({
   children,
   walk,
   goBack,
-  participants,
-  currentUserParticipantDoc,
-  isLoadingParticipants,
 }: WalkProviderProps) => {
+  const { user } = useAuth();
+  
+  // Get walk ID from the walk document
+  const walkId = useMemo(() => {
+    if (!walk?._ref) return "";
+    const pathParts = walk._ref.path.split("/");
+    return pathParts[pathParts.length - 1];
+  }, [walk?._ref]);
+  
+  // Get participants for the walk
+  const participants = useWalkParticipants(walkId);
+  const isLoadingParticipants = !participants && !!walkId;
+
+  // Get the current user's participant document
+  const currentUserParticipantDoc = useMemo(() => {
+    return participants?.find(
+      (participant) => participant.userUid === user?.uid
+    );
+  }, [participants, user?.uid]);
   // Set up notifications permission and configuration
   useEffect(() => {
     async function configureNotifications() {

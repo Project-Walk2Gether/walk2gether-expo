@@ -1,5 +1,6 @@
 import MessageForm from "@/components/Chat/MessageForm";
 import MessageList from "@/components/Chat/MessageList";
+import WalkRoundControls from "@/components/WalkRoundControls";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useWalk } from "@/context/WalkContext";
@@ -95,6 +96,7 @@ export default function ChatTab() {
       keyboardVerticalOffset={90}
     >
       <YStack flex={1} backgroundColor="white">
+        <WalkRoundControls />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ paddingBottom: 20 }}

@@ -1,5 +1,4 @@
 import RoundCard from "@/components/RoundCard";
-import QuestionPromptsList from "@/components/WalkScreen/components/QuestionPromptsList";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
 import { useAuth } from "@/context/AuthContext";
 import { useSheet } from "@/context/SheetContext";
@@ -285,12 +284,6 @@ export default function RoundsList({ walk }: Props): React.ReactNode {
               throughout the walk. Add question prompts to give pairs something
               to talk about during each round.
             </Text>
-            {/* Question Prompts - only for meetup walks */}
-
-            <QuestionPromptsList
-              walk={walk as MeetupWalk}
-              isWalkOwner={isWalkOwner}
-            />
           </YStack>
         )}
       </YStack>

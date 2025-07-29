@@ -49,7 +49,7 @@ export default function WalksScreen() {
       showActions
       onPress={() =>
         router.push({
-          pathname: `/walks/[id]/details`,
+          pathname: `/walks/[id]/plan`,
           params: { id: item.id },
         })
       }
