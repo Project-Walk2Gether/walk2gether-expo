@@ -29,6 +29,16 @@ export function getSmartDateFormat(date: Date): string {
  * @param targetDate The target date to count down to
  * @returns A string in the format "MM:SS"
  */
+/**
+ * Format a date in the format: Jul 29, 2025 (Tue) at 09:00 AM
+ * 
+ * @param date The date to format
+ * @returns A string in the format "MMM d, yyyy (EEE) at h:mm a"
+ */
+export function getFullDateFormat(date: Date): string {
+  return format(date, "MMM d, yyyy (EEE) 'at' h:mm a");
+}
+
 export function formatTimeLeft(currentDate: Date, targetDate: Date): string {
   const diffInSeconds = differenceInSeconds(targetDate, currentDate);
   

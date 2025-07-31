@@ -1,19 +1,32 @@
+import { stopBackgroundLocationTracking } from "@/background/backgroundLocationTask";
 import MessageForm from "@/components/Chat/MessageForm";
 import MessageList from "@/components/Chat/MessageList";
-import WalkRoundControls from "@/components/WalkRoundControls";
+import { EndWalkSlider } from "@/components/WalkScreen/components/EndWalkSlider";
+import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useWalk } from "@/context/WalkContext";
 import { useWalkChat } from "@/hooks/useWalkChat";
 import { useQuery } from "@/utils/firestore";
-import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
+import { isOwner } from "@/utils/walkUtils";
+import {
+  doc,
+  FirebaseFirestoreTypes,
+  setDoc,
+  Timestamp,
+} from "@react-native-firebase/firestore";
 import { sortBy } from "lodash";
 import React, { useMemo, useRef } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Text, View, YStack } from "tamagui";
-import { Round } from "walk2gether-shared";
+import {
+  MeetupWalk,
+  Round,
+  walkIsMeetupWalk,
+  WithId,
+} from "walk2gether-shared";
 
-export default function ChatTab() {
+export default function TalkTab() {
   const { user } = useAuth();
   const { userData } = useUserData();
   const { walk } = useWalk();
@@ -22,9 +35,13 @@ export default function ChatTab() {
   const roundsCollection = walk?._ref?.collection(
     "rounds"
   ) as FirebaseFirestoreTypes.CollectionReference<Round>;
-  const { docs: rounds } = useQuery(roundsCollection);
+  const { docs: roundsRaw } = useQuery(roundsCollection);
 
-  console.log({ walkId: walk?.id, rounds: rounds.map((doc) => doc._ref.path) });
+  // Properly type the rounds
+  const rounds = React.useMemo(() => {
+    return (roundsRaw || []) as WithId<Round>[];
+  }, [roundsRaw]);
+
   // Use our new useWalkChat hook for chat functionality
   const { messages, sendMessage, deleteMessage } = useWalkChat({
     walkId: walk?.id || "",
@@ -62,15 +79,14 @@ export default function ChatTab() {
     }
   };
 
-  if (!walk) {
-    return (
-      <View flex={1} justifyContent="center" alignItems="center">
-        <Text>Walk not found</Text>
-      </View>
-    );
-  }
+  // Get upcoming rounds for walk owners
+  const upcomingRounds = useMemo(() => {
+    if (!walk || !isOwner(walk) || !walkIsMeetupWalk(walk)) return [];
+    const meetupWalk = walk as MeetupWalk;
+    return meetupWalk.upcomingRounds || [];
+  }, [walk]);
 
-  // Combine messages and rounds for the timeline ,memoizing
+  // Combine messages, rounds, and upcoming rounds for the timeline
   const timelineItems = useMemo(
     () =>
       sortBy(
@@ -83,11 +99,72 @@ export default function ChatTab() {
             type: "round" as const,
             data: round,
           })),
+          // Add upcoming rounds for walk owners
+          ...upcomingRounds.map((upcomingRound, index) => ({
+            type: "upcoming-round" as const,
+            data: {
+              ...upcomingRound,
+              // Add a synthetic createdAt for sorting - upcoming rounds should appear at the end
+              createdAt: new Date(Date.now() + (index + 1) * 1000), // Stagger them by 1 second each
+              isFirstUpcoming: index === 0, // Mark the first one as the next round to start
+            },
+          })),
         ],
-        (item) => item.data.createdAt?.toDate()
+        (item) => {
+          // Handle different timestamp fields for sorting
+          const data = item.data as any;
+          if (data.createdAt) {
+            return data.createdAt.toDate?.() || data.createdAt;
+          }
+          if (data.startTime) {
+            return data.startTime.toDate?.() || data.startTime;
+          }
+          // For upcoming rounds with synthetic createdAt, return current time + offset
+          return new Date();
+        }
       ),
-    [messages, rounds]
+    [messages, rounds, upcomingRounds]
   );
+
+  // Handler for ending a walk (owner only)
+  const handleEndWalk = async () => {
+    if (!walk || !walk.id) return;
+
+    try {
+      await setDoc(
+        doc(firestore_instance, "walks", walk.id),
+        {
+          endedAt: Timestamp.now(),
+          status: "completed",
+        },
+        { merge: true }
+      );
+
+      // Stop background tracking for the current user
+      stopBackgroundLocationTracking();
+
+      // Show confirmation alert
+      Alert.alert(
+        "Walk Ended",
+        "Your walk has ended. Thank you for using Walk2gether!",
+        [{ text: "OK" }]
+      );
+    } catch (error) {
+      console.error("Error ending walk:", error);
+      Alert.alert(
+        "Error",
+        "There was a problem ending the walk. Please try again."
+      );
+    }
+  };
+
+  if (!walk) {
+    return (
+      <View flex={1} justifyContent="center" alignItems="center">
+        <Text>Walk not found</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -96,20 +173,19 @@ export default function ChatTab() {
       keyboardVerticalOffset={90}
     >
       <YStack flex={1} backgroundColor="white">
-        <WalkRoundControls />
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        >
-          <MessageList
-            ref={messageListRef}
-            timeline={timelineItems}
-            currentUserId={user?.uid || ""}
-            loading={false}
-            onDeleteMessage={handleDelete}
-            context="walk"
-          />
-        </ScrollView>
+        <MessageList
+          ref={messageListRef}
+          timeline={timelineItems}
+          currentUserId={user?.uid || ""}
+          loading={false}
+          onDeleteMessage={handleDelete}
+          context="walk"
+        />
+
+        {/* End walk slider - only shown for walk owners when walk has started but not ended */}
+        {walk && isOwner(walk) && walk.startedAt && !walk.endedAt && (
+          <EndWalkSlider onEndWalk={handleEndWalk} />
+        )}
 
         <MessageForm
           onSendMessage={handleSendMessage}

@@ -1,5 +1,5 @@
-import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import DurationField from "@/components/WalkForm/components/DurationField";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import React, { useState } from "react";
 import { Button, H4, Text, XStack, YStack } from "tamagui";
 import { MeetupWalk, Walk, WithId, walkIsMeetupWalk } from "walk2gether-shared";
@@ -12,17 +12,17 @@ interface Props {
   onStartRound?: (durationMinutes: number) => void;
   showDurationPicker?: boolean;
   // If isStartingRound is true, will show Start Round button, otherwise Save button
-  isStartingRound?: boolean; 
+  isStartingRound?: boolean;
 }
 
-export function EditUpcomingRoundSheet({ 
-  walk, 
-  roundIndex, 
+export function EditUpcomingRoundSheet({
+  walk,
+  roundIndex,
   suggestedDuration = 15,
   onClose,
   onStartRound,
   showDurationPicker = false,
-  isStartingRound = false
+  isStartingRound = false,
 }: Props) {
   // Get the current prompt from the questionPrompts array if it's a meetup walk
   // or from the upcomingRounds as a fallback for backward compatibility
@@ -38,44 +38,36 @@ export function EditUpcomingRoundSheet({
 
   const [promptText, setPromptText] = useState(initialPrompt);
   const [duration, setDuration] = useState(suggestedDuration);
-  
-  // Handle starting the round with the selected duration
-  const handleStartRound = () => {
-    if (onStartRound) {
-      onStartRound(duration);
-    }
-    onClose();
-  };
 
   const handleSavePrompt = async () => {
     try {
       // Always update the prompt regardless of walk type
       const updatedRounds = [...(walk.upcomingRounds || [])];
-      
+
       // Ensure the round exists
       if (!updatedRounds[roundIndex]) {
         console.error("Cannot update non-existent round at index", roundIndex);
         return;
       }
-      
+
       // Update the prompt
       updatedRounds[roundIndex] = {
         ...updatedRounds[roundIndex],
         questionPrompt: promptText,
       };
-      
+
       // If it's a meetup walk, also update the questionPrompts array
       if (walkIsMeetupWalk(walk)) {
         const meetupWalk = walk as WithId<MeetupWalk>;
         const updatedPrompts = [...(meetupWalk.questionPrompts || [])];
-        
+
         // Ensure the array is long enough
         while (updatedPrompts.length <= roundIndex) {
           updatedPrompts.push("");
         }
-        
+
         updatedPrompts[roundIndex] = promptText;
-        
+
         // Update both fields in the walk document
         await walk._ref.update({
           questionPrompts: updatedPrompts,
@@ -87,12 +79,12 @@ export function EditUpcomingRoundSheet({
           upcomingRounds: updatedRounds,
         });
       }
-      
+
       // If we're in starting round mode, also handle the round start
       if (isStartingRound && onStartRound) {
         onStartRound(duration);
       }
-      
+
       // Close the sheet
       onClose();
     } catch (error) {
@@ -109,10 +101,10 @@ export function EditUpcomingRoundSheet({
       {showDurationPicker && (
         <YStack space="$3">
           <Text color="$gray11">
-            Based on the remaining time and rounds, we suggest {suggestedDuration}{" "}
-            minutes, but you can adjust as needed.
+            Based on the remaining time and rounds, we suggest{" "}
+            {suggestedDuration} minutes, but you can adjust as needed.
           </Text>
-          
+
           <DurationField
             value={duration}
             onChange={(minutes) => setDuration(minutes)}
@@ -142,15 +134,15 @@ export function EditUpcomingRoundSheet({
 
       {/* Action Buttons */}
       <XStack space="$2" marginTop="$2">
-        <Button 
-          flex={1} 
-          backgroundColor="$blue8" 
-          color="white" 
+        <Button
+          flex={1}
+          backgroundColor="$blue8"
+          color="white"
           onPress={handleSavePrompt}
         >
           {isStartingRound ? "Start Round" : "Save"}
         </Button>
-        
+
         <Button flex={1} theme="gray" onPress={onClose}>
           Cancel
         </Button>

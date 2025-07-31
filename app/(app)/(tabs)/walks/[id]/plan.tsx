@@ -5,6 +5,7 @@ import QuestionPromptsList from "@/components/WalkScreen/components/QuestionProm
 import RespondToInvitationCard from "@/components/WalkScreen/components/RespondToInvitationCard";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
 import WalkInfoCard from "@/components/WalkScreen/components/WalkInfoCard";
+import LocationCard from "@/components/WalkScreen/components/LocationCard";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useMenu } from "@/context/MenuContext";
@@ -22,7 +23,7 @@ import Markdown from "react-native-markdown-display";
 import { Button, Text, View, YStack } from "tamagui";
 import { MeetupWalk, Participant, WithId } from "walk2gether-shared";
 
-export default function DetailsTab() {
+export default function PlanTab() {
   const { walk } = useWalk();
   const { user } = useAuth();
   const { showMessage } = useFlashMessage();
@@ -154,12 +155,18 @@ export default function DetailsTab() {
             onMenuPress={handleShowParticipationMenu}
           />
         )}
+        {/* Location Card */}
+        <LocationCard
+          startLocation={walk.startLocation}
+          currentLocation={walk.currentLocation}
+          walkId={walk.id}
+          hasMeetupSpotPhoto={!!walk.meetupSpotPhoto}
+        />
+
         {/* Walk Info Card */}
         <WalkInfoCard
           walkDate={walk.date ? walk.date.toDate() : undefined}
           durationMinutes={walk.durationMinutes}
-          // location={walk.currentLocation}
-          // locationName={walk.currentLocation?.name}
           notes={walk.startLocation?.notes}
         />
 
@@ -217,7 +224,10 @@ export default function DetailsTab() {
 
         {/* Rounds Management - only for meetup walk owners */}
         {isWalkOwner && walk.type === "meetup" && (
-          <RoundsList walk={walk as any} />
+          <RoundsList 
+            /* The walk object comes from context but RoundsList requires specific MeetupWalk properties */
+            walk={walk as any} 
+          />
         )}
 
         {/* Quote and Image at the bottom */}

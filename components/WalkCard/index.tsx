@@ -1,7 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { COLORS } from "@/styles/colors";
-import { getSmartDateFormat } from "@/utils/dateUtils";
+import { getFullDateFormat } from "@/utils/dateUtils";
 import { useDoc } from "@/utils/firestore";
 import { calculateDisplayAvatars } from "@/utils/participantAvatars";
 import { getWalkTitle } from "@/utils/walkType";
@@ -75,19 +75,19 @@ const WalkCard: React.FC<Props> = ({
   // Determine if the walk is happening now (more precise than just 'active' status)
   const isHappeningNow = React.useMemo(() => {
     const now = new Date();
-    
+
     // Check if date is in the past
     if (walk.date) {
       const walkDate = walk.date.toDate();
       if (now >= walkDate) return true;
     }
-    
+
     // Check if startedAt is set and in the past
     if (walk.startedAt) {
       const startTime = walk.startedAt.toDate();
       if (now >= startTime) return true;
     }
-    
+
     // Neither date nor startedAt indicates the walk is happening now
     return false;
   }, [walk.date, walk.startedAt]);
@@ -167,7 +167,7 @@ const WalkCard: React.FC<Props> = ({
         />
         <IconTextRow
           icon={<Calendar size={16} color="#444" />}
-          text={getSmartDateFormat(walk.date.toDate())}
+          text={getFullDateFormat(walk.date.toDate())}
           textWeight="bold"
           right={
             isHappeningNow ? (
@@ -181,7 +181,7 @@ const WalkCard: React.FC<Props> = ({
                 borderWidth={1}
               >
                 <Text fontSize={12} color="#0a5c0a" fontWeight="500">
-                  Happening now!
+                  Now
                 </Text>
               </XStack>
             ) : undefined

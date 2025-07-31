@@ -3,7 +3,7 @@ import { COLORS } from "@/styles/colors";
 import { Car, ChevronRight, MapPin } from "@tamagui/lucide-icons";
 import React from "react";
 import { Pressable } from "react-native";
-import { Text, XStack, YStack, GetProps } from "tamagui";
+import { GetProps, Text, XStack, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
 
 interface Props extends GetProps<typeof XStack> {
@@ -56,12 +56,13 @@ const renderDistanceInfo = (participant: ParticipantWithRoute) => {
   );
 };
 
-export default function CurrentUserStatusCard({
+export default function ParticipantStatusCard({
   participant,
   isOwner,
   onPress,
   ...rest
 }: Props) {
+  return null;
   return (
     <XStack
       backgroundColor="white"
@@ -98,7 +99,7 @@ export default function CurrentUserStatusCard({
           {/* User Status Section */}
           <YStack flex={1} space="$1">
             <Text fontWeight="bold" fontSize="$4" color="$gray12">
-              My status
+              {participant.displayName}
             </Text>
 
             {/* Render status info */}

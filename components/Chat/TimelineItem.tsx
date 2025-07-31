@@ -13,7 +13,8 @@ import TimelineRoundCard from "./TimelineRoundCard";
 export type TimelineItemType =
   | { type: "message"; data: MessageType }
   | { type: "walk"; data: WithId<Walk> }
-  | { type: "round"; data: RoundType };
+  | { type: "round"; data: RoundType }
+  | { type: "upcoming-round"; data: RoundType & { isFirstUpcoming?: boolean } };
 
 interface TimelineItemProps {
   item: TimelineItemType;
@@ -43,7 +44,7 @@ export function TimelineItem({
         walk={item.data as WithId<Walk>}
         onPress={() =>
           router.push({
-            pathname: `/walks/[id]/details`,
+            pathname: `/walks/[id]/meet`,
             params: { id: item.data.id },
           })
         }
@@ -53,6 +54,27 @@ export function TimelineItem({
     const round = item.data as RoundType;
 
     return <TimelineRoundCard round={round} currentUserId={currentUserId} />;
+  } else if (item.type === "upcoming-round") {
+    const upcomingRound = item.data;
+
+    return (
+      <TimelineRoundCard
+        round={upcomingRound}
+        currentUserId={currentUserId}
+        isUpcoming={true}
+        isFirstUpcoming={upcomingRound.isFirstUpcoming}
+      />
+    );
+  } else if (item.type === "active-round") {
+    const activeRound = item.data;
+
+    return (
+      <TimelineRoundCard
+        round={activeRound}
+        currentUserId={currentUserId}
+        isActive={true}
+      />
+    );
   }
 
   return null;

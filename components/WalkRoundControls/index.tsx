@@ -1,20 +1,20 @@
 import { useAuth } from "@/context/AuthContext";
+import { useMenu } from "@/context/MenuContext";
 import { useWalk } from "@/context/WalkContext";
+import { MoreVertical } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
-import firestore from "@react-native-firebase/firestore";
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Button, Stack, Text, XStack, YStack } from "tamagui";
-import RoundCountdown from "../Rounds/RoundCountdown";
-import { differenceInMinutes } from "date-fns";
 import { MeetupWalk, walkIsMeetupWalk } from "walk2gether-shared";
+import RoundCountdown from "../Rounds/RoundCountdown";
 
 interface Props {}
 
 export default function WalkRoundControls({}: Props) {
   const { user } = useAuth();
   const { walk } = useWalk();
+  const { showMenu } = useMenu();
   const currentUserId = user?.uid;
-  const [isRotating, setIsRotating] = useState(false);
 
   // Check if the current user is the walk owner
   const isWalkOwner = useMemo(() => {
@@ -24,9 +24,10 @@ export default function WalkRoundControls({}: Props) {
 
   // Check if the walk is a MeetupWalk and get upcoming rounds
   const isMeetupWalk = walk ? walkIsMeetupWalk(walk) : false;
-  const upcomingRounds = isMeetupWalk && walk
-    ? (walk as unknown as MeetupWalk).upcomingRounds || []
-    : [];
+  const upcomingRounds =
+    isMeetupWalk && walk
+      ? (walk as unknown as MeetupWalk).upcomingRounds || []
+      : [];
 
   // Get activeRound and userPair from context instead of querying directly
   const { activeRound, userPair } = useWalk();
@@ -54,81 +55,7 @@ export default function WalkRoundControls({}: Props) {
   // Whether the header is tappable (has active round user is part of)
   const isTappable = !!activeRound && !!userPair;
 
-  // Calculate suggested round duration based on remaining time and rounds
-  const calculateSuggestedDuration = () => {
-    if (!walk || !walk.estimatedEndTime || upcomingRounds.length === 0) {
-      return 15; // Default to 15 minutes if we can't calculate
-    }
 
-    // Calculate minutes between now and estimated end time
-    const now = new Date();
-    const estimatedEndTime = walk.estimatedEndTime.toDate();
-    const remainingMinutes = differenceInMinutes(estimatedEndTime, now);
-
-    // If we're past the estimated end time, default to 15 minutes
-    if (remainingMinutes <= 0) {
-      return 15;
-    }
-
-    // Divide remaining time by number of upcoming rounds, with a minimum of 5 minutes
-    const suggestedDuration = Math.max(
-      5,
-      Math.floor(remainingMinutes / upcomingRounds.length)
-    );
-
-    return suggestedDuration;
-  };
-
-  // Handle rotating to the next round
-  const handleRotateToNextRound = async () => {
-    if (upcomingRounds.length === 0 || !currentUserId || !walk || !isMeetupWalk) {
-      return;
-    }
-
-    setIsRotating(true);
-
-    try {
-      // Get the first upcoming round
-      const nextRound = upcomingRounds[0];
-      const durationMinutes = calculateSuggestedDuration();
-
-      // Create a batch to perform multiple operations atomically
-      const batch = firestore().batch();
-
-      // Reference for the new round document
-      const newRoundRef = (walk._ref as any).collection("rounds").doc();
-
-      // Calculate round duration in milliseconds
-      const roundDurationMs = durationMinutes * 60 * 1000;
-
-      // Create a new round document in Firestore
-      const roundData = {
-        ...nextRound,
-        createdAt: firestore.FieldValue.serverTimestamp(),
-        startTime: firestore.FieldValue.serverTimestamp(),
-        // Set endTime based on the selected duration
-        endTime: firestore.Timestamp.fromDate(
-          new Date(Date.now() + roundDurationMs)
-        ),
-      };
-
-      // Add the round to the rounds collection
-      batch.set(newRoundRef, roundData);
-
-      // Update the walk document to remove the first upcoming round and shift others up
-      const updatedUpcomingRounds = [...upcomingRounds.slice(1)];
-      batch.update(walk._ref as any, {
-        upcomingRounds: updatedUpcomingRounds,
-      });
-
-      // Commit the batch
-      await batch.commit();
-    } catch (error) {
-      console.error("Error rotating rounds:", error);
-    } finally {
-      setIsRotating(false);
-    }
-  };
 
   // Handle opening the rounds management modal
   const handleOpenRoundsModal = () => {
@@ -137,7 +64,7 @@ export default function WalkRoundControls({}: Props) {
       const walkId = walkIdParts[walkIdParts.length - 1];
       router.push({
         pathname: "/(app)/(modals)/walk-rounds-management",
-        params: { walkId }
+        params: { walkId },
       });
     }
   };
@@ -170,11 +97,33 @@ export default function WalkRoundControls({}: Props) {
                 {userPair.emoji}
               </Text>
               {activeRound.startTime && (
-                <XStack position="absolute" right="$2">
+                <XStack position="absolute" left="$2">
                   <RoundCountdown
                     startTime={activeRound.startTime}
                     endTime={activeRound.endTime}
                   />
+                </XStack>
+              )}
+
+              {/* Menu button for walk owners */}
+              {isWalkOwner && isMeetupWalk && (
+                <XStack position="absolute" right="$2" top="-$2">
+                  <Button
+                    size="$2"
+                    circular
+                    backgroundColor="rgba(255,255,255,0.2)"
+                    borderWidth={0}
+                    onPress={() => {
+                      showMenu("Round Options", [
+                        {
+                          label: "See All Rounds",
+                          onPress: handleOpenRoundsModal,
+                        },
+                      ]);
+                    }}
+                  >
+                    <MoreVertical size={16} color="white" />
+                  </Button>
                 </XStack>
               )}
             </XStack>
@@ -195,7 +144,9 @@ export default function WalkRoundControls({}: Props) {
                 textWrap="wrap"
               >
                 Look for{" "}
-                {partnerNames.length > 0 ? partnerNames.join(", ") : "your partner"}
+                {partnerNames.length > 0
+                  ? partnerNames.join(", ")
+                  : "your partner"}
               </Text>
               {activeRound.questionPrompt && (
                 <Text
@@ -214,39 +165,7 @@ export default function WalkRoundControls({}: Props) {
         </Stack>
       )}
 
-      {/* Admin Controls - shown only to walk owners */}
-      {isWalkOwner && isMeetupWalk && (
-        <YStack px="$2" py="$2" gap="$2" backgroundColor="$gray2">
-          <Text fontSize={12} color="$gray10" textAlign="center" fontWeight="500">
-            Walk Admin Controls
-          </Text>
-          
-          <XStack gap="$2" justifyContent="center">
-            {/* Next Round Button */}
-            {upcomingRounds.length > 0 && (
-              <Button
-                size="$3"
-                theme="blue"
-                onPress={handleRotateToNextRound}
-                disabled={isRotating}
-                flex={1}
-              >
-                {isRotating ? "Starting..." : "Next Round"}
-              </Button>
-            )}
-            
-            {/* See All Rounds Button */}
-            <Button
-              size="$3"
-              variant="outlined"
-              onPress={handleOpenRoundsModal}
-              flex={1}
-            >
-              See All Rounds
-            </Button>
-          </XStack>
-        </YStack>
-      )}
+
     </YStack>
   );
 }

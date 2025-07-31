@@ -1,45 +1,35 @@
 import { stopBackgroundLocationTracking } from "@/background/backgroundLocationTask";
-import CurrentUserStatusCard from "@/components/WalkScreen/components/CurrentUserStatusCard";
 import LocationLoading from "@/components/WalkScreen/components/LiveWalkMap/LocationLoading";
 import OfficialWalkRoute from "@/components/WalkScreen/components/LiveWalkMap/OfficialWalkRoute";
 import ParticipantMarker from "@/components/WalkScreen/components/LiveWalkMap/ParticipantMarker";
 import MeetupSpot from "@/components/WalkScreen/components/MeetupSpot";
+import MeetupSpotCard from "@/components/WalkScreen/components/MeetupSpotCard";
 import RequestBackgroundLocationModal from "@/components/WalkScreen/components/RequestBackgroundLocationModal";
-import { WalkActionSliders } from "@/components/WalkScreen/components/WalkActionSliders";
-import WalkLocationCard from "@/components/WalkScreen/components/WalkLocationCard";
-import WalkParticipantStatusControls from "@/components/WalkScreen/components/WalkParticipantStatusControls";
+import { StartWalkSlider } from "@/components/WalkScreen/components/StartWalkSlider";
+
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
-import { useSheet } from "@/context/SheetContext";
+
 import { useWalk } from "@/context/WalkContext";
 import { useLocationTracking } from "@/hooks/useLocationTracking";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { calculateOptimalRegion } from "@/utils/mapUtils";
 import { getWalkStatus, isOwner } from "@/utils/walkUtils";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
-import { useIsFocused } from "@react-navigation/native";
 import { differenceInHours } from "date-fns";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Text, View } from "tamagui";
 
-export default function MapTab() {
+export default function MeetTab() {
   const { walk: contextWalk } = useWalk();
-  const isFocussed = useIsFocused();
   const { user } = useAuth();
   const mapRef = useRef<MapView>(null);
-  const {
-    locationPermission,
-    backgroundLocationPermission,
-    requestForegroundPermissions,
-  } = useLocation();
+  const { locationPermission, backgroundLocationPermission } = useLocation();
   const [isBackgroundLocationModalOpen, setIsBackgroundLocationModalOpen] =
     useState(false);
-  const [showLivekitRoom, setShowLivekitRoom] = useState(false);
-  const { showSheet, hideSheet } = useSheet();
-
   const walkId = contextWalk?.id || "";
 
   // Get walk participants
@@ -187,38 +177,6 @@ export default function MapTab() {
     }
   }
 
-  // Handler for ending a walk (owner only)
-  async function handleEndWalk() {
-    if (!walk || !walk.id) return;
-
-    try {
-      await setDoc(
-        doc(firestore_instance, "walks", walk.id),
-        {
-          endedAt: Timestamp.now(),
-          status: "completed",
-        },
-        { merge: true }
-      );
-
-      // Stop background tracking for the current user
-      stopBackgroundLocationTracking();
-
-      // Show confirmation alert
-      Alert.alert(
-        "Walk Ended",
-        "Your walk has ended. Thank you for using Walk2gether!",
-        [{ text: "OK" }]
-      );
-    } catch (error) {
-      console.error("Error ending walk:", error);
-      Alert.alert(
-        "Error",
-        "There was a problem ending the walk. Please try again."
-      );
-    }
-  }
-
   // Return loading screen if we don't have walk or focus
   if (!walk || !walk.id) {
     return (
@@ -290,7 +248,7 @@ export default function MapTab() {
             zIndex: 10,
           }}
         >
-          <WalkLocationCard
+          <MeetupSpotCard
             location={walk.currentLocation}
             locationName={walk.currentLocation?.name}
             notes={walk.startLocation?.notes}
@@ -298,38 +256,9 @@ export default function MapTab() {
             meetupSpotPhoto={walk.meetupSpotPhoto}
             isWalkOwner={isWalkOwner}
             walkId={walkId}
-            isVirtual={walk.type === "virtual"}
-          >
-            {isStartingSoon && user && walkId && userParticipant && (
-              <CurrentUserStatusCard
-                participant={userParticipant}
-                isOwner={walk.createdByUid === user.uid}
-                onPress={() => {
-                  if (!walk || !user) return;
-
-                  showSheet(
-                    <WalkParticipantStatusControls
-                      status={userParticipant.status || "pending"}
-                      isCancelled={!!userParticipant.cancelledAt}
-                      isOwner={walk.createdByUid === user.uid}
-                      walkId={walk.id}
-                      userId={user.uid}
-                      navigationMethod={
-                        userParticipant.navigationMethod || "driving"
-                      }
-                      onClose={() => {
-                        hideSheet();
-                      }}
-                    />,
-                    {
-                      title: "Update Your Status",
-                      dismissOnSnapToBottom: true,
-                    }
-                  );
-                }}
-              />
-            )}
-          </WalkLocationCard>
+            participants={participants || []}
+            isStartingSoon={isStartingSoon}
+          />
         </View>
       )}
 
@@ -338,14 +267,9 @@ export default function MapTab() {
         isLoading={locationPermission === null || !userLocation}
       />
 
-      {/* Controls rendered using absolute positioning */}
-      {walk && isOwner(walk) ? (
-        <WalkActionSliders
-          showStartWalkSlider={!walk?.startedAt && !walk?.endedAt}
-          showEndWalkSlider={!!walk?.startedAt && !walk?.endedAt}
-          onStartWalk={handleStartWalk}
-          onEndWalk={handleEndWalk}
-        />
+      {/* Start walk slider - only shown for walk owners when walk hasn't started */}
+      {walk && isOwner(walk) && !walk?.startedAt && !walk?.endedAt ? (
+        <StartWalkSlider onStartWalk={handleStartWalk} />
       ) : null}
 
       <RequestBackgroundLocationModal

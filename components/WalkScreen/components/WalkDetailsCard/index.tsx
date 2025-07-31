@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { Card, H4, XStack, YStack } from "tamagui";
+import { Card, H4, XStack } from "tamagui";
 
 interface Props {
   title: string;
@@ -12,19 +12,14 @@ interface Props {
  * A reusable card component for walk details sections
  * with optional action button in the header
  */
-export default function WalkDetailsCard({ 
-  title, 
-  children, 
+export default function WalkDetailsCard({
+  title,
+  children,
   testID,
-  headerAction 
+  headerAction,
 }: Props) {
   return (
-    <Card 
-      backgroundColor="white" 
-      elevate 
-      borderRadius="$4"
-      testID={testID}
-    >
+    <Card backgroundColor="white" elevate borderRadius="$4" testID={testID}>
       <Card.Header>
         <XStack justifyContent="space-between" alignItems="center" width="100%">
           <H4>{title}</H4>
