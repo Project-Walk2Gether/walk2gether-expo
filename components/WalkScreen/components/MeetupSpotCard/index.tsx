@@ -5,7 +5,7 @@ import { openLocationInMaps } from "@/utils/locationUtils";
 import { MapPin, Navigation } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Button, Card, H4, Text, View, XStack, YStack } from "tamagui";
+import { Button, Card, Text, View, XStack, YStack } from "tamagui";
 import {
   Attachment,
   Location,
@@ -123,10 +123,15 @@ export default function MeetupSpotCard({
         borderRadius="$4"
         testID="meetup-spot-card"
       >
-        <Card.Header>
-          <H4>Meeting Point</H4>
-        </Card.Header>
-        <Text padding="$4">Location not specified</Text>
+        <YStack padding="$4" gap="$3">
+          <XStack alignItems="center" gap="$2">
+            <MapPin size={16} color="$gray10" />
+            <Text fontSize="$4" fontWeight="bold" color="$gray12">
+              Meetup Spot
+            </Text>
+          </XStack>
+          <Text>Location not specified</Text>
+        </YStack>
       </Card>
     );
   }
@@ -143,56 +148,48 @@ export default function MeetupSpotCard({
       borderRadius="$4"
       testID="meetup-spot-card"
     >
-      <Card.Header>
-        <XStack justifyContent="space-between" alignItems="center" width="100%">
-          <H4>Meeting Point</H4>
+      <XStack alignItems="center" width="100%" gap="$3" padding="$4">
+        <MeetupSpotPhoto
+          photo={meetupSpotPhoto}
+          isWalkOwner={isWalkOwner}
+          walkId={walkId}
+        />
+        <YStack flex={1} gap="$2">
+          {/* Header with Meetup Spot title */}
+          <XStack alignItems="center" gap="$2">
+            <MapPin size={16} color="$gray10" />
+            <Text fontSize="$4" fontWeight="bold" color="$gray12">
+              Meetup Spot
+            </Text>
+          </XStack>
+
+          {/* Location Info */}
+          <YStack gap="$1">
+            <Text fontSize="$4" fontWeight="600" color="$gray12">
+              {displayName}
+            </Text>
+            {notes && (
+              <Text fontSize="$3" color="$gray10">
+                {notes}
+              </Text>
+            )}
+          </YStack>
+
+          {/* Open in Maps Button */}
           {hasCoordinates && (
             <Button
               size="$2"
               onPress={() =>
                 openLocationInMaps(latitude, longitude, displayName)
               }
-              icon={<Navigation size={14} color="white" />}
+              icon={<Navigation size={16} color="white" />}
               backgroundColor={COLORS.primary}
               color="white"
+              alignSelf="flex-start"
             >
               Open in Maps
             </Button>
           )}
-        </XStack>
-      </Card.Header>
-
-      <XStack
-        alignItems="flex-start"
-        width="100%"
-        gap="$3"
-        padding="$4"
-        paddingTop="$0"
-      >
-        <MeetupSpotPhoto
-          photo={meetupSpotPhoto}
-          isWalkOwner={isWalkOwner}
-          walkId={walkId}
-        />
-        <YStack flex={1} gap="$3">
-          {/* Location Info */}
-          <YStack gap="$1">
-            <XStack alignItems="center" gap="$2">
-              {!meetupSpotPhoto && <MapPin size={16} color="$gray10" />}
-              <Text fontSize="$4" fontWeight="600" color="$gray12">
-                {displayName}
-              </Text>
-            </XStack>
-            {notes && (
-              <Text
-                fontSize="$3"
-                color="$gray10"
-                paddingLeft={!meetupSpotPhoto ? "$5" : "$0"}
-              >
-                {notes}
-              </Text>
-            )}
-          </YStack>
 
           {/* Map Preview - only shown if showMap is true */}
           {hasCoordinates && showMap && (

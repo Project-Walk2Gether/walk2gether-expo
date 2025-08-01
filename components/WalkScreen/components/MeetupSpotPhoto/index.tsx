@@ -15,6 +15,8 @@ interface Props {
   walkId?: string;
 }
 
+const SIZE = 96;
+
 /**
  * Component that displays a meetup spot photo or an upload button for walk owners
  */
@@ -76,8 +78,8 @@ export default function MeetupSpotPhoto({ photo, isWalkOwner, walkId }: Props) {
     return (
       <Pressable onPress={handleViewPhoto}>
         <View
-          width={70}
-          height={70}
+          width={SIZE}
+          height={SIZE}
           borderRadius={8}
           overflow="hidden"
           borderWidth={1}
@@ -85,8 +87,8 @@ export default function MeetupSpotPhoto({ photo, isWalkOwner, walkId }: Props) {
         >
           <Image
             source={{ uri: photo.uri }}
-            width={100}
-            height={100}
+            width={SIZE}
+            height={SIZE}
             resizeMode="cover"
           />
         </View>
@@ -98,7 +100,7 @@ export default function MeetupSpotPhoto({ photo, isWalkOwner, walkId }: Props) {
     // Only show upload button if user is the walk owner
     if (isWalkOwner && walkId) {
       return (
-        <View width={70} height={70} borderRadius="$4" overflow="hidden">
+        <View width={SIZE} height={SIZE} borderRadius="$4" overflow="hidden">
           {isUploading ? (
             <View
               width="100%"
@@ -132,8 +134,8 @@ export default function MeetupSpotPhoto({ photo, isWalkOwner, walkId }: Props) {
     // Non-owners see an empty placeholder with reduced opacity
     return (
       <View
-        width={70}
-        height={70}
+        width={SIZE}
+        height={SIZE}
         borderRadius="$4"
         backgroundColor="$gray3"
         opacity={0.6}
