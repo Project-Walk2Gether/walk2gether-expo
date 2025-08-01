@@ -1,11 +1,11 @@
 import QuoteWithImage from "@/components/QuoteWithImage";
 import RoundsList from "@/components/Rounds/RoundsList";
+import LocationCard from "@/components/WalkScreen/components/LocationCard";
 import ParticipantsListVertical from "@/components/WalkScreen/components/ParticipantsListVertical";
 import QuestionPromptsList from "@/components/WalkScreen/components/QuestionPromptsList";
 import RespondToInvitationCard from "@/components/WalkScreen/components/RespondToInvitationCard";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
 import WalkInfoCard from "@/components/WalkScreen/components/WalkInfoCard";
-import LocationCard from "@/components/WalkScreen/components/LocationCard";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useMenu } from "@/context/MenuContext";
@@ -21,7 +21,7 @@ import React, { useMemo, useState } from "react";
 import { ScrollView } from "react-native";
 import Markdown from "react-native-markdown-display";
 import { Button, Text, View, YStack } from "tamagui";
-import { MeetupWalk, Participant, WithId } from "walk2gether-shared";
+import { MeetupWalk, Participant } from "walk2gether-shared";
 
 export default function PlanTab() {
   const { walk } = useWalk();
@@ -146,6 +146,7 @@ export default function PlanTab() {
             <Markdown>{(walk as MeetupWalk).descriptionMarkdown}</Markdown>
           </WalkDetailsCard>
         )}
+
         {isMine ? null : (
           <RespondToInvitationCard
             walk={walk}
@@ -155,19 +156,20 @@ export default function PlanTab() {
             onMenuPress={handleShowParticipationMenu}
           />
         )}
-        {/* Location Card */}
-        <LocationCard
-          startLocation={walk.startLocation}
-          currentLocation={walk.currentLocation}
-          walkId={walk.id}
-          hasMeetupSpotPhoto={!!walk.meetupSpotPhoto}
-        />
 
         {/* Walk Info Card */}
         <WalkInfoCard
           walkDate={walk.date ? walk.date.toDate() : undefined}
           durationMinutes={walk.durationMinutes}
           notes={walk.startLocation?.notes}
+        />
+
+        {/* Location Card */}
+        <LocationCard
+          startLocation={walk.startLocation}
+          currentLocation={walk.currentLocation}
+          walkId={walk.id}
+          hasMeetupSpotPhoto={!!walk.meetupSpotPhoto}
         />
 
         {/* Participants Section - only shown for walk owner or friends walks */}
@@ -224,9 +226,9 @@ export default function PlanTab() {
 
         {/* Rounds Management - only for meetup walk owners */}
         {isWalkOwner && walk.type === "meetup" && (
-          <RoundsList 
+          <RoundsList
             /* The walk object comes from context but RoundsList requires specific MeetupWalk properties */
-            walk={walk as any} 
+            walk={walk as any}
           />
         )}
 

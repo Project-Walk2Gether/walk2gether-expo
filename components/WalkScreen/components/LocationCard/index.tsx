@@ -1,11 +1,10 @@
-import React from "react";
+import { ChevronRight, MapPin } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
-import { MapPin } from "@tamagui/lucide-icons";
+import React from "react";
 import { Button, YStack } from "tamagui";
+import { Location } from "walk2gether-shared";
 import WalkDetailsCard from "../WalkDetailsCard";
 import WalkDetailsRow from "../WalkDetailsRow";
-import { Location } from "walk2gether-shared";
-import Badge from "@/components/Badge";
 
 interface Props {
   startLocation?: Location | null;
@@ -38,10 +37,7 @@ export default function LocationCard({
     return (
       <WalkDetailsCard title="Location">
         <YStack w="100%" alignItems="center" p="$2">
-          <WalkDetailsRow
-            icon={<MapPin />}
-            label="No location specified"
-          />
+          <WalkDetailsRow icon={<MapPin />} label="No location specified" />
         </YStack>
       </WalkDetailsCard>
     );
@@ -49,11 +45,21 @@ export default function LocationCard({
 
   // Display location info
   const displayName = location?.name || "Meeting point";
-  
+
   return (
-    <WalkDetailsCard 
+    <WalkDetailsCard
       title="Location"
-      headerAction={hasMeetupSpotPhoto ? <Badge label="Meetup spot" /> : undefined}
+      headerAction={
+        <Button
+          mt="$2"
+          size="$2"
+          theme="blue"
+          onPress={handleGoToMap}
+          iconAfter={<ChevronRight />}
+        >
+          Go to map
+        </Button>
+      }
     >
       <YStack w="100%" space="$3">
         <WalkDetailsRow
@@ -61,24 +67,11 @@ export default function LocationCard({
           label={displayName}
           sublabel={location?.notes}
         />
-        
+
         {/* Display additional notes if available */}
         {location?.displayName && location.displayName !== displayName && (
-          <WalkDetailsRow
-            label={location.displayName}
-            icon={null}
-          />
+          <WalkDetailsRow label={location.displayName} icon={null} />
         )}
-
-        {/* Show action button to navigate to map */}
-        <Button 
-          mt="$2"
-          size="$3"
-          theme="blue"
-          onPress={handleGoToMap}
-        >
-          Go to map
-        </Button>
       </YStack>
     </WalkDetailsCard>
   );
