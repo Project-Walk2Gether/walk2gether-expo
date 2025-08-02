@@ -66,45 +66,44 @@ export const TopicSelection: React.FC<Props> = ({
               Description
             </Text>
 
-            <XStack alignItems="center" gap="$2" marginBottom="$1">
-              <Text fontSize={14} color="$gray10">
-                Supports markdown
-              </Text>
-              <Button
-                size="$2"
-                circular
-                icon={<HelpCircle size={16} color="$gray10" />}
-                transparent
-                onPress={() => router.push("/(app)/(modals)/markdown-help")}
+            <YStack gap="$2">
+              <MarkdownTextInput
+                value={formData.descriptionMarkdown || ""}
+                onChangeText={(text) =>
+                  updateFormData({ descriptionMarkdown: text })
+                }
+                parser={parseExpensiMark}
+                placeholder="Describe the topic so more people in the public might want to join"
+                style={{
+                  minHeight: 150,
+                  textAlignVertical: "top",
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  paddingHorizontal: 12,
+                  backgroundColor: "#f8f8f8",
+                  borderColor: "#eaeaea",
+                  borderWidth: 1,
+                  borderRadius: 8,
+                }}
+                multiline={true}
+                numberOfLines={5}
               />
-            </XStack>
-
-            <MarkdownTextInput
-              value={formData.descriptionMarkdown || ""}
-              onChangeText={(text) =>
-                updateFormData({ descriptionMarkdown: text })
-              }
-              parser={parseExpensiMark}
-              placeholder="Describe the topic so more people in the public might want to join"
-              style={{
-                minHeight: 150,
-                textAlignVertical: "top",
-                paddingTop: 12,
-                paddingBottom: 12,
-                paddingHorizontal: 12,
-                backgroundColor: "#f8f8f8",
-                borderColor: "#eaeaea",
-                borderWidth: 1,
-                borderRadius: 8,
-              }}
-              multiline={true}
-              numberOfLines={5}
-            />
+              <XStack alignItems="center" gap="$2">
+                <Text fontSize={14} color="$gray10">
+                  Supports markdown
+                </Text>
+                <Button
+                  size="$2"
+                  circular
+                  icon={<HelpCircle size={16} color="$gray10" />}
+                  transparent
+                  onPress={() => router.push("/(app)/(modals)/markdown-help")}
+                />
+              </XStack>
+            </YStack>
           </YStack>
         </Card>
       </YStack>
-
-
     </WizardWrapper>
   );
 };

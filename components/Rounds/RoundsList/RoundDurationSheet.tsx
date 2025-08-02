@@ -2,32 +2,34 @@ import DurationField from "@/components/WalkForm/components/DurationField";
 import React, { useState } from "react";
 import { Button, Text, YStack } from "tamagui";
 
-interface RoundDurationSheetProps {
-  suggestedDuration: number; // in minutes
-  onSubmit: (durationMinutes: number) => void;
+interface Props {
+  open: boolean;
   onClose: () => void;
+  onStartRound: (durationMinutes: number) => void;
+  defaultDuration?: number; // in minutes
 }
 
-export function RoundDurationSheet({
-  suggestedDuration,
-  onSubmit,
+export default function RoundDurationSheet({
+  open,
   onClose,
-}: RoundDurationSheetProps) {
-  const [duration, setDuration] = useState<number>(suggestedDuration);
+  onStartRound,
+  defaultDuration = 15,
+}: Props) {
+  const [duration, setDuration] = useState<number>(defaultDuration);
 
   const handleSubmit = () => {
-    onSubmit(duration);
+    onStartRound(duration);
     onClose();
   };
 
   return (
-    <YStack padding="$4" space="$4">
+    <YStack padding="$4" gap="$4">
       <Text fontSize="$5" fontWeight="bold" textAlign="center">
         Set Round Duration
       </Text>
 
       <Text color="$gray11" textAlign="center">
-        Based on the remaining time and rounds, we suggest {suggestedDuration}{" "}
+        Based on the remaining time and rounds, we suggest {defaultDuration}{" "}
         minutes, but you can adjust as needed.
       </Text>
 

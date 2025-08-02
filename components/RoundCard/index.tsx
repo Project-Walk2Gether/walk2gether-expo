@@ -19,7 +19,7 @@ interface Props {
   onToggleExpand?: () => void;
   onEditPrompt?: () => void;
   onStartRound?: () => void;
-  suggestedDuration?: number; // Duration in minutes
+
   isRotating?: boolean;
 }
 
@@ -32,7 +32,7 @@ export default function RoundCard({
   onToggleExpand,
   onEditPrompt,
   onStartRound,
-  suggestedDuration,
+
   isRotating = false,
 }: Props) {
   // Determine styling based on whether this is an actual or upcoming round
@@ -53,7 +53,6 @@ export default function RoundCard({
     <Card
       key={`round-${round.roundNumber}`}
       backgroundColor={cardBackgroundColor}
-      marginBottom="$3"
       borderRadius="$4"
       onPress={onToggleExpand}
       pressStyle={onToggleExpand ? { opacity: 0.9 } : undefined}
@@ -72,12 +71,29 @@ export default function RoundCard({
           justifyContent="space-between"
           flex={1}
         >
-          <Text fontWeight="bold" color={textColor}>
-            Round {round.roundNumber}
-            {suggestedDuration && isFirstUpcoming
-              ? ` (${suggestedDuration}min)`
-              : ""}
-          </Text>
+          <YStack space="$1">
+            <Text fontWeight="bold" color={textColor}>
+              Round {round.roundNumber}
+            </Text>
+            {/* Show start and end times if available */}
+            {round.startTime && (
+              <Text fontSize="$2" color={textColor} opacity={0.8}>
+                {round.startTime.toDate().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+                {round.endTime && (
+                  <Text>
+                    {" - "}
+                    {round.endTime.toDate().toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                )}
+              </Text>
+            )}
+          </YStack>
 
           {/* Status indicator */}
           {isActiveRound && (
@@ -161,9 +177,7 @@ export default function RoundCard({
             disabled={isRotating}
             opacity={isRotating ? 0.7 : 1}
           >
-            {isRotating
-              ? "Starting round..."
-              : `Start Round (${suggestedDuration || 15} min)`}
+            {isRotating ? "Starting round..." : "Start Round"}
           </Button>
         </YStack>
       )}

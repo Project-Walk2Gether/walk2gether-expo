@@ -44,6 +44,7 @@
     "@tamagui/core": "1.126.9",
     "@tamagui/helpers": "1.126.9",
     "@tamagui/lucide-icons": "1.126.9",
+    "@tamagui/slider": "^1.132.15",
     "axios": "^1.8.4",
     "date-fns": "^4.1.0",
     "expensify-common": "^2.0.148",

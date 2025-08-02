@@ -1,13 +1,16 @@
 import QuoteWithImage from "@/components/QuoteWithImage";
-import RoundsList from "@/components/Rounds/RoundsList";
+import EditRoundSheet from "@/components/Rounds/EditRoundSheet";
+import QuestionPromptsForm from "@/components/Rounds/QuestionPromptsForm";
+import RoundsList from "@/components/Rounds/RoundsList/RoundsList";
+import WalkMinimumMinutesForm from "@/components/WalkMinimumMinutesForm";
 import LocationCard from "@/components/WalkScreen/components/LocationCard";
 import ParticipantsListVertical from "@/components/WalkScreen/components/ParticipantsListVertical";
-import QuestionPromptsList from "@/components/WalkScreen/components/QuestionPromptsList";
 import RespondToInvitationCard from "@/components/WalkScreen/components/RespondToInvitationCard";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
-import WalkInfoCard from "@/components/WalkScreen/components/WalkInfoCard";
+import WalkTimeCard from "@/components/WalkScreen/components/WalkTimeCard";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useSheet } from "@/context/SheetContext";
 import { useMenu } from "@/context/MenuContext";
 import { useWalk } from "@/context/WalkContext";
 import { getWalkStatus } from "@/utils/walkUtils";
@@ -15,18 +18,20 @@ import {
   FirebaseFirestoreTypes,
   updateDoc,
 } from "@react-native-firebase/firestore";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { Timestamp } from "firebase/firestore";
 import React, { useMemo, useState } from "react";
 import { ScrollView } from "react-native";
 import Markdown from "react-native-markdown-display";
 import { Button, Text, View, YStack } from "tamagui";
-import { MeetupWalk, Participant } from "walk2gether-shared";
+import { MeetupWalk, Participant, Walk, WithId, Round } from "walk2gether-shared";
 
 export default function PlanTab() {
   const { walk } = useWalk();
+  const router = useRouter();
   const { user } = useAuth();
   const { showMessage } = useFlashMessage();
+  const { showSheet, hideSheet } = useSheet();
 
   // Get participants data from context
   const {
@@ -158,10 +163,11 @@ export default function PlanTab() {
         )}
 
         {/* Walk Info Card */}
-        <WalkInfoCard
+        <WalkTimeCard
           walkDate={walk.date ? walk.date.toDate() : undefined}
           durationMinutes={walk.durationMinutes}
-          notes={walk.startLocation?.notes}
+          walkId={walk.id}
+          showEditButton={isWalkOwner}
         />
 
         {/* Location Card */}
@@ -170,31 +176,19 @@ export default function PlanTab() {
           currentLocation={walk.currentLocation}
           walkId={walk.id}
           hasMeetupSpotPhoto={!!walk.meetupSpotPhoto}
+          showEditButton={isWalkOwner}
         />
 
         {/* Participants Section - only shown for walk owner or friends walks */}
         {canViewParticipants && (
-          <WalkDetailsCard title="Participants">
-            <YStack w="100%">
-              {isLoadingParticipants ? (
-                <View height={50} justifyContent="center" alignItems="center">
-                  <Text>Loading participants...</Text>
-                </View>
-              ) : (
-                <ParticipantsListVertical
-                  walkId={walk.id}
-                  walkStatus={walkStatus}
-                  participants={(participants as any[]) || []}
-                  currentUserId={user?.uid}
-                  isOwner={isWalkOwner}
-                  walkStartDate={walk.date?.toDate()}
-                  onParticipantPress={() => {}}
-                />
-              )}
-              {isWalkOwner && walk?.id && (
+          <WalkDetailsCard
+            title="Participants"
+            headerAction={
+              isWalkOwner && walk?.id ? (
                 <Button
                   mt="$2"
-                  variant="outlined"
+                  size="$2"
+                  theme="blue"
                   onPress={() => {
                     // For friend walks, include the addFriend parameter
                     const params: { walkId: string; addFriend?: string } = {
@@ -212,24 +206,46 @@ export default function PlanTab() {
                     });
                   }}
                 >
-                  Invite others
+                  Invite
                 </Button>
+              ) : undefined
+            }
+          >
+            <YStack w="100%">
+              {isLoadingParticipants ? (
+                <View height={50} justifyContent="center" alignItems="center">
+                  <Text>Loading participants...</Text>
+                </View>
+              ) : (
+                <ParticipantsListVertical
+                  walkId={walk.id}
+                  walkStatus={walkStatus}
+                  participants={(participants as any[]) || []}
+                  currentUserId={user?.uid}
+                  isOwner={isWalkOwner}
+                  walkStartDate={walk.date?.toDate()}
+                  onParticipantPress={() => {}}
+                />
               )}
             </YStack>
           </WalkDetailsCard>
         )}
 
-        {/* Question Prompts - only for meetup walk owners */}
-        {isWalkOwner && walk.type === "meetup" && (
-          <QuestionPromptsList walk={walk} />
-        )}
-
         {/* Rounds Management - only for meetup walk owners */}
         {isWalkOwner && walk.type === "meetup" && (
-          <RoundsList
-            /* The walk object comes from context but RoundsList requires specific MeetupWalk properties */
-            walk={walk as any}
-          />
+          <>
+            <QuestionPromptsForm walk={walk as any} />
+            <WalkMinimumMinutesForm walk={walk as any} />
+            <RoundsList walk={walk as any} onEditActualRound={(round: WithId<Round>) => {
+              showSheet(
+                <EditRoundSheet
+                  round={round}
+                  onClose={hideSheet}
+                  onSave={hideSheet}
+                />
+              );
+            }} />
+          </>
         )}
 
         {/* Quote and Image at the bottom */}

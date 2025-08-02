@@ -1,6 +1,7 @@
 import { COLORS } from "@/styles/colors";
 import { openLocationInMaps } from "@/utils/locationUtils";
-import { MapPin, MonitorSmartphone, Navigation } from "@tamagui/lucide-icons";
+import { Edit3, MapPin, MonitorSmartphone, Navigation } from "@tamagui/lucide-icons";
+import { useRouter } from "expo-router";
 import React from "react";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Text, View, XStack, YStack } from "tamagui";
@@ -19,6 +20,7 @@ interface Props {
   isWalkOwner?: boolean;
   walkId?: string;
   isVirtual?: boolean;
+  showEditButton?: boolean;
 }
 
 /**
@@ -34,7 +36,9 @@ export default function WalkLocationCard({
   isWalkOwner = false,
   walkId,
   isVirtual = false,
+  showEditButton = false,
 }: Props) {
+  const router = useRouter();
   // If it's a virtual walk, show a virtual meeting card
   if (isVirtual) {
     return (
@@ -68,18 +72,33 @@ export default function WalkLocationCard({
   const displayName = locationName || "Meeting point";
   const hasCoordinates = Boolean(latitude && longitude);
 
-  // Define the header action button if coordinates are available
-  const headerAction = hasCoordinates ? (
-    <Button
-      size="$2"
-      onPress={() => openLocationInMaps(latitude, longitude, displayName)}
-      icon={<Navigation size={14} color="white" />}
-      backgroundColor={COLORS.primary}
-      color="white"
-    >
-      Open in Maps
-    </Button>
-  ) : undefined;
+  // Define the header action buttons
+  const headerAction = (
+    <XStack gap="$2">
+      {showEditButton && walkId && (
+        <Button
+          size="$2"
+          onPress={() => router.push(`/(modals)/edit-walk-location?id=${walkId}` as any)}
+          icon={<Edit3 size={14} color="white" />}
+          backgroundColor={COLORS.primary}
+          color="white"
+        >
+          Edit
+        </Button>
+      )}
+      {hasCoordinates && (
+        <Button
+          size="$2"
+          onPress={() => openLocationInMaps(latitude, longitude, displayName)}
+          icon={<Navigation size={14} color="white" />}
+          backgroundColor={COLORS.primary}
+          color="white"
+        >
+          Open in Maps
+        </Button>
+      )}
+    </XStack>
+  );
 
   return (
     <WalkDetailsCard

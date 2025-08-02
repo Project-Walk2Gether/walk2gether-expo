@@ -1,15 +1,17 @@
-import RoundsList from "@/components/Rounds/RoundsList";
+import RoundsManagementCard from "@/components/Rounds/RoundsManagementCard";
 import { WalkProvider } from "@/context/WalkContext";
 import { useDoc } from "@/utils/firestore";
+import { X } from "@tamagui/lucide-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Button, View, YStack } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
-import { X } from "@tamagui/lucide-icons";
 
 export default function WalkRoundsManagementModal() {
   const params = useLocalSearchParams<{ walkId: string }>();
-  const walkId = (Array.isArray(params.walkId) ? params.walkId[0] : params.walkId) as string;
+  const walkId = (
+    Array.isArray(params.walkId) ? params.walkId[0] : params.walkId
+  ) as string;
 
   // Get the walk document
   const { doc: walk } = useDoc<Walk>(`walks/${walkId}`);
@@ -17,7 +19,7 @@ export default function WalkRoundsManagementModal() {
   const handleClose = () => {
     router.back();
   };
-  
+
   const goBack = () => {
     router.back();
   };
@@ -25,7 +27,9 @@ export default function WalkRoundsManagementModal() {
   if (!walk) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center">
-        <Button onPress={handleClose} marginTop="$4">Close</Button>
+        <Button onPress={handleClose} marginTop="$4">
+          Close
+        </Button>
       </YStack>
     );
   }
@@ -46,13 +50,10 @@ export default function WalkRoundsManagementModal() {
           ),
         }}
       />
-      
-      <WalkProvider
-        walk={walk}
-        goBack={goBack}
-      >
+
+      <WalkProvider walk={walk} goBack={goBack}>
         <YStack flex={1} padding="$4">
-          <RoundsList walk={walk as WithId<Walk>} />
+          <RoundsManagementCard walk={walk as WithId<Walk>} />
         </YStack>
       </WalkProvider>
     </View>

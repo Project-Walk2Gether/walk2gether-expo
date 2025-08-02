@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { Button, Card, Stack, Text, XStack, YStack } from "tamagui";
 import { Round, WithId } from "walk2gether-shared";
 import { useSheet } from "@/context/SheetContext";
-import { EditUpcomingRoundSheet } from "../../Rounds/RoundsList/EditUpcomingRoundSheet";
+
 import { differenceInMinutes } from "date-fns";
 import { MeetupWalk, walkIsMeetupWalk } from "walk2gether-shared";
 import firestore from "@react-native-firebase/firestore";
@@ -58,29 +58,6 @@ export default function TimelineRoundCard({
   }, [userPair, currentUserId, walk?.participantsById]);
 
   // Helper functions for upcoming rounds
-  const calculateSuggestedDuration = () => {
-    if (!walk || !walk.estimatedEndTime || !walkIsMeetupWalk(walk)) {
-      return 15; // Default to 15 minutes if we can't calculate
-    }
-
-    const meetupWalk = walk as MeetupWalk;
-    const upcomingRounds = meetupWalk.upcomingRounds || [];
-
-    if (upcomingRounds.length === 0) return 15;
-
-    // Calculate minutes between now and estimated end time
-    const now = new Date();
-    const estimatedEndTime = walk.estimatedEndTime.toDate();
-    const remainingMinutes = differenceInMinutes(estimatedEndTime, now);
-
-    // Divide remaining time by number of upcoming rounds, with a minimum of 5 minutes
-    const suggestedDuration = Math.max(
-      5,
-      Math.floor(remainingMinutes / upcomingRounds.length)
-    );
-
-    return suggestedDuration;
-  };
 
   const startRoundWithDuration = async (durationMinutes: number) => {
     if (!walk || !walkIsMeetupWalk(walk)) return;
@@ -131,29 +108,7 @@ export default function TimelineRoundCard({
     }
   };
 
-  const handleEditUpcomingRound = () => {
-    if (!walk || !walkIsMeetupWalk(walk)) return;
 
-    const meetupWalk = walk as MeetupWalk;
-    const upcomingRounds = meetupWalk.upcomingRounds || [];
-    const roundIndex = upcomingRounds.findIndex(r => r.roundNumber === round.roundNumber);
-    
-    if (roundIndex === -1) return;
-
-    const suggestedDuration = calculateSuggestedDuration();
-
-    showSheet(
-      <EditUpcomingRoundSheet
-        walk={walk}
-        roundIndex={roundIndex}
-        suggestedDuration={suggestedDuration}
-        showDurationPicker={isFirstUpcoming}
-        isStartingRound={isFirstUpcoming}
-        onStartRound={isFirstUpcoming ? startRoundWithDuration : undefined}
-        onClose={() => hideSheet()}
-      />
-    );
-  };
 
   // Show active round with full-width colored background (like WalkRoundControls)
   if (isActive && userPair) {
@@ -288,11 +243,7 @@ export default function TimelineRoundCard({
                 <Text fontWeight="bold" color="$blue11">
                   Round {round.roundNumber}
                 </Text>
-                {isFirstUpcoming && (
-                  <Text fontSize="$2" color="$blue9">
-                    ({calculateSuggestedDuration()} min)
-                  </Text>
-                )}
+
                 <Text 
                   fontSize="$1" 
                   color={isFirstUpcoming ? "$blue9" : "$blue8"} 
@@ -326,35 +277,30 @@ export default function TimelineRoundCard({
                 flex={1}
                 size="$3"
                 theme="blue"
-                onPress={() => startRoundWithDuration(calculateSuggestedDuration())}
+onPress={() => {
+                  if (!walk) return;
+                  // Use the duration from the round's timing or fallback to walk settings
+                  const defaultDuration = walkIsMeetupWalk(walk) 
+                    ? (walk as MeetupWalk).minimumNumberOfMinutesWithEachPartner || 15
+                    : 15;
+                  
+                  // If the round has timing info, calculate duration from that
+                  if (round.startTime && round.endTime) {
+                    const durationMs = round.endTime.toMillis() - round.startTime.toMillis();
+                    const durationMinutes = Math.round(durationMs / (1000 * 60));
+                    startRoundWithDuration(durationMinutes);
+                  } else {
+                    startRoundWithDuration(defaultDuration);
+                  }
+                }}
               >
                 Start Round
               </Button>
-              <Button
-                size="$3"
-                theme="gray"
-                onPress={handleEditUpcomingRound}
-                icon={<Edit size={16} />}
-              >
-                Edit
-              </Button>
+
             </XStack>
           )}
 
-          {/* Edit button for other upcoming rounds */}
-          {!isFirstUpcoming && (
-            <XStack position="absolute" top="$2" right="$2">
-              <Button
-                size="$2"
-                circular
-                backgroundColor="rgba(255,255,255,0.8)"
-                borderWidth={0}
-                onPress={handleEditUpcomingRound}
-              >
-                <Edit size={14} color="$blue9" />
-              </Button>
-            </XStack>
-          )}
+
         </YStack>
       </Card>
     );

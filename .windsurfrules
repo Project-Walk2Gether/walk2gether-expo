@@ -11,3 +11,4 @@ walk2gether-shared contains shared types and schemas (using yup)
 * For components, use a typescript interface Props rather than MyComponentProps
 * Where possible, have one component per file. Prefer the pattern of components/MyComponent/index.ts, components/MyComponent/MySubcomponent.tsx
 * With firebase admin, use correct import structure. FieldValue.serverTimestamp() is correct, admin.firestore.FieldValue.serverTimestamp() is not correct
+* In general, don't create memories to document refactorings

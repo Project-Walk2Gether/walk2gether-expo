@@ -1,5 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { updateDoc } from "@react-native-firebase/firestore";
+import { HelpCircle } from "@tamagui/lucide-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { Alert } from "react-native";
 import { Button, Input, ScrollView, Text, XStack, YStack } from "tamagui";
@@ -57,14 +59,23 @@ export default function QuestionPromptsList({ walk }: Props) {
     <WalkDetailsCard
       title="Question Prompts"
       headerAction={
-        <Button
-          size="$2"
-          variant="outlined"
-          onPress={() => setEditing(!editing)}
-          disabled={loading}
-        >
-          {editing ? "Cancel" : "Edit"}
-        </Button>
+        <XStack gap="$2" alignItems="center">
+          <Button
+            size="$2"
+            circular
+            icon={<HelpCircle size={16} color="$gray10" />}
+            transparent
+            onPress={() => router.push("/(app)/(modals)/rounds-help")}
+          />
+          <Button
+            size="$2"
+            variant="outlined"
+            onPress={() => setEditing(!editing)}
+            disabled={loading}
+          >
+            {editing ? "Cancel" : "Edit"}
+          </Button>
+        </XStack>
       }
     >
       <YStack w="100%" gap="$3">

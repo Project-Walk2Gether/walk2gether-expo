@@ -69,10 +69,7 @@ export default function WalkLayout() {
   };
 
   return (
-    <WalkProvider
-      walk={walk}
-      goBack={goBack}
-    >
+    <WalkProvider walk={walk} goBack={goBack}>
       <Stack.Screen
         options={{
           headerTitle: walkTitle,
@@ -108,7 +105,10 @@ export default function WalkLayout() {
         >
           <MaterialTopTabs.Screen name="plan" options={{ title: "Plan" }} />
           <MaterialTopTabs.Screen name="meet" options={{ title: "Meet" }} />
-          <MaterialTopTabs.Screen name="talk" options={{ title: "Talk" }} />
+          <MaterialTopTabs.Screen
+            name="connect"
+            options={{ title: "Connect" }}
+          />
         </MaterialTopTabs>
       </View>
     </WalkProvider>

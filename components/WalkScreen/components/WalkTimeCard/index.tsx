@@ -1,8 +1,9 @@
 import { COLORS } from "@/styles/colors";
-import { Calendar, Clock, MapPin, Timer } from "@tamagui/lucide-icons";
+import { Calendar, Clock, Edit3, Timer } from "@tamagui/lucide-icons";
 import { format, formatDistanceToNow } from "date-fns";
+import { router } from "expo-router";
 import React from "react";
-import { Text, YStack } from "tamagui";
+import { Button, Text, YStack } from "tamagui";
 import { Location } from "walk2gether-shared";
 import WalkDetailsCardBase from "../WalkDetailsCard";
 import WalkDetailsRow from "../WalkDetailsRow";
@@ -15,32 +16,27 @@ interface Props {
   notes?: string;
   showMap?: boolean;
   children?: React.ReactNode;
+  walkId?: string;
+  showEditButton?: boolean;
 }
 
 /**
  * Card component that displays walk details including time and location information
  */
-export default function WalkDetailsCard({
+export default function WalkTimeCard({
   walkDate,
   durationMinutes = 60,
-  location,
-  locationName,
-  notes,
-  showMap = true,
+  walkId,
+  showEditButton = false,
   children,
 }: Props) {
   // Check if time or location is missing
   const hasTimeInfo = !!walkDate;
-  const hasLocationInfo = !!(
-    location &&
-    location.latitude &&
-    location.longitude
-  );
 
-  if (!hasTimeInfo && !hasLocationInfo) {
+  if (!hasTimeInfo) {
     return (
       <WalkDetailsCardBase title="Walk Details" testID="walk-details-card">
-        <Text>Walk details not specified</Text>
+        <Text>Walk time not specified</Text>
       </WalkDetailsCardBase>
     );
   }
@@ -56,18 +52,18 @@ export default function WalkDetailsCard({
     formattedTime = format(walkDateTime, "h:mm a");
   }
 
-  // Location information
-  let displayName = "";
-  let hasCoordinates = false;
-  if (location) {
-    const { latitude, longitude } = location;
-    displayName = locationName || "Meeting point";
-    hasCoordinates = Boolean(latitude && longitude);
-  }
-
   // Create a header action based on available information
   let headerAction;
-  if (walkDate) {
+  if (showEditButton && walkId) {
+    headerAction = (
+      <Button
+        size="$2"
+        circular
+        icon={<Edit3 size={16} />}
+        onPress={() => router.push(`/(app)/(modals)/edit-walk-time?id=${walkId}`)}
+      />
+    );
+  } else if (walkDate) {
     headerAction = (
       <Text fontSize="$3" color={COLORS.primary} fontWeight="500">
         {timeUntil}
@@ -77,7 +73,7 @@ export default function WalkDetailsCard({
 
   return (
     <WalkDetailsCardBase
-      title="Walk Details"
+      title="Time"
       testID="walk-details-card"
       headerAction={headerAction}
     >
@@ -104,16 +100,6 @@ export default function WalkDetailsCard({
           label={`Duration: ${durationMinutes} minutes`}
           testID="walk-duration-row"
         />
-
-        {/* Location Information Section */}
-        {hasLocationInfo && (
-          <WalkDetailsRow
-            icon={<MapPin />}
-            label={displayName}
-            sublabel={notes}
-            testID="walk-location-row"
-          />
-        )}
 
         {children}
       </YStack>

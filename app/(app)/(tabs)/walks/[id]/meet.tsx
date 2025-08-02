@@ -268,7 +268,11 @@ export default function MeetTab() {
       />
 
       {/* Start walk slider - only shown for walk owners when walk hasn't started */}
-      {walk && isOwner(walk) && !walk?.startedAt && !walk?.endedAt ? (
+      {walk &&
+      isStartingSoon &&
+      isOwner(walk) &&
+      !walk?.startedAt &&
+      !walk?.endedAt ? (
         <StartWalkSlider onStartWalk={handleStartWalk} />
       ) : null}
 

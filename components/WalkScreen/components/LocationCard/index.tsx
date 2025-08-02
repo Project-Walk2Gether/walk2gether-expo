@@ -1,4 +1,4 @@
-import { ChevronRight, MapPin } from "@tamagui/lucide-icons";
+import { ChevronRight, Edit3, MapPin } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import React from "react";
 import { Button, YStack } from "tamagui";
@@ -11,6 +11,7 @@ interface Props {
   currentLocation?: Location | null;
   walkId?: string;
   hasMeetupSpotPhoto?: boolean;
+  showEditButton?: boolean;
 }
 
 export default function LocationCard({
@@ -18,6 +19,7 @@ export default function LocationCard({
   currentLocation,
   walkId,
   hasMeetupSpotPhoto,
+  showEditButton = false,
 }: Props) {
   const location = currentLocation || startLocation;
   const hasLocationInfo = !!(
@@ -50,18 +52,22 @@ export default function LocationCard({
     <WalkDetailsCard
       title="Location"
       headerAction={
-        <Button
-          mt="$2"
-          size="$2"
-          theme="blue"
-          onPress={handleGoToMap}
-          iconAfter={<ChevronRight />}
-        >
-          Go to map
-        </Button>
+        showEditButton && walkId ? (
+          <Button
+            mt="$2"
+            size="$2"
+            theme="blue"
+            onPress={() =>
+              router.push(`/(modals)/edit-walk-location?id=${walkId}` as any)
+            }
+            iconAfter={<Edit3 />}
+          >
+            Edit
+          </Button>
+        ) : undefined
       }
     >
-      <YStack w="100%" space="$3">
+      <YStack w="100%" gap="$3">
         <WalkDetailsRow
           icon={<MapPin />}
           label={displayName}
@@ -72,6 +78,17 @@ export default function LocationCard({
         {location?.displayName && location.displayName !== displayName && (
           <WalkDetailsRow label={location.displayName} icon={null} />
         )}
+
+        {/* Go to map button below location info */}
+        <Button
+          size="$3"
+          theme="blue"
+          onPress={handleGoToMap}
+          iconAfter={<ChevronRight />}
+          alignSelf="flex-start"
+        >
+          Go to map
+        </Button>
       </YStack>
     </WalkDetailsCard>
   );

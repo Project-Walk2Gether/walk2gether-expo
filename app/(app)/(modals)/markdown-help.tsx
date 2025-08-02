@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { Stack } from "expo-router";
 import React from "react";
 import { SafeAreaView } from "react-native";
+import Markdown from "react-native-markdown-display";
 import {
   Button,
   H3,
@@ -47,55 +48,65 @@ export default function MarkdownHelpScreen() {
               </YStack>
 
               <YStack space="$1">
-              <Text fontWeight="bold">Bold</Text>
-              <Text>**bold text** or __bold text__</Text>
-              <Text color="$gray10">
-                Example: <Text fontWeight="bold">bold text</Text>
-              </Text>
-            </YStack>
+                <Text fontWeight="bold">Bold</Text>
+                <Text color="$gray8">**bold text** or __bold text__</Text>
+                <Text color="$gray10" fontSize={13}>Example:</Text>
+                <Markdown style={{ body: { fontSize: 14 } }}>**bold text**</Markdown>
+              </YStack>
 
-            <YStack space="$1">
-              <Text fontWeight="bold">Italic</Text>
-              <Text>*italic text* or _italic text_</Text>
-              <Text color="$gray10">
-                Example: <Text fontStyle="italic">italic text</Text>
-              </Text>
-            </YStack>
+              <YStack space="$1">
+                <Text fontWeight="bold">Italic</Text>
+                <Text color="$gray8">*italic text* or _italic text_</Text>
+                <Text color="$gray10" fontSize={13}>Example:</Text>
+                <Markdown style={{ body: { fontSize: 14 } }}>*italic text*</Markdown>
+              </YStack>
 
-            <YStack space="$1">
-              <Text fontWeight="bold">Headings</Text>
-              <Text># Heading 1</Text>
-              <Text>## Heading 2</Text>
-              <Text>### Heading 3</Text>
-            </YStack>
+              <YStack space="$1">
+                <Text fontWeight="bold">Headings</Text>
+                <Text color="$gray8"># Heading 1</Text>
+                <Text color="$gray8">## Heading 2</Text>
+                <Text color="$gray8">### Heading 3</Text>
+                <Text color="$gray10" fontSize={13}>Example:</Text>
+                <Markdown style={{ body: { fontSize: 14 } }}>## This is a heading</Markdown>
+              </YStack>
 
-            <YStack space="$1">
-              <Text fontWeight="bold">Lists</Text>
-              <Text>- Item 1</Text>
-              <Text>- Item 2</Text>
-              <Text> - Nested item</Text>
-            </YStack>
+              <YStack space="$1">
+                <Text fontWeight="bold">Lists</Text>
+                <Text color="$gray8">- Item 1</Text>
+                <Text color="$gray8">- Item 2</Text>
+                <Text color="$gray8">  - Nested item</Text>
+                <Text color="$gray10" fontSize={13}>Example:</Text>
+                <Markdown style={{ body: { fontSize: 14 } }}>{`- First item\n- Second item\n  - Nested item`}</Markdown>
+              </YStack>
 
-            <YStack space="$1">
-              <Text fontWeight="bold">Numbered Lists</Text>
-              <Text>1. First item</Text>
-              <Text>2. Second item</Text>
-            </YStack>
+              <YStack space="$1">
+                <Text fontWeight="bold">Numbered Lists</Text>
+                <Text color="$gray8">1. First item</Text>
+                <Text color="$gray8">2. Second item</Text>
+                <Text color="$gray10" fontSize={13}>Example:</Text>
+                <Markdown style={{ body: { fontSize: 14 } }}>{`1. First item\n2. Second item`}</Markdown>
+              </YStack>
 
-            <YStack space="$1">
-              <Text fontWeight="bold">Links</Text>
-              <Text>[link text](https://example.com)</Text>
-            </YStack>
+              <YStack space="$1">
+                <Text fontWeight="bold">Links</Text>
+                <Text color="$gray8">[link text](https://example.com)</Text>
+                <Text color="$gray10" fontSize={13}>Example:</Text>
+                <Markdown style={{ body: { fontSize: 14 } }}>[Visit our website](https://walk2gether.com)</Markdown>
+              </YStack>
 
-            <YStack space="$1">
-              <Text fontWeight="bold">Quotes</Text>
-              <Text>{">"} This is a quote</Text>
-            </YStack>
+              <YStack space="$1">
+                <Text fontWeight="bold">Quotes</Text>
+                <Text color="$gray8">{">"}This is a quote</Text>
+                <Text color="$gray10" fontSize={13}>Example:</Text>
+                <Markdown style={{ body: { fontSize: 14 } }}>{`> This is an inspiring quote`}</Markdown>
+              </YStack>
 
-            <YStack space="$1">
-              <Text fontWeight="bold">Code</Text>
-              <Text>`inline code`</Text>
-            </YStack>
+              <YStack space="$1">
+                <Text fontWeight="bold">Code</Text>
+                <Text color="$gray8">`inline code`</Text>
+                <Text color="$gray10" fontSize={13}>Example:</Text>
+                <Markdown style={{ body: { fontSize: 14 } }}>Use the `join` command to participate</Markdown>
+              </YStack>
           </YStack>
         </ScrollView>
 
