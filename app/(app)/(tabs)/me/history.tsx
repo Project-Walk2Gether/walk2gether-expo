@@ -51,7 +51,7 @@ export default function WalkHistoryScreen() {
             data={pastWalks}
             renderItem={({ item }) => (
               <WalkCard
-                onPress={() => router.push(`/walks/${item.id}/details`)}
+                onPress={() => router.push(`/walks/${item.id}/plan`)}
                 walk={item}
                 canShowDismissButton={false}
               />

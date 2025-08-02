@@ -114,7 +114,7 @@ const RespondToInvitation: React.FC<Props> = ({
                   onInvitationResponded();
                 } else {
                   router.replace({
-                    pathname: "/walks/[id]/details",
+                    pathname: "/walks/[id]/plan",
                     params: { id: walk.id },
                   });
                 }

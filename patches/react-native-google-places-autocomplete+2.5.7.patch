@@ -31,7 +31,7 @@ index 60836de..b8ea2bf 100644
 -  View,
 +  View
  } from 'react-native';
- 
+
  const defaultStyles = {
 @@ -68,7 +66,10 @@ const defaultStyles = {
      borderColor: '#c8c7cc',
@@ -43,11 +43,11 @@ index 60836de..b8ea2bf 100644
 +    width: 100
 +  },
  };
- 
+
  export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
 @@ -160,7 +161,7 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
    const [listLoaderDisplayed, setListLoaderDisplayed] = useState(false);
- 
+
    const inputRef = useRef();
 -  const [sessionToken, setSessionToken] = useState(uuidv4());
 +
@@ -55,7 +55,7 @@ index 60836de..b8ea2bf 100644
      setUrl(getRequestUrl(props.requestUrl));
    }, [getRequestUrl, props.requestUrl]);
 @@ -282,14 +283,10 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
- 
+
          if (request.status === 200) {
            const responseJSON = JSON.parse(request.responseText);
 -          if (
@@ -71,11 +71,11 @@ index 60836de..b8ea2bf 100644
 +            const details = responseJSON.result;
              _disableRowLoaders();
              _onBlur();
- 
+
 @@ -327,29 +324,16 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
          }
        };
- 
+
 -      if (props.isNewPlacesAPI) {
 -        request.open(
 -          'GET',
@@ -90,7 +90,7 @@ index 60836de..b8ea2bf 100644
 -      } else {
 -        request.open(
 -          'GET',
--          `${url}/place/details/json?` +
+-          `${url}/place/plan/json?` +
 -            Qs.stringify({
 -              key: props.query.key,
 -              placeid: rowData.place_id,
@@ -101,7 +101,7 @@ index 60836de..b8ea2bf 100644
 -      }
 +      request.open(
 +        'GET',
-+        `${url}/place/details/json?` +
++        `${url}/place/plan/json?` +
 +          Qs.stringify({
 +            key: props.query.key,
 +            placeid: rowData.place_id,
@@ -109,13 +109,13 @@ index 60836de..b8ea2bf 100644
 +            ...props.GooglePlacesDetailsQuery,
 +          }),
 +      );
- 
+
        request.withCredentials = requestShouldUseWithCredentials();
        setRequestHeaders(request, getRequestHeaders(props.requestUrl));
 @@ -437,29 +421,6 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
      return results;
    };
- 
+
 -  const _filterResultsByPlacePredictions = (unfilteredResults) => {
 -    const results = [];
 -    for (let i = 0; i < unfilteredResults.length; i++) {
@@ -141,7 +141,7 @@ index 60836de..b8ea2bf 100644
 -
    const _requestNearby = (latitude, longitude) => {
      _abortRequests();
- 
+
 @@ -565,7 +526,6 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
          setListLoaderDisplayed(false);
          if (request.status === 200) {
@@ -168,7 +168,7 @@ index 60836de..b8ea2bf 100644
 @@ -606,39 +558,18 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
          setStateText(props.preProcess(text));
        }
- 
+
 -      if (props.isNewPlacesAPI) {
 -        const keyQueryParam = props.query.key
 -          ? '?' +
@@ -193,10 +193,10 @@ index 60836de..b8ea2bf 100644
 +          '&' +
 +          Qs.stringify(props.query),
 +      );
- 
+
        request.withCredentials = requestShouldUseWithCredentials();
        setRequestHeaders(request, getRequestHeaders(props.requestUrl));
- 
+
 -      if (props.isNewPlacesAPI) {
 -        const { key, locationbias, types, ...rest } = props.query;
 -        request.send(
@@ -216,7 +216,7 @@ index 60836de..b8ea2bf 100644
 @@ -716,18 +647,9 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
      return null;
    };
- 
+
 -  const _renderRow = (rowData = {}, index) => {
 +  const _renderRow = useCallback((rowData = {}, index) => {
      return (
@@ -243,17 +243,17 @@ index 60836de..b8ea2bf 100644
      );
 -  };
 +  }, [props])
- 
+
    const _renderSeparator = (sectionID, rowID) => {
      if (rowID === dataSource.length - 1) {
 @@ -856,14 +778,11 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
      }
    };
- 
+
 -  const _getFlatList = () => {
 +  const _getFlatList = useCallback(() => {
      const keyGenerator = () => Math.random().toString(36).substr(2, 10);
- 
+
      if (
 -      supportedPlatform() &&
 -      (stateText !== '' ||
@@ -265,11 +265,11 @@ index 60836de..b8ea2bf 100644
        return (
 @@ -895,7 +814,7 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
      }
- 
+
      return null;
 -  };
 +  }, [dataSource])
- 
+
    let {
      onFocus,
 @@ -1013,8 +932,6 @@ GooglePlacesAutocomplete.propTypes = {
@@ -279,7 +279,7 @@ index 60836de..b8ea2bf 100644
 -  isNewPlacesAPI: PropTypes.bool,
 -  fields: PropTypes.string,
  };
- 
+
  GooglePlacesAutocomplete.defaultProps = {
 @@ -1059,8 +976,6 @@ GooglePlacesAutocomplete.defaultProps = {
    textInputHide: false,
@@ -288,5 +288,5 @@ index 60836de..b8ea2bf 100644
 -  isNewPlacesAPI: false,
 -  fields: '*',
  };
- 
+
  GooglePlacesAutocomplete.displayName = 'GooglePlacesAutocomplete';

@@ -3,10 +3,10 @@ import {
   MarkdownTextInput,
   parseExpensiMark,
 } from "@expensify/react-native-live-markdown";
-import React, { useState } from "react";
-import { Card, Input, Text, YStack, Button, XStack } from "tamagui";
 import { HelpCircle } from "@tamagui/lucide-icons";
-import MarkdownHelpModal from "@/components/MarkdownHelpModal";
+import { router } from "expo-router";
+import React from "react";
+import { Button, Card, Input, Text, XStack, YStack } from "tamagui";
 import WizardWrapper from "./WizardWrapper";
 
 interface Props {
@@ -23,7 +23,6 @@ export const TopicSelection: React.FC<Props> = ({
   totalSteps,
 }) => {
   const { formData, updateFormData } = useWalkForm();
-  const [showMarkdownHelp, setShowMarkdownHelp] = useState(false);
 
   const handleContinue = () => {
     if (onContinue) {
@@ -66,15 +65,17 @@ export const TopicSelection: React.FC<Props> = ({
             <Text fontWeight="bold" marginTop="$2">
               Description
             </Text>
-            
+
             <XStack alignItems="center" gap="$2" marginBottom="$1">
-              <Text fontSize={14} color="$gray10">Supports markdown</Text>
+              <Text fontSize={14} color="$gray10">
+                Supports markdown
+              </Text>
               <Button
                 size="$2"
                 circular
                 icon={<HelpCircle size={16} color="$gray10" />}
                 transparent
-                onPress={() => setShowMarkdownHelp(true)}
+                onPress={() => router.push("/(app)/(modals)/markdown-help")}
               />
             </XStack>
 
@@ -102,11 +103,8 @@ export const TopicSelection: React.FC<Props> = ({
           </YStack>
         </Card>
       </YStack>
-      
-      <MarkdownHelpModal 
-        open={showMarkdownHelp} 
-        onOpenChange={setShowMarkdownHelp} 
-      />
+
+
     </WizardWrapper>
   );
 };

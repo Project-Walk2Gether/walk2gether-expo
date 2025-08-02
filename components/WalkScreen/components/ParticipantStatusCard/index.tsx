@@ -62,7 +62,6 @@ export default function ParticipantStatusCard({
   onPress,
   ...rest
 }: Props) {
-  return null;
   return (
     <XStack
       backgroundColor="white"

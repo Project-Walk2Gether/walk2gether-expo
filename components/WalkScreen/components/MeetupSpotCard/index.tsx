@@ -2,7 +2,12 @@ import { useAuth } from "@/context/AuthContext";
 import { useSheet } from "@/context/SheetContext";
 import { COLORS } from "@/styles/colors";
 import { openLocationInMaps } from "@/utils/locationUtils";
-import { MapPin, Navigation } from "@tamagui/lucide-icons";
+import {
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  Navigation,
+} from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Card, Text, View, XStack, YStack } from "tamagui";
@@ -52,29 +57,26 @@ export default function MeetupSpotCard({
   );
 
   function renderParticipantStatusCards() {
-    return null;
     if (!isStartingSoon || validParticipants.length === 0) {
       return null;
     }
 
     return (
-      <YStack gap="$2">
+      <YStack gap="$3">
         {/* Header with expand/collapse button */}
         <Button
           size="$3"
           variant="outlined"
           onPress={() => setIsExpanded(!isExpanded)}
           icon={
-            null //isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+            isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />
           }
-          iconAfter
         >
           <Text fontSize="$3" fontWeight="600">
             ETA Information ({validParticipants.length})
           </Text>
         </Button>
 
-        {/* Participant status cards */}
         {isExpanded && (
           <YStack gap="$2">
             {validParticipants.map((participant) => (
@@ -148,7 +150,7 @@ export default function MeetupSpotCard({
       borderRadius="$4"
       testID="meetup-spot-card"
     >
-      <XStack alignItems="center" width="100%" gap="$3" padding="$4">
+      <XStack alignItems="flex-start" width="100%" gap="$3" padding="$4">
         <MeetupSpotPhoto
           photo={meetupSpotPhoto}
           isWalkOwner={isWalkOwner}
@@ -178,7 +180,7 @@ export default function MeetupSpotCard({
           {/* Open in Maps Button */}
           {hasCoordinates && (
             <Button
-              size="$2"
+              size="$3"
               onPress={() =>
                 openLocationInMaps(latitude, longitude, displayName)
               }
@@ -223,11 +225,11 @@ export default function MeetupSpotCard({
               </MapView>
             </View>
           )}
-
-          {/* Participant Status Cards */}
-          {renderParticipantStatusCards()}
         </YStack>
       </XStack>
+      <View padding="$4" paddingTop={0}>
+        {renderParticipantStatusCards()}
+      </View>
     </Card>
   );
 }
