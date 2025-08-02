@@ -15,7 +15,9 @@ import { useWalk } from "@/context/WalkContext";
 import { useLocationTracking } from "@/hooks/useLocationTracking";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { calculateOptimalRegion } from "@/utils/mapUtils";
+import { startNextRound } from "@/utils/roundUtils";
 import { getWalkStatus, isOwner } from "@/utils/walkUtils";
+import { router } from "expo-router";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { differenceInHours } from "date-fns";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -153,6 +155,7 @@ export default function MeetTab() {
     if (!walk || !walk.id) return;
 
     try {
+      // Start the walk
       await setDoc(
         doc(firestore_instance, "walks", walk.id),
         {
@@ -162,12 +165,18 @@ export default function MeetTab() {
         { merge: true }
       );
 
-      // Show confirmation alert
-      Alert.alert(
-        "Walk Started",
-        "Your walk has officially started. Participants will be notified.",
-        [{ text: "OK" }]
-      );
+      // Start the first round automatically if it's a meetup walk
+      if (walk.type === "meetup") {
+        try {
+          await startNextRound(walk);
+        } catch (roundError) {
+          console.error("Error starting first round:", roundError);
+          // Don't fail the walk start if round starting fails
+        }
+      }
+
+      // Navigate to the connect tab
+      router.push(`/(tabs)/walks/${walk.id}/connect` as any);
     } catch (error) {
       console.error("Error starting walk:", error);
       Alert.alert(

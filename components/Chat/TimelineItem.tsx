@@ -65,16 +65,6 @@ export function TimelineItem({
         isFirstUpcoming={upcomingRound.isFirstUpcoming}
       />
     );
-  } else if (item.type === "active-round") {
-    const activeRound = item.data;
-
-    return (
-      <TimelineRoundCard
-        round={activeRound}
-        currentUserId={currentUserId}
-        isActive={true}
-      />
-    );
   }
 
   return null;

@@ -1,6 +1,9 @@
 import RoundCard from "@/components/RoundCard";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
 import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
+import { useSheet } from "@/context/SheetContext";
+import { startNextRound } from "@/utils/roundUtils";
 import { useQuery } from "@/utils/firestore";
 import firestore, {
   collection,
@@ -52,6 +55,9 @@ export default function RoundsList({ walk, onEditActualRound }: Props) {
     return walk.createdByUid === user.uid;
   }, [walk, user]);
 
+  // Check if the walk has been started (has startedAt)
+  const walkStarted = Boolean(walk.startedAt);
+
   // Query for actual rounds with end time (completed rounds) - limit to last 3
   const actualRoundsQuery = useMemo(() => {
     if (!walk?._ref) return undefined;
@@ -82,33 +88,12 @@ export default function RoundsList({ walk, onEditActualRound }: Props) {
   };
 
   // Handle rotating to the next round - starts the round immediately
-  const handleRotate = async () => {
-    if (!walk._ref || !isMeetupWalk) return;
+  const handleStartRound = async () => {
+    if (!isWalkOwner || isRotating) return;
 
     setIsRotating(true);
-
     try {
-      const meetupWalk = walk as WithId<MeetupWalk>;
-      const nextRound = upcomingRounds[0];
-
-      if (!nextRound) {
-        console.log("No upcoming rounds to start");
-        return;
-      }
-
-      // Calculate duration from backend timestamps or fallback to minimum
-      let durationMinutes =
-        meetupWalk.minimumNumberOfMinutesWithEachPartner || 5;
-
-      if (nextRound.startTime && nextRound.endTime) {
-        const startTime = nextRound.startTime.toDate();
-        const endTime = nextRound.endTime.toDate();
-        durationMinutes = Math.round(
-          (endTime.getTime() - startTime.getTime()) / (1000 * 60)
-        );
-      }
-
-      await startRoundWithDuration(durationMinutes);
+      await startNextRound(walk);
     } catch (error) {
       console.error("Error starting round:", error);
     } finally {
@@ -117,62 +102,7 @@ export default function RoundsList({ walk, onEditActualRound }: Props) {
   };
 
   // Start the round with the selected duration
-  const startRoundWithDuration = async (durationMinutes: number) => {
-    if (!walk._ref || !isMeetupWalk) return;
 
-    try {
-      const meetupWalk = walk as WithId<MeetupWalk>;
-      const nextRound = upcomingRounds[0];
-
-      if (!nextRound) {
-        console.log("No upcoming rounds to start");
-        return;
-      }
-
-      // Create the round document in Firestore
-      const roundsCollection = collection(
-        walk._ref as unknown as FirebaseFirestoreTypes.DocumentReference<Walk>,
-        "rounds"
-      );
-
-      const roundData: Omit<Round, "id"> = {
-        roundNumber: nextRound.roundNumber,
-        pairs: nextRound.pairs,
-        questionPrompt: nextRound.questionPrompt,
-        walkId: walk.id,
-        startTime: Timestamp.now(),
-        endTime: Timestamp.fromDate(
-          new Date(Date.now() + durationMinutes * 60 * 1000)
-        ),
-      };
-
-      await firestore().runTransaction(async (transaction) => {
-        // Add the round document
-        const roundRef = firestore().collection("temp").doc(); // Get a new doc reference
-        transaction.set(
-          firestore()
-            .collection("walks")
-            .doc(walk.id)
-            .collection("rounds")
-            .doc(roundRef.id),
-          roundData
-        );
-
-        // Remove the first upcoming round and update the walk
-        const updatedUpcomingRounds = [...upcomingRounds];
-        updatedUpcomingRounds.shift();
-
-        transaction.update(walk._ref as any, {
-          upcomingRounds: updatedUpcomingRounds,
-        });
-      });
-
-      console.log("Round started successfully");
-    } catch (error) {
-      console.error("Error starting round:", error);
-      throw error;
-    }
-  };
 
   // Toggle expanded state for actual rounds
   const toggleActualRoundExpanded = (roundId: string) => {
@@ -211,6 +141,7 @@ export default function RoundsList({ walk, onEditActualRound }: Props) {
             round={round}
             isExpanded={expandedActualRoundId === round.id}
             isActual={true}
+            walkStarted={walkStarted}
             onToggleExpand={() => toggleActualRoundExpanded(round.id)}
             onEditPrompt={() => handleEditActualRound(round)}
           />
@@ -225,9 +156,10 @@ export default function RoundsList({ walk, onEditActualRound }: Props) {
             isActual={false}
             isFirstUpcoming={index === 0}
             isWalkOwner={isWalkOwner}
+            walkStarted={walkStarted}
             onToggleExpand={() => toggleUpcomingRoundExpanded(index)}
             onEditPrompt={undefined}
-            onStartRound={index === 0 ? handleRotate : undefined}
+            onStartRound={index === 0 ? handleStartRound : undefined}
             isRotating={isRotating}
           />
         ))}

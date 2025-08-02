@@ -16,6 +16,7 @@ interface Props {
   isActual?: boolean;
   isFirstUpcoming?: boolean;
   isWalkOwner?: boolean;
+  walkStarted?: boolean; // Whether the walk has been started (has startTime)
   onToggleExpand?: () => void;
   onEditPrompt?: () => void;
   onStartRound?: () => void;
@@ -28,6 +29,7 @@ export default function RoundCard({
   isExpanded = false,
   isActual = true,
   isFirstUpcoming = false,
+  walkStarted = false,
   isWalkOwner = false,
   onToggleExpand,
   onEditPrompt,
@@ -166,8 +168,8 @@ export default function RoundCard({
         </YStack>
       )}
 
-      {/* Start Round button for first upcoming round */}
-      {isFirstUpcoming && isWalkOwner && onStartRound && (
+      {/* Start Round button for first upcoming round - only show if walk has started */}
+      {isFirstUpcoming && isWalkOwner && walkStarted && onStartRound && (
         <YStack paddingHorizontal="$4" paddingVertical="$2">
           <Button
             backgroundColor="$blue8"

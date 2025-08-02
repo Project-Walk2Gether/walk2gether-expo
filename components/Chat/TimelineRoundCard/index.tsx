@@ -1,39 +1,35 @@
 import { useWalk } from "@/context/WalkContext";
-import { Edit3 as Edit, MoreVertical } from "@tamagui/lucide-icons";
+import { MoreVertical } from "@tamagui/lucide-icons";
 import React, { useMemo } from "react";
 import { Button, Card, Stack, Text, XStack, YStack } from "tamagui";
 import { Round, WithId } from "walk2gether-shared";
-import { useSheet } from "@/context/SheetContext";
 
-import { differenceInMinutes } from "date-fns";
-import { MeetupWalk, walkIsMeetupWalk } from "walk2gether-shared";
-import firestore from "@react-native-firebase/firestore";
-import { useRouter } from "expo-router";
-import { useMenu } from "@/context/MenuContext";
 import RoundCountdown from "@/components/Rounds/RoundCountdown";
 import { useAuth } from "@/context/AuthContext";
+import { useMenu } from "@/context/MenuContext";
+import firestore from "@react-native-firebase/firestore";
+import { useRouter } from "expo-router";
+import { MeetupWalk, walkIsMeetupWalk } from "walk2gether-shared";
 
 interface Props {
   round: Round | WithId<Round>;
   currentUserId?: string;
   isUpcoming?: boolean;
   isFirstUpcoming?: boolean;
-  isActive?: boolean; // New prop for active rounds
 }
 
-export default function TimelineRoundCard({ 
-  round, 
-  currentUserId, 
-  isUpcoming = false, 
+export default function TimelineRoundCard({
+  round,
+  currentUserId,
+  isUpcoming = false,
   isFirstUpcoming = false,
-  isActive = false
 }: Props) {
   // Get walk context to access participant data
-  const { walk } = useWalk();
-  const { showSheet, hideSheet } = useSheet();
+  const { walk, activeRound } = useWalk();
   const { user } = useAuth();
   const router = useRouter();
   const { showMenu } = useMenu();
+  const isActive = activeRound?.id === round.id;
 
   // Check if the current user is the walk owner
   const isWalkOwner = useMemo(() => {
@@ -64,7 +60,7 @@ export default function TimelineRoundCard({
 
     const meetupWalk = walk as MeetupWalk;
     const upcomingRounds = meetupWalk.upcomingRounds || [];
-    
+
     if (upcomingRounds.length === 0) return;
 
     try {
@@ -107,8 +103,6 @@ export default function TimelineRoundCard({
       console.error("Error starting round:", error);
     }
   };
-
-
 
   // Show active round with full-width colored background (like WalkRoundControls)
   if (isActive && userPair) {
@@ -170,7 +164,8 @@ export default function TimelineRoundCard({
                             const walkIdParts = walk._ref.path.split("/");
                             const walkId = walkIdParts[walkIdParts.length - 1];
                             router.push({
-                              pathname: "/(app)/(modals)/walk-rounds-management",
+                              pathname:
+                                "/(app)/(modals)/walk-rounds-management",
                               params: { walkId },
                             });
                           }
@@ -244,9 +239,9 @@ export default function TimelineRoundCard({
                   Round {round.roundNumber}
                 </Text>
 
-                <Text 
-                  fontSize="$1" 
-                  color={isFirstUpcoming ? "$blue9" : "$blue8"} 
+                <Text
+                  fontSize="$1"
+                  color={isFirstUpcoming ? "$blue9" : "$blue8"}
                   fontWeight="bold"
                   backgroundColor={isFirstUpcoming ? "$blue3" : "$blue2"}
                   paddingHorizontal="$2"
@@ -277,17 +272,21 @@ export default function TimelineRoundCard({
                 flex={1}
                 size="$3"
                 theme="blue"
-onPress={() => {
+                onPress={() => {
                   if (!walk) return;
                   // Use the duration from the round's timing or fallback to walk settings
-                  const defaultDuration = walkIsMeetupWalk(walk) 
-                    ? (walk as MeetupWalk).minimumNumberOfMinutesWithEachPartner || 15
+                  const defaultDuration = walkIsMeetupWalk(walk)
+                    ? (walk as MeetupWalk)
+                        .minimumNumberOfMinutesWithEachPartner || 15
                     : 15;
-                  
+
                   // If the round has timing info, calculate duration from that
                   if (round.startTime && round.endTime) {
-                    const durationMs = round.endTime.toMillis() - round.startTime.toMillis();
-                    const durationMinutes = Math.round(durationMs / (1000 * 60));
+                    const durationMs =
+                      round.endTime.toMillis() - round.startTime.toMillis();
+                    const durationMinutes = Math.round(
+                      durationMs / (1000 * 60)
+                    );
                     startRoundWithDuration(durationMinutes);
                   } else {
                     startRoundWithDuration(defaultDuration);
@@ -296,11 +295,8 @@ onPress={() => {
               >
                 Start Round
               </Button>
-
             </XStack>
           )}
-
-
         </YStack>
       </Card>
     );

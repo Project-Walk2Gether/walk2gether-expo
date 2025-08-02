@@ -114,15 +114,15 @@ export function useActiveRound(walkRef: any, walkOwnerId?: string) {
       },
     };
 
-    // Use a DateTriggerInput that triggers exactly at the round's end time
-    const trigger = {
-      date: endTime, // This ensures the notification is triggered at the exact endTime
-      channelId: "round-notifications",
-    };
+    // Use a DateTriggerInput that triggers exactly at the round's end time;
 
     return await Notifications.scheduleNotificationAsync({
       content: notificationContent,
-      trigger,
+      trigger: {
+        date: endTime,
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        channelId: "round-notifications",
+      },
     });
   };
 

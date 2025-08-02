@@ -31,7 +31,6 @@ export default function TalkTab() {
   const { userData } = useUserData();
   const { walk } = useWalk();
   const messageListRef = useRef(null);
-
   const roundsCollection = walk?._ref?.collection(
     "rounds"
   ) as FirebaseFirestoreTypes.CollectionReference<Round>;
