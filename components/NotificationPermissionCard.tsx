@@ -17,7 +17,7 @@ export default function NotificationPermissionCard() {
         shadowRadius={3.84}
         elevation={5}
       >
-        <YStack space="$4">
+        <YStack gap="$4">
           <Text fontSize="$4" lineHeight="$5" color="$gray10">
             Want to get notified of new walks in your area? Enable
             notifications.

@@ -106,8 +106,11 @@ const LocationAutocomplete: React.FC<Omit<Props, "styles">> = ({
 
   // Handle selection of a place
   const handlePlaceSelect = (placeData: PlaceData) => {
-    console.log("LocationAutocomplete - Received place data:", JSON.stringify(placeData, null, 2));
-    
+    console.log(
+      "LocationAutocomplete - Received place data:",
+      JSON.stringify(placeData, null, 2)
+    );
+
     const locationData = {
       name: placeData.name,
       displayName: extractDisplayName(
@@ -133,7 +136,7 @@ const LocationAutocomplete: React.FC<Omit<Props, "styles">> = ({
   };
 
   return (
-    <YStack space="$2">
+    <YStack gap="$2">
       <PlacesAutocomplete
         ref={placesAutocompleteRef}
         placeholder={placeholder}

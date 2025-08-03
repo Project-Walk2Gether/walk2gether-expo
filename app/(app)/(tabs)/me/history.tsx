@@ -21,7 +21,7 @@ export default function WalkHistoryScreen() {
       ? firestore()
           .collection("walks")
           .where("participantUids", "array-contains", user.uid)
-          .orderBy("estimatedEndTime", "desc") // Sort by most recently ended first
+          .orderBy("endTime", "desc") // Sort by most recently ended first
       : undefined,
     [user?.uid]
   );

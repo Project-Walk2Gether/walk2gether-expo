@@ -10,12 +10,14 @@ export interface UserDataFormProps {
     aboutMe?: string;
     profilePicUrl?: string;
     location?: string | PlaceData | null;
+    linkedInProfileUrl?: string;
   };
   onSave: (data: {
     name: string;
     aboutMe: string;
     location: PlaceData | null;
     profilePicUrl?: string;
+    linkedInProfileUrl?: string;
   }) => void;
   isSaving?: boolean;
 }
@@ -31,6 +33,7 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
   const [profilePicUrl, setProfilePicUrl] = useState<string | undefined>(
     undefined
   );
+  const [linkedInProfileUrl, setLinkedInProfileUrl] = useState("");
   // Fix type error: useRef<GooglePlacesAutocompleteRef | null>(null)
   // If GooglePlacesAutocompleteRef is not imported, import it from the correct package
   const googlePlacesAutocompleteRef = useRef<any>(null);
@@ -55,12 +58,13 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
       setLocation(null);
     }
     setProfilePicUrl(userData.profilePicUrl);
+    setLinkedInProfileUrl(userData.linkedInProfileUrl || "");
   }, [userData]);
 
   // ProfilePicturePicker will handle image picking
 
   const handleSave = () => {
-    onSave({ name, aboutMe, location, profilePicUrl });
+    onSave({ name, aboutMe, location, profilePicUrl, linkedInProfileUrl });
   };
 
   return (
@@ -113,6 +117,26 @@ export const UserDataForm: React.FC<UserDataFormProps> = ({
           py={12}
           fontSize={18}
           height={100}
+        />
+      </YStack>
+      <YStack width="100%" gap="$2">
+        <Text fontWeight="500" fontSize="$4">
+          LinkedIn Profile URL
+        </Text>
+        <Input
+          value={linkedInProfileUrl}
+          onChangeText={setLinkedInProfileUrl}
+          placeholder="https://linkedin.com/in/yourprofile"
+          width="100%"
+          borderColor={COLORS.primary}
+          backgroundColor={COLORS.background}
+          color={COLORS.text}
+          borderRadius={10}
+          px={16}
+          py={12}
+          fontSize={18}
+          autoCapitalize="none"
+          keyboardType="url"
         />
       </YStack>
       <ActionButton

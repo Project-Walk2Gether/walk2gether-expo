@@ -70,7 +70,7 @@ export const ParticipantAdminButtons = ({
   };
 
   return (
-    <YStack space="$4">
+    <YStack gap="$4">
       {error ? (
         <Text color="$red10" textAlign="center">
           {error}

@@ -45,13 +45,13 @@ export function useLocationTracking(
     updateLocation: updateLocationInContext,
   } = useLocation();
 
-  // Fetch the walk data to get the estimatedEndTimeWithBuffer
+  // Fetch the walk data to get the endTimeWithBuffer
   const { doc: walk } = useDoc<FirebaseFirestoreTypes.DocumentData>(
     `walks/${walkId}`
   );
 
-  // Keep track of whether we've already stopped tracking due to endedAt
-  const endedAtDetected = useRef(false);
+  // Keep track of whether we've already stopped tracking due to endTime
+  const endTimeDetected = useRef(false);
 
   // Keep track of whether this component initiated the tracking
   const initiatedTracking = useRef(false);
@@ -68,18 +68,18 @@ export function useLocationTracking(
 
     return () => {
       // Only clean up tracking if one of these conditions is met:
-      // 1. The walk has ended (checked via endedAtDetected.current)
+      // 1. The walk has ended (checked via endTimeDetected.current)
       // 2. The user has explicitly opted out of background tracking
       // 3. This component initiated the tracking (to prevent breaking other components' tracking)
       if (
-        endedAtDetected.current ||
+        endTimeDetected.current ||
         !backgroundLocationPermission ||
         !initiatedTracking.current
       ) {
         console.log(
           "Stopping location tracking on component unmount, conditions:",
           {
-            walkEnded: endedAtDetected.current,
+            walkEnded: endTimeDetected.current,
             backgroundLocationPermission,
             initiatedTracking: initiatedTracking.current,
           }
@@ -93,15 +93,15 @@ export function useLocationTracking(
     };
   }, [walkId, userId, backgroundLocationPermission]);
 
-  // Monitor the walk's endedAt property and stop tracking when it's set
+  // Monitor the walk's endTime property and stop tracking when it's set
   useEffect(() => {
-    if (!walk || endedAtDetected.current) return;
+    if (!walk || endTimeDetected.current) return;
 
-    // Check if endedAt has been set on the walk
-    if (walk.endedAt) {
-      endedAtDetected.current = true;
+    // Check if endTime has been set on the walk
+    if (walk.endTime) {
+      endTimeDetected.current = true;
       writeLogIfEnabled({
-        message: `Stopping location tracking because walk ${walkId} has ended at ${walk.endedAt.toDate()}`,
+        message: `Stopping location tracking because walk ${walkId} has ended at ${walk.endTime.toDate()}`,
       });
 
       console.log(`Walk ${walkId} has ended, stopping location tracking...`);
@@ -113,9 +113,9 @@ export function useLocationTracking(
   const startTracking = async () => {
     if (!walkId) return;
 
-    // Get the estimatedEndTimeWithBuffer from the walk data
+    // Get the endTimeWithBuffer from the walk data
     // If it exists, it's a Firebase Timestamp that needs to be converted to a JS Date
-    const endTimeWithBuffer = walk?.estimatedEndTimeWithBuffer;
+    const endTimeWithBuffer = walk?.endTimeWithBuffer;
     const endTime = endTimeWithBuffer ? endTimeWithBuffer.toDate() : undefined;
 
     await startWalkTracking(walkId, endTime);

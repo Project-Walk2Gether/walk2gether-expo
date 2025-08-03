@@ -143,7 +143,7 @@ export default function CompleteYourProfile() {
                       </>
                     )}
                     {locationMode === "auto" && (
-                      <YStack space="$2" ai="center" width="100%">
+                      <YStack gap="$2" ai="center" width="100%">
                         <AutoDetectLocation
                           values={values}
                           setFieldValue={setFieldValue}

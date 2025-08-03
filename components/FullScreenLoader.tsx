@@ -37,7 +37,7 @@ export default function FullScreenLoader({ timeoutMs = 5000 }: Props) {
       {!hasTimedOut ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        <YStack space="$4" alignItems="center">
+        <YStack gap="$4" alignItems="center">
           <Text fontSize="$5" fontWeight="bold" textAlign="center">
             Taking longer than expected
           </Text>
@@ -45,7 +45,7 @@ export default function FullScreenLoader({ timeoutMs = 5000 }: Props) {
             The operation is taking longer than expected. You can try reloading
             the app or sign out.
           </Text>
-          <XStack space="$4" marginTop="$4">
+          <XStack gap="$4" marginTop="$4">
             <Button onPress={handleReload} theme="active">
               Reload App
             </Button>

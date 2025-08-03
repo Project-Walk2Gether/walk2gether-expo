@@ -77,10 +77,10 @@ const ParticipantApprovalDrawer = forwardRef<
       index={0}
       backdropComponent={renderBackdrop}
     >
-      <YStack padding="$4" space="$4">
+      <YStack padding="$4" gap="$4">
         {selectedParticipant && (
           <>
-            <XStack space="$3" alignItems="center">
+            <XStack gap="$3" alignItems="center">
               <Avatar circular size="$4">
                 {selectedParticipant.photoURL ? (
                   <Avatar.Image src={selectedParticipant.photoURL} />
@@ -102,7 +102,7 @@ const ParticipantApprovalDrawer = forwardRef<
               </YStack>
             </XStack>
 
-            <XStack space="$3" justifyContent="space-between">
+            <XStack gap="$3" justifyContent="space-between">
               <Button
                 flex={1}
                 backgroundColor="$gray3"

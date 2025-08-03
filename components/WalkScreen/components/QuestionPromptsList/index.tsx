@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import { Alert } from "react-native";
 import { Button, Input, ScrollView, Text, XStack, YStack } from "tamagui";
 import { MeetupWalk, WithId } from "walk2gether-shared";
+import EmptyState from "../EmptyState";
 import WalkDetailsCard from "../WalkDetailsCard";
 
 interface Props {
@@ -158,19 +159,11 @@ export default function QuestionPromptsList({ walk }: Props) {
                 </YStack>
               ))
             ) : (
-              <Text color="$gray10">
-                No question prompts have been added yet.
-              </Text>
-            )}
-
-            {!prompts.length && (
-              <Button
-                mt="$3"
-                onPress={() => setEditing(true)}
-                variant="outlined"
-              >
-                Add Question Prompts
-              </Button>
+              <EmptyState 
+                message="No question prompts have been added yet."
+                actionText="Add Question Prompts"
+                onActionPress={() => setEditing(true)}
+              />
             )}
           </YStack>
         )}

@@ -406,7 +406,7 @@ export const InviteSelection: React.FC<Props> = ({
         currentStep={currentStep}
         totalSteps={totalSteps}
       >
-        <YStack flex={1} gap="$3">
+        <YStack flex={1} gap="$3" paddingHorizontal={16}>
           <ContentCard
             title={
               isNeighborhoodWalk

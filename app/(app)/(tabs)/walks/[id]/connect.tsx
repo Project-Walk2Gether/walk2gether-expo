@@ -1,7 +1,7 @@
 import { stopBackgroundLocationTracking } from "@/background/backgroundLocationTask";
 import MessageForm from "@/components/Chat/MessageForm";
 import MessageList from "@/components/Chat/MessageList";
-import { EndWalkSlider } from "@/components/WalkScreen/components/EndWalkSlider";
+import WalkStatsBar from "@/components/WalkScreen/components/WalkStatsBar";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
@@ -104,7 +104,7 @@ export default function TalkTab() {
             data: {
               ...upcomingRound,
               // Add a synthetic createdAt for sorting - upcoming rounds should appear at the end
-              createdAt: new Date(Date.now() + (index + 1) * 1000), // Stagger them by 1 second each
+
               isFirstUpcoming: index === 0, // Mark the first one as the next round to start
             },
           })),
@@ -133,7 +133,7 @@ export default function TalkTab() {
       await setDoc(
         doc(firestore_instance, "walks", walk.id),
         {
-          endedAt: Timestamp.now(),
+          endTime: Timestamp.now(),
           status: "completed",
         },
         { merge: true }
@@ -172,6 +172,7 @@ export default function TalkTab() {
       keyboardVerticalOffset={90}
     >
       <YStack flex={1} backgroundColor="white">
+        {walk.startedAt && <WalkStatsBar walk={walk} />}
         <MessageList
           ref={messageListRef}
           timeline={timelineItems}
@@ -180,12 +181,6 @@ export default function TalkTab() {
           onDeleteMessage={handleDelete}
           context="walk"
         />
-
-        {/* End walk slider - only shown for walk owners when walk has started but not ended */}
-        {walk && isOwner(walk) && walk.startedAt && !walk.endedAt && (
-          <EndWalkSlider onEndWalk={handleEndWalk} />
-        )}
-
         <MessageForm
           onSendMessage={handleSendMessage}
           keyboardVerticalOffset={90}

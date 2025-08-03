@@ -50,7 +50,7 @@ export function ActionButton({
       {loading ? (
         <ActivityIndicator color="white" />
       ) : (
-        <XStack alignItems="center" space="$2">
+        <XStack alignItems="center" gap="$2">
           {icon}
           <Text fontSize={20} color={color} fontWeight="bold">
             {label}

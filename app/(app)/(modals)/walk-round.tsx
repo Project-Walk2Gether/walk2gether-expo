@@ -86,39 +86,77 @@ export default function WalkRoundModal() {
         padding="$4"
         alignItems="center"
         justifyContent="center"
-        space="$4"
+        gap="$6"
         backgroundColor={userPair.color}
       >
-        {/* Large emoji with color background */}
-        <View
-          width={200}
-          height={200}
-          borderRadius={100}
-          bg="white"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <Text fontSize={100}>{userPair.emoji}</Text>
-        </View>
+        {/* Large emoji display */}
+        <YStack alignItems="center" gap="$4">
+          <Text fontSize={120}>{userPair.emoji}</Text>
+        </YStack>
 
-        {/* Find names text */}
-        <Text fontSize={28} fontWeight="bold" textAlign="center" marginTop="$6">
-          Find {partnerNames.join(", ")}
-        </Text>
-        <Text fontSize={23}>Look for the same color and emoji</Text>
-
-        {/* Question prompt if available */}
-        {activeRound.questionPrompt && (
-          <YStack alignItems="center" marginTop="$8">
+        {/* Partner information in prominent box */}
+        <YStack alignItems="center" gap="$4">
+          <YStack
+            backgroundColor="rgba(255,255,255,0.2)"
+            borderRadius="$4"
+            paddingHorizontal="$6"
+            paddingVertical="$4"
+            borderWidth={1}
+            borderColor="rgba(255,255,255,0.3)"
+            gap="$3"
+            alignItems="center"
+          >
             <Text
-              fontSize={16}
-              color="$gray11"
+              fontSize="$3"
+              fontWeight="600"
+              color="white"
+              opacity={0.8}
               textAlign="center"
-              marginBottom="$2"
+              textTransform="uppercase"
+              letterSpacing={0.8}
             >
-              Discussion Topic:
+              You're paired with
             </Text>
-            <Text fontSize={22} textAlign="center" fontWeight="500">
+            <Text
+              fontSize="$7"
+              fontWeight="700"
+              color="white"
+              textAlign="center"
+            >
+              {partnerNames.join(" & ")}
+            </Text>
+            <Text fontSize="$4" color="white" opacity={0.9} textAlign="center">
+              Look for the same color and emoji to connect!
+            </Text>
+          </YStack>
+        </YStack>
+
+        {/* Discussion prompt section */}
+        {activeRound.questionPrompt && (
+          <YStack
+            alignItems="center"
+            gap="$3"
+            paddingHorizontal="$4"
+            maxWidth="90%"
+          >
+            <Text
+              fontSize="$3"
+              fontWeight="600"
+              color="white"
+              opacity={0.8}
+              textTransform="uppercase"
+              letterSpacing={0.8}
+              textAlign="center"
+            >
+              Discussion Prompt
+            </Text>
+            <Text
+              fontSize="$5"
+              color="white"
+              textAlign="center"
+              fontWeight="500"
+              lineHeight={28}
+            >
               {activeRound.questionPrompt}
             </Text>
           </YStack>

@@ -26,7 +26,7 @@ export default function WalkDetailsCard({
           {headerAction}
         </XStack>
       </Card.Header>
-      <Card.Footer padding="$3" paddingTop="$0">
+      <Card.Footer padding="$4" paddingTop="$0">
         {children}
       </Card.Footer>
     </Card>

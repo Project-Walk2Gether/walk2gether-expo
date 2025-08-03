@@ -2,15 +2,7 @@ import { db } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@/utils/firestore";
 import { collection, query } from "@react-native-firebase/firestore";
-
-// Assuming a Location type exists or create one
-export interface Location {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  notes?: string;
-}
+import { FavoriteLocation, WithId } from "walk2gether-shared";
 
 export const useSavedLocations = () => {
   const { user } = useAuth();
@@ -22,7 +14,7 @@ export const useSavedLocations = () => {
 
   // Fetch user's saved locations using the custom useQuery hook as per project rules
   const { docs: savedLocations, loading: loadingSavedLocations } =
-    useQuery<Location>(userLocationsCollection);
+    useQuery<FavoriteLocation>(userLocationsCollection);
 
   return {
     savedLocations,

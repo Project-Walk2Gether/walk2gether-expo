@@ -79,6 +79,7 @@ export default function WalkLayout() {
       />
       <View flex={1}>
         <StatusBar style="dark" />
+
         <MaterialTopTabs
           initialRouteName={initialRouteName}
           screenOptions={{

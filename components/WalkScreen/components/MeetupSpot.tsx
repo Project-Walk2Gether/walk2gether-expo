@@ -1,7 +1,6 @@
 import React from "react";
 import { Platform } from "react-native";
 import { Marker } from "react-native-maps";
-import { COLORS } from "../../../styles/colors";
 
 interface Props {
   location: {
@@ -22,9 +21,9 @@ const MeetupSpot: React.FC<Props> = ({ location }) => {
         latitude: location.latitude,
         longitude: location.longitude,
       }}
-      pinColor={COLORS.success}
-      tracksViewChanges={Platform.OS === 'android'}
-      title="Meetup Spot"
+      pinColor={"rgba(0,153,255,0.9)"}
+      tracksViewChanges={Platform.OS === "android"}
+      title={location.notes || "Meetup Spot"}
     />
   );
 };

@@ -86,7 +86,11 @@ const MessageList = forwardRef<MessageListRef, Props>(
               }
             >
               {timeline.length === 0 ? (
-                <YStack height={80} justifyContent="center" alignItems="center">
+                <YStack
+                  height={400}
+                  justifyContent="center"
+                  alignItems="center"
+                >
                   <Text color="#999" textAlign="center">
                     {context === "walk"
                       ? "No messages yet. Say hello!"
@@ -115,7 +119,6 @@ const MessageList = forwardRef<MessageListRef, Props>(
           )}
         </YStack>
 
-        {/* Message options sheet */}
         <MessageOptionsSheet
           open={optionsSheetOpen}
           onOpenChange={setOptionsSheetOpen}

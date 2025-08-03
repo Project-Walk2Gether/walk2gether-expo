@@ -17,7 +17,9 @@ import {
   Camera,
   Clock,
   Download,
+  ExternalLink,
   Info,
+  Linkedin,
   LogOut,
   Map,
   Phone,
@@ -27,7 +29,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Pressable } from "react-native";
+import { ActivityIndicator, Linking, Pressable } from "react-native";
 import {
   Button,
   Card,
@@ -73,6 +75,7 @@ export default function MeScreen() {
             placeId: "",
             latitude: 0,
             longitude: 0,
+            description: userData.location,
           });
         } else {
           // New format: complete location object
@@ -309,6 +312,25 @@ export default function MeScreen() {
             secondaryText={authUser?.phoneNumber || "Not provided"}
           />
 
+          {userData?.linkedInProfileUrl && (
+            <>
+              <Separator borderColor="$gray5" />
+              <ActionRow
+                icon={<Linkedin />}
+                title="LinkedIn Profile"
+                secondaryText="View profile"
+                onPress={() => {
+                  if (userData.linkedInProfileUrl) {
+                    Linking.openURL(userData.linkedInProfileUrl);
+                  }
+                }}
+                action={
+                  <ExternalLink size={16} color={COLORS.textSecondary} />
+                }
+              />
+            </>
+          )}
+
           <Separator borderColor="$gray5" />
 
           <ActionRow
@@ -364,7 +386,7 @@ export default function MeScreen() {
             onPress={isUpdateAvailable ? applyUpdate : undefined}
             action={
               isUpdateAvailable ? (
-                <XStack alignItems="center" space="$2">
+                <XStack alignItems="center" gap="$2">
                   <Download size={16} color="white" />
                   <Text color="white" fontWeight="500">
                     Tap to instant-update

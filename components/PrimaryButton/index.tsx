@@ -32,12 +32,16 @@ export default function PrimaryButton({
       width={width}
     >
       {isLoading ? (
-        <XStack space="$2" justifyContent="center">
+        <XStack gap="$2" justifyContent="center">
           <Spinner size="small" color={COLORS.textOnDark} />
-          {typeof children === 'string' && <Text color={COLORS.textOnDark}>{children}</Text>}
+          {typeof children === "string" && (
+            <Text color={COLORS.textOnDark}>{children}</Text>
+          )}
         </XStack>
+      ) : typeof children === "string" ? (
+        <Text color={COLORS.textOnDark}>{children}</Text>
       ) : (
-        typeof children === 'string' ? <Text color={COLORS.textOnDark}>{children}</Text> : children
+        children
       )}
     </Button>
   );

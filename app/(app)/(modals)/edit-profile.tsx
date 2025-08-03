@@ -24,10 +24,12 @@ export default function EditProfileScreen() {
     name: newName,
     aboutMe: newAboutMe,
     location: newLocation,
+    linkedInProfileUrl: newLinkedInProfileUrl,
   }: {
     name: string;
     aboutMe?: string;
     location?: PlaceData | null;
+    linkedInProfileUrl?: string;
   }) => {
     try {
       setIsSaving(true);
@@ -48,6 +50,7 @@ export default function EditProfileScreen() {
         name: newName,
         location: formattedLocation,
         aboutMe: newAboutMe,
+        linkedInProfileUrl: newLinkedInProfileUrl,
       };
 
       // Update user data in Firestore
@@ -98,6 +101,7 @@ export default function EditProfileScreen() {
                   name: userData.name,
                   aboutMe: userData.aboutMe,
                   location: userData.location as PlaceData | null,
+                  linkedInProfileUrl: userData.linkedInProfileUrl,
                 }}
                 onSave={handleSave}
                 isSaving={isSaving}

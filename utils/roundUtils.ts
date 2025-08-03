@@ -1,7 +1,4 @@
-import { collection, Timestamp } from "@react-native-firebase/firestore";
-import firestore, {
-  FirebaseFirestoreTypes,
-} from "@react-native-firebase/firestore";
+import firestore, { Timestamp } from "@react-native-firebase/firestore";
 import { MeetupWalk, Round, Walk, WithId } from "walk2gether-shared";
 
 /**

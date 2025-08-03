@@ -41,16 +41,16 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
   // Get current time for filtering active walks
   const now = new Date();
 
-  // Create query for current and upcoming walks based on estimatedEndTime
+  // Create query for current and upcoming walks based on endTime
   const currentWalksQuery = useMemo(() => {
     if (!user) return undefined;
 
-    // Get walks that haven't ended yet (estimatedEndTime > now)
+    // Get walks that haven't ended yet (endTime > now)
     return query(
       collection(firestore_instance, "walks"),
-      where("estimatedEndTime", ">", addHours(now, -3)),
+      where("endTime", ">", addHours(now, -3)),
       where("participantUids", "array-contains", user.uid),
-      orderBy("estimatedEndTime", "asc"),
+      orderBy("endTime", "asc"),
       limit(10)
     );
   }, [user, now]);
@@ -77,7 +77,7 @@ export const WalksProvider: React.FC<WalksProviderProps> = ({ children }) => {
         if (walk.date && walk.date.toDate() <= thirtyMinutesFromNow) {
           acc.activeWalks.push(walk);
           // If the walk is started and not ended, it's active
-        } else if (walk.startedAt && !walk.endedAt) {
+        } else if (walk.startedAt && !walk.endTime) {
           acc.activeWalks.push(walk);
         } else {
           acc.upcomingWalks.push(walk);

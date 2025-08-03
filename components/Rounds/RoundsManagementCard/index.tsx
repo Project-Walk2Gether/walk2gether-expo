@@ -63,7 +63,7 @@ export default function RoundsManagementCard({ walk }: Props) {
         </XStack>
       }
     >
-      <YStack space="$4" width="100%">
+      <YStack gap="$4" width="100%">
         {isWalkOwner && (
           <XStack gap="$2" alignItems="center">
             <Info size={16} color={COLORS.primary} />

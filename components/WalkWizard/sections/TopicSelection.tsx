@@ -39,7 +39,7 @@ export const TopicSelection: React.FC<Props> = ({
       continueText="Continue"
       continueDisabled={!formData.topic}
     >
-      <YStack gap="$4">
+      <YStack gap="$4" paddingHorizontal={16}>
         <Card
           backgroundColor="white"
           borderRadius={12}

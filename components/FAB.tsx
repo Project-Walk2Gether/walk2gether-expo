@@ -33,7 +33,7 @@ const FAB = forwardRef<typeof Button, FABProps>(
           borderRadius={30}
           {...rest}
         >
-          <XStack alignItems="center" space="$2">
+          <XStack alignItems="center" gap="$2">
             <Plus size={28} color="white" />
             {text && (
               <Text color="white" fontSize={18} fontWeight="600">

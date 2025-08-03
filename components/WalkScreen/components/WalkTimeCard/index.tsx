@@ -60,7 +60,9 @@ export default function WalkTimeCard({
         size="$2"
         circular
         icon={<Edit3 size={16} />}
-        onPress={() => router.push(`/(app)/(modals)/edit-walk-time?id=${walkId}`)}
+        onPress={() =>
+          router.push(`/(app)/(modals)/edit-walk-time?id=${walkId}`)
+        }
       />
     );
   } else if (walkDate) {
@@ -77,7 +79,7 @@ export default function WalkTimeCard({
       testID="walk-details-card"
       headerAction={headerAction}
     >
-      <YStack w="100%" space="$3">
+      <YStack w="100%" gap="$3">
         {/* Time Information Section */}
 
         {/* Date Info */}

@@ -61,8 +61,8 @@ export default function ParticipantScreen() {
     <>
       <Stack.Screen options={{ title: userData.name }} />
       <ScrollView style={{ flex: 1 }}>
-        <YStack flex={1} padding="$4" space="$4">
-          <YStack alignItems="center" space="$3">
+        <YStack flex={1} padding="$4" gap="$4">
+          <YStack alignItems="center" gap="$3">
             <Avatar size="$10" circular>
               {userData.profilePicUrl ? (
                 <Avatar.Image src={userData.profilePicUrl} />
@@ -73,7 +73,7 @@ export default function ParticipantScreen() {
                 </Text>
               </Avatar.Fallback>
             </Avatar>
-            <XStack alignItems="center" space="$2">
+            <XStack alignItems="center" gap="$2">
               {participant.navigationMethod === "driving" ? (
                 <Car size="$1" color={COLORS.text} />
               ) : (
@@ -89,7 +89,7 @@ export default function ParticipantScreen() {
             {/* Show introduction if available */}
             {participant.introduction && (
               <YStack
-                space="$2"
+                gap="$2"
                 backgroundColor="$gray3"
                 padding="$3"
                 borderRadius="$3"

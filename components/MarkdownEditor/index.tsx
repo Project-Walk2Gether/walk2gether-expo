@@ -23,7 +23,7 @@ export default function MarkdownEditor({
   touched,
 }: Props) {
   return (
-    <YStack space="$2">
+    <YStack gap="$2">
       {label && (
         <Text fontWeight="bold" fontSize={16}>
           {label}

@@ -1,12 +1,12 @@
+import { StatelessAvatar } from "@/components/UserAvatar/StatelessAvatar";
+import { COLORS } from "@/styles/colors";
+import { getWalkStatus } from "@/utils/walkUtils";
+import { Calendar, Car, Check, MapPin } from "@tamagui/lucide-icons";
+import { differenceInHours, format } from "date-fns";
 import React from "react";
 import { Pressable } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
-import { getWalkStatus } from "@/utils/walkUtils";
-import { COLORS } from "@/styles/colors";
 import { ParticipantWithRoute } from "walk2gether-shared";
-import { MapPin, Car, Calendar, Check } from "@tamagui/lucide-icons";
-import { differenceInHours, format } from "date-fns";
-import { StatelessAvatar } from "@/components/UserAvatar/StatelessAvatar";
 
 interface Props {
   participant: ParticipantWithRoute & {
@@ -27,21 +27,21 @@ export default function ParticipantRow({
 }: Props) {
   const isCurrentUser = participant.userUid === currentUserId;
   const isInvited = participant.isInvitedParticipant;
-  
+
   // Helper function to convert timestamp to Date
   const timestampToDate = (timestamp: any) => {
     if (!timestamp) return undefined;
-    
+
     // Handle Firebase Timestamp objects
-    if (typeof timestamp.toDate === 'function') {
+    if (typeof timestamp.toDate === "function") {
       return timestamp.toDate();
     }
-    
+
     // Try to create a date directly
     try {
       return new Date(timestamp);
     } catch (e) {
-      console.warn('Unable to convert timestamp to date:', timestamp);
+      console.warn("Unable to convert timestamp to date:", timestamp);
       return undefined;
     }
   };
@@ -79,24 +79,28 @@ export default function ParticipantRow({
       };
     } else {
       const now = new Date();
-      
+
       // Check if walk is far in the future (more than 4 hours away)
-      const isFutureWalk = walkStartTime && differenceInHours(walkStartTime, now) > 4;
-      
+      const isFutureWalk =
+        walkStartTime && differenceInHours(walkStartTime, now) > 4;
+
       // If it's a future walk and participant has accepted, show when they accepted
       if (isFutureWalk && participant.acceptedAt) {
         const acceptedDate = timestampToDate(participant.acceptedAt);
         return {
           icon: <Check size={16} color="green" />,
-          label: acceptedDate ? `Accepted ${format(acceptedDate, "M/d/yy")}` : "Accepted",
+          label: acceptedDate
+            ? `Accepted ${format(acceptedDate, "M/d/yy")}`
+            : "Accepted",
           color: "green",
           backgroundColor: "$green2",
         };
       }
-      
+
       // Handle pending status based on whether walk is starting soon
-      const isStartingSoon = walkStartTime && differenceInHours(walkStartTime, now) <= 3;
-      
+      const isStartingSoon =
+        walkStartTime && differenceInHours(walkStartTime, now) <= 3;
+
       if (walkStatus === "active" || isStartingSoon) {
         return {
           icon: null,
@@ -133,7 +137,7 @@ export default function ParticipantRow({
       <XStack
         padding="$3"
         alignItems="center"
-        space="$3"
+        gap="$3"
         backgroundColor={isCurrentUser ? "$backgroundHover" : "white"}
       >
         <StatelessAvatar
@@ -143,7 +147,7 @@ export default function ParticipantRow({
           backgroundColor="$blue5"
         />
 
-        <YStack flex={1} space="$1">
+        <YStack flex={1} gap="$1">
           <Text
             fontWeight={isCurrentUser ? "bold" : "normal"}
             fontSize="$4"
@@ -153,7 +157,7 @@ export default function ParticipantRow({
             {isCurrentUser && <Text fontSize="$3">(You)</Text>}
           </Text>
 
-          <XStack alignItems="center" space="$1">
+          <XStack alignItems="center" gap="$1">
             {statusInfo.icon}
             <Text fontSize="$3" color={statusInfo.color}>
               {statusInfo.label}
@@ -169,7 +173,7 @@ export default function ParticipantRow({
 
         {/* Display distance info if available */}
         {participant.route?.distance?.text && !isInvited && (
-          <YStack alignItems="flex-end" space="$1">
+          <YStack alignItems="flex-end" gap="$1">
             <Text fontSize="$3" color="$gray11" fontWeight="bold">
               {participant.route.distance.text}
             </Text>

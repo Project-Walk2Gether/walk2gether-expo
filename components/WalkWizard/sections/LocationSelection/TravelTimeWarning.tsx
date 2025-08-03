@@ -28,7 +28,7 @@ const TravelTimeWarning: React.FC<TravelTimeWarningProps> = ({
         padding="$3"
         borderRadius="$4"
         alignItems="center"
-        space="$2"
+        gap="$2"
       >
         <Spinner size="small" color="$blue10" />
         <Text>Checking travel time...</Text>
@@ -51,10 +51,10 @@ const TravelTimeWarning: React.FC<TravelTimeWarningProps> = ({
       backgroundColor="$yellow3"
       padding="$3"
       borderRadius="$4"
-      space="$2"
+      gap="$2"
       marginBottom="$3"
     >
-      <XStack alignItems="center" space="$2">
+      <XStack alignItems="center" gap="$2">
         <AlertCircle size="$1" color="$yellow11" />
         <Text fontWeight="bold" color="$yellow11">
           Travel time warning

@@ -34,7 +34,7 @@ export default function WalkInviteCard({ walkId }: Props) {
 
   return (
     <WalkDetailsCard title="Invite Others" testID="walk-invite-card">
-      <YStack w="100%" space="$2">
+      <YStack w="100%" gap="$2">
         <Text>Invite friends, family or others to join this walk</Text>
 
         {/* Invite Buttons */}

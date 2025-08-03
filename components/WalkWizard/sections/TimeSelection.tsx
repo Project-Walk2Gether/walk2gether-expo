@@ -109,7 +109,7 @@ export const TimeSelection: React.FC<Props> = ({
       totalSteps={totalSteps}
       continueText="Continue"
     >
-      <YStack gap="$4">
+      <YStack gap="$4" paddingHorizontal={16}>
         {/* Only show time option tabs for neighborhood walks */}
         {isNeighborhoodWalk && (
           <XStack backgroundColor="white" borderRadius={12} overflow="hidden">

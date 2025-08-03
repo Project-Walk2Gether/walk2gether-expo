@@ -60,13 +60,13 @@ export const UpcomingRound = memo(
 
         {/* Expanded view with pairs */}
         {isExpanded && (
-          <YStack marginTop="$2" space="$2">
+          <YStack marginTop="$2" gap="$2">
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ paddingHorizontal: 12 }}
             >
-              <XStack space="$2" paddingVertical="$2">
+              <XStack gap="$2" paddingVertical="$2">
                 {round.pairs.map((pair, pairIndex) => (
                   <PairCard key={`pair-${pairIndex}`} pair={pair} />
                 ))}

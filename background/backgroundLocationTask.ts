@@ -19,16 +19,11 @@ TaskManager.defineTask(
   LOCATION_TRACKING_TASK,
   async ({ data, error }: TaskManager.TaskManagerTaskBody<any>) => {
     console.log("BACKGROUND TASK STARTED", new Date().toISOString());
-    TaskManager.isTaskRegisteredAsync(LOCATION_TRACKING_TASK).then(
-      (isRegistered) => {
-        console.log("Task is registered:", isRegistered);
-      }
-    );
-
     writeLogIfEnabled({
       message: "Background location task started",
       metadata: { data },
     });
+
     if (error) {
       writeLogIfEnabled({
         message: "Error updating location in background: " + error,
@@ -106,12 +101,12 @@ TaskManager.defineTask(
 export const startBackgroundLocationTracking = async ({
   walkId,
   userId,
-  ...locationOptions
+  endTime,
 }: LocationTaskOptions = {}) => {
   console.log("Starting background tracking with:", {
     walkId,
     userId,
-    endTime: locationOptions.endTime,
+    endTime,
   });
 
   if (!walkId) {
@@ -126,14 +121,11 @@ export const startBackgroundLocationTracking = async ({
   }
 
   // Log the end time if provided
-  if (locationOptions.endTime) {
-    console.log(
-      "Background tracking will automatically stop at:",
-      locationOptions.endTime
-    );
+  if (endTime) {
+    console.log("Background tracking will automatically stop at:", endTime);
   }
 
-  const defaultOptions: LocationTaskOptions = {
+  const options: LocationTaskOptions = {
     accuracy: ExpoLocation.Accuracy.High,
     timeInterval: 10000, // Update every 10 seconds
     distanceInterval: 10, // Update if moved by 10 meters
@@ -163,10 +155,7 @@ export const startBackgroundLocationTracking = async ({
   );
   console.log("Is task already registered before starting?", isTaskRegistered);
 
-  await ExpoLocation.startLocationUpdatesAsync(LOCATION_TRACKING_TASK, {
-    ...defaultOptions,
-    ...locationOptions,
-  });
+  await ExpoLocation.startLocationUpdatesAsync(LOCATION_TRACKING_TASK, options);
 
   // Verify task was registered successfully
   const isRegisteredAfter = await TaskManager.isTaskRegisteredAsync(

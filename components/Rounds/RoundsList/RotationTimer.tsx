@@ -55,7 +55,7 @@ export const RotationTimer = ({
       marginBottom="$2"
     >
       <XStack justifyContent="space-between" alignItems="center">
-        <XStack alignItems="center" space="$3" flex={1}>
+        <XStack alignItems="center" gap="$3" flex={1}>
           {remainingSeconds > 0 ? (
             <CountdownCircleTimer
               key={key}

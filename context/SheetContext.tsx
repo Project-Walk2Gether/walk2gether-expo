@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { View } from "react-native";
 import { PortalItem } from "tamagui";
+import { useMaybePortalHostContext } from "./PortalHostContext";
 
 // SheetRef is now imported from Sheet component
 
@@ -28,12 +29,28 @@ const SheetContext = createContext<SheetContextType | undefined>(undefined);
 // Hook to access the sheet context
 export function useSheet() {
   const context = useContext(SheetContext);
+  const portalContext = useMaybePortalHostContext();
 
   if (context === undefined) {
     throw new Error("useSheet must be used within a SheetProvider");
   }
 
-  return context;
+  // Create a wrapped version of showSheet that automatically includes portal context
+  const enhancedContext = {
+    ...context,
+    showSheet: (content: ReactNode, options?: SheetOptions) => {
+      // Mix in the portal context if available and not explicitly overridden
+      const enhancedOptions = {
+        ...options,
+        // Only use the context's portal host if not explicitly provided in options
+        portalHostName: options?.portalHostName || portalContext?.portalHostName,
+      };
+      
+      return context.showSheet(content, enhancedOptions);
+    },
+  };
+
+  return enhancedContext;
 }
 
 export function SheetProvider({ children }: { children: ReactNode }) {

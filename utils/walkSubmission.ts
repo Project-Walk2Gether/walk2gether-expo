@@ -36,11 +36,11 @@ export async function createWalkFromForm({
       );
     }
 
-    const estimatedEndTime = addMinutes(
+    const endTime = addMinutes(
       formData.date.toDate(),
       formData.durationMinutes
     );
-    const estimatedEndTimeWithBuffer = addMinutes(estimatedEndTime, 60);
+    const endTimeWithBuffer = addMinutes(endTime, 60);
 
     // Create base walk payload with common fields for all walk types
     const basePayload: Walk = {
@@ -58,10 +58,8 @@ export async function createWalkFromForm({
       participantUids: [...(formData.participantUids || []), userData.id],
 
       // Timestamp fields
-      estimatedEndTime: Timestamp.fromDate(estimatedEndTime),
-      estimatedEndTimeWithBuffer: Timestamp.fromDate(
-        estimatedEndTimeWithBuffer
-      ),
+      endTime: Timestamp.fromDate(endTime),
+      endTimeWithBuffer: Timestamp.fromDate(endTimeWithBuffer),
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
 

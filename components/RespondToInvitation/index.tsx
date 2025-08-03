@@ -247,7 +247,7 @@ const RespondToInvitation: React.FC<Props> = ({
             </YStack>
           )}
 
-          <YStack space="$2" w="100%">
+          <YStack gap="$2" w="100%">
             <Button
               size="$5"
               w="100%"

@@ -135,7 +135,7 @@ export default function WalksScreen() {
         floatingAction={
           <FAB
             ref={setRef("startWalkFab") as any}
-            text="Start a Walk"
+            text="Create Walk"
             onPress={() => router.push("/new-walk")}
           />
         }

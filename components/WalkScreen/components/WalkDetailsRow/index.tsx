@@ -19,7 +19,7 @@ export default function WalkDetailsRow({
   testID,
 }: Props) {
   return (
-    <XStack space="$2" alignItems="flex-start" testID={testID}>
+    <XStack gap="$2" alignItems="flex-start" testID={testID}>
       {icon && (
         <YStack>
           {React.isValidElement(icon)
@@ -31,7 +31,7 @@ export default function WalkDetailsRow({
         </YStack>
       )}
 
-      <YStack space="$1" flex={1}>
+      <YStack gap="$1" flex={1}>
         <Text fontSize="$4" color="$gray12">
           {label}
         </Text>

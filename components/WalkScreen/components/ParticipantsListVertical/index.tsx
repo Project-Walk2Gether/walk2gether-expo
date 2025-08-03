@@ -3,6 +3,7 @@ import React from "react";
 import { FlatList } from "react-native";
 import { Separator, YStack } from "tamagui";
 import { ParticipantWithRoute } from "walk2gether-shared";
+import EmptyState from "../EmptyState";
 import ParticipantRow from "./ParticipantRow";
 import { sortParticipants } from "./sortParticipants";
 
@@ -11,13 +12,11 @@ interface Props {
   participants: ParticipantWithRoute[];
   currentUserId?: string;
   isOwner: boolean;
-  walkId: string;
   walkStartDate?: Date;
   onParticipantPress?: (participant: ParticipantWithRoute) => void;
 }
 
 export default function ParticipantsListVertical({
-  walkId,
   walkStatus,
   participants,
   currentUserId,
@@ -70,7 +69,10 @@ export default function ParticipantsListVertical({
 
   return (
     <YStack flex={1}>
-      <FlatList
+      {!dataArray.length ? (
+        <EmptyState message="No participants in this walk yet." />
+      ) : (
+        <FlatList
         data={dataArray}
         renderItem={({ item }) => (
           <ParticipantRow
@@ -85,6 +87,7 @@ export default function ParticipantsListVertical({
         ItemSeparatorComponent={() => <Separator />}
         contentContainerStyle={{ paddingBottom: 16 }}
       />
+      )}
     </YStack>
   );
 }

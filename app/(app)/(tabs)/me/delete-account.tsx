@@ -78,7 +78,7 @@ function DeleteAccountContent() {
             shadowRadius={8}
             shadowOffset={{ width: 0, height: 2 }}
           >
-            <XStack alignItems="center" space="$3" marginBottom="$4">
+            <XStack alignItems="center" gap="$3" marginBottom="$4">
               <AlertTriangle color="#DC2626" size={26} />
               <Text
                 flexShrink={1}
@@ -93,8 +93,8 @@ function DeleteAccountContent() {
               Deleting your account will permanently remove all your data,
               including:
             </Text>
-            <YStack space="$3" marginLeft="$2">
-              <XStack space="$2" alignItems="center">
+            <YStack gap="$3" marginLeft="$2">
+              <XStack gap="$2" alignItems="center">
                 <Text color="#991B1B" fontSize={18}>
                   •
                 </Text>
@@ -102,7 +102,7 @@ function DeleteAccountContent() {
                   Your profile information
                 </Text>
               </XStack>
-              <XStack space="$2" alignItems="center">
+              <XStack gap="$2" alignItems="center">
                 <Text color="#991B1B" fontSize={18}>
                   •
                 </Text>
@@ -110,7 +110,7 @@ function DeleteAccountContent() {
                   All walks you've created
                 </Text>
               </XStack>
-              <XStack space="$2" alignItems="center">
+              <XStack gap="$2" alignItems="center">
                 <Text color="#991B1B" fontSize={18}>
                   •
                 </Text>
@@ -118,7 +118,7 @@ function DeleteAccountContent() {
                   Your friend connections
                 </Text>
               </XStack>
-              <XStack space="$2" alignItems="center">
+              <XStack gap="$2" alignItems="center">
                 <Text color="#991B1B" fontSize={18}>
                   •
                 </Text>
@@ -156,7 +156,7 @@ function DeleteAccountContent() {
 
           <YStack alignItems="center">
             <Separator marginVertical="$4" width="70%" />
-            <XStack alignItems="center" justifyContent="center" space="$1">
+            <XStack alignItems="center" justifyContent="center" gap="$1">
               <Text fontSize={14} color="#6B7280">
                 Need help?
               </Text>

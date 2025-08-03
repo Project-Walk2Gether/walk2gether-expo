@@ -53,8 +53,8 @@ export function ConfirmationDialog({
           mx="$4"
           p="$4"
         >
-          <YStack space="$4">
-            <YStack space="$2">
+          <YStack gap="$4">
+            <YStack gap="$2">
               <AlertDialog.Title fontSize={18} fontWeight="bold">
                 {title}
               </AlertDialog.Title>

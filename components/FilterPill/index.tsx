@@ -1,4 +1,3 @@
-import { COLORS } from "@/styles/colors";
 import { WalkTypeKey } from "@/utils/walkType";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
@@ -39,7 +38,7 @@ const FilterPill = ({
     }}
     activeOpacity={0.7}
   >
-    <XStack alignItems="center" space="$1">
+    <XStack alignItems="center" gap="$1">
       {icon && (
         <Ionicons
           name={icon as any}

@@ -50,12 +50,13 @@ export default function NeighborhoodWalkHowItWorksSection({
       totalSteps={totalSteps}
       continueText="Continue"
     >
-      <Card
-        backgroundColor="white"
-        borderRadius={12}
-        padding="$4"
-        marginBottom="$2"
-      >
+      <YStack paddingHorizontal={16}>
+        <Card
+          backgroundColor="white"
+          borderRadius={12}
+          padding="$4"
+          marginBottom="$2"
+        >
         <YStack gap="$4">
           <XStack gap="$3" alignItems="center">
             <View
@@ -122,7 +123,8 @@ export default function NeighborhoodWalkHowItWorksSection({
             </Text>
           </XStack>
         </YStack>
-      </Card>
+        </Card>
+      </YStack>
 
       <Spacer flexGrow={1} />
       {userData?.hasCreatedNeighborhoodWalk && (

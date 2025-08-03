@@ -68,12 +68,12 @@ export default function RoundCard({
         alignItems="center"
       >
         <XStack
-          space="$2"
+          gap="$2"
           alignItems="center"
           justifyContent="space-between"
           flex={1}
         >
-          <YStack space="$1">
+          <YStack gap="$1">
             <Text fontWeight="bold" color={textColor}>
               Round {round.roundNumber}
             </Text>
@@ -191,12 +191,12 @@ export default function RoundCard({
           marginBottom="$2"
           paddingHorizontal="$4"
           paddingBottom="$2"
-          space="$3"
+          gap="$3"
         >
           <Text fontWeight="bold" color={textColor} fontSize="$3">
             Pairs
           </Text>
-          <YStack space="$3">
+          <YStack gap="$3">
             {round.pairs.map((pair, pairIndex) => (
               <PairCard
                 key={`pair-${pairIndex}`}

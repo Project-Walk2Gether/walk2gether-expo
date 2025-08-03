@@ -62,57 +62,59 @@ export default function MeetupSpotCard({
     }
 
     return (
-      <YStack gap="$3">
-        {/* Header with expand/collapse button */}
-        <Button
-          size="$3"
-          variant="outlined"
-          onPress={() => setIsExpanded(!isExpanded)}
-          icon={
-            isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />
-          }
-        >
-          <Text fontSize="$3" fontWeight="600">
-            ETA Information ({validParticipants.length})
-          </Text>
-        </Button>
+      <View padding="$4" paddingTop={0}>
+        <YStack gap="$3">
+          {/* Header with expand/collapse button */}
+          <Button
+            size="$3"
+            variant="outlined"
+            onPress={() => setIsExpanded(!isExpanded)}
+            icon={
+              isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+            }
+          >
+            <Text fontSize="$3" fontWeight="600">
+              ETA Information ({validParticipants.length})
+            </Text>
+          </Button>
 
-        {isExpanded && (
-          <YStack gap="$2">
-            {validParticipants.map((participant) => (
-              <ParticipantStatusCard
-                key={participant.id}
-                participant={participant}
-                isOwner={participant.userUid === user?.uid}
-                onPress={() => {
-                  if (!walkId || !user || participant.userUid !== user.uid)
-                    return;
+          {isExpanded && (
+            <YStack gap="$2">
+              {validParticipants.map((participant) => (
+                <ParticipantStatusCard
+                  key={participant.id}
+                  participant={participant}
+                  isOwner={participant.userUid === user?.uid}
+                  onPress={() => {
+                    if (!walkId || !user || participant.userUid !== user.uid)
+                      return;
 
-                  showSheet(
-                    <WalkParticipantStatusControls
-                      status={participant.status || "pending"}
-                      isCancelled={!!participant.cancelledAt}
-                      isOwner={participant.userUid === user.uid}
-                      walkId={walkId}
-                      userId={user.uid}
-                      navigationMethod={
-                        participant.navigationMethod || "driving"
+                    showSheet(
+                      <WalkParticipantStatusControls
+                        status={participant.status || "pending"}
+                        isCancelled={!!participant.cancelledAt}
+                        isOwner={participant.userUid === user.uid}
+                        walkId={walkId}
+                        userId={user.uid}
+                        navigationMethod={
+                          participant.navigationMethod || "driving"
+                        }
+                        onClose={() => {
+                          hideSheet();
+                        }}
+                      />,
+                      {
+                        title: "Update Your Status",
+                        dismissOnSnapToBottom: true,
                       }
-                      onClose={() => {
-                        hideSheet();
-                      }}
-                    />,
-                    {
-                      title: "Update Your Status",
-                      dismissOnSnapToBottom: true,
-                    }
-                  );
-                }}
-              />
-            ))}
-          </YStack>
-        )}
-      </YStack>
+                    );
+                  }}
+                />
+              ))}
+            </YStack>
+          )}
+        </YStack>
+      </View>
     );
   }
 
@@ -150,7 +152,7 @@ export default function MeetupSpotCard({
       borderRadius="$4"
       testID="meetup-spot-card"
     >
-      <XStack alignItems="flex-start" width="100%" gap="$3" padding="$4">
+      <XStack alignItems="center" width="100%" gap="$3" padding="$4">
         <MeetupSpotPhoto
           photo={meetupSpotPhoto}
           isWalkOwner={isWalkOwner}
@@ -227,9 +229,7 @@ export default function MeetupSpotCard({
           )}
         </YStack>
       </XStack>
-      <View padding="$4" paddingTop={0}>
-        {renderParticipantStatusCards()}
-      </View>
+      {renderParticipantStatusCards()}
     </Card>
   );
 }

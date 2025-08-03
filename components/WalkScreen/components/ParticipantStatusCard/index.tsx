@@ -29,7 +29,7 @@ const renderStatusInfo = (participant: ParticipantWithRoute) => {
   }
 
   return (
-    <XStack alignItems="center" space="$1">
+    <XStack alignItems="center" gap="$1">
       {icon}
       <Text fontSize="$3" color={color}>
         {label}
@@ -43,7 +43,7 @@ const renderDistanceInfo = (participant: ParticipantWithRoute) => {
   if (!participant?.route?.distance?.text) return null;
 
   return (
-    <YStack alignItems="flex-end" space="$1">
+    <YStack alignItems="flex-end" gap="$1">
       <Text fontSize="$3" color="$gray11" fontWeight="bold">
         {participant.route.distance.text}
       </Text>
@@ -82,11 +82,7 @@ export default function ParticipantStatusCard({
           width: "100%",
         })}
       >
-        <XStack
-          alignItems="center"
-          space="$3"
-          backgroundColor="$backgroundHover"
-        >
+        <XStack alignItems="center" gap="$3" backgroundColor="$backgroundHover">
           {/* User Avatar */}
           <StatelessAvatar
             profilePicUrl={participant.photoURL || undefined}
@@ -96,7 +92,7 @@ export default function ParticipantStatusCard({
           />
 
           {/* User Status Section */}
-          <YStack flex={1} space="$1">
+          <YStack flex={1} gap="$1">
             <Text fontWeight="bold" fontSize="$4" color="$gray12">
               {participant.displayName}
             </Text>

@@ -10,8 +10,8 @@ import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard"
 import WalkTimeCard from "@/components/WalkScreen/components/WalkTimeCard";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
-import { useSheet } from "@/context/SheetContext";
 import { useMenu } from "@/context/MenuContext";
+import { useSheet } from "@/context/SheetContext";
 import { useWalk } from "@/context/WalkContext";
 import { getWalkStatus } from "@/utils/walkUtils";
 import {
@@ -24,7 +24,7 @@ import React, { useMemo, useState } from "react";
 import { ScrollView } from "react-native";
 import Markdown from "react-native-markdown-display";
 import { Button, Text, View, YStack } from "tamagui";
-import { MeetupWalk, Participant, Walk, WithId, Round } from "walk2gether-shared";
+import { MeetupWalk, Participant, Round, WithId } from "walk2gether-shared";
 
 export default function PlanTab() {
   const { walk } = useWalk();
@@ -218,7 +218,6 @@ export default function PlanTab() {
                 </View>
               ) : (
                 <ParticipantsListVertical
-                  walkId={walk.id}
                   walkStatus={walkStatus}
                   participants={(participants as any[]) || []}
                   currentUserId={user?.uid}
@@ -236,15 +235,18 @@ export default function PlanTab() {
           <>
             <QuestionPromptsForm walk={walk as any} />
             <WalkMinimumMinutesForm walk={walk as any} />
-            <RoundsList walk={walk as any} onEditActualRound={(round: WithId<Round>) => {
-              showSheet(
-                <EditRoundSheet
-                  round={round}
-                  onClose={hideSheet}
-                  onSave={hideSheet}
-                />
-              );
-            }} />
+            <RoundsList
+              walk={walk as any}
+              onEditActualRound={(round: WithId<Round>) => {
+                showSheet(
+                  <EditRoundSheet
+                    round={round}
+                    onClose={hideSheet}
+                    onSave={hideSheet}
+                  />
+                );
+              }}
+            />
           </>
         )}
 

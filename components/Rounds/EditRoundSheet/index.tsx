@@ -1,8 +1,8 @@
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { DocumentReference, updateDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { Button, H4, Text, XStack, YStack } from "tamagui";
 import { Round, WithId } from "walk2gether-shared";
-import { DocumentReference, updateDoc } from "firebase/firestore";
 
 interface Props {
   round: WithId<Round>;
@@ -10,34 +10,30 @@ interface Props {
   onSave?: () => void;
 }
 
-export default function EditRoundSheet({ 
-  round, 
-  onClose,
-  onSave
-}: Props) {
+export default function EditRoundSheet({ round, onClose, onSave }: Props) {
   const [promptText, setPromptText] = useState(round.questionPrompt || "");
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const handleSave = async () => {
     if (!round._ref) {
       console.error("Round document reference is missing");
       return;
     }
-    
+
     setIsSaving(true);
-    
+
     try {
       // Update the round document with the new question prompt
       // Cast to unknown first to avoid TypeScript errors with DocumentReferenceLike
       await updateDoc(round._ref as unknown as DocumentReference<Round>, {
-        questionPrompt: promptText
+        questionPrompt: promptText,
       });
-      
+
       // Call onSave if provided
       if (onSave) {
         onSave();
       }
-      
+
       // Close the sheet
       onClose();
     } catch (error) {
@@ -48,12 +44,12 @@ export default function EditRoundSheet({
   };
 
   return (
-    <YStack padding="$4" space="$4">
+    <YStack padding="$4" gap="$4">
       {/* Title */}
       <H4>Edit Round {round.roundNumber}</H4>
 
       {/* Question Prompt Editor */}
-      <YStack space="$2">
+      <YStack gap="$2">
         <Text fontWeight="500">Question Prompt</Text>
         <BottomSheetTextInput
           value={promptText}
@@ -73,17 +69,17 @@ export default function EditRoundSheet({
       </YStack>
 
       {/* Action Buttons */}
-      <XStack space="$2" marginTop="$2">
-        <Button 
-          flex={1} 
-          backgroundColor="$blue8" 
-          color="white" 
+      <XStack gap="$2" marginTop="$2">
+        <Button
+          flex={1}
+          backgroundColor="$blue8"
+          color="white"
           onPress={handleSave}
           disabled={isSaving}
         >
           {isSaving ? "Saving..." : "Save"}
         </Button>
-        
+
         <Button flex={1} theme="gray" onPress={onClose}>
           Cancel
         </Button>

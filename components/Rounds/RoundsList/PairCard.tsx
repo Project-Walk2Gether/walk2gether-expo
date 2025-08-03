@@ -29,7 +29,7 @@ export const PairCard = ({ pair, isActual = false }: Props) => {
       overflow="hidden"
       opacity={isActual ? 0.9 : 1}
       alignItems="center"
-      space="$2"
+      gap="$2"
       width="100%"
     >
       {/* Emoji */}

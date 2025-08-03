@@ -47,12 +47,12 @@ export default function MarkdownHelpModal({ open, onOpenChange }: Props) {
           borderRadius={24}
           maxHeight="80%"
         >
-          <YStack space="$2">
+          <YStack gap="$2">
             <H3 textAlign="center">Markdown Formatting</H3>
 
             <ScrollView>
-              <YStack space="$4" paddingVertical="$2">
-                <YStack space="$1">
+              <YStack gap="$4" paddingVertical="$2">
+                <YStack gap="$1">
                   <Text fontWeight="bold">Bold</Text>
                   <Text>**bold text** or __bold text__</Text>
                   <Text color="$gray10">
@@ -60,7 +60,7 @@ export default function MarkdownHelpModal({ open, onOpenChange }: Props) {
                   </Text>
                 </YStack>
 
-                <YStack space="$1">
+                <YStack gap="$1">
                   <Text fontWeight="bold">Italic</Text>
                   <Text>*italic text* or _italic text_</Text>
                   <Text color="$gray10">
@@ -68,37 +68,37 @@ export default function MarkdownHelpModal({ open, onOpenChange }: Props) {
                   </Text>
                 </YStack>
 
-                <YStack space="$1">
+                <YStack gap="$1">
                   <Text fontWeight="bold">Headings</Text>
                   <Text># Heading 1</Text>
                   <Text>## Heading 2</Text>
                   <Text>### Heading 3</Text>
                 </YStack>
 
-                <YStack space="$1">
+                <YStack gap="$1">
                   <Text fontWeight="bold">Lists</Text>
                   <Text>- Item 1</Text>
                   <Text>- Item 2</Text>
                   <Text> - Nested item</Text>
                 </YStack>
 
-                <YStack space="$1">
+                <YStack gap="$1">
                   <Text fontWeight="bold">Numbered Lists</Text>
                   <Text>1. First item</Text>
                   <Text>2. Second item</Text>
                 </YStack>
 
-                <YStack space="$1">
+                <YStack gap="$1">
                   <Text fontWeight="bold">Links</Text>
                   <Text>[link text](https://example.com)</Text>
                 </YStack>
 
-                <YStack space="$1">
+                <YStack gap="$1">
                   <Text fontWeight="bold">Quotes</Text>
                   <Text>{">"} This is a quote</Text>
                 </YStack>
 
-                <YStack space="$1">
+                <YStack gap="$1">
                   <Text fontWeight="bold">Code</Text>
                   <Text>`inline code`</Text>
                 </YStack>

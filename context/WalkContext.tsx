@@ -3,6 +3,7 @@ import { MeetupWalk, Participant, Round, Walk, WithId } from "walk2gether-shared
 import { useActiveRound } from "@/hooks/useActiveRound";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { useAuth } from "@/context/AuthContext";
+import { useRoundRotation } from "@/hooks/useRoundRotation";
 import * as Notifications from 'expo-notifications';
 
 interface WalkContextType {
@@ -82,6 +83,9 @@ export const WalkProvider = ({
     walk?._ref, 
     walk?.createdByUid
   );
+  
+  // Use the round rotation hook for automatic round management
+  useRoundRotation(walk);
   
   // Sync notifications whenever the active round changes
   useEffect(() => {

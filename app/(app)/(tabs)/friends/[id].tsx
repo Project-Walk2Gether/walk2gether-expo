@@ -82,7 +82,7 @@ export default function FriendshipScreen() {
         />
       ),
       headerTitle: () => (
-        <XStack alignItems="center" space="$2">
+        <XStack alignItems="center" gap="$2">
           {/* Display friend's avatar with full screen capability */}
           {friendId && (
             <StatefulAvatarWithFullScreen uid={friendId} size={36} />

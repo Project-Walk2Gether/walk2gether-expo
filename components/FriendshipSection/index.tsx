@@ -69,14 +69,14 @@ export const FriendshipSection = ({ participant, participantId }: Props) => {
 
   if (friendshipsLoading) {
     return (
-      <YStack space="$2" marginTop="$4">
+      <YStack gap="$2" marginTop="$4">
         <Text fontWeight="500">Checking friendship status...</Text>
       </YStack>
     );
   }
 
   return (
-    <YStack space="$4" marginTop="$4" paddingHorizontal="$2">
+    <YStack gap="$4" marginTop="$4" paddingHorizontal="$2">
       {error ? (
         <Text color="$red10" textAlign="center">
           {error}

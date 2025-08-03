@@ -98,7 +98,7 @@ export const DurationSelection: React.FC<Props> = ({
         currentStep={currentStep}
         totalSteps={totalSteps}
       >
-        <YStack gap="$4">
+        <YStack gap="$4" paddingHorizontal={16}>
           <Card
             backgroundColor="white"
             borderRadius="$4"

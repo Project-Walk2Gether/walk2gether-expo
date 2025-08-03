@@ -1,4 +1,5 @@
 import { stopBackgroundLocationTracking } from "@/background/backgroundLocationTask";
+import { syncRoundRotationTask } from "@/background/roundRotationTask";
 import LocationLoading from "@/components/WalkScreen/components/LiveWalkMap/LocationLoading";
 import OfficialWalkRoute from "@/components/WalkScreen/components/LiveWalkMap/OfficialWalkRoute";
 import ParticipantMarker from "@/components/WalkScreen/components/LiveWalkMap/ParticipantMarker";
@@ -6,20 +7,18 @@ import MeetupSpot from "@/components/WalkScreen/components/MeetupSpot";
 import MeetupSpotCard from "@/components/WalkScreen/components/MeetupSpotCard";
 import RequestBackgroundLocationModal from "@/components/WalkScreen/components/RequestBackgroundLocationModal";
 import { StartWalkSlider } from "@/components/WalkScreen/components/StartWalkSlider";
-
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
-
 import { useWalk } from "@/context/WalkContext";
 import { useLocationTracking } from "@/hooks/useLocationTracking";
 import { useWalkParticipants } from "@/hooks/useWaitingParticipants";
 import { calculateOptimalRegion } from "@/utils/mapUtils";
 import { startNextRound } from "@/utils/roundUtils";
 import { getWalkStatus, isOwner } from "@/utils/walkUtils";
-import { router } from "expo-router";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { differenceInHours } from "date-fns";
+import { router } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
@@ -61,7 +60,7 @@ export default function MeetTab() {
 
   // Check if walk has started or ended
   const hasWalkStarted = Boolean(walk?.startedAt);
-  const hasWalkEnded = Boolean(walk?.endedAt);
+  const hasWalkEnded = Boolean(walk?.endTime);
 
   const status = walk ? getWalkStatus(walk) : "pending";
 
@@ -169,8 +168,13 @@ export default function MeetTab() {
       if (walk.type === "meetup") {
         try {
           await startNextRound(walk);
+          // Sync the round rotation task for automatic future rounds
+          await syncRoundRotationTask(walk.id);
         } catch (roundError) {
-          console.error("Error starting first round:", roundError);
+          console.error(
+            "Error starting first round or syncing rotation:",
+            roundError
+          );
           // Don't fail the walk start if round starting fails
         }
       }
@@ -281,7 +285,7 @@ export default function MeetTab() {
       isStartingSoon &&
       isOwner(walk) &&
       !walk?.startedAt &&
-      !walk?.endedAt ? (
+      !walk?.endTime ? (
         <StartWalkSlider onStartWalk={handleStartWalk} />
       ) : null}
 

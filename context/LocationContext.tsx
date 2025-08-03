@@ -39,7 +39,7 @@ interface LocationContextValue {
   locationTracking: boolean;
   startWalkTracking: (
     walkId: string,
-    estimatedEndTimeWithBuffer?: Date
+    endTimeWithBuffer?: Date
   ) => Promise<boolean>;
   stopWalkTracking: () => Promise<void>;
   updateLocation: (location: Location.LocationObject) => Promise<void>;
@@ -282,7 +282,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
   // Start tracking location for a specific walk
   const startWalkTracking = async (
     walkId: string,
-    estimatedEndTimeWithBuffer?: Date
+    endTimeWithBuffer?: Date
   ) => {
     if (!walkId) {
       console.error("Cannot start tracking without walkId");
@@ -323,7 +323,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
           timeInterval: 15000, // 15 seconds
           distanceInterval: 10, // 10 meters,
           // Pass the estimated end time if available
-          endTime: estimatedEndTimeWithBuffer,
+          endTime: endTimeWithBuffer,
         });
         setLocationTracking(true);
         return true;

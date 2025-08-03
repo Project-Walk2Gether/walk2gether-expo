@@ -55,16 +55,16 @@ export const TokenSignInForm: React.FC<TokenSignInFormProps> = ({
   }, [token, signInWithToken, router]);
 
   return (
-    <YStack space="$4" paddingVertical="$4">
+    <YStack gap="$4" paddingVertical="$4">
       {loading ? (
-        <YStack alignItems="center" space="$4">
+        <YStack alignItems="center" gap="$4">
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text fontSize="$4" textAlign="center">
             Authenticating...
           </Text>
         </YStack>
       ) : error ? (
-        <YStack space="$4">
+        <YStack gap="$4">
           <Paragraph color="$red10" textAlign="center">
             {error}
           </Paragraph>

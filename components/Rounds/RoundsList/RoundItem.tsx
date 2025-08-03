@@ -1,6 +1,5 @@
 import { ChevronDown, ChevronUp, Edit3 as Edit } from "@tamagui/lucide-icons";
 import React, { memo } from "react";
-import { ScrollView } from "react-native";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { Round, WithId } from "walk2gether-shared";
 import { COLORS } from "./constants";
@@ -40,7 +39,7 @@ export const RoundItem = memo(
       : "$blue1";
     const textColor = isActual ? "$gray11" : COLORS.text;
     const iconColor = isActual ? "$gray9" : COLORS.primary;
-    
+
     // Check if this is the currently active round (has startTime but no endTime)
     const isActiveRound = isActual && round.startTime && !round.endTime;
 
@@ -61,17 +60,17 @@ export const RoundItem = memo(
           justifyContent="space-between"
           alignItems="center"
         >
-          <XStack space="$2" alignItems="center">
+          <XStack gap="$2" alignItems="center">
             <Text fontWeight="bold" color={textColor}>
               Round {round.roundNumber}
             </Text>
-            
+
             {/* Status indicator */}
             {isActiveRound && (
-              <XStack 
-                backgroundColor="$green2" 
-                paddingHorizontal="$2" 
-                paddingVertical="$1" 
+              <XStack
+                backgroundColor="$green2"
+                paddingHorizontal="$2"
+                paddingVertical="$1"
                 borderRadius="$2"
                 alignItems="center"
               >
@@ -80,12 +79,12 @@ export const RoundItem = memo(
                 </Text>
               </XStack>
             )}
-            
+
             {!isActual && (
-              <XStack 
-                backgroundColor="$blue2" 
-                paddingHorizontal="$2" 
-                paddingVertical="$1" 
+              <XStack
+                backgroundColor="$blue2"
+                paddingHorizontal="$2"
+                paddingVertical="$1"
                 borderRadius="$2"
                 alignItems="center"
               >
@@ -94,12 +93,12 @@ export const RoundItem = memo(
                 </Text>
               </XStack>
             )}
-            
+
             {isActual && !isActiveRound && (
-              <XStack 
-                backgroundColor="$gray2" 
-                paddingHorizontal="$2" 
-                paddingVertical="$1" 
+              <XStack
+                backgroundColor="$gray2"
+                paddingHorizontal="$2"
+                paddingVertical="$1"
                 borderRadius="$2"
                 alignItems="center"
               >
@@ -108,7 +107,7 @@ export const RoundItem = memo(
                 </Text>
               </XStack>
             )}
-            
+
             {/* Time indicator */}
             {isActual && round.startTime && (
               <Text fontSize="$1" color="$gray8">
@@ -166,17 +165,17 @@ export const RoundItem = memo(
 
         {/* Expanded view with pairs */}
         {isExpanded && (
-          <YStack 
-            marginTop="$2" 
-            marginBottom="$2" 
-            paddingHorizontal="$4" 
-            paddingBottom="$2" 
-            space="$3"
+          <YStack
+            marginTop="$2"
+            marginBottom="$2"
+            paddingHorizontal="$4"
+            paddingBottom="$2"
+            gap="$3"
           >
             <Text fontWeight="bold" color={textColor} fontSize="$3">
               Pairs
             </Text>
-            <YStack space="$3">
+            <YStack gap="$3">
               {round.pairs.map((pair, pairIndex) => (
                 <PairCard
                   key={`pair-${pairIndex}`}

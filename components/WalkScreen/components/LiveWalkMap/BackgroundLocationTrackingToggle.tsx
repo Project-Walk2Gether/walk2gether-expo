@@ -73,7 +73,7 @@ export default function BackgroundLocationTrackingToggle({ userId }: Props) {
         paddingHorizontal={12}
         elevate
       >
-        <XStack alignItems="center" space="$2">
+        <XStack alignItems="center" gap="$2">
           {backgroundLocationPermission ? (
             <Locate size={16} color="white" />
           ) : (

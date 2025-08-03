@@ -36,7 +36,7 @@ export const TypeSelection: React.FC<TypeSelectionProps> = ({
       currentStep={currentStep}
       totalSteps={totalSteps}
     >
-      <YStack gap="$4" paddingBottom="$4">
+      <YStack gap="$4" paddingBottom="$4" paddingHorizontal={16}>
         <WalkTypeCard
           type="friends"
           title="Friend Walk"

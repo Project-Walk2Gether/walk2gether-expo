@@ -35,7 +35,7 @@ export default function WalkInfo({ walk }: Props) {
   // Check if the walk has started
   const hasStarted = !!walk.startedAt;
   // Check if the walk has ended
-  const hasEnded = !!walk.endedAt;
+  const hasEnded = !!walk.endTime;
 
   // Function to format the time difference
   const formatTime = (seconds: number): string => {
@@ -53,7 +53,7 @@ export default function WalkInfo({ walk }: Props) {
   const getTimeDisplay = () => {
     // If the walk has ended
     if (hasEnded) {
-      const endTime = walk.endedAt?.toDate();
+      const endTime = walk.endTime?.toDate();
       const startTime = walk.startedAt?.toDate();
 
       if (endTime && startTime) {
@@ -163,10 +163,10 @@ export default function WalkInfo({ walk }: Props) {
               opacity={0.9}
               textAlign="right"
             >
-              {hasEnded && walk.startedAt && walk.endedAt
+              {hasEnded && walk.startedAt && walk.endTime
                 ? // For completed walks, show the full range
                   `${format(walk.startedAt.toDate(), "h:mm a")} - ${format(
-                    walk.endedAt.toDate(),
+                    walk.endTime.toDate(),
                     "h:mm a"
                   )}`
                 : // For all other walks, show the start time

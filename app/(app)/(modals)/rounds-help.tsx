@@ -26,9 +26,9 @@ export default function RoundsHelpScreen() {
         <YStack flex={1} padding="$4">
           {/* Content */}
           <ScrollView flex={1}>
-            <YStack space="$4" paddingVertical="$2">
+            <YStack gap="$4" paddingVertical="$2">
               {/* Overview */}
-              <YStack space="$2" marginBottom="$4">
+              <YStack gap="$2" marginBottom="$4">
                 <Text fontSize={16} fontWeight="600">
                   What are Rounds?
                 </Text>
@@ -41,10 +41,10 @@ export default function RoundsHelpScreen() {
               </YStack>
 
               {/* How it works */}
-              <YStack space="$3">
+              <YStack gap="$3">
                 <H4>How It Works</H4>
 
-                <YStack space="$2">
+                <YStack gap="$2">
                   <XStack alignItems="center" gap="$3">
                     <Clock size={20} color={COLORS.primary} />
                     <YStack flex={1}>
@@ -58,7 +58,7 @@ export default function RoundsHelpScreen() {
                   </XStack>
                 </YStack>
 
-                <YStack space="$2">
+                <YStack gap="$2">
                   <XStack alignItems="center" gap="$3">
                     <Users size={20} color={COLORS.primary} />
                     <YStack flex={1}>
@@ -72,7 +72,7 @@ export default function RoundsHelpScreen() {
                   </XStack>
                 </YStack>
 
-                <YStack space="$2">
+                <YStack gap="$2">
                   <XStack alignItems="center" gap="$3">
                     <Heart size={20} color={COLORS.primary} />
                     <YStack flex={1}>
@@ -86,7 +86,7 @@ export default function RoundsHelpScreen() {
                   </XStack>
                 </YStack>
 
-                <YStack space="$2">
+                <YStack gap="$2">
                   <XStack alignItems="center" gap="$3">
                     <Shuffle size={20} color={COLORS.primary} />
                     <YStack flex={1}>
