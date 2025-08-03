@@ -73,20 +73,19 @@ export default function ParticipantsListVertical({
         <EmptyState message="No participants in this walk yet." />
       ) : (
         <FlatList
-        data={dataArray}
-        renderItem={({ item }) => (
-          <ParticipantRow
-            participant={item}
-            walkStatus={walkStatus}
-            currentUserId={currentUserId}
-            walkStartTime={walkStartDate}
-            onPress={onParticipantPress}
-          />
-        )}
-        keyExtractor={(item) => item.id || `participant-${item.userUid}`}
-        ItemSeparatorComponent={() => <Separator />}
-        contentContainerStyle={{ paddingBottom: 16 }}
-      />
+          data={dataArray}
+          renderItem={({ item }) => (
+            <ParticipantRow
+              participant={item}
+              walkStatus={walkStatus}
+              currentUserId={currentUserId}
+              walkStartTime={walkStartDate}
+              onPress={onParticipantPress}
+            />
+          )}
+          keyExtractor={(item) => item.id || `participant-${item.userUid}`}
+          ItemSeparatorComponent={() => <Separator />}
+        />
       )}
     </YStack>
   );

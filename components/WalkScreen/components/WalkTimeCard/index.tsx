@@ -58,12 +58,14 @@ export default function WalkTimeCard({
     headerAction = (
       <Button
         size="$2"
-        circular
-        icon={<Edit3 size={16} />}
+        iconAfter={Edit3}
+        theme="blue"
         onPress={() =>
           router.push(`/(app)/(modals)/edit-walk-time?id=${walkId}`)
         }
-      />
+      >
+        Edit
+      </Button>
     );
   } else if (walkDate) {
     headerAction = (

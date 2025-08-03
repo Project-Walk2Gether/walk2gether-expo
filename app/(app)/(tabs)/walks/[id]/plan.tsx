@@ -18,6 +18,7 @@ import {
   FirebaseFirestoreTypes,
   updateDoc,
 } from "@react-native-firebase/firestore";
+import { Send } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { Timestamp } from "firebase/firestore";
 import React, { useMemo, useState } from "react";
@@ -189,6 +190,7 @@ export default function PlanTab() {
                   mt="$2"
                   size="$2"
                   theme="blue"
+                  iconAfter={Send}
                   onPress={() => {
                     // For friend walks, include the addFriend parameter
                     const params: { walkId: string; addFriend?: string } = {

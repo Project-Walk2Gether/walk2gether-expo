@@ -161,9 +161,7 @@ export const TimeSelection: React.FC<Props> = ({
               <View borderRadius={10} overflow="hidden" backgroundColor="white">
                 <Calendar
                   minDate={new Date().toISOString().split("T")[0]}
-                  onDayPress={(day) => {
-                    handleDateChange(day);
-                  }}
+                  onDayPress={handleDateChange}
                   theme={{
                     selectedDayBackgroundColor: COLORS.action,
                     todayTextColor: COLORS.action,

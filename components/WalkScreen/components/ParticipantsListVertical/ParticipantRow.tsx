@@ -135,7 +135,7 @@ export default function ParticipantRow({
       })}
     >
       <XStack
-        padding="$3"
+        py="$2"
         alignItems="center"
         gap="$3"
         backgroundColor={isCurrentUser ? "$backgroundHover" : "white"}
