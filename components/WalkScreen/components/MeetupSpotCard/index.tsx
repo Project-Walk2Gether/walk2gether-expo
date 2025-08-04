@@ -163,15 +163,12 @@ export default function MeetupSpotCard({
           <XStack alignItems="center" gap="$2">
             <MapPin size={16} color="$gray10" />
             <Text fontSize="$4" fontWeight="bold" color="$gray12">
-              Meetup Spot
+              {displayName}
             </Text>
           </XStack>
 
           {/* Location Info */}
           <YStack gap="$1">
-            <Text fontSize="$4" fontWeight="600" color="$gray12">
-              {displayName}
-            </Text>
             {notes && (
               <Text fontSize="$3" color="$gray10">
                 {notes}

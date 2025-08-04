@@ -130,12 +130,12 @@ export default function WalkMinimumMinutesForm({ walk }: Props) {
         ) : (
           // Read-only mode - show current value
           <YStack gap="$2">
-            <XStack alignItems="center">
+            <XStack mb="$2" alignItems="center">
               <Text fontSize="$6" fontWeight="600" color="$blue10">
                 {walk.minimumNumberOfMinutesWithEachPartner || 5} minutes
               </Text>
             </XStack>
-            <Text fontSize="$3" color="$gray10">
+            <Text fontSize="$3" color="$gray10" textAlign="center">
               Rounds won't be shorter than this, but may be longer, to fill up
               the available time.
             </Text>

@@ -238,8 +238,6 @@ export default function PlanTab() {
         {/* Rounds Management - only for meetup walk owners */}
         {isWalkOwner && walk.type === "meetup" && (
           <>
-            <QuestionPromptsForm walk={walk as any} />
-            <WalkMinimumMinutesForm walk={walk as any} />
             <RoundsList
               walk={walk as any}
               onEditActualRound={(round: WithId<Round>) => {
@@ -252,6 +250,8 @@ export default function PlanTab() {
                 );
               }}
             />
+            <QuestionPromptsForm walk={walk as any} />
+            <WalkMinimumMinutesForm walk={walk as any} />
           </>
         )}
 

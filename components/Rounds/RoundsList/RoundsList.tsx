@@ -1,16 +1,13 @@
 import RoundCard from "@/components/RoundCard";
 import WalkDetailsCard from "@/components/WalkScreen/components/WalkDetailsCard";
 import { useAuth } from "@/context/AuthContext";
-import { useFlashMessage } from "@/context/FlashMessageContext";
-import { useSheet } from "@/context/SheetContext";
-import { startNextRound } from "@/utils/roundUtils";
 import { useQuery } from "@/utils/firestore";
-import firestore, {
+import { startNextRound } from "@/utils/roundUtils";
+import {
   collection,
   FirebaseFirestoreTypes,
   orderBy,
   query,
-  Timestamp,
   where,
 } from "@react-native-firebase/firestore";
 import { HelpCircle } from "@tamagui/lucide-icons";
@@ -46,8 +43,6 @@ export default function RoundsList({ walk, onEditActualRound }: Props) {
   const upcomingRounds = isMeetupWalk
     ? (walk as unknown as MeetupWalk).upcomingRounds || []
     : [];
-
-  const currentUserId = user!.uid;
 
   // Check if the current user is the walk owner
   const isWalkOwner = useMemo(() => {
@@ -102,7 +97,6 @@ export default function RoundsList({ walk, onEditActualRound }: Props) {
   };
 
   // Start the round with the selected duration
-
 
   // Toggle expanded state for actual rounds
   const toggleActualRoundExpanded = (roundId: string) => {
@@ -169,8 +163,7 @@ export default function RoundsList({ walk, onEditActualRound }: Props) {
           <YStack>
             <Text color="$gray9" textAlign="center" padding="$4">
               Once the walk starts, participants will be matched into pairs
-              throughout the walk. Add question prompts to give pairs something
-              to talk about during each round.
+              throughout the walk.
             </Text>
           </YStack>
         )}

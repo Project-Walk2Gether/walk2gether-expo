@@ -5,12 +5,12 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { Clock, Edit3, Plus, Star, Trash2 } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, Modal, Platform, TouchableOpacity } from "react-native";
 import { Calendar as RNCalendar } from "react-native-calendars";
 import { Button, Text, View, XStack, YStack } from "tamagui";
-import MenuButton from "../../MenuButton";
 import { MenuItem } from "../../../context/MenuContext";
+import MenuButton from "../../MenuButton";
 import SelectableOption from "../../SelectableOption";
 import WizardWrapper from "./WizardWrapper";
 
@@ -40,8 +40,50 @@ export const TimeSelection: React.FC<Props> = ({
   const [timeOption, setTimeOption] = useState<"now" | "future" | null>(null);
   const [selectorExpanded, setSelectorExpanded] = useState(true); // Start expanded
 
+  // Check if we're editing an existing walk
+  const isEditMode = formData.date !== null;
+
+  // Initialize state for existing walk
+  useEffect(() => {
+    if (isEditMode && formData.date && timeOption === null) {
+      const walkDate = formData.date.toDate();
+      const now = new Date();
+      
+      // If walk date is in the past or very close to now (within 5 minutes), it's "now"
+      const isNow = walkDate <= new Date(now.getTime() + 5 * 60 * 1000);
+      
+      setTimeOption(isNow ? "now" : "future");
+      setSelectorExpanded(false); // Start collapsed when editing
+    }
+  }, [isEditMode, formData.date, timeOption]);
+
   // Time entry management - starts completely empty
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
+
+  // Initialize time entries for existing walk
+  useEffect(() => {
+    if (isEditMode && formData.date && timeEntries.length === 0) {
+      const entries: TimeEntry[] = [];
+      
+      // Add the main walk time as primary
+      entries.push({
+        time: formData.date.toDate(),
+        isPrimary: true,
+      });
+      
+      // Add any additional time options
+      if (formData.timeOptions && formData.timeOptions.length > 0) {
+        formData.timeOptions.forEach((option) => {
+          entries.push({
+            time: option.time.toDate(),
+            isPrimary: false,
+          });
+        });
+      }
+      
+      setTimeEntries(entries);
+    }
+  }, [isEditMode, formData.date, formData.timeOptions, timeEntries.length]);
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -124,16 +166,6 @@ export const TimeSelection: React.FC<Props> = ({
     }
 
     closeModal();
-  };
-
-  // Set entry as primary
-  const setPrimary = (index: number) => {
-    const updated = timeEntries.map((entry, i) => ({
-      ...entry,
-      isPrimary: i === index,
-    }));
-    setTimeEntries(updated);
-    updateFormDataFromEntries(updated);
   };
 
   // Remove entry

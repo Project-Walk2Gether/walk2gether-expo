@@ -1,9 +1,8 @@
-import React from "react";
-import { Platform } from "react-native";
-import { Marker, Callout } from "react-native-maps";
-import { Button, Text, YStack } from "tamagui";
-import { Edit3 } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
+import React from "react";
+import { Platform, View } from "react-native";
+import { Marker } from "react-native-maps";
+import { Text } from "tamagui";
 
 interface Props {
   location: {
@@ -18,56 +17,69 @@ interface Props {
   isPending?: boolean;
 }
 
-const MeetupSpot: React.FC<Props> = ({ location, isWalkOwner = false, walkId, isPending = false }) => {
+const MeetupSpot: React.FC<Props> = ({
+  location,
+  isWalkOwner = false,
+  walkId,
+  isPending = false,
+}) => {
   const router = useRouter();
-  
+
   const handleEditLocation = () => {
     if (walkId) {
       router.push({
         pathname: "/(app)/(modals)/edit-walk-location",
-        params: { id: walkId }
+        params: { id: walkId },
       });
     }
   };
 
   return (
-    <Marker
-      coordinate={{
-        latitude: location.latitude,
-        longitude: location.longitude,
-      }}
-      pinColor={isPending ? "rgba(255,165,0,0.9)" : "rgba(0,153,255,0.9)"}
-      tracksViewChanges={Platform.OS === "android"}
-    >
-      <Callout tooltip={false}>
-        <YStack padding="$2" minWidth={200} alignItems="center">
-          <Text fontSize="$4" fontWeight="600" marginBottom="$1">
-            {isPending ? "New Meetup Location (Pending)" : "Meetup Spot"}
+    <>
+      {/* Floating label above and to the right of the marker */}
+      <Marker
+        coordinate={{
+          latitude: location.latitude + 0.0002, // Offset above the actual marker
+          longitude: location.longitude + 0.0002, // Offset to the right of the actual marker
+        }}
+        anchor={{ x: 0, y: 1 }} // Anchor to bottom-left of label so it appears above and to the right
+        tracksViewChanges={Platform.OS === "android"}
+      >
+        <View
+          style={{
+            backgroundColor: "white",
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 8,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+            elevation: 5,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "600",
+              color: "#000",
+            }}
+          >
+            {isPending ? "New Meetup Location" : "Meetup Spot"}
           </Text>
-          {location.notes && (
-            <Text fontSize="$3" color="$gray11" textAlign="center" marginBottom="$2">
-              {location.notes}
-            </Text>
-          )}
-          {isPending && (
-            <Text fontSize="$2" color="$orange10" textAlign="center" marginBottom="$2">
-              Tap 'Update meetup location' to confirm
-            </Text>
-          )}
-          {isWalkOwner && !isPending && walkId && (
-            <Button
-              size="$2"
-              backgroundColor="$blue9"
-              color="white"
-              icon={<Edit3 size={14} />}
-              onPress={handleEditLocation}
-            >
-              Edit Location
-            </Button>
-          )}
-        </YStack>
-      </Callout>
-    </Marker>
+        </View>
+      </Marker>
+
+      {/* Main marker */}
+      <Marker
+        coordinate={{
+          latitude: location.latitude,
+          longitude: location.longitude,
+        }}
+        pinColor={isPending ? "rgba(255,165,0,0.9)" : "rgba(0,153,255,0.9)"}
+        tracksViewChanges={Platform.OS === "android"}
+      />
+    </>
   );
 };
 

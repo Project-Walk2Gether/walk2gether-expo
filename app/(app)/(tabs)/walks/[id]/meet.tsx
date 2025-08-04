@@ -7,6 +7,7 @@ import MeetupSpot from "@/components/WalkScreen/components/MeetupSpot";
 import MeetupSpotCard from "@/components/WalkScreen/components/MeetupSpotCard";
 import RequestBackgroundLocationModal from "@/components/WalkScreen/components/RequestBackgroundLocationModal";
 import { StartWalkSlider } from "@/components/WalkScreen/components/StartWalkSlider";
+import StatusUpdateButton from "@/components/WalkScreen/components/StatusUpdateButton";
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
@@ -364,10 +365,15 @@ export default function MeetTab() {
         isLoading={locationPermission === null || !userLocation}
       />
 
-      {/* Start walk slider - only shown for walk owners when walk hasn't started */}
-      {walk && isStartingSoon && isOwner(walk) && !walk?.startedAt ? (
+      {/* Start walk slider - only shown for walk owners when walk hasn't started and user has arrived */}
+      {walk && isStartingSoon && isOwner(walk) && !walk?.startedAt && userParticipant?.status === "arrived" ? (
         <StartWalkSlider onStartWalk={handleStartWalk} />
-      ) : null}
+      ) : (
+        /* Status update button - shown for all participants when slider conditions aren't met */
+        walk && isStartingSoon && !walk?.startedAt ? (
+          <StatusUpdateButton />
+        ) : null
+      )}
 
       <RequestBackgroundLocationModal
         open={isBackgroundLocationModalOpen}

@@ -118,7 +118,8 @@ export default function QuestionPromptsForm({ walk }: Props) {
         ) : (
           <YStack alignItems="center" py="$3">
             <Text color="$gray10" fontSize="$3" textAlign="center">
-              No question prompts added yet.
+              Add question prompts to give pairs something to talk about during
+              each round.
             </Text>
           </YStack>
         )}
