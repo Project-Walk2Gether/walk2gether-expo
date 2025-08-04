@@ -22,7 +22,7 @@ import { router } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { Text, View } from "tamagui";
+import { Button, Text, View, XStack } from "tamagui";
 
 export default function MeetTab() {
   const { walk: contextWalk } = useWalk();
@@ -32,6 +32,12 @@ export default function MeetTab() {
   const [isBackgroundLocationModalOpen, setIsBackgroundLocationModalOpen] =
     useState(false);
   const walkId = contextWalk?.id || "";
+
+  // Local state for pending meetup location changes
+  const [pendingMeetupLocation, setPendingMeetupLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   // Get walk participants
   const participants = useWalkParticipants(walkId);
@@ -149,6 +155,57 @@ export default function MeetTab() {
     }
   }
 
+  // Handler for long press on map to change meetup location (owner only)
+  const handleMapLongPress = (event: any) => {
+    if (!isWalkOwner || hasWalkStarted) return;
+
+    const { coordinate } = event.nativeEvent;
+    setPendingMeetupLocation({
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+    });
+  };
+
+  // Handler for updating meetup location
+  const handleUpdateMeetupLocation = async () => {
+    if (!walk || !pendingMeetupLocation) return;
+
+    try {
+      await setDoc(
+        doc(firestore_instance, "walks", walk.id),
+        {
+          startLocation: {
+            ...walk.startLocation,
+            latitude: pendingMeetupLocation.latitude,
+            longitude: pendingMeetupLocation.longitude,
+          },
+          currentLocation: {
+            ...walk.currentLocation,
+            latitude: pendingMeetupLocation.latitude,
+            longitude: pendingMeetupLocation.longitude,
+          },
+        },
+        { merge: true }
+      );
+
+      // Clear pending state
+      setPendingMeetupLocation(null);
+
+      Alert.alert("Success", "Meetup location updated successfully!");
+    } catch (error) {
+      console.error("Error updating meetup location:", error);
+      Alert.alert(
+        "Error",
+        "There was a problem updating the meetup location. Please try again."
+      );
+    }
+  };
+
+  // Handler for canceling pending meetup location change
+  const handleCancelLocationChange = () => {
+    setPendingMeetupLocation(null);
+  };
+
   // Handler for starting a walk (owner only)
   async function handleStartWalk() {
     if (!walk || !walk.id) return;
@@ -220,13 +277,15 @@ export default function MeetTab() {
         )}
         showsUserLocation={false}
         showsMyLocationButton={false}
+        onLongPress={handleMapLongPress}
       >
         {/* Only show MeetupSpot if the walk hasn't started yet */}
         {walk?.startLocation ? (
           <MeetupSpot
-            location={walk.startLocation}
+            location={pendingMeetupLocation || walk.startLocation}
             isWalkOwner={isWalkOwner}
             walkId={walkId}
+            isPending={!!pendingMeetupLocation}
           />
         ) : null}
 
@@ -272,6 +331,31 @@ export default function MeetTab() {
             participants={participants || []}
             isStartingSoon={isStartingSoon}
           />
+
+          {/* Update meetup location button - shown when there's a pending change */}
+          {pendingMeetupLocation && isWalkOwner && !hasWalkStarted && (
+            <View marginTop="$2">
+              <XStack gap="$2">
+                <Button
+                  flex={1}
+                  backgroundColor="#ff6b35"
+                  color="white"
+                  onPress={handleUpdateMeetupLocation}
+                  fontWeight="600"
+                >
+                  Update meetup location
+                </Button>
+                <Button
+                  backgroundColor="#666"
+                  color="white"
+                  onPress={handleCancelLocationChange}
+                  fontWeight="600"
+                >
+                  Cancel
+                </Button>
+              </XStack>
+            </View>
+          )}
         </View>
       )}
 
@@ -281,11 +365,7 @@ export default function MeetTab() {
       />
 
       {/* Start walk slider - only shown for walk owners when walk hasn't started */}
-      {walk &&
-      isStartingSoon &&
-      isOwner(walk) &&
-      !walk?.startedAt &&
-      !walk?.endTime ? (
+      {walk && isStartingSoon && isOwner(walk) && !walk?.startedAt ? (
         <StartWalkSlider onStartWalk={handleStartWalk} />
       ) : null}
 

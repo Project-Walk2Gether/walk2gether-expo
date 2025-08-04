@@ -2,10 +2,10 @@ import LocationButton from "@/components/UI/LocationButton";
 import { useSheet } from "@/context/SheetContext";
 import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
+import { Bookmark } from "@tamagui/lucide-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Linking } from "react-native";
 import { Button, YStack } from "tamagui";
-import { Bookmark } from "@tamagui/lucide-icons";
 import WizardWrapper, { WizardWrapperHandle } from "../WizardWrapper";
 
 // Import custom hooks
@@ -170,6 +170,13 @@ Do you still want to continue?`,
       notes: favoriteLocation.location.notes,
     };
     updateFormData({ startLocation: newLocation });
+
+    // Update the search field with the selected location name
+    if (googlePlacesRef.current) {
+      googlePlacesRef.current.setAddressText(
+        favoriteLocation.location.name || "Saved Location"
+      );
+    }
   };
 
   // Handle deleting a saved location
@@ -210,8 +217,19 @@ Do you still want to continue?`,
               googlePlacesRef as React.RefObject<GooglePlacesAutocompleteRef>
             }
             onSelect={handleLocationSelect}
+            value={
+              formData.startLocation
+                ? {
+                    name: formData.startLocation.name,
+                    placeId: "",
+                    latitude: formData.startLocation.latitude,
+                    longitude: formData.startLocation.longitude,
+                    description: formData.startLocation.name,
+                  }
+                : null
+            }
           />
-          
+
           {/* Current location button */}
           <LocationButton
             onPress={handleCurrentLocation}
@@ -220,25 +238,6 @@ Do you still want to continue?`,
               locationLoading || isReverseGeocoding || pendingLocationRequest
             }
           />
-          
-          {/* Saved locations button */}
-          {savedLocations && savedLocations.length > 0 && (
-            <Button
-              size="$4"
-              backgroundColor={COLORS.card}
-              borderColor={COLORS.border}
-              borderWidth={1}
-              color={COLORS.text}
-              icon={Bookmark}
-              onPress={handleOpenSavedLocations}
-              disabled={loadingSavedLocations}
-            >
-              {loadingSavedLocations 
-                ? "Loading saved locations..." 
-                : `Choose from ${savedLocations.length} saved location${savedLocations.length === 1 ? '' : 's'}`
-              }
-            </Button>
-          )}
         </YStack>
 
         {/* Sections with horizontal padding */}
@@ -257,6 +256,26 @@ Do you still want to continue?`,
             nearbyWalkers={nearbyWalkers}
             isLoadingNearbyUsers={isLoadingNearbyUsers}
           />
+
+          {/* Saved locations button */}
+          {savedLocations && savedLocations.length > 0 && (
+            <Button
+              size="$4"
+              backgroundColor={COLORS.card}
+              borderColor={COLORS.border}
+              borderWidth={1}
+              color={COLORS.text}
+              icon={Bookmark}
+              onPress={handleOpenSavedLocations}
+              disabled={loadingSavedLocations}
+            >
+              {loadingSavedLocations
+                ? "Loading saved locations..."
+                : `Choose from ${savedLocations.length} saved location${
+                    savedLocations.length === 1 ? "" : "s"
+                  }`}
+            </Button>
+          )}
 
           {/* Travel time warning */}
           {travelTimeInfo && userMayNotMakeItToStartLocationInTime && (

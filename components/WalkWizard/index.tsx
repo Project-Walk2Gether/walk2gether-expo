@@ -41,16 +41,8 @@ export function WalkWizard() {
   const router = useRouter();
 
   const handleSubmit = useCallback(async () => {
-    if (onSubmit) {
-      await onSubmit(formData, createdWalkId, setCreatedWalkId, goToNextStep);
-    }
-  }, [
-    onSubmit,
-    formData,
-    createdWalkId,
-    setCreatedWalkId,
-    goToNextStep,
-  ]);
+    await onSubmit(formData, createdWalkId, setCreatedWalkId, goToNextStep);
+  }, [onSubmit, formData, createdWalkId, setCreatedWalkId, goToNextStep]);
 
   // Enhance the step configuration with components and navigation handlers
   const wizardSteps = useMemo<WizardStepWithComponents[]>(() => {
@@ -195,7 +187,7 @@ export function WalkWizard() {
     return <DefaultComponent onContinue={goToNextStep} />;
   };
 
-  const { systemErrors = [] } = useWalkForm();
+  const { systemErrors = [], errors } = useWalkForm();
 
   return (
     <>
@@ -232,7 +224,6 @@ export function WalkWizard() {
           ))}
         </View>
       )}
-
       {renderStep()}
     </>
   );

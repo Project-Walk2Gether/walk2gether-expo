@@ -56,7 +56,12 @@ interface WalkFormContextType {
   // Close the entire walk form modal
   closeWalkForm: () => void;
   // Submit handler
-  onSubmit?: (formData: WalkFormData, createdWalkId: string | null, setCreatedWalkId: (id: string) => void, goToNextStep: () => void) => Promise<void>;
+  onSubmit: (
+    formData: WalkFormData,
+    createdWalkId: string | null,
+    setCreatedWalkId: (id: string) => void,
+    goToNextStep: () => void
+  ) => Promise<void>;
   // Edit mode
   isEditMode: boolean;
   existingWalk?: Walk;
@@ -85,26 +90,40 @@ const WalkFormContext = createContext<WalkFormContextType | undefined>(
 export interface Props {
   children: React.ReactNode;
   friendId?: string;
-  onSubmit?: (formData: WalkFormData, createdWalkId: string | null, setCreatedWalkId: (id: string) => void, goToNextStep: () => void) => Promise<void>;
+  onSubmit?: (
+    formData: WalkFormData,
+    createdWalkId: string | null,
+    setCreatedWalkId: (id: string) => void,
+    goToNextStep: () => void
+  ) => Promise<void>;
   existingWalk?: Walk;
 }
 
-export const WalkFormProvider: React.FC<Props> = ({ friendId, children, onSubmit, existingWalk }) => {
+export const WalkFormProvider: React.FC<Props> = ({
+  friendId,
+  children,
+  onSubmit,
+  existingWalk,
+}) => {
   // Initialize form with a fresh invitation code on each form creation
   const { userData } = useUserData();
   // Initialize form data with default values and friendId if available
-  const initializedFormData: WalkFormData = existingWalk ? {
-    ...existingWalk,
-    // Preserve any additional form-specific fields
-    invitationCode: (existingWalk as any).invitationCode || generateInvitationCode(),
-    topic: (existingWalk as any).topic || "",
-  } : {
-    ...initialFormData,
-    date: Timestamp.now(),
-    participantUids: friendId ? [friendId] : [],
-  };
+  const initializedFormData: WalkFormData = existingWalk
+    ? {
+        ...existingWalk,
+        // Preserve any additional form-specific fields
+        invitationCode:
+          (existingWalk as any).invitationCode || generateInvitationCode(),
+        topic: (existingWalk as any).topic || "",
+      }
+    : {
+        ...initialFormData,
+        participantUids: friendId ? [friendId] : [],
+      };
   const [formData, setFormData] = useState<WalkFormData>(initializedFormData);
-  const [currentStep, setCurrentStep] = useState(existingWalk ? 0 : (friendId ? 1 : 0));
+  const [currentStep, setCurrentStep] = useState(
+    existingWalk ? 0 : friendId ? 1 : 0
+  );
   const [errors, setErrors] = useState<WalkFormErrors>({});
   const [isValid, setIsValid] = useState(true);
   // System-level errors (e.g., API failures)

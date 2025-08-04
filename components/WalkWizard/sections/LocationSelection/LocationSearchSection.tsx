@@ -8,17 +8,20 @@ import { View } from "tamagui";
 interface Props {
   googlePlacesRef: React.RefObject<GooglePlacesAutocompleteRef>;
   onSelect: (data: any, details: any) => void;
+  value?: any; // Current location value to display in search field
 }
 
 const LocationSearchSection: React.FC<Props> = ({
   googlePlacesRef,
   onSelect,
+  value,
 }) => {
   return (
     <View zIndex={1}>
       <PlacesAutocomplete
         ref={googlePlacesRef}
         placeholder="Search for a location or long-press on map"
+        value={value}
         onSelect={(data) =>
           onSelect(
             {

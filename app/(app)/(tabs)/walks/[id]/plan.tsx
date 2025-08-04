@@ -169,6 +169,9 @@ export default function PlanTab() {
           durationMinutes={walk.durationMinutes}
           walkId={walk.id}
           showEditButton={isWalkOwner}
+          timeOptions={(walk.timeOptions as any) || []}
+          participants={participants || []}
+          isWalkOwner={isWalkOwner}
         />
 
         {/* Location Card */}

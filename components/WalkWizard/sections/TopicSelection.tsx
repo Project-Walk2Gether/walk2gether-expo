@@ -90,7 +90,7 @@ export const TopicSelection: React.FC<Props> = ({
               />
               <XStack alignItems="center" gap="$2">
                 <Text fontSize={14} color="$gray10">
-                  Supports markdown
+                  This field supports markdown
                 </Text>
                 <Button
                   size="$2"

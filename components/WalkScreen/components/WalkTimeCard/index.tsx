@@ -1,10 +1,12 @@
 import { COLORS } from "@/styles/colors";
 import { Calendar, Clock, Edit3, Timer } from "@tamagui/lucide-icons";
+import { Timestamp } from "@react-native-firebase/firestore";
 import { format, formatDistanceToNow } from "date-fns";
 import { router } from "expo-router";
 import React from "react";
 import { Button, Text, YStack } from "tamagui";
-import { Location } from "walk2gether-shared";
+import { Location, Participant, WithId } from "walk2gether-shared";
+import AlternateTimesCard from "../AlternateTimesCard";
 import WalkDetailsCardBase from "../WalkDetailsCard";
 import WalkDetailsRow from "../WalkDetailsRow";
 
@@ -18,6 +20,9 @@ interface Props {
   children?: React.ReactNode;
   walkId?: string;
   showEditButton?: boolean;
+  timeOptions?: Timestamp[];
+  participants?: WithId<Participant>[];
+  isWalkOwner?: boolean;
 }
 
 /**
@@ -28,6 +33,9 @@ export default function WalkTimeCard({
   durationMinutes = 60,
   walkId,
   showEditButton = false,
+  timeOptions = [],
+  participants = [],
+  isWalkOwner = false,
   children,
 }: Props) {
   // Check if time or location is missing
@@ -107,6 +115,17 @@ export default function WalkTimeCard({
 
         {children}
       </YStack>
+      
+      {/* Alternate Times Card - show if there are time options */}
+      {timeOptions.length > 0 && walkDate && walkId && (
+        <AlternateTimesCard
+          walkId={walkId}
+          timeOptions={timeOptions}
+          participants={participants}
+          isWalkOwner={isWalkOwner}
+          currentWalkTime={Timestamp.fromDate(walkDate)}
+        />
+      )}
     </WalkDetailsCardBase>
   );
 }

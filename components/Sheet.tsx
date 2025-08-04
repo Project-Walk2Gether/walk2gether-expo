@@ -14,11 +14,9 @@ import { H3 } from "tamagui";
 export interface SheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  snapPoints?: number[];
   dismissOnSnapToBottom?: boolean;
   title?: string;
   children: React.ReactNode;
-  position?: number;
 }
 
 export interface SheetRef {
@@ -30,7 +28,6 @@ export const Sheet = forwardRef<SheetRef, SheetProps>(
     {
       open,
       onOpenChange,
-      snapPoints,
       dismissOnSnapToBottom = true,
       title,
       children,

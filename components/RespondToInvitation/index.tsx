@@ -7,13 +7,14 @@ import {
   deleteField,
   doc,
   FirebaseFirestoreTypes,
+  setDoc,
   Timestamp,
   updateDoc,
 } from "@react-native-firebase/firestore";
-import { Check, X } from "@tamagui/lucide-icons";
+import { Check, Clock, X } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ActivityIndicator, Alert } from "react-native";
+import { ActivityIndicator, Alert, Platform } from "react-native";
 import {
   Button,
   Card,
@@ -24,6 +25,9 @@ import {
   XStack,
   YStack,
 } from "tamagui";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Calendar } from "react-native-calendars";
+import { combineDateAndTime } from "@/utils/timezone";
 import {
   Participant,
   Walk,
@@ -49,6 +53,11 @@ const RespondToInvitation: React.FC<Props> = ({
   const [loading, setLoading] = useState(false);
   const [introduction, setIntroduction] = useState("");
   const [saveToProfile, setSaveToProfile] = useState(false);
+  const [showTimeProposal, setShowTimeProposal] = useState(false);
+  const [proposedDate, setProposedDate] = useState<Date>(new Date());
+  const [proposedTime, setProposedTime] = useState<Date>(new Date());
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const isAndroid = Platform.OS === "android";
   const cantMakeIt = !!participantDoc?.cancelledAt;
   const isApproved =
     !!participantDoc?.acceptedAt && !participantDoc?.cancelledAt;
@@ -166,6 +175,87 @@ const RespondToInvitation: React.FC<Props> = ({
   const handleAcceptButtonPress = () => handleWalkAction("accept");
   const handleCancelButtonPress = () => handleWalkAction("cancel");
 
+  // Handler for proposing a new time
+  const handleProposeNewTime = async () => {
+    if (!walk || !user) return;
+
+    setLoading(true);
+    try {
+      const combinedDateTime = combineDateAndTime(proposedDate, proposedTime);
+      const proposedTimestamp = Timestamp.fromDate(combinedDateTime);
+      
+      // Get current timeOptions or initialize empty array
+      const currentTimeOptions = walk.timeOptions || [];
+      
+      // Add the proposed time to timeOptions if it's not already there
+      const timeExists = currentTimeOptions.some(
+        (option) => Math.abs(option.toMillis() - proposedTimestamp.toMillis()) < 60000 // Within 1 minute
+      );
+      
+      if (!timeExists) {
+        const updatedTimeOptions = [...currentTimeOptions, proposedTimestamp];
+        
+        // Update the walk document with the new time option
+        await updateDoc(doc(firestore_instance, "walks", walk.id), {
+          timeOptions: updatedTimeOptions,
+        });
+      }
+      
+      // Create or update participant document with the proposed time preference
+      const participantRef = doc(
+        firestore_instance,
+        "walks",
+        walk.id,
+        "participants",
+        user.uid
+      );
+      
+      await setDoc(participantRef, {
+        proposedTime: proposedTimestamp,
+        proposedTimeAt: Timestamp.now(),
+        displayName: (userData as any)?.displayName || user.displayName || "Anonymous",
+        photoURL: (userData as any)?.photoURL || user.photoURL || null,
+      }, { merge: true });
+      
+      setShowTimeProposal(false);
+      Alert.alert(
+        "Time Proposed!",
+        "Your time suggestion has been sent to the walk organizer.",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              if (onInvitationResponded) {
+                onInvitationResponded();
+              }
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error("Error proposing new time:", error);
+      Alert.alert(
+        "Error",
+        "There was a problem proposing the new time. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Date picker handler
+  const handleDateChange = (day: any) => {
+    const newDate = new Date(day.timestamp);
+    setProposedDate(newDate);
+  };
+
+  // Time picker handler
+  const handleTimeChange = (_: any, selectedTimeValue?: Date) => {
+    if (selectedTimeValue) {
+      setProposedTime(selectedTimeValue);
+    }
+  };
+
   return (
     <YStack w="100%" gap="$4" ai="center">
       {isApproved ? (
@@ -247,6 +337,97 @@ const RespondToInvitation: React.FC<Props> = ({
             </YStack>
           )}
 
+          {/* Time proposal section */}
+          {showTimeProposal && (
+            <Card backgroundColor="white" borderRadius={10} padding={15} marginBottom="$3">
+              <Text fontSize="$4" fontWeight="600" marginBottom="$3">
+                Propose a different time
+              </Text>
+              
+              <Card backgroundColor="#f9f9f9" borderRadius={10} padding={10} marginBottom="$3">
+                <Calendar
+                  minDate={new Date().toISOString().split("T")[0]}
+                  onDayPress={handleDateChange}
+                  theme={{
+                    selectedDayBackgroundColor: COLORS.primary,
+                    todayTextColor: COLORS.primary,
+                    arrowColor: COLORS.primary,
+                  }}
+                  markedDates={{
+                    [proposedDate.toISOString().split("T")[0]]: {
+                      selected: true,
+                    },
+                  }}
+                />
+              </Card>
+
+              <Card backgroundColor="#f9f9f9" borderRadius={10} padding={10} marginBottom="$3">
+                {isAndroid ? (
+                  <YStack alignItems="center" gap="$2">
+                    <Text fontSize="$3" fontWeight="500">
+                      Selected Time:{" "}
+                      {proposedTime.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+                    <Button
+                      backgroundColor={COLORS.primary}
+                      color="white"
+                      onPress={() => setShowTimePicker(true)}
+                      size="$3"
+                    >
+                      Select Time
+                    </Button>
+                    {showTimePicker && (
+                      <DateTimePicker
+                        value={proposedTime}
+                        mode="time"
+                        is24Hour={false}
+                        onChange={(event, selectedTimeValue) => {
+                          setShowTimePicker(false);
+                          handleTimeChange(event, selectedTimeValue);
+                        }}
+                        minuteInterval={5}
+                      />
+                    )}
+                  </YStack>
+                ) : (
+                  <DateTimePicker
+                    value={proposedTime}
+                    mode="time"
+                    display="spinner"
+                    onChange={handleTimeChange}
+                    themeVariant="light"
+                    minuteInterval={5}
+                  />
+                )}
+              </Card>
+
+              <XStack gap="$2">
+                <Button
+                  flex={1}
+                  backgroundColor="$gray6"
+                  color="$gray12"
+                  onPress={() => setShowTimeProposal(false)}
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  flex={1}
+                  backgroundColor={COLORS.primary}
+                  color="white"
+                  onPress={handleProposeNewTime}
+                  disabled={loading}
+                  iconAfter={loading ? undefined : <Clock color="white" />}
+                >
+                  {loading ? <ActivityIndicator color="white" /> : "Propose Time"}
+                </Button>
+              </XStack>
+            </Card>
+          )}
+
           <YStack gap="$2" w="100%">
             <Button
               size="$5"
@@ -264,6 +445,21 @@ const RespondToInvitation: React.FC<Props> = ({
               ) : (
                 "Accept Invitation"
               )}
+            </Button>
+
+            {/* Propose new time button */}
+            <Button
+              size="$5"
+              w="100%"
+              borderWidth={1}
+              borderColor={COLORS.primary}
+              bg="white"
+              color={COLORS.primary}
+              onPress={() => setShowTimeProposal(true)}
+              disabled={loading}
+              iconAfter={<Clock color={COLORS.primary} />}
+            >
+              Propose a different time
             </Button>
 
             <Button

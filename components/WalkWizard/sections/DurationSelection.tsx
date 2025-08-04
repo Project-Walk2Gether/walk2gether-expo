@@ -19,6 +19,7 @@ import {
   XStack,
   YStack,
 } from "tamagui";
+import CustomDurationModal from "../../CustomDurationModal";
 import WizardWrapper from "./WizardWrapper";
 // Note: We're using the default export here (no named exports)
 
@@ -38,8 +39,6 @@ export const DurationSelection: React.FC<Props> = ({
   const { formData, updateFormData } = useWalkForm();
   const [duration, setDuration] = useState(formData.durationMinutes || 30);
   const [customModalOpen, setCustomModalOpen] = useState(false);
-  const [customHours, setCustomHours] = useState("0");
-  const [customMinutes, setCustomMinutes] = useState("30");
   const durationOptions = [15, 30, 45, 60, 75, 90, 120];
 
   const handleDurationChange = (value: number) => {
@@ -53,27 +52,17 @@ export const DurationSelection: React.FC<Props> = ({
   };
 
   const openCustomDurationPicker = () => {
-    // Convert current duration to hours and minutes
-    const hours = Math.floor(duration / 60);
-    const minutes = duration % 60;
-    setCustomHours(hours.toString());
-    setCustomMinutes(minutes.toString());
     setCustomModalOpen(true);
   };
 
-  const saveCustomDuration = () => {
-    let hours = parseInt(customHours) || 0;
-    let minutes = parseInt(customMinutes) || 0;
-
+  const handleCustomDurationSave = (hours: number, minutes: number) => {
     // Convert to total minutes
     const totalMinutes = hours * 60 + minutes;
 
-    // Enforce minimum of 5 minutes only
-    const sanitizedDuration = Math.max(5, totalMinutes);
-
-    setDuration(sanitizedDuration);
-    updateFormData({ durationMinutes: sanitizedDuration });
-    setCustomModalOpen(false);
+    if (totalMinutes > 0) {
+      setDuration(totalMinutes);
+      updateFormData({ durationMinutes: totalMinutes });
+    }
   };
 
   const formatDuration = (minutes: number) => {
@@ -210,110 +199,13 @@ export const DurationSelection: React.FC<Props> = ({
       </WizardWrapper>
 
       {/* Custom Duration Modal */}
-      <Modal
+      <CustomDurationModal
         visible={customModalOpen}
-        // animationType="slide"
-        transparent={true}
-        onRequestClose={() => setCustomModalOpen(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "flex-end",
-            backgroundColor: "rgba(0,0,0,0.5)",
-          }}
-        >
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ width: "100%" }}
-          >
-            <View
-              style={{
-                backgroundColor: "white",
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                paddingBottom: 30,
-              }}
-            >
-              <TouchableOpacity
-                style={{
-                  alignSelf: "flex-end",
-                  padding: 15,
-                }}
-                onPress={() => setCustomModalOpen(false)}
-              >
-                <X size={24} color={COLORS.text} />
-              </TouchableOpacity>
-
-              <YStack gap="$4" padding="$5">
-                <Text
-                  fontWeight="bold"
-                  fontSize={20}
-                  textAlign="center"
-                  color={COLORS.text}
-                >
-                  Set Custom Duration
-                </Text>
-
-                <XStack gap="$4" justifyContent="center" alignItems="center">
-                  <YStack>
-                    <Text
-                      fontSize={16}
-                      textAlign="center"
-                      marginBottom="$1"
-                      color={COLORS.text}
-                    >
-                      Hours
-                    </Text>
-                    <Input
-                      value={customHours}
-                      onChangeText={setCustomHours}
-                      keyboardType="number-pad"
-                      width={80}
-                      textAlign="center"
-                      fontSize={20}
-                      color={COLORS.text}
-                    />
-                  </YStack>
-
-                  <Text fontSize={24} marginTop="$2" color={COLORS.text}>
-                    :
-                  </Text>
-
-                  <YStack>
-                    <Text
-                      fontSize={16}
-                      textAlign="center"
-                      marginBottom="$1"
-                      color={COLORS.text}
-                    >
-                      Minutes
-                    </Text>
-                    <Input
-                      value={customMinutes}
-                      onChangeText={setCustomMinutes}
-                      keyboardType="number-pad"
-                      width={80}
-                      textAlign="center"
-                      fontSize={20}
-                      color={COLORS.text}
-                    />
-                  </YStack>
-                </XStack>
-
-                <Button
-                  backgroundColor={COLORS.action}
-                  color={COLORS.textOnDark}
-                  onPress={saveCustomDuration}
-                  marginTop="$6"
-                >
-                  Set Duration
-                </Button>
-              </YStack>
-            </View>
-          </KeyboardAvoidingView>
-        </View>
-      </Modal>
+        onClose={() => setCustomModalOpen(false)}
+        onSave={handleCustomDurationSave}
+        initialHours={Math.floor(duration / 60)}
+        initialMinutes={duration % 60}
+      />
     </>
   );
 };

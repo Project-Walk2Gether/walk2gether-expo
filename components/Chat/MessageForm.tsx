@@ -110,7 +110,11 @@ export default function MessageForm({
         Platform.OS === "ios" ? keyboardVerticalOffset : 0
       }
     >
-      <YStack backgroundColor="white">
+      <YStack
+        borderTopColor={"$gray3"}
+        borderTopWidth={1}
+        backgroundColor="white"
+      >
         {/* Selected images preview */}
         {selectedImages.length > 0 && (
           <ScrollView
