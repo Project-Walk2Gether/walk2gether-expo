@@ -42,6 +42,8 @@ export default function NewWalkScreen() {
           userData,
         });
 
+        console.log({ success });
+
         if (!success) {
           showMessage("Failed to update walk", "error");
           return;

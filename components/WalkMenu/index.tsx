@@ -3,13 +3,12 @@ import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useFlashMessage } from "@/context/FlashMessageContext";
 import { MenuItem, useMenu } from "@/context/MenuContext";
-import { COLORS } from "@/styles/colors";
 import {
   cancelParticipation,
   restoreParticipation,
 } from "@/utils/participantManagement";
 import { deleteDoc, doc, getDoc } from "@react-native-firebase/firestore";
-import { Edit3, LogOut, MoreVertical, Trash } from "@tamagui/lucide-icons";
+import { LogOut, MoreVertical, Trash } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "tamagui";
@@ -134,17 +133,6 @@ export default function WalkMenu({ walk, afterDelete, iconColor }: Props) {
     const menuItems: MenuItem[] = [];
 
     if (isWalkOwner) {
-      // Options for walk owner
-      menuItems.push({
-        label: "Edit Walk",
-        icon: <Edit3 size="$1" color={COLORS.primary} />,
-        onPress: () =>
-          router.push({
-            pathname: "/edit-walk",
-            params: { id: walk.id },
-          }),
-      });
-
       // Add the Cancel Walk option at the end for owners
       menuItems.push({
         label: "Cancel Walk",

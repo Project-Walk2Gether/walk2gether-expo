@@ -2,7 +2,7 @@ import { useWalkForm } from "@/context/WalkFormContext";
 import { useDoc } from "@/utils/firestore";
 import { Timestamp } from "@react-native-firebase/firestore";
 import { Stack, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Button, View, XStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
 import {
@@ -40,9 +40,8 @@ export function WalkWizard() {
   } = useWalkForm();
   const router = useRouter();
 
-  const handleSubmit = useCallback(async () => {
-    await onSubmit(formData, createdWalkId, setCreatedWalkId, goToNextStep);
-  }, [onSubmit, formData, createdWalkId, setCreatedWalkId, goToNextStep]);
+  const handleSubmit = () =>
+    onSubmit(formData, createdWalkId, setCreatedWalkId, goToNextStep);
 
   // Enhance the step configuration with components and navigation handlers
   const wizardSteps = useMemo<WizardStepWithComponents[]>(() => {
