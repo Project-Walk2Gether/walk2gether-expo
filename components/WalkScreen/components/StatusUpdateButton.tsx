@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
+import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useSheet } from "@/context/SheetContext";
 import { useWalk } from "@/context/WalkContext";
 import { COLORS } from "@/styles/colors";
@@ -30,6 +31,7 @@ export default function StatusUpdateButton({
   const { user } = useAuth();
   const { walk } = useWalk();
   const { showSheet, hideSheet } = useSheet();
+  const { showMessage } = useFlashMessage();
 
   // Use the participant status hook with walk object to access current status
   const { currentStatus, updateStatus } = useParticipantStatus({
@@ -66,9 +68,33 @@ export default function StatusUpdateButton({
     buttonColor = COLORS.success;
   }
 
-  const handleOpenStatusSheet = () => {
+  const handleButtonPress = async () => {
     if (!walk || !user || !currentStatus) return;
 
+    // If status is pending, automatically update to "on-the-way"
+    if (isPending) {
+      try {
+        const success = await updateStatus(
+          "on-the-way",
+          currentStatus.status,
+          currentStatus.navigationMethod || "driving"
+        );
+        if (success) {
+          showMessage("Status updated - you're on your way!", "success");
+          if (onStatusUpdated) {
+            onStatusUpdated();
+          }
+        } else {
+          showMessage("Failed to update status. Please try again.", "error");
+        }
+      } catch (error) {
+        console.error("Error updating status to on-the-way:", error);
+        showMessage("Failed to update status. Please try again.", "error");
+      }
+      return;
+    }
+
+    // For other statuses, open the status sheet
     showSheet(
       <WalkParticipantStatusControls
         status={currentStatus.status}
@@ -94,7 +120,7 @@ export default function StatusUpdateButton({
   return (
     <>
       <Button
-        onPress={handleOpenStatusSheet}
+        onPress={handleButtonPress}
         backgroundColor={buttonVariant === "filled" ? buttonColor : undefined}
         borderColor={buttonVariant === "subtle" ? buttonColor : undefined}
         borderWidth={buttonVariant === "subtle" ? 1 : undefined}

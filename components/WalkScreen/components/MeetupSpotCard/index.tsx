@@ -9,7 +9,6 @@ import {
   Navigation,
 } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Button, Card, Text, View, XStack, YStack } from "tamagui";
 import {
   Attachment,
@@ -25,7 +24,6 @@ interface Props {
   location?: Location;
   locationName?: string;
   notes?: string;
-  showMap?: boolean;
   meetupSpotPhoto?: Attachment;
   isWalkOwner?: boolean;
   walkId?: string;
@@ -40,14 +38,13 @@ export default function MeetupSpotCard({
   location,
   locationName,
   notes,
-  showMap = true,
   meetupSpotPhoto,
   isWalkOwner = false,
   walkId,
   participants = [],
   isStartingSoon = false,
 }: Props) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const { showSheet, hideSheet } = useSheet();
   const { user } = useAuth();
 
@@ -57,62 +54,42 @@ export default function MeetupSpotCard({
   );
 
   function renderParticipantStatusCards() {
-    if (!isStartingSoon || validParticipants.length === 0) {
+    if (!isStartingSoon || validParticipants.length === 0 || !isExpanded) {
       return null;
     }
 
     return (
       <View padding="$4" paddingTop={0}>
-        <YStack gap="$3">
-          {/* Header with expand/collapse button */}
-          <Button
-            size="$3"
-            variant="outlined"
-            onPress={() => setIsExpanded(!isExpanded)}
-            icon={
-              isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />
-            }
-          >
-            <Text fontSize="$3" fontWeight="600">
-              ETA Information ({validParticipants.length})
-            </Text>
-          </Button>
+        <YStack gap="$2">
+          {validParticipants.map((participant) => (
+            <ParticipantStatusCard
+              key={participant.id}
+              participant={participant}
+              isMe={participant.userUid === user?.uid}
+              onPress={() => {
+                if (!walkId || !user || participant.userUid !== user.uid)
+                  return;
 
-          {isExpanded && (
-            <YStack gap="$2">
-              {validParticipants.map((participant) => (
-                <ParticipantStatusCard
-                  key={participant.id}
-                  participant={participant}
-                  isOwner={participant.userUid === user?.uid}
-                  onPress={() => {
-                    if (!walkId || !user || participant.userUid !== user.uid)
-                      return;
-
-                    showSheet(
-                      <WalkParticipantStatusControls
-                        status={participant.status || "pending"}
-                        isCancelled={!!participant.cancelledAt}
-                        isOwner={participant.userUid === user.uid}
-                        walkId={walkId}
-                        userId={user.uid}
-                        navigationMethod={
-                          participant.navigationMethod || "driving"
-                        }
-                        onClose={() => {
-                          hideSheet();
-                        }}
-                      />,
-                      {
-                        title: "Update Your Status",
-                        dismissOnSnapToBottom: true,
-                      }
-                    );
-                  }}
-                />
-              ))}
-            </YStack>
-          )}
+                showSheet(
+                  <WalkParticipantStatusControls
+                    status={participant.status || "pending"}
+                    isCancelled={!!participant.cancelledAt}
+                    isOwner={participant.userUid === user.uid}
+                    walkId={walkId}
+                    userId={user.uid}
+                    navigationMethod={participant.navigationMethod || "driving"}
+                    onClose={() => {
+                      hideSheet();
+                    }}
+                  />,
+                  {
+                    title: "Update Your Status",
+                    dismissOnSnapToBottom: true,
+                  }
+                );
+              }}
+            />
+          ))}
         </YStack>
       </View>
     );
@@ -176,54 +153,42 @@ export default function MeetupSpotCard({
             )}
           </YStack>
 
-          {/* Open in Maps Button */}
-          {hasCoordinates && (
-            <Button
-              size="$3"
-              onPress={() =>
-                openLocationInMaps(latitude, longitude, displayName)
-              }
-              icon={<Navigation size={16} color="white" />}
-              backgroundColor={COLORS.primary}
-              color="white"
-              alignSelf="flex-start"
-            >
-              Open in Maps
-            </Button>
-          )}
-
-          {/* Map Preview - only shown if showMap is true */}
-          {hasCoordinates && showMap && (
-            <View
-              height={180}
-              borderRadius={12}
-              overflow="hidden"
-              borderWidth={1}
-              borderColor="$gray4"
-            >
-              <MapView
-                provider={PROVIDER_GOOGLE}
-                style={{ flex: 1 }}
-                initialRegion={{
-                  latitude,
-                  longitude,
-                  latitudeDelta: 0.005,
-                  longitudeDelta: 0.005,
-                }}
-                scrollEnabled={false}
-                zoomEnabled={false}
-                rotateEnabled={false}
-                pitchEnabled={false}
-                toolbarEnabled={false}
+          {/* Action Buttons Row */}
+          <XStack gap="$2" alignItems="center">
+            {/* Open in Maps Button */}
+            {hasCoordinates && (
+              <Button
+                size="$2"
+                onPress={() =>
+                  openLocationInMaps(latitude, longitude, displayName)
+                }
+                icon={<Navigation size={16} color="white" />}
+                backgroundColor={COLORS.primary}
+                color="white"
+                flex={1}
               >
-                <Marker
-                  coordinate={{ latitude, longitude }}
-                  title={displayName}
-                  description="Meeting point"
-                />
-              </MapView>
-            </View>
-          )}
+                Open in Maps
+              </Button>
+            )}
+
+            {/* ETA Toggle Button */}
+            {isStartingSoon && validParticipants.length > 0 && (
+              <Button
+                size="$2"
+                variant="outlined"
+                onPress={() => setIsExpanded(!isExpanded)}
+                icon={
+                  isExpanded ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )
+                }
+                width={44}
+                padding={0}
+              />
+            )}
+          </XStack>
         </YStack>
       </XStack>
       {renderParticipantStatusCards()}

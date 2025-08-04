@@ -1,7 +1,7 @@
 import HeaderCloseButton from "@/components/HeaderCloseButton";
 import InviteSelection from "@/components/WalkWizard/sections/InviteSelection";
 import { useFlashMessage } from "@/context/FlashMessageContext";
-import { useUserData } from "@/context/UserDataContext";
+import { WalkFormProvider } from "@/context/WalkFormContext";
 import firestore from "@react-native-firebase/firestore";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -11,7 +11,6 @@ import { Spinner, YStack } from "tamagui";
 import { Walk, WithId } from "walk2gether-shared";
 
 export default function InviteFriendsScreen() {
-  const { userData } = useUserData();
   const { showMessage } = useFlashMessage();
   const { walkId, addFriend } = useLocalSearchParams<{
     walkId?: string;
@@ -153,12 +152,14 @@ export default function InviteFriendsScreen() {
         }}
       />
       <StatusBar style="light" />
-      <InviteSelection
-        walk={walk}
-        walkId={walk.id}
-        walkType={walk.type}
-        onContinue={handleContinue}
-      />
+      <WalkFormProvider existingWalk={walk}>
+        <InviteSelection
+          walk={walk}
+          walkId={walk.id}
+          walkType={walk.type}
+          onContinue={handleContinue}
+        />
+      </WalkFormProvider>
     </>
   );
 }

@@ -67,8 +67,6 @@ export async function createWalkFromForm({
       participantsById: {},
     };
 
-    console.log({ basePayload });
-
     // Add type-specific fields based on walk type
     let walkPayload;
 
@@ -79,7 +77,6 @@ export async function createWalkFromForm({
         topic: formData.topic || "General Discussion", // Default topic
         minimumNumberOfMinutesWithEachPartner:
           formData.minimumNumberOfMinutesWithEachPartner || 5,
-        rounds: [],
       };
     } else if (formData.type === "neighborhood") {
       walkPayload = {
@@ -122,7 +119,8 @@ export async function createWalkFromForm({
       acceptedAt: Timestamp.now(), // Auto-approve the walk creator
       sourceType: "walk-creator", // Set source type to walk
       status: "pending", // Set initial status to pending
-      navigationMethod: "walking", // Default navigation method
+      navigationMethod: "driving", // Default navigation method
+      suggestedDepartureNotificationSentAt: null,
       route: null,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),

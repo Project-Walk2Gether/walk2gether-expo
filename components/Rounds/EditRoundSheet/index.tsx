@@ -1,5 +1,8 @@
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { DocumentReference, updateDoc } from "firebase/firestore";
+import {
+  FirebaseFirestoreTypes,
+  updateDoc,
+} from "@react-native-firebase/firestore";
 import React, { useState } from "react";
 import { Button, H4, Text, XStack, YStack } from "tamagui";
 import { Round, WithId } from "walk2gether-shared";
@@ -15,23 +18,24 @@ export default function EditRoundSheet({ round, onClose, onSave }: Props) {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!round._ref) {
-      console.error("Round document reference is missing");
-      return;
-    }
-
     setIsSaving(true);
+
+    console.log(round._ref);
 
     try {
       // Update the round document with the new question prompt
       // Cast to unknown first to avoid TypeScript errors with DocumentReferenceLike
-      await updateDoc(round._ref as unknown as DocumentReference<Round>, {
-        questionPrompt: promptText,
-      });
+      await updateDoc(
+        round._ref as unknown as FirebaseFirestoreTypes.DocumentReference<Round>,
+        {
+          questionPrompt: promptText,
+        }
+      );
 
       // Call onSave if provided
       if (onSave) {
         onSave();
+        onClose();
       }
 
       // Close the sheet

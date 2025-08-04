@@ -8,7 +8,7 @@ import { ParticipantWithRoute } from "walk2gether-shared";
 
 interface Props extends GetProps<typeof XStack> {
   participant: ParticipantWithRoute;
-  isOwner: boolean;
+  isMe: boolean;
   onPress: () => void;
 }
 
@@ -58,7 +58,7 @@ const renderDistanceInfo = (participant: ParticipantWithRoute) => {
 
 export default function ParticipantStatusCard({
   participant,
-  isOwner,
+  isMe,
   onPress,
   ...rest
 }: Props) {
@@ -93,9 +93,24 @@ export default function ParticipantStatusCard({
 
           {/* User Status Section */}
           <YStack flex={1} gap="$1">
-            <Text fontWeight="bold" fontSize="$4" color="$gray12">
-              {participant.displayName}
-            </Text>
+            <XStack alignItems="center" gap="$2">
+              <Text fontWeight="bold" fontSize="$4" color="$gray12">
+                {participant.displayName}
+              </Text>
+              {isMe && (
+                <Text
+                  fontSize="$2"
+                  color="$gray10"
+                  backgroundColor="$gray3"
+                  paddingHorizontal="$2"
+                  paddingVertical="$1"
+                  borderRadius="$2"
+                  fontWeight="500"
+                >
+                  You
+                </Text>
+              )}
+            </XStack>
 
             {/* Render status info */}
             {renderStatusInfo(participant)}

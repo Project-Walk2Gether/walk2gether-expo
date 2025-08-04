@@ -23,7 +23,7 @@ import { router } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { Button, Text, View, XStack } from "tamagui";
+import { Button, Text, View, XStack, YStack } from "tamagui";
 
 export default function MeetTab() {
   const { walk: contextWalk } = useWalk();
@@ -325,7 +325,6 @@ export default function MeetTab() {
             location={walk.currentLocation}
             locationName={walk.currentLocation?.name}
             notes={walk.startLocation?.notes}
-            showMap={false}
             meetupSpotPhoto={walk.meetupSpotPhoto}
             isWalkOwner={isWalkOwner}
             walkId={walkId}
@@ -366,14 +365,24 @@ export default function MeetTab() {
       />
 
       {/* Start walk slider - only shown for walk owners when walk hasn't started and user has arrived */}
-      {walk && isStartingSoon && isOwner(walk) && !walk?.startedAt && userParticipant?.status === "arrived" ? (
+      {walk &&
+      isStartingSoon &&
+      isOwner(walk) &&
+      !walk?.startedAt &&
+      userParticipant?.status === "arrived" ? (
         <StartWalkSlider onStartWalk={handleStartWalk} />
-      ) : (
-        /* Status update button - shown for all participants when slider conditions aren't met */
-        walk && isStartingSoon && !walk?.startedAt ? (
+      ) : /* Status update button - shown for all participants when slider conditions aren't met */
+      walk && isStartingSoon && userParticipant?.status !== "arrived" ? (
+        <YStack
+          position="absolute"
+          bottom={"$4"}
+          left={"$4"}
+          right={"$4"}
+          zIndex={100}
+        >
           <StatusUpdateButton />
-        ) : null
-      )}
+        </YStack>
+      ) : null}
 
       <RequestBackgroundLocationModal
         open={isBackgroundLocationModalOpen}
