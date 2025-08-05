@@ -3,6 +3,7 @@ import { useLocation } from "@/context/LocationContext";
 import { COLORS } from "@/styles/colors";
 import { getFullDateFormat } from "@/utils/dateUtils";
 import { useDoc } from "@/utils/firestore";
+import { isPast } from "@/utils/walkUtils";
 import { calculateDisplayAvatars } from "@/utils/participantAvatars";
 import { getWalkTitle } from "@/utils/walkType";
 import { getWalkStatus } from "@/utils/walkUtils";
@@ -173,7 +174,7 @@ const WalkCard: React.FC<Props> = ({
           {isApproved && !isMine && (
             <IconTextRow
               icon={<CheckCircle size={16} color="#4CAF50" />}
-              text="You're going!"
+              text={isPast(walk) ? "You went" : "You're going!"}
               textColor="#4CAF50"
               textWeight="bold"
             />

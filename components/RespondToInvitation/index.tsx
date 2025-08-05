@@ -3,6 +3,9 @@ import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
 import { COLORS } from "@/styles/colors";
+import { combineDateAndTime } from "@/utils/timezone";
+import { isPast } from "@/utils/walkUtils";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import {
   deleteField,
   doc,
@@ -15,6 +18,7 @@ import { Check, Clock, X } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, Platform } from "react-native";
+import { Calendar } from "react-native-calendars";
 import {
   Button,
   Card,
@@ -25,9 +29,6 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { Calendar } from "react-native-calendars";
-import { combineDateAndTime } from "@/utils/timezone";
 import {
   Participant,
   Walk,
@@ -62,6 +63,8 @@ const RespondToInvitation: React.FC<Props> = ({
   const isApproved =
     !!participantDoc?.acceptedAt && !participantDoc?.cancelledAt;
 
+  const walkIsPastWalk = isPast(walk);
+
   // Common function to handle walk actions (accept or cancel)
   const handleWalkAction = async (action: "accept" | "cancel") => {
     console.log("HWA");
@@ -91,8 +94,6 @@ const RespondToInvitation: React.FC<Props> = ({
         const introductionValue = walkIsNeighborhoodWalk(walk)
           ? introduction.trim()
           : "";
-
-        console.log("ABOUT TO UPDATE");
 
         // Update existing participant document with acceptance data
         await updateDoc<Participant>(participantRef, {
@@ -183,24 +184,25 @@ const RespondToInvitation: React.FC<Props> = ({
     try {
       const combinedDateTime = combineDateAndTime(proposedDate, proposedTime);
       const proposedTimestamp = Timestamp.fromDate(combinedDateTime);
-      
+
       // Get current timeOptions or initialize empty array
       const currentTimeOptions = walk.timeOptions || [];
-      
+
       // Add the proposed time to timeOptions if it's not already there
       const timeExists = currentTimeOptions.some(
-        (option) => Math.abs(option.toMillis() - proposedTimestamp.toMillis()) < 60000 // Within 1 minute
+        (option) =>
+          Math.abs(option.toMillis() - proposedTimestamp.toMillis()) < 60000 // Within 1 minute
       );
-      
+
       if (!timeExists) {
         const updatedTimeOptions = [...currentTimeOptions, proposedTimestamp];
-        
+
         // Update the walk document with the new time option
         await updateDoc(doc(firestore_instance, "walks", walk.id), {
           timeOptions: updatedTimeOptions,
         });
       }
-      
+
       // Create or update participant document with the proposed time preference
       const participantRef = doc(
         firestore_instance,
@@ -209,14 +211,19 @@ const RespondToInvitation: React.FC<Props> = ({
         "participants",
         user.uid
       );
-      
-      await setDoc(participantRef, {
-        proposedTime: proposedTimestamp,
-        proposedTimeAt: Timestamp.now(),
-        displayName: (userData as any)?.displayName || user.displayName || "Anonymous",
-        photoURL: (userData as any)?.photoURL || user.photoURL || null,
-      }, { merge: true });
-      
+
+      await setDoc(
+        participantRef,
+        {
+          proposedTime: proposedTimestamp,
+          proposedTimeAt: Timestamp.now(),
+          displayName:
+            (userData as any)?.displayName || user.displayName || "Anonymous",
+          photoURL: (userData as any)?.photoURL || user.photoURL || null,
+        },
+        { merge: true }
+      );
+
       setShowTimeProposal(false);
       Alert.alert(
         "Time Proposed!",
@@ -271,12 +278,15 @@ const RespondToInvitation: React.FC<Props> = ({
             <XStack gap="$2" ai="center" jc="center">
               <Check size="$1" color={"$green10"} />
               <Text fontSize="$5" fontWeight="bold" color="$green10">
-                You're Going!
+                {walkIsPastWalk ? "You went!" : "You're Going!"}
               </Text>
             </XStack>
-            <Text fontSize="$3" textAlign="center" color="$green9">
-              {walk.organizerName} is looking forward to seeing you at the walk
-            </Text>
+            {walkIsPastWalk ? null : (
+              <Text fontSize="$3" textAlign="center" color="$green9">
+                {walk.organizerName} is looking forward to seeing you at the
+                walk
+              </Text>
+            )}
           </YStack>
         </Card>
       ) : cantMakeIt ? (
@@ -339,12 +349,22 @@ const RespondToInvitation: React.FC<Props> = ({
 
           {/* Time proposal section */}
           {showTimeProposal && (
-            <Card backgroundColor="white" borderRadius={10} padding={15} marginBottom="$3">
+            <Card
+              backgroundColor="white"
+              borderRadius={10}
+              padding={15}
+              marginBottom="$3"
+            >
               <Text fontSize="$4" fontWeight="600" marginBottom="$3">
                 Propose a different time
               </Text>
-              
-              <Card backgroundColor="#f9f9f9" borderRadius={10} padding={10} marginBottom="$3">
+
+              <Card
+                backgroundColor="#f9f9f9"
+                borderRadius={10}
+                padding={10}
+                marginBottom="$3"
+              >
                 <Calendar
                   minDate={new Date().toISOString().split("T")[0]}
                   onDayPress={handleDateChange}
@@ -361,7 +381,12 @@ const RespondToInvitation: React.FC<Props> = ({
                 />
               </Card>
 
-              <Card backgroundColor="#f9f9f9" borderRadius={10} padding={10} marginBottom="$3">
+              <Card
+                backgroundColor="#f9f9f9"
+                borderRadius={10}
+                padding={10}
+                marginBottom="$3"
+              >
                 {isAndroid ? (
                   <YStack alignItems="center" gap="$2">
                     <Text fontSize="$3" fontWeight="500">
@@ -422,7 +447,11 @@ const RespondToInvitation: React.FC<Props> = ({
                   disabled={loading}
                   iconAfter={loading ? undefined : <Clock color="white" />}
                 >
-                  {loading ? <ActivityIndicator color="white" /> : "Propose Time"}
+                  {loading ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    "Propose Time"
+                  )}
                 </Button>
               </XStack>
             </Card>

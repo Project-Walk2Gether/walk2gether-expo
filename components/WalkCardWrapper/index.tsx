@@ -53,17 +53,15 @@ export const WalkCardWrapper: React.FC<WalkCardWrapperProps> = ({
   const isHappeningNow = React.useMemo(() => {
     const now = new Date();
 
-    // Check if date is in the past
-    if (walk.date) {
-      const walkDate = walk.date.toDate();
-      if (now >= walkDate) return true;
-    }
+    if (walk.endTime && walk.endTime.toDate() < now) return false;
 
     // Check if startedAt is set and in the past
     if (walk.startedAt) {
       const startTime = walk.startedAt.toDate();
       if (now >= startTime) return true;
     }
+    const walkDate = walk.date.toDate();
+    if (now >= walkDate) return true;
 
     // Neither date nor startedAt indicates the walk is happening now
     return false;

@@ -13,7 +13,7 @@ import { useFlashMessage } from "@/context/FlashMessageContext";
 import { useMenu } from "@/context/MenuContext";
 import { useSheet } from "@/context/SheetContext";
 import { useWalk } from "@/context/WalkContext";
-import { getWalkStatus } from "@/utils/walkUtils";
+import { getWalkStatus, isPast } from "@/utils/walkUtils";
 import {
   FirebaseFirestoreTypes,
   updateDoc,
@@ -143,6 +143,8 @@ export default function PlanTab() {
 
   const walkStatus = getWalkStatus(walk);
 
+  const walkIsPastWalk = isPast(walk);
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
       <YStack p="$4" gap="$4" pb="$w6">
@@ -153,7 +155,7 @@ export default function PlanTab() {
           </WalkDetailsCard>
         )}
 
-        {isMine ? null : (
+        {isMine || walkIsPastWalk ? null : (
           <RespondToInvitationCard
             walk={walk}
             participantDoc={currentUserParticipantDoc || undefined}

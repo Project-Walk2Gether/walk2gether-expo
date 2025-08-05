@@ -30,7 +30,7 @@ export default function RespondToInvitationCard({
 }: Props) {
   return (
     <WalkDetailsCard
-      title={walkIsMeetupWalk(walk) ? "Respond to request" : "RSVP to join"}
+      title={walkIsMeetupWalk(walk) ? "RSVP to join" : "Respond to request"}
       headerAction={
         hasResponded ? (
           <Button
