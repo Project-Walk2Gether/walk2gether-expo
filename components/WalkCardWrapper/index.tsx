@@ -93,13 +93,7 @@ export const WalkCardWrapper: React.FC<WalkCardWrapperProps> = ({
       <YStack pb={paddingVertical} px={paddingHorizontal} pt={paddingVertical}>
         {/* Happening Now Bar */}
         {isHappeningNow && (
-          <XStack
-            alignItems="center"
-            justifyContent="center"
-            borderTopLeftRadius={8}
-            borderTopRightRadius={8}
-            mb="$1"
-          >
+          <XStack mt="$1" mb="$2">
             <Text
               color={cardColor}
               textTransform="uppercase"

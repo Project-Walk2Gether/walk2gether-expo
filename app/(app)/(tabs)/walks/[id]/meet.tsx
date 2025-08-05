@@ -227,10 +227,7 @@ export default function MeetTab() {
           await startNextRound(walk);
           // Note: Subsequent rounds are now handled automatically by the scheduled function
         } catch (roundError) {
-          console.error(
-            "Error starting first round:",
-            roundError
-          );
+          console.error("Error starting first round:", roundError);
           // Don't fail the walk start if round starting fails
         }
       }

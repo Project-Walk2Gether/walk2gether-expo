@@ -12,7 +12,6 @@ import { COLORS } from "@/styles/colors";
 import { appVersion } from "@/utils/version";
 import storage from "@react-native-firebase/storage";
 import {
-  AlertTriangle,
   Bell,
   Camera,
   Clock,
@@ -21,9 +20,9 @@ import {
   Info,
   Linkedin,
   LogOut,
-  Map,
   Phone,
   QrCode,
+  Settings,
   Trash,
 } from "@tamagui/lucide-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -324,48 +323,12 @@ export default function MeScreen() {
                     Linking.openURL(userData.linkedInProfileUrl);
                   }
                 }}
-                action={
-                  <ExternalLink size={16} color={COLORS.textSecondary} />
-                }
+                action={<ExternalLink size={16} color={COLORS.textSecondary} />}
               />
             </>
           )}
 
-          <Separator borderColor="$gray5" />
 
-          <ActionRow
-            icon={<Map />}
-            label="Distance Unit"
-            secondaryText={
-              userData?.distanceUnit === "mi" ? "Miles" : "Kilometers"
-            }
-            onPress={() => {
-              const menuItems: MenuItem[] = [
-                {
-                  label: "Kilometers",
-                  onPress: () => {
-                    updateUserData({ distanceUnit: "km" });
-                    showMessage(
-                      "Distance unit changed to kilometers",
-                      "success"
-                    );
-                  },
-                  theme: userData?.distanceUnit === "km" ? "blue" : "default",
-                },
-                {
-                  label: "Miles",
-                  onPress: () => {
-                    updateUserData({ distanceUnit: "mi" });
-                    showMessage("Distance unit changed to miles", "success");
-                  },
-                  theme: userData?.distanceUnit === "mi" ? "blue" : "default",
-                },
-              ];
-              showMenu("Select Distance Unit", menuItems);
-            }}
-          />
-
-          <Separator borderColor="$gray5" />
 
           <ActionRow
             icon={
@@ -402,9 +365,9 @@ export default function MeScreen() {
           <Separator borderColor="$gray5" />
 
           <ActionRow
-            icon={<AlertTriangle color={COLORS.error} />}
-            label="Delete My Account"
-            onPress={() => router.push("/me/delete-account")}
+            icon={<Settings color={COLORS.textSecondary} />}
+            label="Account Actions"
+            onPress={() => router.push("/me/account-actions")}
             isLast={true}
           />
         </Card>

@@ -2,7 +2,7 @@ import { useWalkForm } from "@/context/WalkFormContext";
 import { COLORS } from "@/styles/colors";
 import { combineDateAndTime } from "@/utils/timezone";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Timestamp } from "@react-native-firebase/firestore";
+import { deleteField, Timestamp } from "@react-native-firebase/firestore";
 import { Clock, Edit3, Plus, Star, Trash2 } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
@@ -45,10 +45,10 @@ export const TimeSelection: React.FC<Props> = ({
     if (isEditMode && formData.date && timeOption === null) {
       const walkDate = formData.date.toDate();
       const now = new Date();
-      
+
       // If walk date is in the past or very close to now (within 5 minutes), it's "now"
       const isNow = walkDate <= new Date(now.getTime() + 5 * 60 * 1000);
-      
+
       setTimeOption(isNow ? "now" : "future");
       setSelectorExpanded(false); // Start collapsed when editing
     }
@@ -61,13 +61,13 @@ export const TimeSelection: React.FC<Props> = ({
   useEffect(() => {
     if (isEditMode && formData.date && timeEntries.length === 0) {
       const entries: TimeEntry[] = [];
-      
+
       // Add the main walk time as primary
       entries.push({
         time: formData.date.toDate(),
         isPrimary: true,
       });
-      
+
       // Add any additional time options
       if (formData.timeOptions && formData.timeOptions.length > 0) {
         formData.timeOptions.forEach((option) => {
@@ -77,7 +77,7 @@ export const TimeSelection: React.FC<Props> = ({
           });
         });
       }
-      
+
       setTimeEntries(entries);
     }
   }, [isEditMode, formData.date, formData.timeOptions, timeEntries.length]);
@@ -250,10 +250,13 @@ export const TimeSelection: React.FC<Props> = ({
 
     if (primary) {
       const primaryTimestamp = Timestamp.fromDate(primary.time);
-      updateFormData({ date: primaryTimestamp } as any);
+      updateFormData({
+        date: primaryTimestamp,
+        startedAt: deleteField() as any,
+      } as any);
     } else {
       // Clear primary if no entries
-      updateFormData({ date: null } as any);
+      updateFormData({ date: null, startedAt: deleteField() as any } as any);
     }
 
     if (alternates.length > 0) {
@@ -275,6 +278,7 @@ export const TimeSelection: React.FC<Props> = ({
   const handleNowOption = () => {
     updateFormData({
       date: Timestamp.fromDate(new Date()),
+      startedAt: deleteField() as any,
     });
     setTimeOption("now");
     setSelectorExpanded(false); // Collapse after selection
@@ -296,6 +300,7 @@ export const TimeSelection: React.FC<Props> = ({
     if (timeOption === "now") {
       updateFormData({
         date: Timestamp.fromDate(new Date()),
+        startedAt: deleteField() as any,
       });
     }
     if (onSubmit) {
@@ -370,13 +375,10 @@ export const TimeSelection: React.FC<Props> = ({
                   {/* Primary time section */}
                   {timeEntries
                     .filter((entry) => entry.isPrimary)
-                    .map((entry, originalIndex) => {
+                    .map((entry) => {
                       const index = timeEntries.findIndex((e) => e === entry);
                       return (
                         <YStack key={`primary-${index}`} gap="$2">
-                          <Text fontSize={18} fontWeight="600">
-                            Walk Time
-                          </Text>
                           <TouchableOpacity
                             onPress={() =>
                               !entry.isPrimary && handleChooseTime(entry, index)

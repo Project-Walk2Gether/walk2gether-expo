@@ -91,16 +91,6 @@ export default function TalkTab() {
             type: "round" as const,
             data: round,
           })),
-          // Add upcoming rounds for walk owners
-          ...upcomingRounds.map((upcomingRound, index) => ({
-            type: "upcoming-round" as const,
-            data: {
-              ...upcomingRound,
-              // Add a synthetic createdAt for sorting - upcoming rounds should appear at the end
-
-              isFirstUpcoming: index === 0, // Mark the first one as the next round to start
-            },
-          })),
         ],
         (item) => {
           // Handle different timestamp fields for sorting
