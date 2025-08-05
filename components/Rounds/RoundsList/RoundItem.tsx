@@ -14,7 +14,6 @@ interface Props {
   isWalkOwner?: boolean; // Flag to indicate if the current user is the walk owner
   onToggleExpand: () => void;
   onEditPrompt?: () => void; // Optional since only upcoming rounds can be edited
-  onStartRound?: () => void; // Function to start this round (only for first upcoming round)
   isRotating?: boolean; // Flag to indicate if rotation is in progress
 }
 
@@ -28,7 +27,6 @@ export const RoundItem = memo(
     isWalkOwner,
     onToggleExpand,
     onEditPrompt,
-    onStartRound,
     isRotating,
   }: Props) => {
     // Determine styling based on whether this is an actual or upcoming round
@@ -146,23 +144,6 @@ export const RoundItem = memo(
             </Text>
           </YStack>
         )}
-
-        {/* Start Round button for first upcoming round */}
-        {isFirstUpcoming && isWalkOwner && onStartRound && (
-          <YStack paddingHorizontal="$4" paddingVertical="$2">
-            <Button
-              backgroundColor="$blue8"
-              color="white"
-              size="$3"
-              onPress={onStartRound}
-              disabled={isRotating}
-              opacity={isRotating ? 0.7 : 1}
-            >
-              {isRotating ? "Starting round..." : "Start this round"}
-            </Button>
-          </YStack>
-        )}
-
         {/* Expanded view with pairs */}
         {isExpanded && (
           <YStack

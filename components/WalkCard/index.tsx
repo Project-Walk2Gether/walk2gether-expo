@@ -72,26 +72,6 @@ const WalkCard: React.FC<Props> = ({
   const ownerName = getOwnerName();
   const status = getWalkStatus(walk);
 
-  // Determine if the walk is happening now (more precise than just 'active' status)
-  const isHappeningNow = React.useMemo(() => {
-    const now = new Date();
-
-    // Check if date is in the past
-    if (walk.date) {
-      const walkDate = walk.date.toDate();
-      if (now >= walkDate) return true;
-    }
-
-    // Check if startedAt is set and in the past
-    if (walk.startedAt) {
-      const startTime = walk.startedAt.toDate();
-      if (now >= startTime) return true;
-    }
-
-    // Neither date nor startedAt indicates the walk is happening now
-    return false;
-  }, [walk.date, walk.startedAt]);
-
   // Get the participant document for the current user (if they exist as a participant)
   const { doc: participantDoc } = useDoc<Participant>(
     user?.uid ? `walks/${walk.id}/participants/${user.uid}` : undefined
@@ -140,171 +120,157 @@ const WalkCard: React.FC<Props> = ({
   };
 
   return (
-    <YStack marginVertical={10} opacity={!isMine && isCancelled ? 0.85 : 1}>
-      {/* Attachments Carousel - Not pressable */}
-      {showAttachments && <WalkAttachmentsCarousel walk={walk} />}
+    <>
+      <YStack marginVertical={10} opacity={!isMine && isCancelled ? 0.85 : 1}>
+        {/* Attachments Carousel - Not pressable */}
+        {showAttachments && <WalkAttachmentsCarousel walk={walk} />}
 
-      {/* Card Content - Pressable */}
-      <WalkCardWrapper
-        type={walkType}
-        onPress={onPress}
-        elevation={3}
-        animation={true}
-      >
-        <CardHeader
-          icon={<UserAvatar uid={walk.createdByUid} size={34} />}
-          title={getWalkTitle(walk, user?.uid)}
-          walkType={
-            walk.type === "neighborhood"
-              ? "Neighborhood"
-              : walk.type === "meetup"
-              ? "Meetup"
-              : "Friends"
-          }
-          isUserInitiator={isMine}
-          initiatorName={ownerName}
-          action={isMine && <WalkMenu walk={walk} />}
-        />
-        <IconTextRow
-          icon={<Calendar size={16} color="#444" />}
-          text={getFullDateFormat(walk.date.toDate())}
-          textWeight="bold"
-          right={
-            isHappeningNow ? (
-              <XStack
-                paddingHorizontal={8}
-                paddingVertical={4}
-                borderRadius={4}
-                alignItems="center"
-                justifyContent="center"
-                borderColor="#4caf50"
-                borderWidth={1}
-              >
-                <Text fontSize={12} color="#0a5c0a" fontWeight="500">
-                  Now
-                </Text>
-              </XStack>
-            ) : undefined
-          }
-        />
-        <IconTextRow
-          icon={<Timer size={16} color="#444" />}
-          text={`${walk.durationMinutes} minutes`}
-        />
-        {/* Show topic for meetup walks */}
-        {walk.type === "meetup" && walk.topic && (
-          <IconTextRow
-            icon={<MessageCircle size={16} />}
-            text={`Topic: ${walk.topic}`}
-          />
-        )}
-        <LocationDisplay
+        {/* Card Content - Pressable */}
+        <WalkCardWrapper
           walk={walk}
-          userCoords={coords}
-          locationLoading={locationLoading}
-          locationError={locationError}
-        />
-        {/* You're going section - only shows for participants who aren't the owner */}
-        {isApproved && !isMine && (
+          type={walkType}
+          onPress={onPress}
+          elevation={3}
+          animation={true}
+        >
+          <CardHeader
+            icon={<UserAvatar uid={walk.createdByUid} size={34} />}
+            title={getWalkTitle(walk, user?.uid)}
+            walkType={
+              walk.type === "neighborhood"
+                ? "Neighborhood"
+                : walk.type === "meetup"
+                ? "Meetup"
+                : "Friends"
+            }
+            isUserInitiator={isMine}
+            initiatorName={ownerName}
+            action={isMine && <WalkMenu walk={walk} />}
+          />
           <IconTextRow
-            icon={<CheckCircle size={16} color="#4CAF50" />}
-            text="You're going!"
-            textColor="#4CAF50"
+            icon={<Calendar size={16} color="#444" />}
+            text={getFullDateFormat(walk.date.toDate())}
             textWeight="bold"
           />
-        )}
-        {/* Participants section */}
-        <YStack gap="$2">
-          {/* If user has cancelled their participation */}
-          {isCancelled && (
-            <YStack gap="$2">
-              <XStack
-                backgroundColor="$red7"
-                paddingHorizontal="$3"
-                paddingVertical="$2"
-                borderRadius="$3"
-                alignItems="center"
-                gap="$1"
-                mt="$2"
-              >
-                <Text fontSize={12} fontWeight="600">
-                  You've told {ownerName} you can't make it
-                </Text>
-              </XStack>
-              {canShowDismissButton ? (
-                <Button onPress={handleHideInvitationButtonPress}>
-                  Hide this invitation
-                </Button>
-              ) : null}
-            </YStack>
-          )}
-
-          {/* Unified participants display component - only render if conditions are met */}
-          {shouldShowParticipantsDisplay && (
-            <ParticipantsDisplay
-              walk={walk}
-              currentUserUid={user?.uid}
-              isMine={isMine}
-              displayAvatars={displayAvatars}
-              overflow={overflow}
+          <IconTextRow
+            icon={<Timer size={16} color="#444" />}
+            text={`${walk.durationMinutes} minutes`}
+          />
+          {/* Show topic for meetup walks */}
+          {walk.type === "meetup" && walk.topic && (
+            <IconTextRow
+              icon={<MessageCircle size={16} />}
+              text={`Topic: ${walk.topic}`}
             />
           )}
-
-          {/* Show action buttons for non-owners when showActions is true */}
-          {!isMine && showActions && !isCancelled ? (
-            <>
-              {/* If user has not responded */}
-              {!isApproved && !isRejected && !isCancelled && (
-                <View mt="$3">
-                  <WalkCardButton
-                    label="Respond to invitation"
-                    onPress={onPress}
-                    icon={<Hand color="white" size={16} />}
-                    size="$3"
-                    fontWeight="bold"
-                    backgroundColor={COLORS.primary}
-                  />
-                </View>
-              )}
-
-              {/* If user has requested to join and it's rejected */}
-              {isRejected && (
+          <LocationDisplay
+            walk={walk}
+            userCoords={coords}
+            locationLoading={locationLoading}
+            locationError={locationError}
+          />
+          {/* You're going section - only shows for participants who aren't the owner */}
+          {isApproved && !isMine && (
+            <IconTextRow
+              icon={<CheckCircle size={16} color="#4CAF50" />}
+              text="You're going!"
+              textColor="#4CAF50"
+              textWeight="bold"
+            />
+          )}
+          {/* Participants section */}
+          <YStack gap="$2">
+            {/* If user has cancelled their participation */}
+            {isCancelled && (
+              <YStack gap="$2">
                 <XStack
-                  backgroundColor="$gray4"
+                  backgroundColor="$red7"
                   paddingHorizontal="$3"
                   paddingVertical="$2"
                   borderRadius="$3"
                   alignItems="center"
                   gap="$1"
                   mt="$2"
-                  flex={1}
                 >
-                  <Text fontSize={12} fontWeight="600" color="$gray9">
-                    Your request wasn't accepted this time
+                  <Text fontSize={12} fontWeight="600">
+                    You've told {ownerName} you can't make it
                   </Text>
                 </XStack>
-              )}
-              {/* Show join button for neighborhood walks if user hasn't requested or request was rejected */}
-              {/* Don't show if the user is already approved or has cancelled */}
-              {(!hasRequested || isRejected) &&
-                !isApproved &&
-                !isCancelled &&
-                walkIsNeighborhoodWalk(walk) &&
-                status !== "past" && (
-                  <WalkCardButton
-                    label="Join this walk"
-                    onPress={onPress}
-                    icon={<Hand color="white" size={16} />}
-                    size="$3"
-                    fontWeight="bold"
-                    backgroundColor={COLORS.primary}
-                  />
+                {canShowDismissButton ? (
+                  <Button onPress={handleHideInvitationButtonPress}>
+                    Hide this invitation
+                  </Button>
+                ) : null}
+              </YStack>
+            )}
+
+            {/* Unified participants display component - only render if conditions are met */}
+            {shouldShowParticipantsDisplay && (
+              <ParticipantsDisplay
+                walk={walk}
+                currentUserUid={user?.uid}
+                isMine={isMine}
+                displayAvatars={displayAvatars}
+                overflow={overflow}
+              />
+            )}
+
+            {/* Show action buttons for non-owners when showActions is true */}
+            {!isMine && showActions && !isCancelled ? (
+              <>
+                {/* If user has not responded */}
+                {!isApproved && !isRejected && !isCancelled && (
+                  <View mt="$3">
+                    <WalkCardButton
+                      label="Respond to invitation"
+                      onPress={onPress}
+                      icon={<Hand color="white" size={16} />}
+                      size="$3"
+                      fontWeight="bold"
+                      backgroundColor={COLORS.primary}
+                    />
+                  </View>
                 )}
-            </>
-          ) : null}
-        </YStack>
-      </WalkCardWrapper>
-    </YStack>
+
+                {/* If user has requested to join and it's rejected */}
+                {isRejected && (
+                  <XStack
+                    backgroundColor="$gray4"
+                    paddingHorizontal="$3"
+                    paddingVertical="$2"
+                    borderRadius="$3"
+                    alignItems="center"
+                    gap="$1"
+                    mt="$2"
+                    flex={1}
+                  >
+                    <Text fontSize={12} fontWeight="600" color="$gray9">
+                      Your request wasn't accepted this time
+                    </Text>
+                  </XStack>
+                )}
+                {/* Show join button for neighborhood walks if user hasn't requested or request was rejected */}
+                {/* Don't show if the user is already approved or has cancelled */}
+                {(!hasRequested || isRejected) &&
+                  !isApproved &&
+                  !isCancelled &&
+                  walkIsNeighborhoodWalk(walk) &&
+                  status !== "past" && (
+                    <WalkCardButton
+                      label="Join this walk"
+                      onPress={onPress}
+                      icon={<Hand color="white" size={16} />}
+                      size="$3"
+                      fontWeight="bold"
+                      backgroundColor={COLORS.primary}
+                    />
+                  )}
+              </>
+            ) : null}
+          </YStack>
+        </WalkCardWrapper>
+      </YStack>
+    </>
   );
 };
 

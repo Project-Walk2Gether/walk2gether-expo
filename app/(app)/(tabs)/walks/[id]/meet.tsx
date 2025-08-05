@@ -1,5 +1,4 @@
 import { stopBackgroundLocationTracking } from "@/background/backgroundLocationTask";
-import { syncRoundRotationTask } from "@/background/roundRotationTask";
 import LocationLoading from "@/components/WalkScreen/components/LiveWalkMap/LocationLoading";
 import OfficialWalkRoute from "@/components/WalkScreen/components/LiveWalkMap/OfficialWalkRoute";
 import ParticipantMarker from "@/components/WalkScreen/components/LiveWalkMap/ParticipantMarker";
@@ -226,11 +225,10 @@ export default function MeetTab() {
       if (walk.type === "meetup") {
         try {
           await startNextRound(walk);
-          // Sync the round rotation task for automatic future rounds
-          await syncRoundRotationTask(walk.id);
+          // Note: Subsequent rounds are now handled automatically by the scheduled function
         } catch (roundError) {
           console.error(
-            "Error starting first round or syncing rotation:",
+            "Error starting first round:",
             roundError
           );
           // Don't fail the walk start if round starting fails

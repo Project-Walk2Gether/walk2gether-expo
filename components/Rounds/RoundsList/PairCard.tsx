@@ -39,7 +39,13 @@ export const PairCard = ({ pair, isActual = false }: Props) => {
 
       {/* Participant names */}
       {participantsInfo.length > 0 ? (
-        <Text textAlign="center" fontSize="$2" color="white" fontWeight="bold">
+        <Text
+          flexShrink={1}
+          textAlign="center"
+          fontSize="$2"
+          color="white"
+          fontWeight="bold"
+        >
           {formatNamesInSentenceCase(
             participantsInfo.map((participant) => participant.displayName)
           )}

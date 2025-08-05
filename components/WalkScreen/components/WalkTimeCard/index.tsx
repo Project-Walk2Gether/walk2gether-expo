@@ -6,6 +6,7 @@ import { router } from "expo-router";
 import React from "react";
 import { Button, Text, YStack } from "tamagui";
 import { Location, Participant, WithId } from "walk2gether-shared";
+import { useMenu } from "@/context/MenuContext";
 import AlternateTimesCard from "../AlternateTimesCard";
 import WalkDetailsCardBase from "../WalkDetailsCard";
 import WalkDetailsRow from "../WalkDetailsRow";
@@ -38,6 +39,23 @@ export default function WalkTimeCard({
   isWalkOwner = false,
   children,
 }: Props) {
+  const { showMenu } = useMenu();
+
+  // Format duration helper function
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) {
+      return `${minutes} minutes`;
+    } else {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      if (remainingMinutes === 0) {
+        return hours === 1 ? "1 hour" : `${hours} hours`;
+      } else {
+        return `${hours} hr ${remainingMinutes} min`;
+      }
+    }
+  };
+
   // Check if time or location is missing
   const hasTimeInfo = !!walkDate;
 
@@ -69,7 +87,16 @@ export default function WalkTimeCard({
         iconAfter={Edit3}
         theme="blue"
         onPress={() =>
-          router.push(`/(app)/(modals)/edit-walk-time?id=${walkId}`)
+          showMenu("Edit Time & Duration", [
+            {
+              label: "Edit Time",
+              onPress: () => router.push(`/(app)/(modals)/edit-walk-time?id=${walkId}`),
+            },
+            {
+              label: "Edit Duration",
+              onPress: () => router.push(`/(app)/(modals)/edit-walk-duration?id=${walkId}`),
+            },
+          ])
         }
       >
         Edit
@@ -109,7 +136,7 @@ export default function WalkTimeCard({
         {/* Duration Info */}
         <WalkDetailsRow
           icon={<Timer />}
-          label={`Duration: ${durationMinutes} minutes`}
+          label={formatDuration(durationMinutes)}
           testID="walk-duration-row"
         />
 

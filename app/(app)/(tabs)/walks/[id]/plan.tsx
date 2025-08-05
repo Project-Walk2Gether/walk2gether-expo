@@ -163,7 +163,7 @@ export default function PlanTab() {
           />
         )}
 
-        {/* Walk Info Card */}
+        {/* Walk Time Card */}
         <WalkTimeCard
           walkDate={walk.date ? walk.date.toDate() : undefined}
           durationMinutes={walk.durationMinutes}

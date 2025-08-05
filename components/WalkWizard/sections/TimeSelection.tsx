@@ -33,15 +33,12 @@ export const TimeSelection: React.FC<Props> = ({
   onBack,
   onSubmit,
 }) => {
-  const { formData, updateFormData } = useWalkForm();
+  const { formData, updateFormData, isEditMode } = useWalkForm();
 
   // Determine if this is a friends walk or neighborhood walk
   const isFriendsWalk = formData.type === "friends";
   const [timeOption, setTimeOption] = useState<"now" | "future" | null>(null);
   const [selectorExpanded, setSelectorExpanded] = useState(true); // Start expanded
-
-  // Check if we're editing an existing walk
-  const isEditMode = formData.date !== null;
 
   // Initialize state for existing walk
   useEffect(() => {
@@ -319,49 +316,53 @@ export const TimeSelection: React.FC<Props> = ({
         }
       >
         <YStack gap="$4" flex={1} p={16}>
-          {/* Time option selector */}
-          {selectorExpanded ? (
-            <YStack gap="$3">
-              <SelectableOption
-                isSelected={timeOption === "now"}
-                onPress={handleNowOption}
-                title="Start walking now"
-                description="Begin your walk immediately"
-              />
+          {/* Time option selector - only show when not in edit mode */}
+          {!isEditMode && (
+            <>
+              {selectorExpanded ? (
+                <YStack gap="$3">
+                  <SelectableOption
+                    isSelected={timeOption === "now"}
+                    onPress={handleNowOption}
+                    title="Start walking now"
+                    description="Begin your walk immediately"
+                  />
 
-              <SelectableOption
-                isSelected={timeOption === "future"}
-                onPress={handleFutureOption}
-                title="Schedule for later"
-                description="Pick a specific date and time"
-              />
-            </YStack>
-          ) : (
-            <XStack
-              alignItems="center"
-              justifyContent="space-between"
-              padding="$3"
-              backgroundColor="$gray1"
-              borderRadius={12}
-            >
-              <Text fontSize={16} fontWeight="600">
-                {timeOption === "now"
-                  ? "Start walking now"
-                  : "Schedule for later"}
-              </Text>
-              <Button
-                size="$2"
-                chromeless
-                onPress={handleEditTimeOption}
-                icon={<Edit3 size={16} />}
-              >
-                Edit
-              </Button>
-            </XStack>
+                  <SelectableOption
+                    isSelected={timeOption === "future"}
+                    onPress={handleFutureOption}
+                    title="Schedule for later"
+                    description="Pick a specific date and time"
+                  />
+                </YStack>
+              ) : (
+                <XStack
+                  alignItems="center"
+                  justifyContent="space-between"
+                  padding="$3"
+                  backgroundColor="$gray1"
+                  borderRadius={12}
+                >
+                  <Text fontSize={16} fontWeight="600">
+                    {timeOption === "now"
+                      ? "Start walking now"
+                      : "Schedule for later"}
+                  </Text>
+                  <Button
+                    size="$2"
+                    chromeless
+                    onPress={handleEditTimeOption}
+                    icon={<Edit3 size={16} />}
+                  >
+                    Edit
+                  </Button>
+                </XStack>
+              )}
+            </>
           )}
 
-          {/* Future time selection */}
-          {timeOption === "future" && (
+          {/* Future time selection - show when 'future' is selected OR when in edit mode */}
+          {(timeOption === "future" || isEditMode) && (
             <YStack gap="$4" flex={1}>
               {/* Show time entries if any exist */}
               {timeEntries.length > 0 && (

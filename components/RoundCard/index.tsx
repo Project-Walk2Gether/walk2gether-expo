@@ -168,22 +168,6 @@ export default function RoundCard({
         </YStack>
       )}
 
-      {/* Start Round button for first upcoming round - only show if walk has started */}
-      {isFirstUpcoming && isWalkOwner && walkStarted && onStartRound && (
-        <YStack paddingHorizontal="$4" paddingVertical="$2">
-          <Button
-            backgroundColor="$blue8"
-            color="white"
-            size="$3"
-            onPress={onStartRound}
-            disabled={isRotating}
-            opacity={isRotating ? 0.7 : 1}
-          >
-            {isRotating ? "Starting round..." : "Start Round"}
-          </Button>
-        </YStack>
-      )}
-
       {/* Expanded view with pairs */}
       {isExpanded && round.pairs && (
         <YStack

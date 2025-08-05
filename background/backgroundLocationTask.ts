@@ -102,6 +102,7 @@ export const startBackgroundLocationTracking = async ({
   walkId,
   userId,
   endTime,
+  ...restOptions
 }: LocationTaskOptions = {}) => {
   console.log("Starting background tracking with:", {
     walkId,
@@ -143,6 +144,8 @@ export const startBackgroundLocationTracking = async ({
     // Store these values to access in the background task
     walkId,
     userId,
+    endTime, // Explicitly include endTime in the options
+    ...restOptions,
   };
 
   await writeLogIfEnabled({

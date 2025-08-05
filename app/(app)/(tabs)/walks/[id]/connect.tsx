@@ -1,23 +1,16 @@
-import { stopBackgroundLocationTracking } from "@/background/backgroundLocationTask";
 import MessageForm from "@/components/Chat/MessageForm";
 import MessageList from "@/components/Chat/MessageList";
 import WalkStatsBar from "@/components/WalkScreen/components/WalkStatsBar";
-import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
 import { useWalk } from "@/context/WalkContext";
 import { useWalkChat } from "@/hooks/useWalkChat";
 import { useQuery } from "@/utils/firestore";
 import { isOwner } from "@/utils/walkUtils";
-import {
-  doc,
-  FirebaseFirestoreTypes,
-  setDoc,
-  Timestamp,
-} from "@react-native-firebase/firestore";
+import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
 import { sortBy } from "lodash";
 import React, { useMemo, useRef } from "react";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { KeyboardAvoidingView, Platform } from "react-native";
 import { Text, View, YStack } from "tamagui";
 import {
   MeetupWalk,
@@ -124,38 +117,6 @@ export default function TalkTab() {
       ),
     [messages, rounds, upcomingRounds]
   );
-
-  // Handler for ending a walk (owner only)
-  const handleEndWalk = async () => {
-    if (!walk || !walk.id) return;
-
-    try {
-      await setDoc(
-        doc(firestore_instance, "walks", walk.id),
-        {
-          endTime: Timestamp.now(),
-          status: "completed",
-        },
-        { merge: true }
-      );
-
-      // Stop background tracking for the current user
-      stopBackgroundLocationTracking();
-
-      // Show confirmation alert
-      Alert.alert(
-        "Walk Ended",
-        "Your walk has ended. Thank you for using Walk2gether!",
-        [{ text: "OK" }]
-      );
-    } catch (error) {
-      console.error("Error ending walk:", error);
-      Alert.alert(
-        "Error",
-        "There was a problem ending the walk. Please try again."
-      );
-    }
-  };
 
   if (!walk) {
     return (
