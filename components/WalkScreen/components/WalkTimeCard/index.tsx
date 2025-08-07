@@ -5,7 +5,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { router } from "expo-router";
 import React from "react";
 import { Button, Text, YStack } from "tamagui";
-import { Location, Participant, WithId } from "walk2gether-shared";
+import { Location, Participant, TimeOption, WithId } from "walk2gether-shared";
 import { useMenu } from "@/context/MenuContext";
 import AlternateTimesCard from "../AlternateTimesCard";
 import WalkDetailsCardBase from "../WalkDetailsCard";
@@ -21,7 +21,7 @@ interface Props {
   children?: React.ReactNode;
   walkId?: string;
   showEditButton?: boolean;
-  timeOptions?: Timestamp[];
+  timeOptions?: TimeOption[];
   participants?: WithId<Participant>[];
   isWalkOwner?: boolean;
 }
@@ -141,18 +141,18 @@ export default function WalkTimeCard({
         />
 
         {children}
+
+        {/* Alternate Times Card - show if there are time options */}
+        {timeOptions.length > 0 && walkDate && walkId && (
+          <AlternateTimesCard
+            walkId={walkId}
+            timeOptions={timeOptions}
+            participants={participants}
+            isWalkOwner={isWalkOwner}
+            currentWalkTime={Timestamp.fromDate(walkDate)}
+          />
+        )}
       </YStack>
-      
-      {/* Alternate Times Card - show if there are time options */}
-      {timeOptions.length > 0 && walkDate && walkId && (
-        <AlternateTimesCard
-          walkId={walkId}
-          timeOptions={timeOptions}
-          participants={participants}
-          isWalkOwner={isWalkOwner}
-          currentWalkTime={Timestamp.fromDate(walkDate)}
-        />
-      )}
     </WalkDetailsCardBase>
   );
 }

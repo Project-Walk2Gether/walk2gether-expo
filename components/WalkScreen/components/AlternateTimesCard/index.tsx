@@ -8,7 +8,6 @@ import React, { useMemo, useState } from "react";
 import { Alert } from "react-native";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { Participant, TimeOption, WithId } from "walk2gether-shared";
-import WalkDetailsCardBase from "../WalkDetailsCard";
 
 interface Props {
   walkId: string;
@@ -117,107 +116,108 @@ export default function AlternateTimesCard({
   }
 
   return (
-    <WalkDetailsCardBase title="Alternate Times" testID="alternate-times-card">
-      <YStack gap="$2">
-        <Text fontSize="$3" color="$gray11" marginBottom="$2">
-          {isWalkOwner
-            ? "Participants can vote on times they can make. Tap 'Set as official' to change the walk time."
-            : "Vote on alternate times you can make it to."}
-        </Text>
+    <YStack gap="$3" marginTop="$3">
+      <Text fontSize="$3" color="$gray11" fontWeight="500">
+        Alternate Times
+      </Text>
+      <Text fontSize="$3" color="$gray11" marginBottom="$2">
+        {isWalkOwner
+          ? "Participants can vote on times they can make. Tap 'Set as official' to change the walk time."
+          : "Vote on alternate times you can make it to."}
+      </Text>
 
-        {timeOptions.map((timeOption, index) => {
-          const timeMillis = timeOption.time.toMillis();
-          const voteCount = timeVoteCounts[timeMillis] || 0;
-          const isVoted = userTimeVotes.includes(timeMillis);
-          const isCurrentTime =
-            timeOption.time.toMillis() === currentWalkTime.toMillis();
-          const isLoadingThis = loading === timeMillis.toString();
+      {timeOptions.map((timeOption, index) => {
+        const timeMillis = timeOption.time.toMillis();
+        const voteCount = timeVoteCounts[timeMillis] || 0;
+        const isVoted = userTimeVotes.includes(timeMillis);
+        const isCurrentTime =
+          timeOption.time.toMillis() === currentWalkTime.toMillis();
+        const isLoadingThis = loading === timeMillis.toString();
 
-          return (
-            <Card
-              key={index}
-              backgroundColor={isCurrentTime ? "$green2" : "white"}
-              borderColor={isCurrentTime ? "$green6" : "$gray6"}
-              borderWidth={1}
-              padding="$3"
-              marginBottom="$2"
-            >
-              <XStack justifyContent="space-between" alignItems="center">
-                <YStack flex={1}>
-                  <XStack alignItems="center" gap="$2" marginBottom="$1">
-                    <Clock
-                      size={16}
-                      color={isCurrentTime ? "$green10" : "$gray10"}
-                    />
-                    <Text
-                      fontSize="$4"
-                      fontWeight="600"
-                      color={isCurrentTime ? "$green10" : "$gray12"}
-                    >
-                      {format(timeOption.time.toDate(), "EEEE, MMM d")}
-                    </Text>
-                    {isCurrentTime && (
-                      <Text
-                        fontSize="$2"
-                        backgroundColor="$green9"
-                        color="white"
-                        paddingHorizontal="$2"
-                        paddingVertical="$1"
-                        borderRadius="$2"
-                        fontWeight="600"
-                      >
-                        CURRENT
-                      </Text>
-                    )}
-                  </XStack>
+        return (
+          <Card
+            key={index}
+            backgroundColor={isCurrentTime ? "$green2" : "white"}
+            borderColor={isCurrentTime ? "$green6" : "$gray6"}
+            borderWidth={1}
+            padding="$3"
+            marginBottom="$2"
+          >
+            <XStack justifyContent="space-between" alignItems="center">
+              <YStack flex={1}>
+                <XStack alignItems="center" gap="$2" marginBottom="$1">
+                  <Clock
+                    size={16}
+                    color={isCurrentTime ? "$green10" : "$gray10"}
+                  />
                   <Text
-                    fontSize="$3"
-                    color={isCurrentTime ? "$green10" : "$gray11"}
-                    marginBottom="$1"
+                    fontSize="$4"
+                    fontWeight="600"
+                    color={isCurrentTime ? "$green10" : "$gray12"}
                   >
-                    {format(timeOption.time.toDate(), "h:mm a")}
+                    {format(timeOption.time.toDate(), "EEEE, MMM d")}
                   </Text>
-                  <XStack alignItems="center" gap="$1">
-                    <Users size={14} color="$gray10" />
-                    <Text fontSize="$2" color="$gray10">
-                      {voteCount} {voteCount === 1 ? "vote" : "votes"}
-                    </Text>
-                  </XStack>
-                </YStack>
-
-                <XStack gap="$2" alignItems="center">
-                  {!isWalkOwner && !isCurrentTime && (
-                    <Button
-                      size="$3"
-                      backgroundColor={isVoted ? "$green9" : "white"}
-                      borderColor={isVoted ? "$green9" : "$gray6"}
-                      borderWidth={1}
-                      color={isVoted ? "white" : "$gray12"}
-                      onPress={() => handleVoteTime(timeOption)}
-                      disabled={isLoadingThis}
-                      icon={isVoted ? <Check size={14} /> : undefined}
-                    >
-                      {isVoted ? "Voted" : "Can make it"}
-                    </Button>
-                  )}
-
-                  {isWalkOwner && !isCurrentTime && (
-                    <Button
-                      size="$3"
-                      backgroundColor={COLORS.primary}
+                  {isCurrentTime && (
+                    <Text
+                      fontSize="$2"
+                      backgroundColor="$green9"
                       color="white"
-                      onPress={() => handleSetOfficialTime(timeOption)}
-                      disabled={isLoadingThis}
+                      paddingHorizontal="$2"
+                      paddingVertical="$1"
+                      borderRadius="$2"
+                      fontWeight="600"
                     >
-                      Set as official
-                    </Button>
+                      CURRENT
+                    </Text>
                   )}
                 </XStack>
+                <Text
+                  fontSize="$3"
+                  color={isCurrentTime ? "$green10" : "$gray11"}
+                  marginBottom="$1"
+                >
+                  {format(timeOption.time.toDate(), "h:mm a")}
+                </Text>
+                <XStack alignItems="center" gap="$1">
+                  <Users size={14} color="$gray10" />
+                  <Text fontSize="$2" color="$gray10">
+                    {voteCount} {voteCount === 1 ? "vote" : "votes"}
+                  </Text>
+                </XStack>
+              </YStack>
+
+              <XStack gap="$2" alignItems="center">
+                {!isWalkOwner && !isCurrentTime && (
+                  <Button
+                    size="$3"
+                    backgroundColor={isVoted ? "$green9" : "white"}
+                    borderColor={isVoted ? "$green9" : "$gray6"}
+                    borderWidth={1}
+                    color={isVoted ? "white" : "$gray12"}
+                    onPress={() => handleVoteTime(timeOption)}
+                    disabled={isLoadingThis}
+                    icon={isVoted ? <Check size={14} /> : undefined}
+                  >
+                    {isVoted ? "Voted" : "Can make it"}
+                  </Button>
+                )}
+
+                {isWalkOwner && !isCurrentTime && (
+                  <Button
+                    size="$3"
+                    backgroundColor={COLORS.primary}
+                    color="white"
+                    onPress={() => handleSetOfficialTime(timeOption)}
+                    disabled={isLoadingThis}
+                  >
+                    Set as official
+                  </Button>
+                )}
               </XStack>
-            </Card>
-          );
-        })}
-      </YStack>
-    </WalkDetailsCardBase>
+            </XStack>
+          </Card>
+        );
+      })}
+    </YStack>
   );
 }
