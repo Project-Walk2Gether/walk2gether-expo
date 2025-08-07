@@ -238,19 +238,6 @@ const RespondToInvitation: React.FC<Props> = ({
       console.log("Time proposed");
     } catch (error) {
       console.error("Error proposing new time:", error);
-
-      // Provide more specific error messages based on the error type
-      let errorMessage = "There was a problem proposing the new time. Please try again.";
-
-      if (error instanceof Error) {
-        if (error.message.includes('permission-denied')) {
-          errorMessage = "You don't have permission to propose times for this walk. Please contact the walk organizer.";
-        } else if (error.message.includes('not-found')) {
-          errorMessage = "The walk could not be found. Please refresh and try again.";
-        }
-      }
-
-      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }
