@@ -16,7 +16,7 @@ export interface InvitationSharingProps {
   /**
    * User's invitation code
    */
-  invitationCode: string;
+  invitationCode?: string;
   /**
    * Walk type, affects messaging and section display
    */
@@ -56,28 +56,34 @@ export const InvitationSharing: React.FC<InvitationSharingProps> = ({
   const router = useRouter();
   const { showMessage } = useFlashMessage();
   const [copied, setCopied] = useState(false);
-  
+
   // Generate the invitation URL
   const invitationUrl = getInvitationUrl(invitationCode, walkId);
-  
+
   // Generate appropriate share message and title based on walk type
   const getShareInfo = () => {
     let defaultMessage = "";
     let title = "";
-    
+
     if (walkType === "meetup") {
-      defaultMessage = `Join me for a meetup walk to discuss "${walkTopic || "our topic"}"! ${
-        walkDescription ? "We'll be talking about interesting ideas together while walking." : ""
+      defaultMessage = `Join me for a meetup walk to discuss "${
+        walkTopic || "our topic"
+      }"! ${
+        walkDescription
+          ? "We'll be talking about interesting ideas together while walking."
+          : ""
       }`;
       title = "Join my Walk2Gether Meetup";
     } else if (walkType === "neighborhood") {
-      defaultMessage = "I'm organizing a neighborhood walk. Join me for some fresh air and community connection!";
+      defaultMessage =
+        "I'm organizing a neighborhood walk. Join me for some fresh air and community connection!";
       title = "Join my Neighborhood Walk";
     } else {
-      defaultMessage = "Join my walk on the Walk2Gether app! Use this link to join.";
+      defaultMessage =
+        "Join my walk on the Walk2Gether app! Use this link to join.";
       title = "Join my Walk2Gether Walk";
     }
-    
+
     return { defaultMessage, title };
   };
 
@@ -93,7 +99,7 @@ export const InvitationSharing: React.FC<InvitationSharingProps> = ({
   // Handle sharing the invitation
   const handleShareLink = () => {
     const { defaultMessage, title } = getShareInfo();
-    
+
     router.push({
       pathname: "/(app)/(modals)/custom-share",
       params: {
@@ -102,7 +108,7 @@ export const InvitationSharing: React.FC<InvitationSharingProps> = ({
         title: encodeURIComponent(title),
       },
     });
-    
+
     if (onShareSuccess) {
       onShareSuccess();
     }
@@ -123,7 +129,8 @@ export const InvitationSharing: React.FC<InvitationSharingProps> = ({
         <YStack gap="$2">
           <FormControl label="Public invitation">
             <Text fontSize={14} color="$gray11" marginBottom="$2">
-              Publish the meetup walk invitation link below to invite the public to join
+              Publish the meetup walk invitation link below to invite the public
+              to join
             </Text>
             <XStack
               backgroundColor="$background"
@@ -144,7 +151,13 @@ export const InvitationSharing: React.FC<InvitationSharingProps> = ({
                 color={COLORS.textOnDark}
                 backgroundColor={copied ? COLORS.success : COLORS.primary}
                 onPress={handleCopyLink}
-                icon={copied ? <Check size={16} color="#fff" /> : <Copy size={16} color="#fff" />}
+                icon={
+                  copied ? (
+                    <Check size={16} color="#fff" />
+                  ) : (
+                    <Copy size={16} color="#fff" />
+                  )
+                }
               >
                 {copied ? "Copied!" : "Copy"}
               </Button>
@@ -171,11 +184,11 @@ export const InvitationSharing: React.FC<InvitationSharingProps> = ({
             hoverStyle={{ backgroundColor: "#6d4c2b" }}
             pressStyle={{ backgroundColor: "#4b2e13" }}
           >
-            {walkType === "neighborhood" 
-              ? "Invite another neighbor" 
-              : walkType === "meetup" 
-                ? "Share invitation" 
-                : "Send invitation"}
+            {walkType === "neighborhood"
+              ? "Invite another neighbor"
+              : walkType === "meetup"
+              ? "Share invitation"
+              : "Send invitation"}
           </Button>
 
           <Button

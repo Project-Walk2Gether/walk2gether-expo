@@ -127,6 +127,21 @@ export const useLocationSelection = () => {
 
   const handleLocationSelect = (data: any, details: any) => {
     if (details && details.geometry) {
+      // Extract city from address components
+      let city = "Unknown City";
+      if (details.address_components) {
+        for (const component of details.address_components) {
+          if (component.types.includes("locality")) {
+            city = component.long_name;
+            break;
+          }
+          // Fallback to administrative_area_level_2 if locality not found
+          if (component.types.includes("administrative_area_level_2") && city === "Unknown City") {
+            city = component.long_name;
+          }
+        }
+      }
+
       const newLocation = {
         name:
           data.description ||
@@ -135,6 +150,7 @@ export const useLocationSelection = () => {
           "Selected Location",
         latitude: details.geometry.location.lat,
         longitude: details.geometry.location.lng,
+        city,
       };
 
       updateFormData({ startLocation: newLocation });

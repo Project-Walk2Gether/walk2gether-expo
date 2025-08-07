@@ -471,7 +471,11 @@ export const InviteSelection: React.FC<Props> = ({
 
                     <InvitationSharing
                       walkId={effectiveWalkId}
-                      invitationCode={userData?.friendInvitationCode || ""}
+                      invitationCode={
+                        isMeetupWalk
+                          ? undefined // Don't include the user's invitation code for meetup walks
+                          : userData?.friendInvitationCode || ""
+                      }
                       walkType={effectiveWalkType}
                       walkTopic={(walk as MeetupWalk)?.topic || formData.topic}
                       walkDescription={

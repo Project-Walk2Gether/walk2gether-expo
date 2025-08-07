@@ -168,6 +168,7 @@ Do you still want to continue?`,
       latitude: favoriteLocation.location.latitude,
       longitude: favoriteLocation.location.longitude,
       notes: favoriteLocation.location.notes,
+      city: favoriteLocation.location.city || "Unknown City",
     };
     updateFormData({ startLocation: newLocation });
 

@@ -1,7 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@/utils/firestore";
 import { collection, orderBy, query } from "@react-native-firebase/firestore";
-import * as Notifications from "expo-notifications";
 import { useMemo } from "react";
 import { Round, WithId } from "walk2gether-shared";
 
@@ -35,103 +34,12 @@ export function useActiveRound(walkRef: any, walkOwnerId?: string) {
     );
   }, [activeRound, currentUserId]);
 
-  /**
-   * Syncs notifications for the active round if the current user is the walk owner
-   */
-  const syncRoundNotifications = async () => {
-    // Only walk owners should receive round rotation notifications
-    if (!isWalkOwner || !activeRound || !activeRound.endTime) return;
-
-    try {
-      // Cancel any existing notifications for this round
-      await cancelRoundNotifications(activeRound.id);
-
-      // Schedule a new notification for when the round ends
-      const endTimeDate = activeRound.endTime.toDate();
-      const currentTime = new Date();
-
-      // Only schedule if the end time is in the future
-      if (endTimeDate > currentTime) {
-        const notificationId = await scheduleRoundEndNotification(
-          activeRound.id,
-          activeRound.roundNumber,
-          endTimeDate
-        );
-        console.log(
-          `Scheduled round end notification with ID: ${notificationId}`
-        );
-      }
-    } catch (error) {
-      console.error("Error syncing round notifications:", error);
-    }
-  };
-
-  /**
-   * Cancels notifications for a specific round
-   */
-  const cancelRoundNotifications = async (roundId: string) => {
-    try {
-      // Get all scheduled notifications
-      const scheduledNotifications =
-        await Notifications.getAllScheduledNotificationsAsync();
-
-      // Filter for notifications related to this round
-      const roundNotifications = scheduledNotifications.filter(
-        (notification) => notification.content.data?.roundId === roundId
-      );
-
-      // Cancel each notification
-      for (const notification of roundNotifications) {
-        if (notification.identifier) {
-          await Notifications.cancelScheduledNotificationAsync(
-            notification.identifier
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Error cancelling round notifications:", error);
-    }
-  };
-
-  /**
-   * Schedules a notification for when a round ends
-   */
-  const scheduleRoundEndNotification = async (
-    roundId: string,
-    roundNumber: number,
-    endTime: Date
-  ) => {
-    // Extract walkId from the reference path
-    const walkId = walkRef?.path?.split("/")?.[1] || "";
-
-    const notificationContent = {
-      title: `Round ${roundNumber} is ending`,
-      body: "It's time to rotate to the next round",
-      data: {
-        roundId,
-        type: "round_end",
-        url: `/walks/${walkId}/plan`,
-      },
-    };
-
-    // Use a DateTriggerInput that triggers exactly at the round's end time;
-
-    return await Notifications.scheduleNotificationAsync({
-      content: notificationContent,
-      trigger: {
-        date: endTime,
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        channelId: "round-notifications",
-      },
-    });
-  };
+  // Round notifications are now handled server-side via the roundRotationScheduler
 
   // Return all the useful data and functions
   return {
     rounds,
     activeRound,
     userPair,
-    syncRoundNotifications,
-    cancelRoundNotifications,
   };
 }

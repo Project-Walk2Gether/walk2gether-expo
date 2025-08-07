@@ -1,9 +1,8 @@
 import { COLORS } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Text, View, XStack, YStack } from "tamagui";
+import { Card, Text, View, XStack, YStack } from "tamagui";
 import { Walk } from "walk2gether-shared";
-import WalkCardWrapper from "./WalkCardWrapper";
 
 type WalkType = Walk["type"];
 type KnownWalkType = keyof typeof COLORS.walkTypes;
@@ -43,9 +42,8 @@ export default function WalkTypeCard({
   onSelect,
 }: Props) {
   return (
-    <WalkCardWrapper
-      type={type}
-      color={color}
+    <Card
+      // color={color}
       backgroundColor={backgroundColor}
       onPress={() => onSelect(type)}
       paddingVertical="$3"
@@ -78,6 +76,6 @@ export default function WalkTypeCard({
           </Text>
         </YStack>
       </XStack>
-    </WalkCardWrapper>
+    </Card>
   );
 }

@@ -3,9 +3,19 @@ import HeaderCloseButton from "@/components/HeaderCloseButton";
 import TimeSelection from "@/components/WalkWizard/sections/TimeSelection";
 import { db } from "@/config/firebase";
 import { useFlashMessage } from "@/context/FlashMessageContext";
-import { WalkFormProvider, useWalkForm } from "@/context/WalkFormContext";
+import {
+  WalkFormData,
+  WalkFormProvider,
+  useWalkForm,
+} from "@/context/WalkFormContext";
 import { useDoc } from "@/utils/firestore";
-import { doc, updateDoc } from "@react-native-firebase/firestore";
+import {
+  Timestamp,
+  deleteField,
+  doc,
+  updateDoc,
+} from "@react-native-firebase/firestore";
+import { addMinutes } from "date-fns";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import { Alert } from "react-native";
@@ -16,7 +26,7 @@ function EditTimeSelectionWrapper({
   onSave,
   onBack,
 }: {
-  onSave: (formData: any) => Promise<void>;
+  onSave: (formData: WalkFormData) => Promise<void>;
   onBack: () => void;
 }) {
   const { formData } = useWalkForm();
@@ -36,15 +46,38 @@ export default function EditWalkTimeScreen() {
 
   // Handle saving the time changes
   const handleSave = useCallback(
-    async (formData: any) => {
+    async (formData: WalkFormData) => {
       if (!walk) return;
 
       try {
         const walkRef = doc(db, "walks", walk.id!);
 
-        await updateDoc(walkRef, {
-          date: formData.date, // formData.date is already a Timestamp from TimeSelection
-        });
+        // Extract data we need to update
+        const updateData: Record<string, any> = {
+          // Primary time
+          date: formData.date,
+          
+          // Time options array - ensure proper schema format
+          timeOptions: formData.timeOptions || [],
+          
+          // Calculate end times based on primary date
+          endTime: Timestamp.fromDate(
+            addMinutes(formData.date!.toDate(), formData.durationMinutes || 60)
+          ),
+          endTimeWithBuffer: Timestamp.fromDate(
+            addMinutes(
+              formData.date!.toDate(),
+              (formData.durationMinutes || 60) + 60
+            )
+          ),
+          
+          // Reset started status
+          startedAt: deleteField(),
+        };
+
+        console.log('Updating walk with:', updateData);
+        
+        await updateDoc(walkRef, updateData);
 
         showMessage("Walk time updated successfully!", "success");
         router.back();

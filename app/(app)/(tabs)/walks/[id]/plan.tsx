@@ -18,14 +18,20 @@ import {
   FirebaseFirestoreTypes,
   updateDoc,
 } from "@react-native-firebase/firestore";
-import { Send } from "@tamagui/lucide-icons";
+import { Edit3, Send } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { Timestamp } from "firebase/firestore";
 import React, { useMemo, useState } from "react";
 import { ScrollView } from "react-native";
 import Markdown from "react-native-markdown-display";
 import { Button, Text, View, YStack } from "tamagui";
-import { MeetupWalk, Participant, Round, WithId } from "walk2gether-shared";
+import {
+  MeetupWalk,
+  Participant,
+  Round,
+  walkIsMeetupWalk,
+  WithId,
+} from "walk2gether-shared";
 
 export default function PlanTab() {
   const { walk } = useWalk();
@@ -148,12 +154,24 @@ export default function PlanTab() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
       <YStack p="$4" gap="$4" pb="$w6">
-        {/* Use type assertion since descriptionMarkdown exists but isn't in the type definition yet */}
-        {(walk as MeetupWalk).descriptionMarkdown && (
-          <WalkDetailsCard title="Description">
-            <Markdown>{(walk as MeetupWalk).descriptionMarkdown}</Markdown>
-          </WalkDetailsCard>
-        )}
+        {walkIsMeetupWalk(walk) &&
+          (isMine || (walk as MeetupWalk).descriptionMarkdown) && (
+            <WalkDetailsCard 
+              title="Description"
+              headerAction={
+                isMine ? (
+                  <Button
+                    size="$2"
+                    circular
+                    icon={<Edit3 size={16} />}
+                    onPress={() => router.push(`/(app)/(modals)/edit-walk-topic?id=${walk.id}`)}
+                  />
+                ) : undefined
+              }
+            >
+              <Markdown>{(walk as MeetupWalk).descriptionMarkdown}</Markdown>
+            </WalkDetailsCard>
+          )}
 
         {isMine || walkIsPastWalk ? null : (
           <RespondToInvitationCard

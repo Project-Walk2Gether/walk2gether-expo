@@ -50,9 +50,8 @@ export default function TalkTab() {
     message?: string;
     attachments?: any[];
   }) => {
-    if (message) {
-      sendMessage({ message, attachments });
-    }
+    console.log("About to send message");
+    sendMessage({ message, attachments });
   };
 
   // Handle deleting message

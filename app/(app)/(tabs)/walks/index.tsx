@@ -42,19 +42,41 @@ export default function WalksScreen() {
       ? upcomingWalks
       : upcomingWalks.filter((walk) => walk.type === selectedType);
 
-  const renderWalkItem = ({ item }: { item: WithId<Walk> }) => (
-    <WalkCard
-      key={item.id}
-      walk={item}
-      showActions
-      onPress={() =>
-        router.push({
-          pathname: `/walks/[id]/plan`,
-          params: { id: item.id },
-        })
+  const renderWalkItem = ({ item }: { item: WithId<Walk> }) => {
+    // Determine the destination tab based on walk status
+    const now = new Date();
+    
+    // Router pathnames must be literal strings for type safety
+    let tab: "connect" | "meet" | "plan" = "plan";
+    
+    // If walk has started and hasn't ended
+    if (item.startedAt && (!item.endTime || now < item.endTime.toDate())) {
+      tab = "connect";
+    } 
+    // If walk is about to start in the next 4 hours
+    else if (item.date) {
+      const walkDate = item.date.toDate();
+      const fourHoursFromNow = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+      
+      if (walkDate <= fourHoursFromNow) {
+        tab = "meet";
       }
-    />
-  );
+    }
+    
+    return (
+      <WalkCard
+        key={item.id}
+        walk={item}
+        showActions
+        onPress={() =>
+          router.push({
+            pathname: `/walks/[id]/${tab}`,
+            params: { id: item.id },
+          })
+        }
+      />
+    );
+  };
 
   // Handle filter selection
   const handleFilterSelect = useCallback((type: WalkTypeKey | "all") => {
@@ -188,13 +210,13 @@ export default function WalksScreen() {
               message={
                 selectedType === "all"
                   ? "Ready to take the first step?"
-                  : `No ${WALK_TYPES[selectedType]?.title || ""} walks found`
+                  : `No ${selectedType in WALK_TYPES ? WALK_TYPES[selectedType].title : ""} walks found`
               }
               subtitle={
                 selectedType === "all"
                   ? `Start a walk with a using the button below! Or go to the Friends tab below to "Invite a Friend".`
                   : `Try creating a new ${
-                      WALK_TYPES[selectedType]?.title || ""
+                      (selectedType in WALK_TYPES) ? WALK_TYPES[selectedType].title : ""
                     } walk, or select a different filter`
               }
               icon={Footprints}
@@ -202,7 +224,7 @@ export default function WalksScreen() {
               iconColor={
                 selectedType === "all"
                   ? COLORS.primary
-                  : WALK_TYPES[selectedType]?.color || COLORS.primary
+                  : (selectedType in WALK_TYPES ? WALK_TYPES[selectedType].color : COLORS.primary)
               }
             />
           )}

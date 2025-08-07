@@ -91,6 +91,8 @@ export default function MessageForm({
         attachments: attachments.length > 0 ? attachments : undefined,
       };
 
+      console.log({ message });
+
       onSendMessage(message);
       setMessageText("");
       setSelectedImages([]);

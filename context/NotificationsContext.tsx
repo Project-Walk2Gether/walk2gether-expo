@@ -150,6 +150,7 @@ export const NotificationsProvider: React.FC<Props> = ({ children }) => {
         userRef,
         {
           expoPushToken: token,
+          expoPushTokenSetAt: token ? Timestamp.now() : null,
           deviceInfo: {
             platform: Platform.OS,
             model: modelName,

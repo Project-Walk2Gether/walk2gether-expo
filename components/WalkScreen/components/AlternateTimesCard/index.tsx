@@ -1,6 +1,5 @@
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
-import { useWalk } from "@/context/WalkContext";
 import { COLORS } from "@/styles/colors";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
 import { Check, Clock, Users } from "@tamagui/lucide-icons";
@@ -8,12 +7,12 @@ import { format } from "date-fns";
 import React, { useMemo, useState } from "react";
 import { Alert } from "react-native";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
-import { Participant, WithId } from "walk2gether-shared";
+import { Participant, TimeOption, WithId } from "walk2gether-shared";
 import WalkDetailsCardBase from "../WalkDetailsCard";
 
 interface Props {
   walkId: string;
-  timeOptions: Timestamp[];
+  timeOptions: TimeOption[];
   participants: WithId<Participant>[];
   isWalkOwner: boolean;
   currentWalkTime: Timestamp;
@@ -40,22 +39,22 @@ export default function AlternateTimesCard({
   // Calculate vote counts for each time option
   const timeVoteCounts = useMemo(() => {
     const counts: { [key: string]: number } = {};
-    
+
     timeOptions.forEach((timeOption) => {
-      const timeMillis = timeOption.toMillis();
+      const timeMillis = timeOption.time.toMillis();
       counts[timeMillis] = participants.filter((p) =>
         (p as any).timeVotes?.includes(timeMillis)
       ).length;
     });
-    
+
     return counts;
   }, [timeOptions, participants]);
 
   // Handle voting on a time
-  const handleVoteTime = async (timeOption: Timestamp) => {
+  const handleVoteTime = async (timeOption: TimeOption) => {
     if (!user || !currentUserParticipant) return;
 
-    const timeMillis = timeOption.toMillis();
+    const timeMillis = timeOption.time.toMillis();
     setLoading(timeMillis.toString());
 
     try {
@@ -88,18 +87,18 @@ export default function AlternateTimesCard({
   };
 
   // Handle setting a time as the official walk time
-  const handleSetOfficialTime = async (timeOption: Timestamp) => {
+  const handleSetOfficialTime = async (timeOption: TimeOption) => {
     if (!isWalkOwner) return;
 
-    setLoading(timeOption.toMillis().toString());
+    setLoading(timeOption.time.toMillis().toString());
 
     try {
       const walkRef = doc(firestore_instance, "walks", walkId);
-      
+
       await setDoc(
         walkRef,
         {
-          date: timeOption,
+          date: timeOption.time,
         },
         { merge: true }
       );
@@ -125,12 +124,13 @@ export default function AlternateTimesCard({
             ? "Participants can vote on times they can make. Tap 'Set as official' to change the walk time."
             : "Vote on alternate times you can make it to."}
         </Text>
-        
+
         {timeOptions.map((timeOption, index) => {
-          const timeMillis = timeOption.toMillis();
+          const timeMillis = timeOption.time.toMillis();
           const voteCount = timeVoteCounts[timeMillis] || 0;
           const isVoted = userTimeVotes.includes(timeMillis);
-          const isCurrentTime = timeOption.toMillis() === currentWalkTime.toMillis();
+          const isCurrentTime =
+            timeOption.time.toMillis() === currentWalkTime.toMillis();
           const isLoadingThis = loading === timeMillis.toString();
 
           return (
@@ -145,13 +145,16 @@ export default function AlternateTimesCard({
               <XStack justifyContent="space-between" alignItems="center">
                 <YStack flex={1}>
                   <XStack alignItems="center" gap="$2" marginBottom="$1">
-                    <Clock size={16} color={isCurrentTime ? "$green10" : "$gray10"} />
+                    <Clock
+                      size={16}
+                      color={isCurrentTime ? "$green10" : "$gray10"}
+                    />
                     <Text
                       fontSize="$4"
                       fontWeight="600"
                       color={isCurrentTime ? "$green10" : "$gray12"}
                     >
-                      {format(timeOption.toDate(), "EEEE, MMM d")}
+                      {format(timeOption.time.toDate(), "EEEE, MMM d")}
                     </Text>
                     {isCurrentTime && (
                       <Text
@@ -172,7 +175,7 @@ export default function AlternateTimesCard({
                     color={isCurrentTime ? "$green10" : "$gray11"}
                     marginBottom="$1"
                   >
-                    {format(timeOption.toDate(), "h:mm a")}
+                    {format(timeOption.time.toDate(), "h:mm a")}
                   </Text>
                   <XStack alignItems="center" gap="$1">
                     <Users size={14} color="$gray10" />
@@ -197,7 +200,7 @@ export default function AlternateTimesCard({
                       {isVoted ? "Voted" : "Can make it"}
                     </Button>
                   )}
-                  
+
                   {isWalkOwner && !isCurrentTime && (
                     <Button
                       size="$3"

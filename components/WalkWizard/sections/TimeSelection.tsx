@@ -4,7 +4,7 @@ import { combineDateAndTime } from "@/utils/timezone";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { deleteField, Timestamp } from "@react-native-firebase/firestore";
 import { Clock, Edit3, Plus, Star, Trash2 } from "@tamagui/lucide-icons";
-import { format } from "date-fns";
+import { addMinutes, format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { Alert, Modal, Platform, TouchableOpacity } from "react-native";
 import { Calendar as RNCalendar } from "react-native-calendars";
@@ -36,7 +36,6 @@ export const TimeSelection: React.FC<Props> = ({
   const { formData, updateFormData, isEditMode } = useWalkForm();
 
   // Determine if this is a friends walk or neighborhood walk
-  const isFriendsWalk = formData.type === "friends";
   const [timeOption, setTimeOption] = useState<"now" | "future" | null>(null);
   const [selectorExpanded, setSelectorExpanded] = useState(true); // Start expanded
 
@@ -178,19 +177,67 @@ export const TimeSelection: React.FC<Props> = ({
     updateFormDataFromEntries(updated);
   };
 
-  // Helper function to check if a time option has votes
+  // Helper function to check if a time entry has any votes
   const hasVotes = (entry: TimeEntry): boolean => {
-    // For now, we'll simulate this - in real implementation, this would check the votes object
-    // TODO: Update when we integrate with actual vote data from Firestore
-    return false; // Placeholder - no votes yet
+    if (entry.isPrimary) {
+      // Primary time doesn't have votes in current schema
+      return false;
+    }
+
+    // For alternate times, find the corresponding TimeOption in formData.timeOptions
+    if (!formData.timeOptions) return false;
+
+    const correspondingOption = formData.timeOptions.find((option) => {
+      // Compare timestamps (within 1 minute to account for precision differences)
+      const entryTime = entry.time.getTime();
+      const optionTime = option.time.toDate().getTime();
+      return Math.abs(entryTime - optionTime) < 60000; // 1 minute tolerance
+    });
+
+    if (!correspondingOption || !correspondingOption.votes) {
+      return false;
+    }
+
+    // Check if votes object has any entries
+    return Object.keys(correspondingOption.votes).length > 0;
   };
 
   // Helper function to get vote count for a time option
   const getVoteCount = (
     entry: TimeEntry
   ): { canMake: number; cantMake: number } => {
-    // TODO: Calculate from actual votes object
-    return { canMake: 0, cantMake: 0 };
+    if (entry.isPrimary) {
+      // Primary time doesn't have votes in current schema
+      return { canMake: 0, cantMake: 0 };
+    }
+
+    // For alternate times, find the corresponding TimeOption in formData.timeOptions
+    if (!formData.timeOptions) return { canMake: 0, cantMake: 0 };
+
+    const correspondingOption = formData.timeOptions.find((option) => {
+      // Compare timestamps (within 1 minute to account for precision differences)
+      const entryTime = entry.time.getTime();
+      const optionTime = option.time.toDate().getTime();
+      return Math.abs(entryTime - optionTime) < 60000; // 1 minute tolerance
+    });
+
+    if (!correspondingOption || !correspondingOption.votes) {
+      return { canMake: 0, cantMake: 0 };
+    }
+
+    // Count votes: true = can make it, false = can't make it
+    let canMake = 0;
+    let cantMake = 0;
+
+    Object.values(correspondingOption.votes).forEach((vote) => {
+      if (vote === true) {
+        canMake++;
+      } else if (vote === false) {
+        cantMake++;
+      }
+    });
+
+    return { canMake, cantMake };
   };
 
   // Handle choosing a time option with confirmation
@@ -252,6 +299,9 @@ export const TimeSelection: React.FC<Props> = ({
       const primaryTimestamp = Timestamp.fromDate(primary.time);
       updateFormData({
         date: primaryTimestamp,
+        endTime: Timestamp.fromDate(
+          addMinutes(new Date(), formData.durationMinutes || 60)
+        ),
         startedAt: deleteField() as any,
       } as any);
     } else {
@@ -278,6 +328,9 @@ export const TimeSelection: React.FC<Props> = ({
   const handleNowOption = () => {
     updateFormData({
       date: Timestamp.fromDate(new Date()),
+      endTime: Timestamp.fromDate(
+        addMinutes(new Date(), formData.durationMinutes || 60)
+      ),
       startedAt: deleteField() as any,
     });
     setTimeOption("now");
@@ -380,9 +433,15 @@ export const TimeSelection: React.FC<Props> = ({
                       return (
                         <YStack key={`primary-${index}`} gap="$2">
                           <TouchableOpacity
-                            onPress={() =>
-                              !entry.isPrimary && handleChooseTime(entry, index)
-                            }
+                            onPress={() => {
+                              if (entry.isPrimary) {
+                                // If it's primary, open edit modal
+                                openModal(index);
+                              } else {
+                                // If it's not primary, make it primary
+                                handleChooseTime(entry, index);
+                              }
+                            }}
                             style={{
                               backgroundColor: "#f5f5f5",
                               borderRadius: 12,

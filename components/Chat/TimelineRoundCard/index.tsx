@@ -22,6 +22,7 @@ export default function TimelineRoundCard({
   // Get walk context to access participant data
   const { walk, activeRound } = useWalk();
   const isActive = activeRound && activeRound?.id === round.id;
+  const hasEnded = round.endTime.toDate() < new Date();
 
   // Find the current user's pair
   const userPair = useMemo(() => {
@@ -40,8 +41,7 @@ export default function TimelineRoundCard({
   }, [userPair, currentUserId, walk?.participantsById]);
 
   // Show active round
-  if (isActive && userPair) {
-    console.log("Rendering active round");
+  if (isActive && userPair && !hasEnded) {
     return (
       <ActiveRoundCard
         round={round}

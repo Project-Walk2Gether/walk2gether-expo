@@ -42,6 +42,9 @@ export default function MeetTab() {
   // Get walk participants
   const participants = useWalkParticipants(walkId);
 
+  // Use the walk from context instead of re-fetching
+  const walk = contextWalk;
+
   // Memoize the current user participant data
   const userParticipant = useMemo(() => {
     if (!participants || !user) return null;
@@ -49,17 +52,10 @@ export default function MeetTab() {
   }, [participants, user]);
 
   // Use the location tracking hook
-  const { userLocation } = useLocationTracking(
-    walkId,
-    user?.uid || "",
-    userParticipant
-  );
+  const { userLocation } = useLocationTracking(walk, userParticipant);
 
   // Get access to location context for tracking functions
   const locationContext = useLocation();
-
-  // Use the walk from context instead of re-fetching
-  const walk = contextWalk;
 
   // Check if current user is the walk owner
   const isWalkOwner = walk?.createdByUid === user?.uid;

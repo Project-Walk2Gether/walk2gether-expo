@@ -14,7 +14,6 @@ interface WalkContextType {
   isLoadingParticipants: boolean;
   activeRound: WithId<Round> | undefined;
   userPair: { emoji: string; color: string; userUids: string[] } | undefined;
-  syncRoundNotifications: () => Promise<void>;
 }
 
 const WalkContext = createContext<WalkContextType>(undefined as any);
@@ -77,8 +76,7 @@ export const WalkProvider = ({
   // Use the active round hook
   const { 
     activeRound, 
-    userPair, 
-    syncRoundNotifications 
+    userPair
   } = useActiveRound(
     walk?._ref, 
     walk?.createdByUid
@@ -86,12 +84,7 @@ export const WalkProvider = ({
   
   // Note: Round rotation is now handled automatically by a scheduled function in walk2gether-functions
   
-  // Sync notifications whenever the active round changes
-  useEffect(() => {
-    if (activeRound) {
-      syncRoundNotifications();
-    }
-  }, [activeRound?.id]);
+  // Note: Round notifications are now handled server-side via the roundRotationScheduler
   
   return (
     <WalkContext.Provider
@@ -103,7 +96,6 @@ export const WalkProvider = ({
         isLoadingParticipants,
         activeRound,
         userPair,
-        syncRoundNotifications,
       }}
     >
       {children}

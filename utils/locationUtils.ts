@@ -73,10 +73,11 @@ export const reverseGeocode = async (latitude: number, longitude: number) => {
       const addressResult = data.results[0];
       const addressComponents = addressResult.address_components;
 
-      // Extract street number, route, and locality for a concise address
+      // Extract street number, route, locality, and city for a concise address
       let streetNumber = "";
       let route = "";
       let locality = "";
+      let city = "";
       for (const component of addressComponents) {
         if (component.types.includes("street_number")) {
           streetNumber = component.long_name;
@@ -86,6 +87,11 @@ export const reverseGeocode = async (latitude: number, longitude: number) => {
         }
         if (component.types.includes("locality")) {
           locality = component.long_name;
+          city = component.long_name; // locality is typically the city
+        }
+        // Also check for administrative_area_level_1 (state/province) and administrative_area_level_2 (county/city)
+        if (component.types.includes("administrative_area_level_2") && !city) {
+          city = component.long_name;
         }
       }
       let conciseAddress = "";
@@ -102,6 +108,7 @@ export const reverseGeocode = async (latitude: number, longitude: number) => {
         name: conciseAddress,
         latitude,
         longitude,
+        city: city || locality || "Unknown City",
       };
       return newLocation;
     } else {
@@ -110,6 +117,7 @@ export const reverseGeocode = async (latitude: number, longitude: number) => {
         name: `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
         latitude,
         longitude,
+        city: "Unknown City",
       };
 
       return newLocation;
@@ -121,6 +129,7 @@ export const reverseGeocode = async (latitude: number, longitude: number) => {
       name: `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
       latitude,
       longitude,
+      city: "Unknown City",
     };
 
     return newLocation;

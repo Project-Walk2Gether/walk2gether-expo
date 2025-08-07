@@ -35,14 +35,13 @@ interface LocationContextValue {
   requestBackgroundPermissions: () => Promise<boolean>;
 
   // Walk tracking
-  activeWalkId?: string;
   locationTracking: boolean;
   startWalkTracking: (
     walkId: string,
     endTimeWithBuffer?: Date
   ) => Promise<boolean>;
   stopWalkTracking: () => Promise<void>;
-  updateLocation: (location: Location.LocationObject) => Promise<void>;
+  updateLocation: (walkId: string, location: Location.LocationObject) => Promise<void>;
 }
 
 const LocationContext = createContext<LocationContextValue>({
@@ -82,7 +81,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<boolean | null>(null);
 
   // Walk tracking state
-  const [activeWalkId, setActiveWalkId] = useState<string>();
   const [locationTracking, setLocationTracking] = useState(false);
   const locationSubscription = useRef<Location.LocationSubscription | null>(
     null
@@ -264,11 +262,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
         longitude: loc.coords.longitude,
       });
 
-      // If we're actively tracking a walk, update the location there too
-      if (activeWalkId && locationTracking && auth_instance.currentUser?.uid) {
-        await updateLocation(loc);
-      }
-
       return loc;
     } catch (e: any) {
       console.warn("Location error:", e);
@@ -298,8 +291,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      // Store the active walk
-      setActiveWalkId(walkId);
       // Stop any existing tracking
       await stopWalkTracking();
 
@@ -308,7 +299,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
         accuracy: Location.Accuracy.BestForNavigation,
       });
       setUserLocation(initialLocation);
-      await updateLocation(initialLocation);
+      await updateLocation(walkId, initialLocation);
 
       // Start background tracking if we have permission and it's enabled by user preference
       if (backgroundLocationPermission) {
@@ -337,7 +328,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
           },
           (location) => {
             setUserLocation(location);
-            updateLocation(location);
           }
         );
 
@@ -365,21 +355,20 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Reset state
       setLocationTracking(false);
-      setActiveWalkId(undefined);
     } catch (e) {
       console.error("Error stopping walk tracking:", e);
     }
   };
 
   // Update location in Firebase
-  const updateLocation = async (location: Location.LocationObject) => {
-    if (!activeWalkId) return;
+  const updateLocation = async (walkId: string, location: Location.LocationObject) => {
+    if (!walkId) return;
 
     const userId = auth_instance.currentUser?.uid;
     if (!userId) return;
 
     try {
-      await locationService.updateLocation(activeWalkId, userId, location);
+      await locationService.updateLocation(walkId, userId, location);
     } catch (e) {
       console.error("Error updating location in Firebase:", e);
     }
@@ -394,7 +383,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
         loading,
         locationPermission,
         backgroundLocationPermission,
-        activeWalkId,
         locationTracking,
         refresh: getLocation,
         requestForegroundPermissions,

@@ -81,7 +81,20 @@ export const useParticipantStatus = ({
           cancelledAt: deleteField() as any,
         };
 
+        // Update participant status in the participants subcollection
         await setDoc(participantDocRef, update, { merge: true });
+
+        // Also update the same participant data in the walk document's participantsById field
+        const walkDocRef = doc(firestore_instance, `walks/${walkId}`);
+        await setDoc(
+          walkDocRef,
+          {
+            participantsById: {
+              [userId]: update,
+            },
+          },
+          { merge: true }
+        );
 
         // If user is walk owner and changing from "arrived" to another status,
         // reset the walk's startedAt property
@@ -91,8 +104,6 @@ export const useParticipantStatus = ({
           newStatus !== "arrived" &&
           walkStarted
         ) {
-          const walkDocRef = doc(firestore_instance, `walks/${walkId}`);
-
           await setDoc(
             walkDocRef,
             {
