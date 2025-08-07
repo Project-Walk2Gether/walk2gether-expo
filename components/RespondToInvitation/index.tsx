@@ -238,6 +238,7 @@ const RespondToInvitation: React.FC<Props> = ({
       console.log("Time proposed");
     } catch (error) {
       console.error("Error proposing new time:", error);
+      Alert.alert("Error", "There was a problem proposing the new time. Please try again.");
     } finally {
       setLoading(false);
     }
