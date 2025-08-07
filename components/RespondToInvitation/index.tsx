@@ -212,11 +212,21 @@ const RespondToInvitation: React.FC<Props> = ({
         user.uid
       );
 
+      // Get current timeVotes or initialize empty array
+      const currentTimeVotes = (participantDoc as any)?.timeVotes || [];
+      const timeMillis = proposedTimestamp.toMillis();
+
+      // Add the proposed time to timeVotes if it's not already there
+      const updatedTimeVotes = currentTimeVotes.includes(timeMillis)
+        ? currentTimeVotes
+        : [...currentTimeVotes, timeMillis];
+
       await setDoc(
         participantRef,
         {
           proposedTime: proposedTimestamp,
           proposedTimeAt: Timestamp.now(),
+          timeVotes: updatedTimeVotes,
           displayName:
             (userData as any)?.displayName || user.displayName || "Anonymous",
           photoURL: (userData as any)?.photoURL || user.photoURL || null,
@@ -225,20 +235,7 @@ const RespondToInvitation: React.FC<Props> = ({
       );
 
       hideSheet();
-      Alert.alert(
-        "Time Proposed!",
-        "Your time suggestion has been sent to the walk organizer.",
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              if (onInvitationResponded) {
-                onInvitationResponded();
-              }
-            },
-          },
-        ]
-      );
+      console.log("Time proposed");
     } catch (error) {
       console.error("Error proposing new time:", error);
 

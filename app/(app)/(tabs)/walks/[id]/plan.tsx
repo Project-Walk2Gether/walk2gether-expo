@@ -156,7 +156,7 @@ export default function PlanTab() {
       <YStack p="$4" gap="$4" pb="$w6">
         {walkIsMeetupWalk(walk) &&
           (isMine || (walk as MeetupWalk).descriptionMarkdown) && (
-            <WalkDetailsCard 
+            <WalkDetailsCard
               title="Description"
               headerAction={
                 isMine ? (
@@ -189,7 +189,7 @@ export default function PlanTab() {
           durationMinutes={walk.durationMinutes}
           walkId={walk.id}
           showEditButton={isWalkOwner}
-          timeOptions={(walk.timeOptions as any) || []}
+          timeOptions={walk.timeOptions || []}
           participants={participants || []}
           isWalkOwner={isWalkOwner}
         />
@@ -248,7 +248,7 @@ export default function PlanTab() {
                   currentUserId={user?.uid}
                   isOwner={isWalkOwner}
                   walkStartDate={walk.date?.toDate()}
-                  onParticipantPress={() => {}}
+                  onParticipantPress={() => { }}
                 />
               )}
             </YStack>
