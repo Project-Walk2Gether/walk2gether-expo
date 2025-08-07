@@ -8,7 +8,7 @@ import React, {
   useImperativeHandle,
   useRef,
 } from "react";
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import { H3 } from "tamagui";
 
 export interface SheetProps {
@@ -17,6 +17,7 @@ export interface SheetProps {
   dismissOnSnapToBottom?: boolean;
   title?: string;
   children: React.ReactNode;
+  maxDynamicContentSize?: number;
 }
 
 export interface SheetRef {
@@ -31,6 +32,7 @@ export const Sheet = forwardRef<SheetRef, SheetProps>(
       dismissOnSnapToBottom = true,
       title,
       children,
+      maxDynamicContentSize = Dimensions.get("window").height * 0.9,
     }: SheetProps,
     ref
   ) => {
@@ -84,6 +86,7 @@ export const Sheet = forwardRef<SheetRef, SheetProps>(
         enablePanDownToClose={dismissOnSnapToBottom}
         backdropComponent={renderBackdrop}
         enableDynamicSizing
+        maxDynamicContentSize={maxDynamicContentSize}
         onChange={handleSheetChanges}
         handleIndicatorStyle={styles.indicator}
         backgroundStyle={styles.bottomSheetBackground}
