@@ -30,6 +30,7 @@ import {
 } from "tamagui";
 import {
   Participant,
+  TimeOption,
   Walk,
   walkIsNeighborhoodWalk,
   WithId,
@@ -193,7 +194,8 @@ const RespondToInvitation: React.FC<Props> = ({
       );
 
       if (!timeExists) {
-        const updatedTimeOptions = [...currentTimeOptions, { time: proposedTimestamp, voteCount: 0 }];
+        const timeOption: TimeOption = { time: proposedTimestamp, votes: { [user.uid]: true } };
+        const updatedTimeOptions = [...currentTimeOptions, timeOption];
 
         // Update the walk document with the new time option
         await updateDoc<Walk>(doc(firestore_instance, "walks", walk.id) as FirebaseFirestoreTypes.DocumentReference<Walk>, {
