@@ -11,14 +11,16 @@ interface Props extends Omit<ButtonProps, "children"> {
 export const LocationButton: React.FC<Props> = ({
   loading = false,
   text = "Use my current location",
+  size = "$4",
+  bg = COLORS.primary,
   ...props
 }) => {
   return (
     <Button
-      size="$4"
       backgroundColor="$blue9"
       color="black"
-      bg={COLORS.accent2}
+      bg={bg}
+      size={size}
       icon={<MapPin size={20} style={{ marginRight: 8 }} />}
       pressStyle={{ opacity: 0.8 }}
       {...props}

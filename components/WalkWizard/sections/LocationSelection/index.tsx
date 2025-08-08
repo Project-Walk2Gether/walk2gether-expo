@@ -246,11 +246,12 @@ Do you still want to continue?`,
           {/* Current location button */}
           <XStack gap="$2" width="100%">
             <LocationButton
-              size="$4"
+              size="$3"
+              bg={COLORS.accent2}
               flex={1}
               onPress={handleCurrentLocation}
               disabled={locationLoading || isReverseGeocoding}
-              text="Use current"
+              text="Use my location"
               loading={
                 locationLoading || isReverseGeocoding || pendingLocationRequest
               }
@@ -258,7 +259,7 @@ Do you still want to continue?`,
             {/* Saved locations button */}
             {savedLocations && savedLocations.length > 0 && (
               <Button
-                size="$4"
+                size="$3"
                 flex={1}
                 backgroundColor={COLORS.card}
                 borderColor={COLORS.border}
@@ -270,7 +271,7 @@ Do you still want to continue?`,
               >
                 {loadingSavedLocations
                   ? "Loading..."
-                  : `Saved (${savedLocations.length})`
+                  : `Saved locations (${savedLocations.length})`
                 }
               </Button>
             )}
