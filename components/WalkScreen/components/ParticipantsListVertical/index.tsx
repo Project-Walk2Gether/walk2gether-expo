@@ -14,6 +14,7 @@ interface Props {
   isOwner: boolean;
   walkStartDate?: Date;
   onParticipantPress?: (participant: ParticipantWithRoute) => void;
+  useFlatList?: boolean; // New prop to control whether to use FlatList or regular mapping
 }
 
 export default function ParticipantsListVertical({
@@ -23,6 +24,7 @@ export default function ParticipantsListVertical({
   isOwner,
   walkStartDate,
   onParticipantPress,
+  useFlatList = true, // Default to true for backward compatibility
 }: Props) {
   // Filter to show confirmed or active participants
   const confirmedParticipants = participants.filter(
@@ -34,12 +36,12 @@ export default function ParticipantsListVertical({
   // Get invited participants (those who haven't accepted/rejected/cancelled yet)
   const invitedParticipants = isOwner
     ? participants.filter(
-        (p) =>
-          !p.acceptedAt &&
-          !p.deniedAt &&
-          !p.cancelledAt &&
-          p.sourceType === "invited"
-      )
+      (p) =>
+        !p.acceptedAt &&
+        !p.deniedAt &&
+        !p.cancelledAt &&
+        p.sourceType === "invited"
+    )
     : [];
 
   // Sort participants based on requirements
@@ -71,7 +73,7 @@ export default function ParticipantsListVertical({
     <YStack flex={1}>
       {!dataArray.length ? (
         <EmptyState message="No participants in this walk yet." />
-      ) : (
+      ) : useFlatList ? (
         <FlatList
           data={dataArray}
           renderItem={({ item }) => (
@@ -86,6 +88,21 @@ export default function ParticipantsListVertical({
           keyExtractor={(item) => item.id || `participant-${item.userUid}`}
           ItemSeparatorComponent={() => <Separator />}
         />
+      ) : (
+        <YStack>
+          {dataArray.map((item, index) => (
+            <React.Fragment key={item.id || `participant-${item.userUid}`}>
+              <ParticipantRow
+                participant={item}
+                walkStatus={walkStatus}
+                currentUserId={currentUserId}
+                walkStartTime={walkStartDate}
+                onPress={onParticipantPress}
+              />
+              {index < dataArray.length - 1 && <Separator />}
+            </React.Fragment>
+          ))}
+        </YStack>
       )}
     </YStack>
   );

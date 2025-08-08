@@ -152,7 +152,11 @@ export default function PlanTab() {
   const walkIsPastWalk = isPast(walk);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: "#fff" }}
+      nestedScrollEnabled={true}
+      keyboardShouldPersistTaps="handled"
+    >
       <YStack p="$4" gap="$4" pb="$w6">
         {walkIsMeetupWalk(walk) &&
           (isMine || (walk as MeetupWalk).descriptionMarkdown) && (
@@ -249,6 +253,7 @@ export default function PlanTab() {
                   isOwner={isWalkOwner}
                   walkStartDate={walk.date?.toDate()}
                   onParticipantPress={() => { }}
+                  useFlatList={false}
                 />
               )}
             </YStack>
