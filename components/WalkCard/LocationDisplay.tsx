@@ -24,11 +24,11 @@ export const LocationDisplay: React.FC<Props> = ({
   // Get user's preferred distance unit from userData
   const { userData } = useUserData();
   const distanceUnit = userData?.distanceUnit || "km";
-  
+
   if (walkIsNeighborhoodWalk(walk)) return null;
 
   // Extract the location name and remove city part for compact display
-  const fullLocationName = walk.currentLocation?.name || "";
+  const fullLocationName = walk.startLocation?.name || "";
   // If the location contains a comma, only show the first part (typically the street address)
   const locationName = fullLocationName.split(",")[0] || fullLocationName;
 
@@ -36,7 +36,7 @@ export const LocationDisplay: React.FC<Props> = ({
   let distanceText = "";
   if (userCoords) {
     const distance = getDistanceToLocation({
-      targetLocation: walk.currentLocation,
+      targetLocation: walk.startLocation,
       userCoords: userCoords,
       loading: locationLoading,
       error: locationError,
