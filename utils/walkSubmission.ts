@@ -36,6 +36,21 @@ export async function createWalkFromForm({
       );
     }
 
+    // Validate and clean the startLocation data to prevent Firestore errors
+    const validatedStartLocation = {
+      name: formData.startLocation.name || "Selected Location",
+      latitude: formData.startLocation.latitude,
+      longitude: formData.startLocation.longitude,
+      city: (formData.startLocation as any).city || "Unknown City",
+      notes: formData.startLocation.notes || "",
+    };
+
+    // Ensure latitude and longitude are numbers
+    if (typeof validatedStartLocation.latitude !== 'number' || typeof validatedStartLocation.longitude !== 'number') {
+      console.error("Invalid location coordinates:", formData.startLocation);
+      throw new Error("Invalid location coordinates");
+    }
+
     const endTime = addMinutes(
       formData.date.toDate(),
       formData.durationMinutes
@@ -50,8 +65,8 @@ export async function createWalkFromForm({
       createdByUid: userData.id,
 
       // Location data - For friends walk, both start and current are the same initially
-      startLocation: formData.startLocation,
-      currentLocation: formData.startLocation,
+      startLocation: validatedStartLocation,
+      currentLocation: validatedStartLocation,
       ownerIsInitiallyAtLocation: !!formData.ownerIsInitiallyAtLocation,
 
       // Invitation details
@@ -65,7 +80,11 @@ export async function createWalkFromForm({
 
       // Required participant tracking fields
       participantsById: {},
-    };
+
+      // Add missing optional properties
+      timeOptions: [],
+      allowLocationSuggestions: true,
+    } as Walk;
 
     // Add type-specific fields based on walk type
     let walkPayload;
@@ -181,6 +200,7 @@ export async function createWalkFromForm({
         sourceType: "invited",
         navigationMethod: "walking",
         route: null,
+        suggestedDepartureNotificationSentAt: null,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
@@ -206,8 +226,7 @@ export async function createWalkFromForm({
     await updateDoc(walkDocRef, walkDataUpdate);
 
     console.log(
-      `Created walk with ${
-        formData.participantUids?.length || 0
+      `Created walk with ${formData.participantUids?.length || 0
       } invited participants`
     );
     return walkDocRef;

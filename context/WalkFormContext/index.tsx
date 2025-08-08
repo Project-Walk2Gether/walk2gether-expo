@@ -110,16 +110,16 @@ export const WalkFormProvider: React.FC<Props> = ({
   // Initialize form data with default values and friendId if available
   const initializedFormData: WalkFormData = existingWalk
     ? {
-        ...existingWalk,
-        // Preserve any additional form-specific fields
-        invitationCode:
-          (existingWalk as any).invitationCode || generateInvitationCode(),
-        topic: (existingWalk as any).topic || "",
-      }
+      ...existingWalk,
+      // Preserve any additional form-specific fields
+      invitationCode:
+        (existingWalk as any).invitationCode || generateInvitationCode(),
+      topic: (existingWalk as any).topic || "",
+    }
     : {
-        ...initialFormData,
-        participantUids: friendId ? [friendId] : [],
-      };
+      ...initialFormData,
+      participantUids: friendId ? [friendId] : [],
+    };
   const [formData, setFormData] = useState<WalkFormData>(initializedFormData);
   const [currentStep, setCurrentStep] = useState(
     existingWalk ? 0 : friendId ? 1 : 0
@@ -291,7 +291,7 @@ export const WalkFormProvider: React.FC<Props> = ({
         createdWalkId,
         setCreatedWalkId,
         closeWalkForm,
-        onSubmit,
+        onSubmit: onSubmit || (() => Promise.resolve()),
         isEditMode: !!existingWalk,
         existingWalk,
       }}

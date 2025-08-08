@@ -17,8 +17,8 @@ export const LocationButton: React.FC<Props> = ({
     <Button
       size="$4"
       backgroundColor="$blue9"
-      color="white"
-      bg={COLORS.primary}
+      color="black"
+      bg={COLORS.accent2}
       icon={<MapPin size={20} style={{ marginRight: 8 }} />}
       pressStyle={{ opacity: 0.8 }}
       {...props}

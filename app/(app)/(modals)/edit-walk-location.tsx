@@ -15,11 +15,11 @@ import { Walk, WithId } from "walk2gether-shared";
 // Wrapper component to handle the onContinue callback with form data
 function EditLocationSelectionWrapper({ onSave, onBack }: { onSave: (formData: any) => Promise<void>; onBack: () => void }) {
   const { formData } = useWalkForm();
-  
+
   const handleContinue = useCallback(() => {
     onSave(formData);
   }, [onSave, formData]);
-  
+
   return (
     <LocationSelection
       onContinue={handleContinue}
@@ -40,9 +40,9 @@ export default function EditWalkLocationScreen() {
 
     try {
       const walkRef = doc(db, "walks", walk.id!);
-      
+
       await updateDoc(walkRef, {
-        startLocation: formData.startLocation,
+        startLocation: formData.startLocation
       });
 
       showMessage("Walk location updated successfully!", "success");

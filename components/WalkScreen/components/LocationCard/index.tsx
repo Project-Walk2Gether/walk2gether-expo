@@ -21,7 +21,7 @@ export default function LocationCard({
   hasMeetupSpotPhoto,
   showEditButton = false,
 }: Props) {
-  const location = currentLocation || startLocation;
+  const location = startLocation || currentLocation;
   const hasLocationInfo = !!(
     location &&
     location.latitude &&

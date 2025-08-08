@@ -5,7 +5,7 @@ import { COLORS } from "@/styles/colors";
 import { Bookmark } from "@tamagui/lucide-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Linking } from "react-native";
-import { Button, YStack } from "tamagui";
+import { Button, XStack, YStack } from "tamagui";
 import WizardWrapper, { WizardWrapperHandle } from "../WizardWrapper";
 
 // Import custom hooks
@@ -71,18 +71,18 @@ export const LocationSelection: React.FC<Props> = ({
   // Extract location coordinates for nearby walkers hook
   const locationCoords = formData.startLocation
     ? {
-        latitude: formData.startLocation.latitude,
-        longitude: formData.startLocation.longitude,
-      }
+      latitude: formData.startLocation.latitude,
+      longitude: formData.startLocation.longitude,
+    }
     : null;
 
   // Extract startLocation object for the MapSection component
   const startLocation = formData.startLocation
     ? {
-        latitude: formData.startLocation.latitude,
-        longitude: formData.startLocation.longitude,
-        name: formData.startLocation.name || "",
-      }
+      latitude: formData.startLocation.latitude,
+      longitude: formData.startLocation.longitude,
+      name: formData.startLocation.name || "",
+    }
     : null;
 
   // Get walk type
@@ -124,14 +124,12 @@ export const LocationSelection: React.FC<Props> = ({
     if (userMayNotMakeItToStartLocationInTime && travelTimeInfo) {
       Alert.alert(
         "Travel Time Warning",
-        `You may not make it to the walk on time. It takes about ${
-          travelTimeInfo.travelTimeMinutes
-        } minutes (${travelTimeInfo.route.distance.text}) to get there by car.${
-          travelTimeInfo.arrivalTimeBeforeStart < 0
-            ? ` You'll arrive approximately ${Math.abs(
-                travelTimeInfo.arrivalTimeBeforeStart
-              )} minutes after the walk starts.`
-            : ` You'll only arrive ${travelTimeInfo.arrivalTimeBeforeStart} minutes before the walk starts.`
+        `You may not make it to the walk on time. It takes about ${travelTimeInfo.travelTimeMinutes
+        } minutes (${travelTimeInfo.route.distance.text}) to get there by car.${travelTimeInfo.arrivalTimeBeforeStart < 0
+          ? ` You'll arrive approximately ${Math.abs(
+            travelTimeInfo.arrivalTimeBeforeStart
+          )} minutes after the walk starts.`
+          : ` You'll only arrive ${travelTimeInfo.arrivalTimeBeforeStart} minutes before the walk starts.`
         }
 
 Do you still want to continue?`,
@@ -163,21 +161,35 @@ Do you still want to continue?`,
 
   // Handle saved location selection
   const handleSavedLocationSelect = (favoriteLocation: any) => {
+    // Ensure all required fields are defined and have fallback values
+    const location = favoriteLocation.location;
+
+    if (!location || typeof location.latitude !== 'number' || typeof location.longitude !== 'number') {
+      console.error('Invalid saved location data:', favoriteLocation);
+      Alert.alert('Error', 'Invalid saved location data. Please try again.');
+      return;
+    }
+
     const newLocation = {
-      name: favoriteLocation.location.name || "Saved Location",
-      latitude: favoriteLocation.location.latitude,
-      longitude: favoriteLocation.location.longitude,
-      notes: favoriteLocation.location.notes,
-      city: favoriteLocation.location.city || "Unknown City",
+      name: location.name || "Saved Location",
+      latitude: location.latitude,
+      longitude: location.longitude,
+      notes: location.notes || "",
+      city: location.city || "Unknown City",
     };
+
+    console.log('Setting saved location:', newLocation);
     updateFormData({ startLocation: newLocation });
 
     // Update the search field with the selected location name
     if (googlePlacesRef.current) {
       googlePlacesRef.current.setAddressText(
-        favoriteLocation.location.name || "Saved Location"
+        location.name || "Saved Location"
       );
     }
+
+    // Close the sheet after selection
+    hideSheet();
   };
 
   // Handle deleting a saved location
@@ -221,24 +233,48 @@ Do you still want to continue?`,
             value={
               formData.startLocation
                 ? {
-                    name: formData.startLocation.name,
-                    placeId: "",
-                    latitude: formData.startLocation.latitude,
-                    longitude: formData.startLocation.longitude,
-                    description: formData.startLocation.name,
-                  }
+                  name: formData.startLocation.name,
+                  placeId: "",
+                  latitude: formData.startLocation.latitude,
+                  longitude: formData.startLocation.longitude,
+                  description: formData.startLocation.name,
+                }
                 : null
             }
           />
 
           {/* Current location button */}
-          <LocationButton
-            onPress={handleCurrentLocation}
-            disabled={locationLoading || isReverseGeocoding}
-            loading={
-              locationLoading || isReverseGeocoding || pendingLocationRequest
-            }
-          />
+          <XStack gap="$2" width="100%">
+            <LocationButton
+              size="$4"
+              flex={1}
+              onPress={handleCurrentLocation}
+              disabled={locationLoading || isReverseGeocoding}
+              text="Use current"
+              loading={
+                locationLoading || isReverseGeocoding || pendingLocationRequest
+              }
+            />
+            {/* Saved locations button */}
+            {savedLocations && savedLocations.length > 0 && (
+              <Button
+                size="$4"
+                flex={1}
+                backgroundColor={COLORS.card}
+                borderColor={COLORS.border}
+                borderWidth={1}
+                color={COLORS.text}
+                icon={Bookmark}
+                onPress={handleOpenSavedLocations}
+                disabled={loadingSavedLocations}
+              >
+                {loadingSavedLocations
+                  ? "Loading..."
+                  : `Saved (${savedLocations.length})`
+                }
+              </Button>
+            )}
+          </XStack>
         </YStack>
 
         {/* Sections with horizontal padding */}
@@ -257,26 +293,6 @@ Do you still want to continue?`,
             nearbyWalkers={nearbyWalkers}
             isLoadingNearbyUsers={isLoadingNearbyUsers}
           />
-
-          {/* Saved locations button */}
-          {savedLocations && savedLocations.length > 0 && (
-            <Button
-              size="$4"
-              backgroundColor={COLORS.card}
-              borderColor={COLORS.border}
-              borderWidth={1}
-              color={COLORS.text}
-              icon={Bookmark}
-              onPress={handleOpenSavedLocations}
-              disabled={loadingSavedLocations}
-            >
-              {loadingSavedLocations
-                ? "Loading saved locations..."
-                : `Choose from ${savedLocations.length} saved location${
-                    savedLocations.length === 1 ? "" : "s"
-                  }`}
-            </Button>
-          )}
 
           {/* Travel time warning */}
           {travelTimeInfo && userMayNotMakeItToStartLocationInTime && (
