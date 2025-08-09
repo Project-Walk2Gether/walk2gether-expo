@@ -1,10 +1,10 @@
 import { COLORS } from "@/styles/colors";
-import React from "react";
-import { TouchableOpacity, Alert } from "react-native";
-import { Button, Text, XStack, YStack } from "tamagui";
-import { MapPin, Trash2, X } from "@tamagui/lucide-icons";
-import MapView, { Marker } from "react-native-maps";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { MapPin, Trash2, X } from "@tamagui/lucide-icons";
+import React from "react";
+import { Alert, TouchableOpacity } from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import { Button, Text, XStack, YStack } from "tamagui";
 
 interface Props {
   locations: any[];
@@ -13,8 +13,6 @@ interface Props {
   onClose: () => void;
   onDeleteLocation?: (location: any) => void;
 }
-
-
 
 const SavedLocationsSheet: React.FC<Props> = ({
   locations,
@@ -31,7 +29,9 @@ const SavedLocationsSheet: React.FC<Props> = ({
   const handleDeleteLocation = (location: any) => {
     Alert.alert(
       "Delete Saved Location",
-      `Are you sure you want to delete "${location.location.name || 'this location'}"?`,
+      `Are you sure you want to delete "${
+        location.location.name || "this location"
+      }"?`,
       [
         {
           text: "Cancel",
@@ -46,7 +46,10 @@ const SavedLocationsSheet: React.FC<Props> = ({
               onDeleteLocation?.(location);
             } catch (error) {
               console.error("Error deleting saved location:", error);
-              Alert.alert("Error", "Failed to delete saved location. Please try again.");
+              Alert.alert(
+                "Error",
+                "Failed to delete saved location. Please try again."
+              );
             }
           },
         },
@@ -58,11 +61,11 @@ const SavedLocationsSheet: React.FC<Props> = ({
     return (
       <YStack flex={1}>
         {/* Header */}
-        <XStack 
-          justifyContent="space-between" 
-          alignItems="center" 
-          paddingHorizontal="$4" 
-          paddingTop="$4" 
+        <XStack
+          justifyContent="space-between"
+          alignItems="center"
+          paddingHorizontal="$4"
+          paddingTop="$4"
           paddingBottom="$3"
         >
           <Text fontSize={20} fontWeight="600" color={COLORS.text}>
@@ -87,11 +90,11 @@ const SavedLocationsSheet: React.FC<Props> = ({
     return (
       <YStack flex={1}>
         {/* Header */}
-        <XStack 
-          justifyContent="space-between" 
-          alignItems="center" 
-          paddingHorizontal="$4" 
-          paddingTop="$4" 
+        <XStack
+          justifyContent="space-between"
+          alignItems="center"
+          paddingHorizontal="$4"
+          paddingTop="$4"
           paddingBottom="$3"
         >
           <Text fontSize={20} fontWeight="600" color={COLORS.text}>
@@ -121,11 +124,11 @@ const SavedLocationsSheet: React.FC<Props> = ({
   return (
     <YStack flex={1}>
       {/* Header */}
-      <XStack 
-        justifyContent="space-between" 
-        alignItems="center" 
-        paddingHorizontal="$4" 
-        paddingTop="$4" 
+      <XStack
+        justifyContent="space-between"
+        alignItems="center"
+        paddingHorizontal="$4"
+        paddingTop="$4"
         paddingBottom="$3"
       >
         <Text fontSize={20} fontWeight="600" color={COLORS.text}>
@@ -139,7 +142,7 @@ const SavedLocationsSheet: React.FC<Props> = ({
           backgroundColor="transparent"
         />
       </XStack>
-      
+
       {/* Vertical List */}
       <BottomSheetFlatList
         data={locations}
@@ -148,12 +151,11 @@ const SavedLocationsSheet: React.FC<Props> = ({
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingBottom: 20,
+          marginBottom: 30,
         }}
         renderItem={({ item }) => (
           <YStack style={{ marginBottom: 16 }}>
-            <TouchableOpacity
-              onPress={() => handleSelectLocation(item)}
-            >
+            <TouchableOpacity onPress={() => handleSelectLocation(item)}>
               <YStack
                 backgroundColor={COLORS.card}
                 borderRadius={12}
@@ -167,15 +169,15 @@ const SavedLocationsSheet: React.FC<Props> = ({
                 elevation={2}
               >
                 {/* Header with delete button */}
-                <XStack 
-                  justifyContent="space-between" 
-                  alignItems="center" 
+                <XStack
+                  justifyContent="space-between"
+                  alignItems="center"
                   padding="$3"
                   paddingBottom="$2"
                 >
-                  <Text 
-                    fontSize={16} 
-                    fontWeight="600" 
+                  <Text
+                    fontSize={16}
+                    fontWeight="600"
                     color={COLORS.text}
                     numberOfLines={1}
                     flex={1}
@@ -194,11 +196,11 @@ const SavedLocationsSheet: React.FC<Props> = ({
                     }}
                   />
                 </XStack>
-                
+
                 {/* Large Google Map */}
                 <MapView
                   style={{
-                    width: '100%',
+                    width: "100%",
                     height: 120,
                   }}
                   region={{
@@ -219,23 +221,21 @@ const SavedLocationsSheet: React.FC<Props> = ({
                     }}
                   />
                 </MapView>
-                
+
                 {/* Location info below map */}
                 <YStack padding="$3" paddingTop="$2" gap="$1">
                   {item.location.notes && (
-                    <Text 
-                      fontSize={14} 
+                    <Text
+                      fontSize={14}
                       color={COLORS.textSecondary}
                       numberOfLines={2}
                     >
                       {item.location.notes}
                     </Text>
                   )}
-                  <Text 
-                    fontSize={12} 
-                    color={COLORS.textMuted}
-                  >
-                    Used {item.useCount} {item.useCount === 1 ? 'time' : 'times'}
+                  <Text fontSize={12} color={COLORS.textMuted}>
+                    Used {item.useCount}{" "}
+                    {item.useCount === 1 ? "time" : "times"}
                   </Text>
                 </YStack>
               </YStack>

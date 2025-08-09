@@ -247,7 +247,8 @@ Do you still want to continue?`,
           <XStack gap="$2" width="100%">
             <LocationButton
               size="$3"
-              bg={COLORS.accent2}
+              backgroundColor="$blue10"
+              color="white"
               flex={1}
               onPress={handleCurrentLocation}
               disabled={locationLoading || isReverseGeocoding}
@@ -261,10 +262,8 @@ Do you still want to continue?`,
               <Button
                 size="$3"
                 flex={1}
-                backgroundColor={COLORS.card}
-                borderColor={COLORS.border}
-                borderWidth={1}
-                color={COLORS.text}
+                backgroundColor="$green10"
+                color="white"
                 icon={Bookmark}
                 onPress={handleOpenSavedLocations}
                 disabled={loadingSavedLocations}
