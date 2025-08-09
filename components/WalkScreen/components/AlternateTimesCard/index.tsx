@@ -1,8 +1,14 @@
 import { firestore_instance } from "@/config/firebase";
 import { useAuth } from "@/context/AuthContext";
-import { COLORS } from "@/styles/colors";
+import { useMenu } from "@/context/MenuContext";
 import { doc, setDoc, Timestamp } from "@react-native-firebase/firestore";
-import { Check, Clock, Users } from "@tamagui/lucide-icons";
+import {
+  Check,
+  Clock,
+  MoreVertical,
+  Trash,
+  Users,
+} from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import React, { useMemo, useState } from "react";
 import { Alert } from "react-native";
@@ -25,6 +31,7 @@ export default function AlternateTimesCard({
   currentWalkTime,
 }: Props) {
   const { user } = useAuth();
+  const { showMenu } = useMenu();
   const [loading, setLoading] = useState<string | null>(null);
 
   // Get current user's votes
@@ -111,13 +118,43 @@ export default function AlternateTimesCard({
     }
   };
 
+  // Handle removing a suggested time from the walk's timeOptions
+  const handleRemoveSuggestion = async (timeOption: TimeOption) => {
+    if (!isWalkOwner) return;
+
+    const timeMillis = timeOption.time.toMillis();
+    setLoading(timeMillis.toString());
+
+    try {
+      const walkRef = doc(firestore_instance, "walks", walkId);
+
+      // Filter out the removed time option locally and write back
+      const updatedTimeOptions = timeOptions.filter(
+        (opt) => opt.time.toMillis() !== timeMillis
+      );
+
+      await setDoc(
+        walkRef,
+        {
+          timeOptions: updatedTimeOptions,
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error("Error removing time suggestion:", error);
+      Alert.alert("Error", "Failed to remove suggestion. Please try again.");
+    } finally {
+      setLoading(null);
+    }
+  };
+
   if (!timeOptions || timeOptions.length === 0) {
     return null;
   }
 
   return (
     <YStack gap="$3" marginTop="$3">
-      <Text fontSize="$3" color="$gray11" fontWeight="500">
+      <Text fontSize="$3" color="$gray11" fontWeight="bold">
         Alternate Times
       </Text>
       <Text fontSize="$3" color="$gray11" marginBottom="$2">
@@ -141,9 +178,8 @@ export default function AlternateTimesCard({
             borderColor={isCurrentTime ? "$green6" : "$gray6"}
             borderWidth={1}
             padding="$3"
-            marginBottom="$2"
           >
-            <XStack justifyContent="space-between" alignItems="center">
+            <XStack gap="$2" justifyContent="space-between" alignItems="center">
               <YStack flex={1}>
                 <XStack alignItems="center" gap="$2" marginBottom="$1">
                   <Clock
@@ -178,13 +214,13 @@ export default function AlternateTimesCard({
                 >
                   {format(timeOption.time.toDate(), "h:mm a")}
                 </Text>
-                <XStack alignItems="center" gap="$1">
-                  <Users size={14} color="$gray10" />
-                  <Text fontSize="$2" color="$gray10">
-                    {voteCount} {voteCount === 1 ? "vote" : "votes"}
-                  </Text>
-                </XStack>
               </YStack>
+              <XStack alignItems="center" gap="$1">
+                <Users size={14} color="$gray10" />
+                <Text fontSize="$2" color="$gray10">
+                  {voteCount} {voteCount === 1 ? "vote" : "votes"}
+                </Text>
+              </XStack>
 
               <XStack gap="$2" alignItems="center">
                 {!isWalkOwner && !isCurrentTime && (
@@ -204,14 +240,26 @@ export default function AlternateTimesCard({
 
                 {isWalkOwner && !isCurrentTime && (
                   <Button
-                    size="$3"
-                    backgroundColor={COLORS.primary}
-                    color="white"
-                    onPress={() => handleSetOfficialTime(timeOption)}
+                    size="$2"
+                    circular
+                    chromeless
+                    onPress={() =>
+                      showMenu("Time Option", [
+                        {
+                          label: "Choose this time",
+                          onPress: () => handleSetOfficialTime(timeOption),
+                        },
+                        {
+                          label: "Remove this suggestion",
+                          icon: <Trash size={14} />,
+                          theme: "red",
+                          onPress: () => handleRemoveSuggestion(timeOption),
+                        },
+                      ])
+                    }
+                    icon={<MoreVertical size={16} />}
                     disabled={isLoadingThis}
-                  >
-                    Set as official
-                  </Button>
+                  />
                 )}
               </XStack>
             </XStack>
