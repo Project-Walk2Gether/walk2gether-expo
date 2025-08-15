@@ -17,8 +17,14 @@ import "../config/emulators";
 // Import the background update task
 import "@/background/backgroundUpdateTask";
 
+import { GeoShim } from "../geolocation-shim";
+
 // https://github.com/FaridSafi/react-native-google-places-autocomplete#more-examples
-(navigator as any).geolocation = require("@react-native-community/geolocation");
+// (navigator as any).geolocation = require("@react-native-community/geolocation");
+if (typeof navigator !== "undefined") {
+  // Maintain the old surface: navigator.geolocation.getCurrentPosition / watchPosition / clearWatch
+  (navigator as any).geolocation = GeoShim;
+}
 
 // Configure notifications at the app initialization
 configureNotifications();
