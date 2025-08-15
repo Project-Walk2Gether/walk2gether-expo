@@ -1,7 +1,7 @@
 import WalkIcon from "@/components/WalkIcon";
 import { useUpdates } from "@/context/UpdatesContext";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Footprints, User } from "@tamagui/lucide-icons";
+import { CalendarClock, Footprints, User } from "@tamagui/lucide-icons";
 import React, { useCallback } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { XStack } from "tamagui";
@@ -48,24 +48,33 @@ const CustomTabBar: React.FC<BottomTabBarProps> = (props) => {
         label="Walks"
       />
 
+      {/* Availability Tab */}
+      <BottomTabItem
+        testID="availability-tab"
+        isActive={props.state.index === 1}
+        IconComponent={CalendarClock}
+        onPress={() => handleTabPress(1)}
+        label="Availability"
+      />
+
       {/* Friends Tab */}
       <BottomTabItem
         testID="friends-tab"
         tourRefName="friendsTab"
-        isActive={props.state.index === 1}
+        isActive={props.state.index === 2}
         IconComponent={(props) => (
           <WalkIcon size={props.size} color={props.color} />
         )}
-        onPress={() => handleTabPress(1)}
+        onPress={() => handleTabPress(2)}
         label="Friends"
       />
 
       {/* Me Tab */}
       <BottomTabItem
         testID="me-tab"
-        isActive={props.state.index === 2}
+        isActive={props.state.index === 3}
         IconComponent={User}
-        onPress={() => handleTabPress(2)}
+        onPress={() => handleTabPress(3)}
         label="Me"
         badge={isUpdateAvailable ? "!" : undefined}
       />

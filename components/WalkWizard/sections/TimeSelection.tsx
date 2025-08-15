@@ -385,11 +385,10 @@ export const TimeSelection: React.FC<Props> = ({
                     title="Start walking now"
                     description="Begin your walk immediately"
                   />
-
                   <SelectableOption
                     isSelected={timeOption === "future"}
                     onPress={handleFutureOption}
-                    title="Schedule for later"
+                    title="Suggest a time"
                     description="Pick a specific date and time"
                   />
                 </YStack>

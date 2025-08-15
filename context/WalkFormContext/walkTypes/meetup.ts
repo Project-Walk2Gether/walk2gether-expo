@@ -14,6 +14,10 @@ export const meetupWalkConfig: WalkTypeConfig = {
       title: "Select topic",
     },
     {
+      key: "questionPrompts",
+      title: "Question prompts",
+    },
+    {
       key: "time",
       title: "Select date and time",
     },
@@ -39,7 +43,7 @@ export const meetupWalkConfig: WalkTypeConfig = {
     type: "meetup",
     durationMinutes: 30,
     minimumNumberOfMinutesWithEachPartner: 5,
-    rounds: [],
+    questionPrompts: [],
     topic: "", // Initialize with empty topic that will be filled in the topic step
   },
 };

@@ -6,3 +6,4 @@ export { default as TimeSelection } from "./TimeSelection";
 export { default as TopicSelection } from "./TopicSelection";
 export { default as TypeSelection } from "./TypeSelection";
 export { default as WizardWrapper } from "./WizardWrapper";
+export { default as QuestionPromptsSelection } from "./QuestionPromptsSelection";

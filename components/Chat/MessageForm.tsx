@@ -180,7 +180,7 @@ export default function MessageForm({
               menuItems.push({
                 label: "Select photos",
                 icon: <ImagePlus size="$1" />,
-                onPress: () => handleImagePicker("multiple"),
+                onPress: () => handleImagePicker("library"),
               });
 
               showMenu("Add Photos", menuItems);
